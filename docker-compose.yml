@@ -1,0 +1,40 @@
+services:
+  nginx:
+    container_name: nginx_${COMPOSE_PROJECT_NAME}
+    image: nginx:latest
+    ports:
+      - "8080:80"
+    volumes:
+      - ./html:/var/www/html
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - php
+
+  php:
+    container_name: php_${COMPOSE_PROJECT_NAME}
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./html:/var/www/html
+    working_dir: /var/www/html
+    environment:
+      - MYSQL_HOSTNAME=${MYSQL_HOSTNAME}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+
+  mysql:
+    container_name: mysql_${COMPOSE_PROJECT_NAME}
+    image: mysql:5.7
+    ports:
+      - "33061:3306"
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+      - ./my.cnf:/etc/mysql/conf.d/my.cnf
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
