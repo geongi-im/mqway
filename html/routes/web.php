@@ -1,5 +1,15 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\IndexController;
+use App\Http\Controllers\NewsController;
+use App\Http\Controllers\BoardController;
+use App\Http\Controllers\PickController;
+use App\Http\Controllers\BeecubeController;
+use App\Http\Controllers\LifeSearchController;
+use App\Http\Controllers\DataInsertController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -11,6 +21,65 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+Route::get('/', [IndexController::class, 'index']);
+
+// 로그인 페이지
+Route::get('/login', function () {
+    return view('auth.login');
+})->name('login');
+
+// 로그아웃
+Route::post('/logout', function () {
+    Auth::logout();
+    return redirect('/');
 });
+
+// Google 로그인
+Route::post('/auth/google/callback', [GoogleController::class, 'handleCallback']);
+
+// 뉴스
+Route::get('/news', [NewsController::class, 'index']);
+
+// 게시판 (비회원 접근 가능)
+Route::get('/board', [BoardController::class, 'index'])->name('board.index');
+Route::get('/board/create', [BoardController::class, 'create'])->name('board.create');
+Route::post('/board/upload-image', [BoardController::class, 'uploadImage'])->name('board.upload.image');
+Route::post('/board', [BoardController::class, 'store'])->name('board.store');
+Route::get('/board/{idx}', [BoardController::class, 'show'])->name('board.show');
+Route::get('/board/{idx}/edit', [BoardController::class, 'edit'])->name('board.edit');
+Route::put('/board/{idx}', [BoardController::class, 'update'])->name('board.update');
+Route::delete('/board/{idx}', [BoardController::class, 'destroy'])->name('board.destroy');
+Route::post('/board/{idx}/like', [BoardController::class, 'like'])->name('board.like');
+
+// 게시판 (회원 전용)
+Route::middleware('auth')->group(function () {
+    Route::get('/board/{idx}/edit', [BoardController::class, 'edit'])->name('board.edit');
+    Route::put('/board/{idx}', [BoardController::class, 'update'])->name('board.update');
+    Route::delete('/board/{idx}', [BoardController::class, 'destroy'])->name('board.destroy');
+    Route::post('/board/{idx}/like', [BoardController::class, 'like'])->name('board.like');
+});
+
+// Pick
+Route::middleware('auth')->group(function () {
+    Route::get('/pick', [PickController::class, 'index'])->name('pick.index');
+    Route::post('/pick/start', [PickController::class, 'start'])->name('pick.start');
+    Route::post('/pick/update', [PickController::class, 'update'])->name('pick.update');
+    Route::post('/pick/prev', [PickController::class, 'prev'])->name('pick.prev');
+});
+
+// BeeCube
+Route::middleware('auth')->group(function () {
+    Route::get('/beecube', [BeecubeController::class, 'index'])->name('beecube.index');
+    Route::post('/beecube/save', [BeecubeController::class, 'save'])->name('beecube.save');
+});
+
+// Guidebook
+// Route::middleware('auth')->group(function () {
+    Route::get('/guidebook/life-search', [LifeSearchController::class, 'index'])->name('guidebook.life-search');
+    Route::post('/guidebook/life-search', [LifeSearchController::class, 'store'])->name('guidebook.life-search.store');
+    Route::put('/guidebook/life-search/{id}', [LifeSearchController::class, 'update'])->name('guidebook.life-search.update');
+    Route::delete('/guidebook/life-search/{id}', [LifeSearchController::class, 'destroy'])->name('guidebook.life-search.destroy');
+    Route::get('/guidebook/reality-check', function () {
+        return view('guidebook.reality-check');
+    })->name('guidebook.reality-check');
+// });

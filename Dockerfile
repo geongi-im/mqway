@@ -26,7 +26,13 @@ RUN curl -sS https://getcomposer.org/installer | php -- --version=2.2.18 --insta
 # PHP-FPM 설정
 RUN mkdir -p /run/php && \
     sed -i 's/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/' /etc/php/7.2/fpm/php.ini && \
-    sed -i 's/listen = \/run\/php\/php7.2-fpm.sock/listen = 9000/' /etc/php/7.2/fpm/pool.d/www.conf
+    sed -i 's/listen = \/run\/php\/php7.2-fpm.sock/listen = 9000/' /etc/php/7.2/fpm/pool.d/www.conf && \
+    sed -i 's/pm = dynamic/pm = dynamic/' /etc/php/7.2/fpm/pool.d/www.conf && \
+    sed -i 's/pm.max_children = 5/pm.max_children = 50/' /etc/php/7.2/fpm/pool.d/www.conf && \
+    sed -i 's/pm.start_servers = 2/pm.start_servers = 5/' /etc/php/7.2/fpm/pool.d/www.conf && \
+    sed -i 's/pm.min_spare_servers = 1/pm.min_spare_servers = 5/' /etc/php/7.2/fpm/pool.d/www.conf && \
+    sed -i 's/pm.max_spare_servers = 3/pm.max_spare_servers = 35/' /etc/php/7.2/fpm/pool.d/www.conf && \
+    echo "pm.max_requests = 500" >> /etc/php/7.2/fpm/pool.d/www.conf
 
 # 작업 디렉토리 설정
 WORKDIR /var/www/html
