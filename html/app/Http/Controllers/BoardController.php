@@ -135,7 +135,7 @@ class BoardController extends Controller
     public function edit($idx)
     {
         $post = Board::findOrFail($idx);
-        $categories = ['테크', '경제', '사회', '문화', '스포츠'];
+        $categories = ['테크', '경제', '산업', '증권'];
         
         // 작성자 체크
         if ($post->mq_writer !== Auth::user()->name) {

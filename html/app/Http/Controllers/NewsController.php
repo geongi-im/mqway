@@ -11,8 +11,8 @@ class NewsController extends Controller
     protected $categoryColors = [
         '테크' => 'bg-yellow-100 text-yellow-800',
         '경제' => 'bg-blue-100 text-blue-800',
-        '사회' => 'bg-green-100 text-green-800',
-        '문화' => 'bg-red-100 text-red-800'
+        '산업' => 'bg-green-100 text-green-800',
+        '증권' => 'bg-red-100 text-red-800'
     ];
 
     public function index(Request $request)
@@ -34,7 +34,7 @@ class NewsController extends Controller
         }
 
         // 정렬 (기본값: 최신순)
-        $query->orderBy('mq_reg_date', 'desc');
+        $query->orderBy('mq_published_date', 'desc');
 
         // 페이지네이션
         $news = $query->paginate(10);

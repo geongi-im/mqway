@@ -17,15 +17,19 @@ class LifeSearchController extends Controller
         ];
 
         $lifeSearches = [];
+        $typeLabels = [];
+
         foreach ($types as $type) {
             $lifeSearches[$type] = LifeSearch::where('mq_type', $type)
                 ->orderBy('mq_reg_date', 'desc')
                 ->get();
+            $typeLabels[$type] = LifeSearch::getTypeLabel($type);
         }
 
         return view('guidebook.life-search', [
             'lifeSearches' => $lifeSearches,
-            'types' => $types
+            'types' => $types,
+            'typeLabels' => $typeLabels
         ]);
     }
 

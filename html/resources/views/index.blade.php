@@ -324,22 +324,26 @@
         <div class="swiper-wrapper">
             @foreach($posts as $post)
             <div class="swiper-slide">
-                <a href="{{ route('board.show', $post->idx) }}" class="block">
-                <div class="bg-white rounded-lg overflow-hidden shadow-lg">
-                    <img src="{{ asset('storage/' . $post->mq_image) }}" alt="게시글 이미지" class="w-full h-full object-cover">
-                    <div class="p-4">
+                <a href="{{ route('board.show', $post->idx) }}" class="block h-full">
+                <div class="bg-white rounded-lg overflow-hidden shadow-lg h-full flex flex-col">
+                    <div class="bg-gray-50 flex items-center justify-center" style="height: 240px;">
+                        <img src="{{ asset('storage/' . $post->mq_image) }}" 
+                             alt="게시글 이미지" 
+                             class="w-full h-full object-contain p-2">
+                    </div>
+                    <div class="p-4 flex-1 flex flex-col">
                         <div class="mb-2">
                             <span class="inline-block px-2 py-1 {{ $boardCategoryColors[$post->mq_category] }} text-xs font-medium rounded-md">
                                 {{ $post->mq_category }}
                             </span>
                         </div>
                         <h3 class="font-bold text-lg mb-2">{{ $post->mq_title }}</h3>
-                        <p class="text-gray-600">{{ strip_tags($post->mq_content) }}</p>
-                        <div class="mt-4 text-sm text-gray-500">
+                        <p class="text-gray-600 h-12 overflow-hidden">{{ $post->mq_content }}</p>
+                        <div class="mt-auto text-sm text-gray-500">
                             {{ $post->mq_reg_date ? $post->mq_reg_date->format('Y-m-d') : '' }}
-                            </div>
                         </div>
                     </div>
+                </div>
                 </a>
             </div>
             @endforeach

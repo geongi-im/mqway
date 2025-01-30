@@ -10,6 +10,7 @@ use App\Http\Controllers\PickController;
 use App\Http\Controllers\BeecubeController;
 use App\Http\Controllers\LifeSearchController;
 use App\Http\Controllers\DataInsertController;
+use App\Http\Controllers\RealityCheckController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -74,12 +75,10 @@ Route::middleware('auth')->group(function () {
 });
 
 // Guidebook
-// Route::middleware('auth')->group(function () {
-    Route::get('/guidebook/life-search', [LifeSearchController::class, 'index'])->name('guidebook.life-search');
-    Route::post('/guidebook/life-search', [LifeSearchController::class, 'store'])->name('guidebook.life-search.store');
-    Route::put('/guidebook/life-search/{id}', [LifeSearchController::class, 'update'])->name('guidebook.life-search.update');
-    Route::delete('/guidebook/life-search/{id}', [LifeSearchController::class, 'destroy'])->name('guidebook.life-search.destroy');
-    Route::get('/guidebook/reality-check', function () {
-        return view('guidebook.reality-check');
-    })->name('guidebook.reality-check');
-// });
+Route::get('/guidebook/life-search', [LifeSearchController::class, 'index'])->name('guidebook.life-search');
+Route::post('/guidebook/life-search', [LifeSearchController::class, 'store'])->name('guidebook.life-search.store');
+Route::put('/guidebook/life-search/{id}', [LifeSearchController::class, 'update'])->name('guidebook.life-search.update');
+Route::delete('/guidebook/life-search/{id}', [LifeSearchController::class, 'destroy'])->name('guidebook.life-search.destroy');
+
+// 현실 점검 하기 라우트 추가
+Route::get('/guidebook/reality-check', [RealityCheckController::class, 'index'])->name('guidebook.reality-check');

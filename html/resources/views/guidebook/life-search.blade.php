@@ -8,19 +8,18 @@
         <p class="text-gray-600">나의 삶의 목표와 꿈을 정리해보세요</p>
     </div>
 
-    <!-- 추가 버튼 -->
-    <div class="mb-8 flex justify-end">
-        <button id="addButton" class="bg-dark text-secondary px-6 py-2 rounded-lg hover:bg-dark/90 transition-colors duration-200 flex items-center">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-            </svg>
-            추가하기
-        </button>
-    </div>
-
     @foreach($types as $type)
     <div class="mb-12">
-        <h2 class="text-2xl font-bold mb-6">{{ $type }}</h2>
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold">{{ $typeLabels[$type] }}</h2>
+            <button class="add-button bg-dark text-secondary px-4 py-2 rounded-lg hover:bg-dark/90 transition-colors duration-200 flex items-center text-sm"
+                    data-type="{{ $type }}">
+                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                추가하기
+            </button>
+        </div>
         <div class="bg-white rounded-lg shadow-lg overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="min-w-full">
@@ -109,9 +108,14 @@
                 </div>
                 <div>
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="mq_content">
-                        항목
+                        항목 <span class="text-red-500">*</span>
                     </label>
-                    <input type="text" id="mq_content" name="mq_content" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-dark">
+                    <input type="text" 
+                           id="mq_content" 
+                           name="mq_content" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-dark"
+                           required>
+                    <p id="contentError" class="hidden text-red-500 text-xs mt-1">항목을 입력해주세요.</p>
                 </div>
                 <div>
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="mq_price">
@@ -130,7 +134,7 @@
                 <button type="button" id="cancelButton" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200">
                     취소
                 </button>
-                <button type="submit" class="px-4 py-2 bg-dark text-secondary rounded-lg hover:bg-dark/90 transition-colors duration-200">
+                <button type="submit" id="submitButton" class="px-4 py-2 bg-dark text-secondary rounded-lg hover:bg-dark/90 transition-colors duration-200">
                     저장
                 </button>
             </div>
@@ -143,7 +147,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     const modal = document.getElementById('modal');
     const form = document.getElementById('lifeSearchForm');
-    const addButton = document.getElementById('addButton');
     const cancelButton = document.getElementById('cancelButton');
     const closeModal = document.getElementById('closeModal');
     const modalTitle = document.getElementById('modalTitle');
@@ -162,11 +165,6 @@ document.addEventListener('DOMContentLoaded', function() {
         form.reset();
         isEditing = false;
     }
-
-    addButton.addEventListener('click', () => {
-        modalTitle.textContent = '추가하기';
-        openModal();
-    });
 
     cancelButton.addEventListener('click', closeModalHandler);
     closeModal.addEventListener('click', closeModalHandler);
@@ -214,6 +212,24 @@ document.addEventListener('DOMContentLoaded', function() {
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         
+        // 항목 필드 유효성 검사
+        const contentInput = document.getElementById('mq_content');
+        const contentError = document.getElementById('contentError');
+        
+        if (!contentInput.value.trim()) {
+            contentInput.classList.add('border-red-500');
+            contentError.classList.remove('hidden');
+            contentInput.focus();
+            return;
+        }
+        
+        // 에러 표시 초기화
+        contentInput.classList.remove('border-red-500');
+        contentError.classList.add('hidden');
+        
+        // 전역 로딩 표시
+        LoadingManager.show();
+        
         const formData = new FormData(form);
         const id = document.getElementById('itemId').value;
         
@@ -235,10 +251,21 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (response.ok) {
                 window.location.reload();
+            } else {
+                throw new Error('저장에 실패했습니다.');
             }
         } catch (error) {
             console.error('Error:', error);
             alert('저장 중 오류가 발생했습니다.');
+            LoadingManager.hide();
+        }
+    });
+
+    // 입력 시 에러 표시 제거
+    document.getElementById('mq_content').addEventListener('input', function() {
+        if (this.value.trim()) {
+            this.classList.remove('border-red-500');
+            document.getElementById('contentError').classList.add('hidden');
         }
     });
 
@@ -254,6 +281,16 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.target === modal) {
             closeModalHandler();
         }
+    });
+
+    // 각 타입별 추가 버튼에 대한 이벤트 리스너
+    document.querySelectorAll('.add-button').forEach(button => {
+        button.addEventListener('click', () => {
+            const type = button.dataset.type;
+            document.getElementById('mq_type').value = type;
+            modalTitle.textContent = '추가하기';
+            openModal();
+        });
     });
 });
 </script>

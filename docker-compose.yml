@@ -3,7 +3,7 @@ services:
     container_name: nginx_${COMPOSE_PROJECT_NAME}
     image: nginx:latest
     ports:
-      - "8080:80"
+      - "80:80"
     volumes:
       - ./html:/var/www/html:cached
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
@@ -26,6 +26,11 @@ services:
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - GOOGLE_REDIRECT_URI=${GOOGLE_REDIRECT_URI}
+    command: >
+      sh -c "
+      php artisan storage:link &&
+      php-fpm7.2 -F
+      "
 
   mysql:
     container_name: mysql_${COMPOSE_PROJECT_NAME}
@@ -44,3 +49,21 @@ services:
       MYSQL_COLLATION: utf8mb4_unicode_ci
       TZ: Asia/Seoul
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+
+  # node:
+  #   container_name: node_${COMPOSE_PROJECT_NAME}
+  #   image: node:18
+  #   volumes:
+  #     - ./html:/var/www/html
+  #   working_dir: /var/www/html
+  #   tty: true
+  #   stdin_open: true
+  #   command: >
+  #     sh -c "
+  #       rm -rf node_modules package-lock.json &&
+  #       npm install -g cross-env webpack webpack-cli laravel-mix &&
+  #       npm install cross-env camelcase webpack webpack-cli laravel-mix --save-dev &&
+  #       npm install &&
+  #       npm audit fix --force &&
+  #       npm run watch
+  #     "

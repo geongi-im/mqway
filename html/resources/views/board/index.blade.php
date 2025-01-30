@@ -2,6 +2,11 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+    <!-- 상단 타이틀 및 설명 -->
+    <div class="mb-8 text-center">
+        <h1 class="text-3xl font-bold text-dark mb-2">추천 콘텐츠</h1>
+    </div>
+
     <!-- 검색 영역 -->
     <div class="bg-yellow-200 rounded-xl p-4 mb-6">
         <form action="{{ route('board.index') }}" method="GET">
@@ -44,8 +49,14 @@
             </select>
         </div>
 
-        <!-- 글쓰기 버튼 - 데스크톱 -->
-        <div class="sm:block">
+        <!-- 버튼 영역 -->
+        <div class="sm:flex items-center gap-2">
+            @if(request('search'))
+                <a href="{{ route('board.index') }}" 
+                   class="inline-flex items-center justify-center h-10 px-6 bg-gray-500 text-white rounded-lg hover:bg-opacity-90 transition-all text-sm">
+                    전체목록
+                </a>
+            @endif
             <a href="{{ route('board.create') }}" 
                class="inline-flex items-center justify-center h-10 px-6 bg-dark text-white rounded-lg hover:bg-opacity-90 transition-all text-sm">
                 글쓰기
@@ -82,37 +93,39 @@
     @else
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @foreach($posts as $post)
-            <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-                <a href="{{ route('board.show', $post->idx) }}" class="block">
-                    <div class="aspect-w-16 aspect-h-9">
-                        <img src="{{ asset('storage/' . $post->mq_image) }}" 
-                             alt="게시글 이미지" 
-                             class="w-full h-full object-cover">
-                    </div>
-                    <div class="p-4">
-                        <div class="mb-2">
-                            <span class="inline-block px-2 py-1 {{ $categoryColors[$post->mq_category] }} text-xs font-medium rounded-md">
-                                {{ $post->mq_category }}
-                            </span>
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow h-full">
+                <a href="{{ route('board.show', $post->idx) }}" class="block h-full">
+                    <div class="flex flex-col h-full">
+                        <div class="bg-gray-50 flex items-center justify-center" style="height: 240px;">
+                            <img src="{{ asset('storage/' . $post->mq_image) }}" 
+                                 alt="게시글 이미지" 
+                                 class="w-full h-full object-contain p-2">
                         </div>
-                        <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ $post->mq_title }}</h3>
-                        <p class="text-sm text-gray-500 mb-4 line-clamp-2">{{ strip_tags($post->mq_content) }}</p>
-                        <div class="flex items-center justify-between text-sm text-gray-500">
-                            <span>{{ $post->mq_reg_date ? $post->mq_reg_date->format('Y-m-d') : '' }}</span>
-                            <div class="flex items-center gap-4">
-                                <span class="flex items-center gap-1">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                    </svg>
-                                    {{ $post->mq_view_cnt }}
+                        <div class="p-4 flex-1 flex flex-col">
+                            <div class="mb-2">
+                                <span class="inline-block px-2 py-1 {{ $categoryColors[$post->mq_category] }} text-xs font-medium rounded-md">
+                                    {{ $post->mq_category }}
                                 </span>
-                                <span class="flex items-center gap-1">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                    </svg>
-                                    {{ $post->mq_like_cnt }}
-                                </span>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ $post->mq_title }}</h3>
+                            <p class="text-sm text-gray-500 mb-4 h-12 overflow-hidden">{{ strip_tags($post->mq_content) }}</p>
+                            <div class="flex items-center justify-between text-sm text-gray-500 mt-auto">
+                                <span>{{ $post->mq_reg_date ? $post->mq_reg_date->format('Y-m-d') : '' }}</span>
+                                <div class="flex items-center gap-4">
+                                    <span class="flex items-center gap-1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                        {{ $post->mq_view_cnt }}
+                                    </span>
+                                    <span class="flex items-center gap-1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                        </svg>
+                                        {{ $post->mq_like_cnt }}
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
