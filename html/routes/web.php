@@ -80,5 +80,10 @@ Route::post('/guidebook/life-search', [LifeSearchController::class, 'store'])->n
 Route::put('/guidebook/life-search/{id}', [LifeSearchController::class, 'update'])->name('guidebook.life-search.update');
 Route::delete('/guidebook/life-search/{id}', [LifeSearchController::class, 'destroy'])->name('guidebook.life-search.destroy');
 
-// 현실 점검 하기 라우트 추가
-Route::get('/guidebook/reality-check', [RealityCheckController::class, 'index'])->name('guidebook.reality-check');
+// 현실 점검 라우트
+Route::prefix('guidebook/reality-check')->group(function () {
+    Route::get('/', [RealityCheckController::class, 'index'])->name('guidebook.reality-check');
+    Route::post('/', [RealityCheckController::class, 'store'])->name('guidebook.reality-check.store');
+    Route::put('/{idx}', [RealityCheckController::class, 'update'])->name('guidebook.reality-check.update');
+    Route::delete('/{idx}', [RealityCheckController::class, 'destroy'])->name('guidebook.reality-check.destroy');
+});
