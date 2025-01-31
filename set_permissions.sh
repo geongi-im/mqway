@@ -1,20 +1,21 @@
 #!/bin/bash
 
-# Ensure correct permissions for /var/www/html
-echo "Setting permissions for /var/www/html"
-chmod -R 775 /var/www/html
+# 디렉토리 생성 및 권한 설정
+echo "Setting up storage directories..."
+mkdir -p storage/app/public
+mkdir -p storage/framework/{cache,sessions,testing,views}
+mkdir -p storage/logs
+mkdir -p bootstrap/cache
 
-echo "Setting permissions for /var/www/html/storage"
-chmod -R 775 storage
-chown -R www-data:www-data storage
+echo "Setting permissions..."
+chmod -R 775 storage bootstrap/cache
+chown -R www-data:www-data storage bootstrap/cache
 
-# Check if composer dependencies are installed
-if [ ! -f /var/www/html/vendor/autoload.php ]; then
-    echo "Installing Composer dependencies"
-    composer install --no-dev --prefer-dist
-else
-    echo "Composer dependencies are already installed"
-fi
+# Laravel 캐시 클리어
+echo "Clearing Laravel caches..."
+php artisan cache:clear
+php artisan config:clear
+php artisan view:clear
 
-# Continue with default command
+# 기존 명령어 실행
 exec "$@"

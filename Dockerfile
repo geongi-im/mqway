@@ -36,6 +36,17 @@ RUN mkdir -p /run/php && \
     sed -i 's/pm.max_spare_servers = 3/pm.max_spare_servers = 35/' /etc/php/7.2/fpm/pool.d/www.conf && \
     echo "pm.max_requests = 500" >> /etc/php/7.2/fpm/pool.d/www.conf
 
+# 기존 www-data 사용자 설정 부분 수정
+ARG USER_ID=1000
+ARG GROUP_ID=1000
+
+RUN groupmod -g ${GROUP_ID} www-data && \
+    usermod -u ${USER_ID} -g www-data www-data && \
+    mkdir -p /var/www/html/storage/logs && \
+    mkdir -p /var/www/html/bootstrap/cache && \
+    chown -R www-data:www-data /var/www/html/storage && \
+    chown -R www-data:www-data /var/www/html/bootstrap/cache
+
 # 권한 설정 및 Composer 설치 스크립트 복사
 COPY set_permissions.sh /usr/local/bin/set_permissions.sh
 RUN chmod +x /usr/local/bin/set_permissions.sh
@@ -44,4 +55,4 @@ RUN chmod +x /usr/local/bin/set_permissions.sh
 WORKDIR /var/www/html
 
 # 컨테이너 시작 시 권한 설정 및 Composer 설치 실행
-CMD ["bash", "-c", "/usr/local/bin/set_permissions.sh && php-fpm7.2 -F"]
+CMD ["bash", "-c", "cd /var/www/html && composer install --no-interaction --no-dev --optimize-autoloader && /usr/local/bin/set_permissions.sh && php-fpm7.2 -F"]

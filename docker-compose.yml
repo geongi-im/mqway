@@ -12,9 +12,12 @@ services:
 
   php:
     container_name: php_${COMPOSE_PROJECT_NAME}
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - USER_ID=${USER_ID:-1000}
+        - GROUP_ID=${GROUP_ID:-1000}
     volumes:
       - ./html:/var/www/html
     working_dir: /var/www/html
@@ -28,6 +31,10 @@ services:
       - GOOGLE_REDIRECT_URI=${GOOGLE_REDIRECT_URI}
     command: >
       sh -c "
+      mkdir -p storage/logs bootstrap/cache &&
+      chown -R www-data:www-data storage bootstrap/cache &&
+      chmod -R 775 storage bootstrap/cache &&
+      composer install --no-interaction --no-dev --optimize-autoloader &&
       php artisan storage:link &&
       php-fpm7.2 -F
       "
