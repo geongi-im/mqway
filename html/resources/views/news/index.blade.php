@@ -13,24 +13,31 @@
             <!-- 카테고리 필터 -->
             <div class="flex gap-2 overflow-x-auto pb-2 w-full md:w-auto">
                 @foreach($categories as $category)
-                <button class="px-4 py-2 rounded-full border border-gray-300 hover:bg-dark hover:text-white transition-colors whitespace-nowrap
-                            {{ $category === '전체' ? 'bg-dark text-white' : 'bg-white text-dark' }}">
+                <a href="{{ $category === '전체' ? url('/news') : request()->fullUrlWithQuery(['category' => $category]) }}" 
+                   class="px-4 py-2 rounded-full border border-gray-300 hover:bg-dark hover:text-white transition-colors whitespace-nowrap
+                         {{ (request('category', '전체') === $category) ? 'bg-dark text-white' : 'bg-white text-dark' }}">
                     {{ $category }}
-                </button>
+                </a>
                 @endforeach
             </div>
 
             <!-- 검색창 -->
-            <div class="relative w-full md:w-96">
+            <form method="GET" class="relative w-full md:w-96">
                 <input type="text" 
+                       name="search"
+                       value="{{ request('search') }}"
                        placeholder="뉴스 검색" 
                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-dark">
-                <button class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-dark">
+                <!-- 현재 선택된 카테고리 유지 -->
+                @if(request('category'))
+                    <input type="hidden" name="category" value="{{ request('category') }}">
+                @endif
+                <button type="submit" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-dark">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                     </svg>
                 </button>
-            </div>
+            </form>
         </div>
     </div>
 
@@ -45,7 +52,7 @@
                         {{ $item->mq_category }}
                     </span>
                     <time datetime="{{ $item->mq_reg_date }}">
-                        {{ date('Y.m.d H:i', strtotime($item->mq_reg_date)) }}
+                        {{ date('Y.m.d H:i', strtotime($item->mq_published_date)) }}
                     </time>
                     <span>·</span>
                     <span>{{ $item->mq_company }}</span>
@@ -66,8 +73,8 @@
     </div>
 
     <!-- 페이지네이션 -->
-    <div class="mt-12">
-        {{ $news->links() }}
+    <div class="mt-12 flex justify-center">
+        {{ $news->appends(request()->query())->links('vendor.pagination.tailwind') }}
     </div>
 </div>
 @endsection 
