@@ -171,7 +171,7 @@
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="mq_price">
                         예상비용
                     </label>
-                    <input type="number" id="mq_price" name="mq_price" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-dark">
+                    <input type="text" id="mq_price" name="mq_price" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-dark">
                 </div>
                 <div>
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="mq_expected_time">
@@ -227,7 +227,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('mq_type').value = data.type;
             document.getElementById('mq_category').value = data.category;
             document.getElementById('mq_content').value = data.content;
-            document.getElementById('mq_price').value = data.price;
+            document.getElementById('mq_price').value = numberWithCommas(data.price);
             document.getElementById('mq_expected_time').value = data.time;
             
             modalTitle.textContent = '수정하기';
@@ -242,6 +242,8 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const id = e.target.closest('button').dataset.id;
             try {
+                LoadingManager.show();  // 로딩 시작
+                
                 const response = await fetch(`/guidebook/life-search/${id}`, {
                     method: 'DELETE',
                     headers: {
@@ -251,10 +253,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 if (response.ok) {
                     window.location.reload();
+                } else {
+                    throw new Error('삭제에 실패했습니다.');
                 }
             } catch (error) {
                 console.error('Error:', error);
                 alert('삭제 중 오류가 발생했습니다.');
+                LoadingManager.hide();  // 에러 발생 시 로딩 숨김
             }
         });
     });
@@ -273,15 +278,17 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // 에러 표시 초기화
         contentInput.classList.remove('border-red-500');
         contentError.classList.add('hidden');
         
-        // 전역 로딩 표시
-        LoadingManager.show();
+        LoadingManager.show();  // 로딩 시작
         
         const formData = new FormData(form);
         const id = document.getElementById('itemId').value;
+        
+        // 금액 필드의 콤마 제거
+        const price = formData.get('mq_price').replace(/,/g, '');
+        formData.set('mq_price', price);
         
         try {
             const url = isEditing 
@@ -307,7 +314,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (error) {
             console.error('Error:', error);
             alert('저장 중 오류가 발생했습니다.');
-            LoadingManager.hide();
+            LoadingManager.hide();  // 에러 발생 시 로딩 숨김
         }
     });
 
@@ -334,6 +341,52 @@ document.addEventListener('DOMContentLoaded', function() {
             modalTitle.textContent = '추가하기';
             openModal();
         });
+    });
+
+    // 천단위 콤마 포맷팅 함수
+    function numberWithCommas(x) {
+        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    // 금액 입력 필드 이벤트 처리
+    const priceInput = document.getElementById('mq_price');
+    priceInput.addEventListener('input', function(e) {
+        // 현재 커서 위치 저장
+        const start = this.selectionStart;
+        
+        // 입력된 값에서 콤마 제거
+        let value = this.value.replace(/,/g, '');
+        
+        // 숫자만 남기기
+        value = value.replace(/[^\d]/g, '');
+        
+        // 콤마 포맷팅 적용
+        if (value) {
+            const formattedValue = numberWithCommas(value);
+            
+            // 값이 변경된 경우에만 업데이트
+            if (this.value !== formattedValue) {
+                // 커서 위치 계산
+                const beforeCommas = this.value.substr(0, start).replace(/[^\d]/g, '').length;
+                this.value = formattedValue;
+                
+                // 새로운 커서 위치 계산
+                const afterCommas = formattedValue.substr(0, start).replace(/[^\d]/g, '').length;
+                const newPosition = start + (afterCommas - beforeCommas);
+                
+                // 커서 위치 설정
+                this.setSelectionRange(newPosition, newPosition);
+            }
+        } else {
+            this.value = '';
+        }
+    });
+
+    // 숫자와 콤마만 입력 가능하도록
+    priceInput.addEventListener('keypress', function(e) {
+        if (!/[\d]/.test(e.key) && e.key !== ',') {
+            e.preventDefault();
+        }
     });
 });
 </script>

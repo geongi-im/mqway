@@ -11,6 +11,7 @@ class LifeSearch extends Model
     public $timestamps = false;
 
     protected $fillable = [
+        'mq_user_id',
         'mq_type',
         'mq_category',
         'mq_content',
@@ -37,5 +38,10 @@ class LifeSearch extends Model
             self::TYPE_GO => '가고 싶은 곳',
             self::TYPE_SHARE => '나누고 싶은 것'
         ][$type] ?? '';
+    }
+
+    public function member()
+    {
+        return $this->belongsTo(Member::class, 'mq_user_id', 'mq_user_id');
     }
 } 
