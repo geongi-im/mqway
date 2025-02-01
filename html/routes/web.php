@@ -11,6 +11,7 @@ use App\Http\Controllers\BeecubeController;
 use App\Http\Controllers\LifeSearchController;
 use App\Http\Controllers\DataInsertController;
 use App\Http\Controllers\RealityCheckController;
+use App\Http\Controllers\RoadmapController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -74,11 +75,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/beecube/save', [BeecubeController::class, 'save'])->name('beecube.save');
 });
 
-// Guidebook
-Route::get('/guidebook/life-search', [LifeSearchController::class, 'index'])->name('guidebook.life-search');
-Route::post('/guidebook/life-search', [LifeSearchController::class, 'store'])->name('guidebook.life-search.store');
-Route::put('/guidebook/life-search/{id}', [LifeSearchController::class, 'update'])->name('guidebook.life-search.update');
-Route::delete('/guidebook/life-search/{id}', [LifeSearchController::class, 'destroy'])->name('guidebook.life-search.destroy');
+// 원하는 삶 라우트
+Route::prefix('guidebook/life-search')->group(function () {
+    Route::get('/', [LifeSearchController::class, 'index'])->name('guidebook.life-search');
+    Route::post('/', [LifeSearchController::class, 'store'])->name('guidebook.life-search.store');
+    Route::put('/{id}', [LifeSearchController::class, 'update'])->name('guidebook.life-search.update');
+    Route::delete('/{id}', [LifeSearchController::class, 'destroy'])->name('guidebook.life-search.destroy');
+});
 
 // 현실 점검 라우트
 Route::prefix('guidebook/reality-check')->group(function () {
@@ -86,4 +89,9 @@ Route::prefix('guidebook/reality-check')->group(function () {
     Route::post('/', [RealityCheckController::class, 'store'])->name('guidebook.reality-check.store');
     Route::put('/{idx}', [RealityCheckController::class, 'update'])->name('guidebook.reality-check.update');
     Route::delete('/{idx}', [RealityCheckController::class, 'destroy'])->name('guidebook.reality-check.destroy');
+    Route::post('/get-samples', [RealityCheckController::class, 'getSamples'])->name('reality-check.get-samples');
+    Route::post('/apply-sample', [RealityCheckController::class, 'applySample'])->name('reality-check.apply-sample');
 });
+
+// 로드맵
+Route::get('/guidebook/roadmap', [RoadmapController::class, 'index'])->name('guidebook.roadmap');

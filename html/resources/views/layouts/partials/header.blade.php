@@ -28,7 +28,15 @@
                         <a href="{{ route('guidebook.reality-check') }}" 
                            class="submenu-item block py-2 pl-4 text-base text-secondary/70 hover:text-secondary transition-all duration-200 hover:pl-6
                            {{ request()->routeIs('guidebook.reality-check') ? 'text-secondary font-bold bg-dark/10' : '' }}">
-                            현실 점검 하기
+                            현실 점검하기
+                            <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-0 bg-secondary transition-all duration-200"></span>
+                        </a>
+                    </li>
+                    <li class="relative">
+                        <a href="{{ route('guidebook.roadmap') }}" 
+                           class="submenu-item block py-2 pl-4 text-base text-secondary/70 hover:text-secondary transition-all duration-200 hover:pl-6
+                           {{ request()->routeIs('guidebook.roadmap') ? 'text-secondary font-bold bg-dark/10' : '' }}">
+                            로드맵 작성하기
                             <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-0 bg-secondary transition-all duration-200"></span>
                         </a>
                     </li>
