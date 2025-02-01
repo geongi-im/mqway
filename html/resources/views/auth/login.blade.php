@@ -9,10 +9,10 @@
         <div class="flex justify-center">
             <div id="g_id_onload"
                  data-client_id="{{ config('services.google.client_id') }}"
-                 data-context="signin"
-                 data-ux_mode="popup"
+                 data-callback="handleCredentialResponse"
                  data-auto_prompt="false"
-                 data-callback="handleCredentialResponse">
+                 data-auto_select="false"
+                 data-prompt_parent_id="g_id_onload">
             </div>
             <div class="g_id_signin"
                  data-type="standard"
@@ -31,19 +31,12 @@
 
 @push('scripts')
 <script>
-// Google Sign In 초기화
-window.onload = function () {
-    google.accounts.id.initialize({
-        client_id: '{{ config('services.google.client_id') }}',
-        callback: handleCredentialResponse,
-        auto_select: false,
-        cancel_on_tap_outside: true
-    });
-};
-
 function handleCredentialResponse(response) {
+    // 로딩 시작
+    LoadingManager.show();
+    
     // 서버로 토큰 전송
-    fetch('{{ url('/auth/google/callback') }}', {
+    fetch('{{ config('services.google.redirect') }}', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -58,14 +51,25 @@ function handleCredentialResponse(response) {
         if (data.success) {
             window.location.href = '{{ url('/') }}';
         } else {
+            LoadingManager.hide(); // 에러 발생 시 로딩 숨김
             alert('로그인 처리 중 오류가 발생했습니다.');
         }
     })
     .catch(error => {
+        LoadingManager.hide(); // 에러 발생 시 로딩 숨김
         console.error('Error:', error);
         alert('로그인 처리 중 오류가 발생했습니다.');
     });
 }
+
+// 콘솔 에러 메시지 숨기기
+const originalError = console.error;
+console.error = function(...args) {
+    if (args[0]?.includes('Cross-Origin-Opener-Policy')) {
+        return;
+    }
+    originalError.apply(console, args);
+};
 </script>
 @endpush
 @endsection 
