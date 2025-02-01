@@ -4,16 +4,26 @@
 <div class="container mx-auto px-4 py-8">
     <!-- 상단 타이틀 및 설명 -->
     <div class="mb-8 text-center">
-        <h1 class="text-3xl font-bold text-dark mb-2">현실 점검 하기</h1>
+        <h1 class="text-3xl font-bold text-dark mb-2">현실 점검하기</h1>
         <p class="text-gray-600">월별 지출 내역을 기록하고 관리하세요</p>
     </div>
 
     <!-- 항상 존재하는 숨겨진 추가 버튼 -->
     <button id="addExpenseButton" class="hidden">지출 추가</button>
 
-    <!-- 추가 버튼 (데이터 있을 때만 표시) -->
+    <!-- 상단 버튼 영역 수정 -->
     @if(count($expenses) > 0)
-    <div class="mb-8 flex justify-end">
+    <div class="mb-8 flex justify-end items-center space-x-4">
+        <!-- 샘플 가져오기 버튼 -->
+        <button onclick="openSampleModal()" 
+                class="bg-secondary text-dark px-4 py-2 rounded-lg hover:bg-secondary/90 transition-colors duration-200 flex items-center text-sm">
+            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+            </svg>
+            샘플 가져오기
+        </button>
+        
+        <!-- 지출 추가 버튼 -->
         <button onclick="document.getElementById('addExpenseButton').click()" 
                 class="bg-dark text-secondary px-4 py-2 rounded-lg hover:bg-dark/90 transition-colors duration-200 flex items-center text-sm">
             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -74,13 +84,24 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>
                 <p class="text-lg text-gray-600">아직 등록된 지출 항목이 없습니다.</p>
-                <button onclick="document.getElementById('addExpenseButton').click()" 
-                        class="mt-4 px-6 py-2 bg-dark text-secondary rounded-lg hover:bg-dark/90 transition-colors duration-200 flex items-center">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                    </svg>
-                    지출 항목 추가하기
-                </button>
+                <div class="flex space-x-4 mt-4">
+                    <!-- 샘플 가져오기 버튼 -->
+                    <button onclick="openSampleModal()" 
+                            class="px-6 py-2 bg-secondary text-dark rounded-lg hover:bg-secondary/90 transition-colors duration-200 flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                        </svg>
+                        샘플 가져오기
+                    </button>
+                    <!-- 지출 항목 추가 버튼 -->
+                    <button onclick="document.getElementById('addExpenseButton').click()" 
+                            class="px-6 py-2 bg-dark text-secondary rounded-lg hover:bg-dark/90 transition-colors duration-200 flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        지출 항목 추가하기
+                    </button>
+                </div>
             </div>
         </div>
         @endif
@@ -134,13 +155,24 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                     </svg>
                     <p class="text-base text-gray-600">아직 등록된 지출 항목이 없습니다.</p>
-                    <button onclick="document.getElementById('addExpenseButton').click()" 
-                            class="mt-2 px-4 py-2 bg-dark text-secondary rounded-lg hover:bg-dark/90 transition-colors duration-200 flex items-center text-sm">
-                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                        </svg>
-                        지출 항목 추가하기
-                    </button>
+                    <div class="flex space-x-4 mt-4">
+                        <!-- 샘플 가져오기 버튼 -->
+                        <button onclick="openSampleModal()" 
+                                class="px-6 py-2 bg-secondary text-dark rounded-lg hover:bg-secondary/90 transition-colors duration-200 flex items-center">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                            </svg>
+                            샘플 가져오기
+                        </button>
+                        <!-- 지출 항목 추가 버튼 -->
+                        <button onclick="document.getElementById('addExpenseButton').click()" 
+                                class="px-6 py-2 bg-dark text-secondary rounded-lg hover:bg-dark/90 transition-colors duration-200 flex items-center">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            지출 항목 추가하기
+                        </button>
+                    </div>
                 </div>
             </div>
         @endif
@@ -224,9 +256,119 @@
     </div>
 </div>
 
+<!-- 샘플 선택 모달 -->
+<div id="sampleModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg w-full max-w-md mx-4 overflow-hidden">
+        <!-- 모달 헤더 -->
+        <div class="bg-dark p-4">
+            <div class="flex justify-between items-center">
+                <h2 class="text-xl font-bold text-secondary">샘플 가져오기</h2>
+                <button type="button" onclick="closeSampleModal()" class="text-secondary hover:text-secondary/80">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="mt-2">
+                <div class="flex items-center">
+                    <div class="w-full bg-secondary/30 h-2 rounded-full">
+                        <div id="progressBar" class="bg-secondary h-2 rounded-full transition-all duration-300" style="width: 50%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 모달 컨텐츠 -->
+        <div class="p-6">
+            <!-- 성별 선택 화면 -->
+            <div id="genderStep" class="space-y-6">
+                <h3 class="text-lg font-bold text-center mb-8">성별을 선택해주세요</h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="selectGender('male')" class="aspect-square rounded-xl border-2 border-gray-200 p-4 hover:border-dark focus:border-dark transition-colors duration-200 flex flex-col items-center justify-center space-y-2">
+                        <svg class="w-12 h-12 text-dark" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                        </svg>
+                        <span class="font-medium">남자</span>
+                    </button>
+                    <button onclick="selectGender('female')" class="aspect-square rounded-xl border-2 border-gray-200 p-4 hover:border-dark focus:border-dark transition-colors duration-200 flex flex-col items-center justify-center space-y-2">
+                        <svg class="w-12 h-12 text-dark" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                        </svg>
+                        <span class="font-medium">여자</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 연령대 선택 화면 -->
+            <div id="ageStep" class="hidden space-y-6">
+                <h3 class="text-lg font-bold text-center mb-8">연령대를 선택해주세요</h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="selectAge('10')" class="rounded-xl border-2 border-gray-200 p-4 hover:border-dark focus:border-dark transition-colors duration-200">
+                        <span class="font-medium">10대</span>
+                    </button>
+                    <button onclick="selectAge('2030')" class="rounded-xl border-2 border-gray-200 p-4 hover:border-dark focus:border-dark transition-colors duration-200">
+                        <span class="font-medium">20~30대</span>
+                    </button>
+                    <button onclick="selectAge('3040')" class="rounded-xl border-2 border-gray-200 p-4 hover:border-dark focus:border-dark transition-colors duration-200">
+                        <span class="font-medium">30~40대</span>
+                    </button>
+                    <button onclick="selectAge('5060')" class="rounded-xl border-2 border-gray-200 p-4 hover:border-dark focus:border-dark transition-colors duration-200">
+                        <span class="font-medium">50~60대</span>
+                    </button>
+                    <button onclick="selectAge('60')" class="rounded-xl border-2 border-gray-200 p-4 hover:border-dark focus:border-dark transition-colors duration-200">
+                        <span class="font-medium">60대 이상</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 샘플 보기 화면의 구조 수정 -->
+            <div id="sampleStep" class="hidden space-y-6">
+                <!-- 타이틀을 위한 고정 영역 추가 -->
+                <div id="sampleTitle" class="text-center mb-4">
+                    <h3 class="text-lg font-bold text-dark"></h3>
+                </div>
+                
+                <div class="relative">
+                    <!-- 슬라이더 컨테이너 -->
+                    <div class="overflow-hidden">
+                        <div id="sampleSlider" class="flex transition-transform duration-300 ease-in-out">
+                            <!-- 샘플 데이터가 여기에 동적으로 추가됨 -->
+                        </div>
+                    </div>
+                    
+                    <!-- 이전/다음 버튼 -->
+                    <button id="prevSlide" class="absolute left-0 top-1/2 -translate-y-1/2 bg-dark/50 text-white p-2 rounded-full hover:bg-dark/70 transition-colors duration-200">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                    </button>
+                    <button id="nextSlide" class="absolute right-0 top-1/2 -translate-y-1/2 bg-dark/50 text-white p-2 rounded-full hover:bg-dark/70 transition-colors duration-200">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- 선택 버튼 -->
+                <div class="flex justify-center space-x-4 mt-8">
+                    <button onclick="resetSelection()" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200">
+                        다시 선택하기
+                    </button>
+                    <button onclick="selectSample()" class="px-6 py-2 bg-dark text-secondary rounded-lg hover:bg-dark/90 transition-colors duration-200">
+                        항목 불러오기
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // 금액 입력 필드에 포맷팅 적용
+    initNumberFormatting('#expected_amount, #actual_amount');
+    
     const modal = document.getElementById('modal');
     const form = document.getElementById('expenseForm');
     const addButton = document.getElementById('addExpenseButton');
@@ -253,54 +395,6 @@ document.addEventListener('DOMContentLoaded', function() {
         categoryCustom.required = false;
         isEditing = false;
     }
-
-    // 천단위 콤마 포맷팅 함수
-    function numberWithCommas(x) {
-        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    }
-
-    // 금액 입력 필드 이벤트 처리
-    const amountInputs = document.querySelectorAll('#expected_amount, #actual_amount');
-    amountInputs.forEach(input => {
-        input.addEventListener('input', function(e) {
-            // 현재 커서 위치 저장
-            const start = this.selectionStart;
-            
-            // 입력된 값에서 콤마 제거
-            let value = this.value.replace(/,/g, '');
-            
-            // 숫자만 남기기
-            value = value.replace(/[^\d]/g, '');
-            
-            // 콤마 포맷팅 적용
-            if (value) {
-                const formattedValue = numberWithCommas(value);
-                
-                // 값이 변경된 경우에만 업데이트
-                if (this.value !== formattedValue) {
-                    // 커서 위치 계산
-                    const beforeCommas = this.value.substr(0, start).replace(/[^\d]/g, '').length;
-                    this.value = formattedValue;
-                    
-                    // 새로운 커서 위치 계산
-                    const afterCommas = formattedValue.substr(0, start).replace(/[^\d]/g, '').length;
-                    const newPosition = start + (afterCommas - beforeCommas);
-                    
-                    // 커서 위치 설정
-                    this.setSelectionRange(newPosition, newPosition);
-                }
-            } else {
-                this.value = '';
-            }
-        });
-
-        // 숫자와 콤마만 입력 가능하도록
-        input.addEventListener('keypress', function(e) {
-            if (!/[\d]/.test(e.key) && e.key !== ',') {
-                e.preventDefault();
-            }
-        });
-    });
 
     // 카테고리 선택 이벤트
     categorySelect.addEventListener('change', function() {
@@ -460,6 +554,285 @@ document.addEventListener('DOMContentLoaded', function() {
             closeModalHandler();
         }
     });
+});
+
+// 샘플 모달 관련 스크립트
+let selectedGender = null;
+let selectedAge = null;
+let currentSlide = 0;
+let samples = [];
+
+function openSampleModal() {
+    const modal = document.getElementById('sampleModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+    
+    // 초기 상태로 리셋
+    resetSampleModal();
+}
+
+function closeSampleModal() {
+    const modal = document.getElementById('sampleModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    document.body.style.overflow = '';
+    
+    // 모달이 닫힐 때도 초기화
+    resetSampleModal();
+}
+
+// 모달 데이터 초기화 함수 추가
+function resetSampleModal() {
+    selectedGender = null;
+    selectedAge = null;
+    currentSlide = 0;
+    samples = [];
+    
+    // UI 초기화
+    document.getElementById('genderStep').classList.remove('hidden');
+    document.getElementById('ageStep').classList.add('hidden');
+    document.getElementById('sampleStep').classList.add('hidden');
+    document.getElementById('progressBar').style.width = '33%';
+    
+    // 슬라이더 초기화
+    const slider = document.getElementById('sampleSlider');
+    if (slider) {
+        slider.innerHTML = '';
+        slider.style.transform = 'translateX(0)';
+    }
+    
+    // 타이틀 초기화
+    const sampleTitle = document.getElementById('sampleTitle').querySelector('h3');
+    if (sampleTitle) {
+        sampleTitle.textContent = '';
+    }
+}
+
+// ESC 키 이벤트에도 초기화 추가
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !document.getElementById('sampleModal').classList.contains('hidden')) {
+        closeSampleModal();
+    }
+});
+
+function showGenderStep() {
+    document.getElementById('genderStep').classList.remove('hidden');
+    document.getElementById('ageStep').classList.add('hidden');
+    document.getElementById('progressBar').style.width = '33%';
+}
+
+function showAgeStep() {
+    document.getElementById('genderStep').classList.add('hidden');
+    document.getElementById('ageStep').classList.remove('hidden');
+    document.getElementById('progressBar').style.width = '66%';
+}
+
+function selectGender(gender) {
+    selectedGender = gender;
+    updateProgressBar('age');
+    showAgeStep();
+}
+
+async function selectAge(age) {
+    selectedAge = age;
+    updateProgressBar('sample');
+    await loadSamples();
+    showSampleStep();
+}
+
+// 프로그레스바 업데이트 함수 수정
+function updateProgressBar(step) {
+    const progressBar = document.getElementById('progressBar');
+    switch(step) {
+        case 'gender':
+            progressBar.style.width = '33%';
+            break;
+        case 'age':
+            progressBar.style.width = '66%';
+            break;
+        case 'sample':
+            progressBar.style.width = '100%';
+            break;
+    }
+}
+
+// 샘플 데이터 로드 함수
+async function loadSamples() {
+    LoadingManager.show();
+    try {
+        const response = await fetch('/guidebook/reality-check/get-samples', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({
+                gender: selectedGender,
+                age: selectedAge
+            })
+        });
+
+        if (response.ok) {
+            samples = await response.json();
+            renderSamples();
+        } else {
+            throw new Error('샘플 데이터 가져오기 실패');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('샘플 데이터를 가져오는 중 오류가 발생했습니다.');
+    } finally {
+        LoadingManager.hide();
+    }
+}
+
+// 샘플 화면 표시 함수
+function showSampleStep() {
+    document.getElementById('genderStep').classList.add('hidden');
+    document.getElementById('ageStep').classList.add('hidden');
+    document.getElementById('sampleStep').classList.remove('hidden');
+}
+
+// 샘플 렌더링 함수 수정
+function renderSamples() {
+    const slider = document.getElementById('sampleSlider');
+    const sampleTitle = document.getElementById('sampleTitle').querySelector('h3');
+    
+    // 슬라이더 내용 초기화
+    slider.innerHTML = '';
+    
+    // 타이틀 업데이트
+    sampleTitle.textContent = `${getAgeRangeText(selectedAge)} ${selectedGender === 'male' ? '남성' : '여성'} (1/${samples.length})`;
+    
+    samples.forEach((sample, index) => {
+        const slide = document.createElement('div');
+        slide.className = 'w-full flex-shrink-0 px-4';
+        slide.innerHTML = `
+            <div class="bg-gray-50 rounded-lg p-6">
+                <div class="text-center mb-6">
+                    <h4 class="text-xl font-bold text-dark mb-2">${sample.name}</h4>
+                    <p class="text-gray-600">${sample.description}</p>
+                </div>
+                <div class="space-y-3">
+                    ${Object.entries(sample.expenses).map(([category, amount]) => `
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-700">${category}</span>
+                            <span class="font-medium">${numberWithCommas(amount)}원</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+        slider.appendChild(slide);
+    });
+    
+    updateSliderPosition();
+}
+
+// 연령대 텍스트 변환 함수 추가
+function getAgeRangeText(age) {
+    const ageRanges = {
+        '10': '10대',
+        '2030': '20~30대',
+        '3040': '30~40대',
+        '5060': '50~60대',
+        '60': '60대 이상'
+    };
+    return ageRanges[age] || '';
+}
+
+// 슬라이더 위치 업데이트 함수 수정
+function updateSliderPosition() {
+    const slider = document.getElementById('sampleSlider');
+    const sampleTitle = document.getElementById('sampleTitle').querySelector('h3');
+    
+    slider.style.transform = `translateX(-${currentSlide * 100}%)`;
+    
+    // 타이틀 업데이트
+    sampleTitle.textContent = `${getAgeRangeText(selectedAge)} ${selectedGender === 'male' ? '남성' : '여성'} (${currentSlide + 1}/${samples.length})`;
+    
+    // 이전/다음 버튼 상태 업데이트
+    const prevButton = document.getElementById('prevSlide');
+    const nextButton = document.getElementById('nextSlide');
+    
+    if (prevButton && nextButton) {
+        prevButton.style.visibility = currentSlide === 0 ? 'hidden' : 'visible';
+        nextButton.style.visibility = currentSlide === samples.length - 1 ? 'hidden' : 'visible';
+    }
+}
+
+// 샘플 선택 함수
+async function selectSample() {
+    LoadingManager.show();
+    try {
+        const response = await fetch('/guidebook/reality-check/apply-sample', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({
+                sampleIndex: currentSlide,
+                gender: selectedGender,
+                age: selectedAge
+            })
+        });
+
+        if (response.ok) {
+            window.location.reload();
+        } else {
+            throw new Error('샘플 적용 실패');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('샘플 적용 중 오류가 발생했습니다.');
+        LoadingManager.hide();
+    }
+}
+
+// 다시 선택하기 함수 추가
+function resetSelection() {
+    selectedGender = null;
+    selectedAge = null;
+    currentSlide = 0;
+    samples = [];
+    
+    // UI 초기화
+    document.getElementById('genderStep').classList.remove('hidden');
+    document.getElementById('ageStep').classList.add('hidden');
+    document.getElementById('sampleStep').classList.add('hidden');
+    
+    // 프로그레스바 초기화
+    document.getElementById('progressBar').style.width = '33%';
+    
+    // 슬라이더 초기화
+    const slider = document.getElementById('sampleSlider');
+    if (slider) {
+        slider.innerHTML = '';
+        slider.style.transform = 'translateX(0)';
+    }
+    
+    // 타이틀 초기화
+    const sampleTitle = document.getElementById('sampleTitle').querySelector('h3');
+    if (sampleTitle) {
+        sampleTitle.textContent = '';
+    }
+}
+
+// 슬라이더 네비게이션 이벤트 리스너 추가
+document.getElementById('prevSlide')?.addEventListener('click', () => {
+    if (currentSlide > 0) {
+        currentSlide--;
+        updateSliderPosition();
+    }
+});
+
+document.getElementById('nextSlide')?.addEventListener('click', () => {
+    if (currentSlide < samples.length - 1) {
+        currentSlide++;
+        updateSliderPosition();
+    }
 });
 </script>
 @endpush
