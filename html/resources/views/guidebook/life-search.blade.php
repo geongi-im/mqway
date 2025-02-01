@@ -343,51 +343,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // 천단위 콤마 포맷팅 함수
-    function numberWithCommas(x) {
-        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    }
-
-    // 금액 입력 필드 이벤트 처리
-    const priceInput = document.getElementById('mq_price');
-    priceInput.addEventListener('input', function(e) {
-        // 현재 커서 위치 저장
-        const start = this.selectionStart;
-        
-        // 입력된 값에서 콤마 제거
-        let value = this.value.replace(/,/g, '');
-        
-        // 숫자만 남기기
-        value = value.replace(/[^\d]/g, '');
-        
-        // 콤마 포맷팅 적용
-        if (value) {
-            const formattedValue = numberWithCommas(value);
-            
-            // 값이 변경된 경우에만 업데이트
-            if (this.value !== formattedValue) {
-                // 커서 위치 계산
-                const beforeCommas = this.value.substr(0, start).replace(/[^\d]/g, '').length;
-                this.value = formattedValue;
-                
-                // 새로운 커서 위치 계산
-                const afterCommas = formattedValue.substr(0, start).replace(/[^\d]/g, '').length;
-                const newPosition = start + (afterCommas - beforeCommas);
-                
-                // 커서 위치 설정
-                this.setSelectionRange(newPosition, newPosition);
-            }
-        } else {
-            this.value = '';
-        }
-    });
-
-    // 숫자와 콤마만 입력 가능하도록
-    priceInput.addEventListener('keypress', function(e) {
-        if (!/[\d]/.test(e.key) && e.key !== ',') {
-            e.preventDefault();
-        }
-    });
+    // 금액 입력 필드에 포맷팅 적용
+    initNumberFormatting('#mq_price');
 });
 </script>
 @endpush

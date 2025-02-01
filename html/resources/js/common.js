@@ -37,3 +37,70 @@ const LoadingManager = {
 
 // 전역으로 사용할 수 있도록 window 객체에 추가
 window.LoadingManager = LoadingManager;
+
+/**
+ * 숫자에 천단위 콤마를 추가하는 함수
+ * @param {number|string} x - 포맷팅할 숫자 또는 문자열
+ * @returns {string} 천단위 콤마가 포함된 문자열
+ */
+function numberWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+/**
+ * 입력 필드에 천단위 콤마를 적용하는 함수
+ * @param {HTMLElement} input - 숫자 입력 필드 엘리먼트
+ */
+function applyNumberFormat(input) {
+    // 현재 커서 위치 저장
+    const start = input.selectionStart;
+    
+    // 입력된 값에서 콤마 제거
+    let value = input.value.replace(/,/g, '');
+    
+    // 숫자만 남기기
+    value = value.replace(/[^\d]/g, '');
+    
+    // 콤마 포맷팅 적용
+    if (value) {
+        const formattedValue = numberWithCommas(value);
+        
+        // 값이 변경된 경우에만 업데이트
+        if (input.value !== formattedValue) {
+            // 커서 위치 계산
+            const beforeCommas = input.value.substr(0, start).replace(/[^\d]/g, '').length;
+            input.value = formattedValue;
+            
+            // 새로운 커서 위치 계산
+            const afterCommas = formattedValue.substr(0, start).replace(/[^\d]/g, '').length;
+            const newPosition = start + (afterCommas - beforeCommas);
+            
+            // 커서 위치 설정
+            input.setSelectionRange(newPosition, newPosition);
+        }
+    } else {
+        input.value = '';
+    }
+}
+
+/**
+ * 숫자 입력 필드에 이벤트 리스너를 추가하는 함수
+ * @param {string} selector - 숫자 입력 필드의 CSS 선택자
+ */
+function initNumberFormatting(selector) {
+    const inputs = document.querySelectorAll(selector);
+    
+    inputs.forEach(input => {
+        // input 이벤트에 포맷팅 적용
+        input.addEventListener('input', function(e) {
+            applyNumberFormat(this);
+        });
+
+        // 숫자와 콤마만 입력 가능하도록 제한
+        input.addEventListener('keypress', function(e) {
+            if (!/[\d]/.test(e.key) && e.key !== ',') {
+                e.preventDefault();
+            }
+        });
+    });
+}
