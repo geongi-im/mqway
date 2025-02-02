@@ -100,3 +100,8 @@ Route::get('/guidebook/roadmap', [RoadmapController::class, 'index'])->name('gui
 Route::get('/privacy', function () {
     return view('privacy');
 })->name('privacy');
+
+// 서비스 이용약관
+Route::get('/service', function () {
+    return view('service');
+})->name('service');
