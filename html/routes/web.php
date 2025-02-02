@@ -95,3 +95,8 @@ Route::prefix('guidebook/reality-check')->group(function () {
 
 // 로드맵
 Route::get('/guidebook/roadmap', [RoadmapController::class, 'index'])->name('guidebook.roadmap');
+
+// 개인정보처리방침
+Route::get('/privacy', function () {
+    return view('privacy');
+})->name('privacy');
