@@ -87,7 +87,7 @@
                 <div class="flex space-x-4 mt-4">
                     <!-- 샘플 가져오기 버튼 -->
                     <button onclick="openSampleModal()" 
-                            class="px-6 py-2 bg-secondary text-cdark rounded-lg transition-colors duration-200 flex items-center">
+                            class="px-6 py-2 bg-secondary border border-gray-300 text-cdark rounded-lg transition-colors duration-200 flex items-center">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                         </svg>
