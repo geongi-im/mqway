@@ -9,7 +9,7 @@
     </div>
 
     <!-- 항상 존재하는 숨겨진 추가 버튼 -->
-    <button id="addExpenseButton" class="hidden">지출 추가</button>
+    <button id="addExpenseButton" class="hidden">항목 추가</button>
 
     <!-- 상단 버튼 영역 수정 -->
     @if(count($expenses) > 0)
@@ -29,7 +29,7 @@
             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
             </svg>
-            지출 추가
+            항목 추가
         </button>
     </div>
     @endif
@@ -41,7 +41,7 @@
             <table class="min-w-full">
                 <thead>
                     <tr class="bg-point">
-                        <th class="px-6 py-4 text-left text-cdark">지출 항목</th>
+                        <th class="px-6 py-4 text-left text-cdark">항목</th>
                         <th class="px-6 py-4 text-left text-cdark">예상 금액</th>
                         <th class="px-6 py-4 text-left text-cdark">실제 금액</th>
                         <th class="px-6 py-4 text-left text-cdark">차이</th>
@@ -83,7 +83,7 @@
                 <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>
-                <p class="text-lg text-gray-600">아직 등록된 지출 항목이 없습니다.</p>
+                <p class="text-lg text-gray-600">아직 등록된 항목이 없습니다.</p>
                 <div class="flex space-x-4 mt-4">
                     <!-- 샘플 가져오기 버튼 -->
                     <button onclick="openSampleModal()" 
@@ -99,7 +99,7 @@
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                         </svg>
-                        지출 추가하기
+                        항목 추가하기
                     </button>
                 </div>
             </div>
@@ -154,11 +154,11 @@
                     <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                     </svg>
-                    <p class="text-base text-gray-600">아직 등록된 지출 항목이 없습니다.</p>
+                    <p class="text-base text-gray-600">아직 등록된 항목이 없습니다.</p>
                     <div class="flex space-x-4 mt-4">
                         <!-- 샘플 가져오기 버튼 -->
                         <button onclick="openSampleModal()" 
-                                class="px-6 py-2 bg-secondary text-dark rounded-lg hover:bg-secondary/90 transition-colors duration-200 flex items-center">
+                                class="px-6 py-2 bg-secondary text-dark border border-gray-300 rounded-lg hover:bg-secondary/90 transition-colors duration-200 flex items-center">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                             </svg>
@@ -170,7 +170,7 @@
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                             </svg>
-                            지출 항목 추가하기
+                            항목 추가하기
                         </button>
                     </div>
                 </div>
@@ -183,7 +183,7 @@
 <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
     <div class="bg-white p-8 rounded-lg w-full max-w-md">
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-dark" id="modalTitle">지출 추가</h2>
+            <h2 class="text-2xl font-bold text-dark" id="modalTitle">항목 추가</h2>
             <button type="button" id="closeModal" class="text-text-dark hover:text-gray-700">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -196,7 +196,7 @@
             <div class="space-y-4">
                 <div>
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="category">
-                        지출 항목 <span class="text-red-500">*</span>
+                        항목 <span class="text-red-500">*</span>
                     </label>
                     <select id="category" 
                             name="category" 
@@ -221,7 +221,7 @@
                            id="categoryCustom" 
                            name="categoryCustom" 
                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-dark hidden"
-                           placeholder="지출 항목을 입력하세요">
+                           placeholder="항목을 입력하세요">
                 </div>
                 <div>
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="expected_amount">
@@ -503,7 +503,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('actual_amount').value = numberWithCommas(actualAmount);
             document.getElementById('itemId').value = tr.dataset.id;
             
-            modalTitle.textContent = '지출 수정';
+            modalTitle.textContent = '수정';
             isEditing = true;
             openModal();
         });
@@ -544,7 +544,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 이벤트 리스너 등록
     addButton.addEventListener('click', () => {
-        modalTitle.textContent = '지출 추가';
+        modalTitle.textContent = '항목 추가';
         openModal();
     });
     cancelButton.addEventListener('click', closeModalHandler);
