@@ -53,6 +53,13 @@ class BoardController extends Controller
 
         $posts = $query->paginate(10);
         
+        // 이미지 경로 처리
+        foreach ($posts as $post) {
+            $post->mq_image = $post->mq_image 
+                ? asset('storage/' . $post->mq_image)
+                : asset('images/content/no_image.jpeg');
+        }
+        
         return view('board.index', [
             'posts' => $posts,
             'categories' => $this->categories,
@@ -86,7 +93,7 @@ class BoardController extends Controller
         $board->mq_title = $request->mq_title;
         $board->mq_content = $request->mq_content;
         $board->mq_category = $request->mq_category;
-        $board->mq_writer = 'test'; //Auth::user()->name;
+        $board->mq_writer = Auth::user()->mq_user_id;
         $board->mq_view_cnt = 0;
         $board->mq_like_cnt = 0;
         $board->mq_status = 1;
@@ -120,6 +127,11 @@ class BoardController extends Controller
     {
         $post = Board::findOrFail($idx);
         
+        // 이미지 경로 처리
+        $post->mq_image = $post->mq_image 
+            ? asset('storage/' . $post->mq_image)
+            : asset('images/content/no_image.jpeg');
+        
         // 조회수 증가
         $post->increment('mq_view_cnt');
 
@@ -138,7 +150,7 @@ class BoardController extends Controller
         $categories = ['테크', '경제', '산업', '증권'];
         
         // 작성자 체크
-        if ($post->mq_writer !== Auth::user()->name) {
+        if ($post->mq_writer !== Auth::user()->mq_user_id) {
             return redirect()->route('board.show', $idx)->with('error', '수정 권한이 없습니다.');
         }
 
@@ -163,7 +175,7 @@ class BoardController extends Controller
         $board = Board::findOrFail($idx);
         
         // 작성자 체크
-        if ($board->mq_writer !== Auth::user()->name) {
+        if ($board->mq_writer !== Auth::user()->mq_user_id) {
             return redirect()->route('board.show', $idx)->with('error', '수정 권한이 없습니다.');
         }
 
@@ -196,7 +208,7 @@ class BoardController extends Controller
         $board = Board::findOrFail($idx);
         
         // 작성자 체크
-        if ($board->mq_writer !== Auth::user()->name) {
+        if ($board->mq_writer !== Auth::user()->mq_user_id) {
             return redirect()->route('board.show', $idx)->with('error', '삭제 권한이 없습니다.');
         }
 

@@ -16,7 +16,7 @@
     <div class="mb-8 flex justify-end items-center space-x-4">
         <!-- 샘플 가져오기 버튼 -->
         <button onclick="openSampleModal()" 
-                class="bg-secondary text-dark px-4 py-2 rounded-lg hover:bg-secondary/90 transition-colors duration-200 flex items-center text-sm">
+                class="bg-secondary border border-gray-300 text-cdark px-4 py-2 rounded-lg transition-colors duration-200 flex items-center text-sm">
             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
             </svg>
@@ -25,7 +25,7 @@
         
         <!-- 지출 추가 버튼 -->
         <button onclick="document.getElementById('addExpenseButton').click()" 
-                class="bg-dark text-secondary px-4 py-2 rounded-lg hover:bg-dark/90 transition-colors duration-200 flex items-center text-sm">
+                class="bg-point text-cdark px-4 py-2 rounded-lg transition-colors duration-200 flex items-center text-sm">
             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
             </svg>
@@ -40,12 +40,12 @@
         <div class="bg-white rounded-lg shadow-lg overflow-hidden">
             <table class="min-w-full">
                 <thead>
-                    <tr class="bg-dark">
-                        <th class="px-6 py-4 text-left text-secondary font-semibold">지출 항목</th>
-                        <th class="px-6 py-4 text-left text-secondary font-semibold">예상 금액</th>
-                        <th class="px-6 py-4 text-left text-secondary font-semibold">실제 금액</th>
-                        <th class="px-6 py-4 text-left text-secondary font-semibold">차이</th>
-                        <th class="px-6 py-4 text-left text-secondary font-semibold w-24">작업</th>
+                    <tr class="bg-point">
+                        <th class="px-6 py-4 text-left text-cdark">지출 항목</th>
+                        <th class="px-6 py-4 text-left text-cdark">예상 금액</th>
+                        <th class="px-6 py-4 text-left text-cdark">실제 금액</th>
+                        <th class="px-6 py-4 text-left text-cdark">차이</th>
+                        <th class="px-6 py-4 text-left text-cdark w-24">작업</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -87,7 +87,7 @@
                 <div class="flex space-x-4 mt-4">
                     <!-- 샘플 가져오기 버튼 -->
                     <button onclick="openSampleModal()" 
-                            class="px-6 py-2 bg-secondary text-dark rounded-lg hover:bg-secondary/90 transition-colors duration-200 flex items-center">
+                            class="px-6 py-2 bg-secondary text-cdark rounded-lg transition-colors duration-200 flex items-center">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                         </svg>
@@ -95,11 +95,11 @@
                     </button>
                     <!-- 지출 항목 추가 버튼 -->
                     <button onclick="document.getElementById('addExpenseButton').click()" 
-                            class="px-6 py-2 bg-dark text-secondary rounded-lg hover:bg-dark/90 transition-colors duration-200 flex items-center">
+                            class="px-6 py-2 bg-point text-cdark rounded-lg transition-colors duration-200 flex items-center">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                         </svg>
-                        지출 항목 추가하기
+                        지출 추가하기
                     </button>
                 </div>
             </div>
@@ -166,7 +166,7 @@
                         </button>
                         <!-- 지출 항목 추가 버튼 -->
                         <button onclick="document.getElementById('addExpenseButton').click()" 
-                                class="px-6 py-2 bg-dark text-secondary rounded-lg hover:bg-dark/90 transition-colors duration-200 flex items-center">
+                                class="px-6 py-2 bg-point text-point rounded-lg transition-colors duration-200 flex items-center">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                             </svg>
@@ -184,7 +184,7 @@
     <div class="bg-white p-8 rounded-lg w-full max-w-md">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-dark" id="modalTitle">지출 추가</h2>
-            <button type="button" id="closeModal" class="text-gray-500 hover:text-gray-700">
+            <button type="button" id="closeModal" class="text-text-dark hover:text-gray-700">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
@@ -245,10 +245,10 @@
                 </div>
             </div>
             <div class="flex justify-end space-x-3 mt-6">
-                <button type="button" id="cancelButton" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200">
+                <button type="button" id="cancelButton" class="px-4 py-2 text-cdark border border-gray-300 rounded-lg transition-colors duration-200">
                     취소
                 </button>
-                <button type="submit" id="submitButton" class="px-4 py-2 bg-dark text-secondary rounded-lg hover:bg-dark/90 transition-colors duration-200">
+                <button type="submit" id="submitButton" class="px-4 py-2 bg-point text-cdark rounded-lg transition-colors duration-200">
                     저장
                 </button>
             </div>
@@ -260,10 +260,10 @@
 <div id="sampleModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
     <div class="bg-white rounded-lg w-full max-w-md mx-4 overflow-hidden">
         <!-- 모달 헤더 -->
-        <div class="bg-dark p-4">
+        <div class="bg-point p-4">
             <div class="flex justify-between items-center">
-                <h2 class="text-xl font-bold text-secondary">샘플 가져오기</h2>
-                <button type="button" onclick="closeSampleModal()" class="text-secondary hover:text-secondary/80">
+                <h2 class="text-xl font-bold text-cdark">샘플 가져오기</h2>
+                <button type="button" onclick="closeSampleModal()" class="text-cdark hover:text-secondary/80">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
@@ -271,8 +271,8 @@
             </div>
             <div class="mt-2">
                 <div class="flex items-center">
-                    <div class="w-full bg-secondary/30 h-2 rounded-full">
-                        <div id="progressBar" class="bg-secondary h-2 rounded-full transition-all duration-300" style="width: 50%"></div>
+                    <div class="w-full bg-cdark/30 h-2 rounded-full">
+                        <div id="progressBar" class="bg-cdark h-2 rounded-full transition-all duration-300" style="width: 50%"></div>
                     </div>
                 </div>
             </div>
@@ -337,13 +337,13 @@
                     </div>
                     
                     <!-- 이전/다음 버튼 -->
-                    <button id="prevSlide" class="absolute left-0 top-1/2 -translate-y-1/2 bg-dark/50 text-white p-2 rounded-full hover:bg-dark/70 transition-colors duration-200">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <button id="prevSlide" class="absolute left-0 top-1/2 -translate-y-1/2 bg-cdark text-white p-2 rounded-full transition-colors duration-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                         </svg>
                     </button>
-                    <button id="nextSlide" class="absolute right-0 top-1/2 -translate-y-1/2 bg-dark/50 text-white p-2 rounded-full hover:bg-dark/70 transition-colors duration-200">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <button id="nextSlide" class="absolute right-0 top-1/2 -translate-y-1/2 bg-cdark text-white p-2 rounded-full transition-colors duration-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                         </svg>
                     </button>
@@ -351,10 +351,10 @@
 
                 <!-- 선택 버튼 -->
                 <div class="flex justify-center space-x-4 mt-8">
-                    <button onclick="resetSelection()" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200">
+                    <button onclick="resetSelection()" class="px-6 py-2 text-cdark border border-gray-300 rounded-lg transition-colors duration-200">
                         다시 선택하기
                     </button>
-                    <button onclick="selectSample()" class="px-6 py-2 bg-dark text-secondary rounded-lg hover:bg-dark/90 transition-colors duration-200">
+                    <button onclick="selectSample()" class="px-6 py-2 bg-point text-cdark rounded-lg transition-colors duration-200">
                         항목 불러오기
                     </button>
                 </div>

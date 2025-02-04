@@ -8,16 +8,18 @@
     </div>
 
     <!-- 검색 영역 -->
-    <div class="bg-yellow-200 rounded-xl p-4 mb-6">
+    <div class="bg-primary rounded-xl p-4 mb-6">
         <form action="{{ route('board.index') }}" method="GET">
-            <div class="flex gap-2">
+            <div class="flex gap-2 relative">
                 <input type="text" 
                        name="search"
                        value="{{ request('search') }}"
-                       class="flex-1 h-12 px-4 rounded-xl border-0 focus:ring-2 focus:ring-yellow-500" 
+                       class="w-full h-12 px-4 rounded-xl border-0 focus:ring-2 focus:ring-yellow-500" 
                        placeholder="검색어를 입력하세요">
-                <button type="submit" class="w-20 h-12 bg-dark text-white rounded-xl hover:bg-opacity-90 transition-all">
-                    검색
+                <button type="submit" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-cdark hover:text-cgray transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
                 </button>
             </div>
         </form>
@@ -50,16 +52,21 @@
         </div>
 
         <!-- 버튼 영역 -->
-        <div class="sm:flex items-center gap-2">
+        <div class="flex items-center gap-2">
             @if(request('search'))
                 <a href="{{ route('board.index') }}" 
-                   class="inline-flex items-center justify-center h-10 px-6 bg-gray-500 text-white rounded-lg hover:bg-opacity-90 transition-all text-sm">
+                   class="inline-flex items-center justify-center h-10 px-6 bg-text-dark text-white rounded-lg hover:bg-opacity-90 transition-all text-sm">
                     전체목록
                 </a>
             @endif
             <a href="{{ route('board.create') }}" 
-               class="inline-flex items-center justify-center h-10 px-6 bg-dark text-white rounded-lg hover:bg-opacity-90 transition-all text-sm">
-                글쓰기
+               class="inline-flex items-center justify-center h-10 px-6 bg-point text-cdark rounded-lg hover:bg-opacity-90 transition-all text-sm">
+                <span class="flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    글쓰기
+                </span>
             </a>
         </div>
     </div>
@@ -76,7 +83,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
             </svg>
             <h3 class="text-lg font-medium text-gray-900 mb-2">게시글이 없습니다</h3>
-            <p class="text-sm text-gray-500 text-center mb-6">
+            <p class="text-sm text-text-dark text-center">
                 @if(request('search'))
                     '{{ request('search') }}'에 대한 검색 결과가 없습니다.<br>
                     다른 검색어로 다시 시도해보세요.
@@ -85,10 +92,6 @@
                     첫 번째 게시글의 주인공이 되어보세요!
                 @endif
             </p>
-            <a href="{{ route('board.create') }}" 
-               class="inline-flex items-center justify-center px-6 h-10 bg-dark text-white rounded-lg hover:bg-opacity-90 transition-all text-sm">
-                글쓰기
-            </a>
         </div>
     @else
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -97,7 +100,7 @@
                 <a href="{{ route('board.show', $post->idx) }}" class="block h-full">
                     <div class="flex flex-col h-full">
                         <div class="bg-gray-50 flex items-center justify-center" style="height: 240px;">
-                            <img src="{{ asset('storage/' . $post->mq_image) }}" 
+                            <img src="{{ $post->mq_image }}" 
                                  alt="게시글 이미지" 
                                  class="w-full h-full object-contain p-2">
                         </div>
@@ -108,8 +111,8 @@
                                 </span>
                             </div>
                             <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ $post->mq_title }}</h3>
-                            <p class="text-sm text-gray-500 mb-4 h-12 overflow-hidden">{{ strip_tags($post->mq_content) }}</p>
-                            <div class="flex items-center justify-between text-sm text-gray-500 mt-auto">
+                            <p class="text-sm text-text-dark mb-4 h-12 overflow-hidden">{{ strip_tags($post->mq_content) }}</p>
+                            <div class="flex items-center justify-between text-sm text-text-dark mt-auto">
                                 <span>{{ $post->mq_reg_date ? $post->mq_reg_date->format('Y-m-d') : '' }}</span>
                                 <div class="flex items-center gap-4">
                                     <span class="flex items-center gap-1">
@@ -134,16 +137,6 @@
             @endforeach
         </div>
     @endif
-
-    <!-- 글쓰기 버튼 - 모바일 -->
-    <div class="fixed bottom-4 right-4 sm:hidden z-10">
-        <a href="{{ route('board.create') }}" 
-           class="flex items-center justify-center w-14 h-14 bg-dark text-white rounded-full hover:bg-opacity-90 transition-all shadow-lg">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-            </svg>
-        </a>
-    </div>
 
     <!-- 페이지네이션 -->
     <div class="mt-8">

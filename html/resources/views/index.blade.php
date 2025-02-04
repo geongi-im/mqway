@@ -327,7 +327,7 @@
                 <a href="{{ route('board.show', $post->idx) }}" class="block h-full">
                 <div class="bg-white rounded-lg overflow-hidden shadow-lg h-full flex flex-col">
                     <div class="bg-gray-50 flex items-center justify-center" style="height: 240px;">
-                        <img src="{{ asset('storage/' . $post->mq_image) }}" 
+                        <img src="{{ $post->mq_image }}" 
                              alt="게시글 이미지" 
                              class="w-full h-full object-contain p-2">
                     </div>
@@ -339,7 +339,7 @@
                         </div>
                         <h3 class="font-bold text-lg mb-2">{{ $post->mq_title }}</h3>
                         <p class="text-gray-600 h-12 overflow-hidden">{{ $post->mq_content }}</p>
-                        <div class="mt-auto text-sm text-gray-500">
+                        <div class="mt-auto text-sm text-text-dark">
                             {{ $post->mq_reg_date ? $post->mq_reg_date->format('Y-m-d') : '' }}
                         </div>
                     </div>
@@ -370,7 +370,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         @foreach($latestNews as $news)
         <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
-            <div class="flex items-center gap-3 text-sm text-gray-500 mb-3">
+            <div class="flex items-center gap-3 text-sm text-text-dark mb-3">
                 <span class="{{ $newsCategoryColors[$news->mq_category] }} px-3 py-1 rounded-full">
                     {{ $news->mq_category }}
                 </span>

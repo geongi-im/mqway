@@ -1,15 +1,15 @@
 <!-- 햄버거 메뉴 오버레이 -->
-<div id="menuOverlay" class="menu-overlay fixed inset-0 bg-dark z-50 flex flex-col items-center justify-center">
-    <button id="closeMenu" class="absolute top-4 right-4 text-secondary text-3xl">&times;</button>
+<div id="menuOverlay" class="menu-overlay fixed inset-0 bg-point z-50 flex flex-col items-center justify-center">
+    <button id="closeMenu" class="absolute top-4 right-4 text-cdark hover:text-cgray text-3xl">&times;</button>
     <nav class="text-left w-full max-w-md px-8">
         <ul class="space-y-6 text-2xl">
             <li>
-                <a href="{{ url('/') }}" class="text-secondary hover:text-secondary/80 block py-2 {{ request()->is('/') ? 'font-bold border-l-4 border-secondary pl-4 -ml-4' : '' }}">
+                <a href="{{ url('/') }}" class="text-cdark hover:text-cgray block py-2 {{ request()->is('/') ? 'font-bold border-l-4 border-secondary pl-4 -ml-4' : '' }}">
                     Home
                 </a>
             </li>
             <li class="relative">
-                <a href="#" class="text-secondary hover:text-secondary/80 guidebook-toggle flex items-center justify-between py-2 {{ request()->is('guidebook*') ? 'font-bold border-l-4 border-secondary pl-4 -ml-4' : '' }}">
+                <a href="#" class="text-cdark hover:text-cgray guidebook-toggle flex items-center justify-between py-2 {{ request()->is('guidebook*') ? 'font-bold border-l-4 border-secondary pl-4 -ml-4' : '' }}">
                     <span>Guidebook</span>
                     <svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -18,7 +18,7 @@
                 <ul class="submenu hidden space-y-1 ml-4 border-l-2 border-secondary/20">
                     <li class="relative">
                         <a href="{{ route('guidebook.life-search') }}" 
-                           class="submenu-item block py-2 pl-4 text-base text-secondary/70 hover:text-secondary transition-all duration-200 hover:pl-6 
+                           class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6 
                            {{ request()->routeIs('guidebook.life-search') ? 'text-secondary font-bold bg-dark/10' : '' }}">
                             원하는 삶 찾기
                             <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-0 bg-secondary transition-all duration-200"></span>
@@ -26,7 +26,7 @@
                     </li>
                     <li class="relative">
                         <a href="{{ route('guidebook.reality-check') }}" 
-                           class="submenu-item block py-2 pl-4 text-base text-secondary/70 hover:text-secondary transition-all duration-200 hover:pl-6
+                           class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6
                            {{ request()->routeIs('guidebook.reality-check') ? 'text-secondary font-bold bg-dark/10' : '' }}">
                             현실 점검하기
                             <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-0 bg-secondary transition-all duration-200"></span>
@@ -34,7 +34,7 @@
                     </li>
                     <li class="relative">
                         <a href="{{ route('guidebook.roadmap') }}" 
-                           class="submenu-item block py-2 pl-4 text-base text-secondary/70 hover:text-secondary transition-all duration-200 hover:pl-6
+                           class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6
                            {{ request()->routeIs('guidebook.roadmap') ? 'text-secondary font-bold bg-dark/10' : '' }}">
                             로드맵 작성하기
                             <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-0 bg-secondary transition-all duration-200"></span>
@@ -44,23 +44,23 @@
             </li>
             <!--
             <li>
-                <a href="{{ url('/pick') }}" class="text-secondary hover:text-secondary/80 block py-2 {{ request()->is('pick*') ? 'font-bold border-l-4 border-secondary pl-4 -ml-4' : '' }}">
+                <a href="{{ url('/pick') }}" class="text-point hover:text-secondary/80 block py-2 {{ request()->is('pick*') ? 'font-bold border-l-4 border-secondary pl-4 -ml-4' : '' }}">
                     Pick
                 </a>
             </li>
             <li>
-                <a href="{{ url('/beecube') }}" class="text-secondary hover:text-secondary/80 block py-2 {{ request()->is('beecube*') ? 'font-bold border-l-4 border-secondary pl-4 -ml-4' : '' }}">
+                <a href="{{ url('/beecube') }}" class="text-point hover:text-secondary/80 block py-2 {{ request()->is('beecube*') ? 'font-bold border-l-4 border-secondary pl-4 -ml-4' : '' }}">
                     Beecube
                 </a>
             </li>
             -->
             <li>
-                <a href="{{ url('/board') }}" class="text-secondary hover:text-secondary/80 block py-2 {{ request()->is('board*') ? 'font-bold border-l-4 border-secondary pl-4 -ml-4' : '' }}">
+                <a href="{{ url('/board') }}" class="text-cdark hover:text-cgray block py-2 {{ request()->is('board*') ? 'font-bold border-l-4 border-secondary pl-4 -ml-4' : '' }}">
                     Board
                 </a>
             </li>
             <li>
-                <a href="{{ url('/news') }}" class="text-secondary hover:text-secondary/80 block py-2 {{ request()->is('news*') ? 'font-bold border-l-4 border-secondary pl-4 -ml-4' : '' }}">
+                <a href="{{ url('/news') }}" class="text-cdark hover:text-cgray block py-2 {{ request()->is('news*') ? 'font-bold border-l-4 border-secondary pl-4 -ml-4' : '' }}">
                     News
                 </a>
             </li>
@@ -95,25 +95,34 @@
 </style>
 
 <!-- 헤더 -->
-<nav class="bg-dark p-4">
+<nav class="bg-point p-4">
     <div class="container mx-auto flex justify-between items-center">
         <a href="{{ url('/') }}" class="flex items-center">
-            <img src="{{ asset('images/logo/mqway-white-logo.png') }}" alt="MQWAY" class="h-8">
+            <img src="{{ asset('images/logo/mqway_blank_logo.png') }}" alt="MQWAY" class="h-8">
         </a>
         <div class="flex items-center gap-4">
             @if(auth()->check())
                 <span class="text-secondary">{{ auth()->user()->name }}</span>
-                <a href="{{ url('/logout') }}" class="text-secondary hover:text-secondary/80"
+                <a href="{{ url('/logout') }}" 
+                   class="text-cdark hover:text-cgray group relative"
                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                    로그아웃
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5.636 5.636a9 9 0 1 0 12.728 0M12 3v9" />
+                    </svg>
+                    <span class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-cdark text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-[60]">로그아웃</span>
                 </a>
                 <form id="logout-form" action="{{ url('/logout') }}" method="POST" class="hidden">
                     @csrf
                 </form>
             @else
-                <a href="{{ url('/login') }}" class="text-secondary hover:text-secondary/80">로그인</a>
+                <a href="{{ url('/login') }}" class="text-cdark hover:text-cgray group relative">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                    </svg>
+                    <span class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-cdark text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-[60]">로그인</span>
+                </a>
             @endif
-            <button id="menuButton" class="text-secondary hover:text-secondary/80">
+            <button id="menuButton" class="text-cdark hover:text-cgray">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
                 </svg>

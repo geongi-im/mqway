@@ -40,10 +40,10 @@
         </svg>
     </div>
     <div class="control-buttons">
-        <button id="btn_edit_mode" class="px-6 py-2 rounded-lg bg-dark text-secondary hover:bg-opacity-90 transition-all">편집</button>
-        <button id="btn_input_content" class="px-6 py-2 rounded-lg bg-dark text-secondary hover:bg-opacity-90 transition-all hidden">내용 입력</button>
-        <button id="btn_add_cube" class="px-6 py-2 rounded-lg bg-dark text-secondary hover:bg-opacity-90 transition-all hidden">추가</button>
-        <button id="btn_save" class="px-6 py-2 rounded-lg bg-dark text-secondary hover:bg-opacity-90 transition-all hidden">저장</button>
+        <button id="btn_edit_mode" class="px-6 py-2 rounded-lg bg-point text-point hover:bg-opacity-90 transition-all">편집</button>
+        <button id="btn_input_content" class="px-6 py-2 rounded-lg bg-point text-point hover:bg-opacity-90 transition-all hidden">내용 입력</button>
+        <button id="btn_add_cube" class="px-6 py-2 rounded-lg bg-point text-point hover:bg-opacity-90 transition-all hidden">추가</button>
+        <button id="btn_save" class="px-6 py-2 rounded-lg bg-point text-point hover:bg-opacity-90 transition-all hidden">저장</button>
     </div>
 </div>
 
@@ -62,7 +62,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 transition-colors" data-bs-dismiss="modal">닫기</button>
-                <button type="button" class="px-4 py-2 rounded-lg bg-dark text-secondary hover:bg-opacity-90 transition-colors" id="confirmBtn">확인</button>
+                <button type="button" class="px-4 py-2 rounded-lg bg-point text-point hover:bg-opacity-90 transition-colors" id="confirmBtn">확인</button>
             </div>
         </div>
     </div>

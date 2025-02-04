@@ -6,7 +6,7 @@
     <!-- 시작 화면 -->
     <div class="flex-1 flex flex-col items-center justify-center p-4">
         <h1 class="text-4xl font-bold text-dark mb-8">나의 성향을 알아보세요</h1>
-        <button id="startBtn" class="bg-dark text-white px-8 py-4 rounded-full text-xl font-medium hover:bg-opacity-90 transition-all transform hover:scale-105 active:scale-95">
+        <button id="startBtn" class="bg-point text-white px-8 py-4 rounded-full text-xl font-medium hover:bg-opacity-90 transition-all transform hover:scale-105 active:scale-95">
             시작하기
         </button>
     </div>
@@ -27,7 +27,7 @@
                     </div>
 
                     <!-- VS 배지 -->
-                    <div class="w-12 h-12 md:w-16 md:h-16 bg-dark text-white rounded-full flex items-center justify-center text-xl md:text-2xl font-bold">
+                    <div class="w-12 h-12 md:w-16 md:h-16 bg-point text-white rounded-full flex items-center justify-center text-xl md:text-2xl font-bold">
                         VS
                     </div>
 
@@ -44,14 +44,14 @@
 
             <!-- 네비게이션 버튼 -->
             <div class="flex items-center justify-center gap-6">
-                <button id="prevBtn" class="px-6 py-2 bg-dark text-white rounded-lg hover:bg-opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed" 
+                <button id="prevBtn" class="px-6 py-2 bg-point text-white rounded-lg hover:bg-opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed" 
                         {{ $currentPage == 0 ? 'disabled' : '' }}>
                     이전
                 </button>
                 <span class="text-dark font-medium">
                     {{ $currentPage + 1 }} / {{ $progress['total'] }}
                 </span>
-                <button id="nextBtn" class="px-6 py-2 bg-dark text-white rounded-lg hover:bg-opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed" 
+                <button id="nextBtn" class="px-6 py-2 bg-point text-white rounded-lg hover:bg-opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed" 
                         disabled>
                     다음
                 </button>

@@ -14,9 +14,11 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: '#f4e176',
+                        primary: '#f6f6f6',
                         secondary: '#FFFFFF',
-                        dark: '#34383d'
+                        cdark: '#2b2b2b',
+                        cgray: '#f5f5f5',
+                        point: '#fecc41'
                     }
                 }
             }

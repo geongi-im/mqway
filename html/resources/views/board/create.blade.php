@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="min-h-screen" style="background-color: rgb(244 225 118)">
+<div class="min-h-screen bg-primary">
     <div class="container mx-auto px-4 py-8">
         <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-8">
             <h1 class="text-2xl font-bold text-gray-900 mb-8">새 게시글 작성</h1>
@@ -63,12 +63,12 @@
                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                onchange="updateFileLabel(this)">
                         <div class="w-full h-12 px-4 border border-gray-300 rounded-xl bg-white flex items-center justify-between cursor-pointer hover:border-yellow-500 transition-all">
-                            <span id="fileLabel" class="text-gray-500">이미지를 선택하세요</span>
+                            <span id="fileLabel" class="text-text-dark">이미지를 선택하세요</span>
                             <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                             </svg>
                         </div>
-                        <p class="mt-2 text-sm text-gray-500">최대 2MB까지 업로드 가능합니다.</p>
+                        <p class="mt-2 text-sm text-text-dark">최대 2MB까지 업로드 가능합니다.</p>
                     </div>
                     @error('mq_image')
                         <p class="text-sm text-red-500">{{ $message }}</p>
@@ -82,7 +82,7 @@
                         취소
                     </a>
                     <button type="submit" 
-                            class="inline-flex items-center justify-center px-6 h-12 bg-dark text-white rounded-xl hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-dark focus:ring-offset-2 transition-all">
+                            class="inline-flex items-center justify-center px-6 h-12 bg-point text-cdark rounded-xl hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-dark focus:ring-offset-2 transition-all">
                         작성하기
                     </button>
                 </div>

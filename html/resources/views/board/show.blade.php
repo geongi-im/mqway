@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="min-h-screen" style="background-color: rgb(244 225 118)">
+<div class="min-h-screen bg-primary">
     <div class="container mx-auto px-4 py-8">
         <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-8">
             <!-- 카테고리 -->
@@ -47,6 +47,22 @@
                 </a>
                 
                 <div class="flex gap-3">
+                    @if(auth()->check() && auth()->user()->mq_user_id === $post->mq_writer)
+                        <a href="{{ route('board.edit', $post->idx) }}" 
+                           class="inline-flex items-center justify-center px-6 h-12 border border-gray-300 rounded-xl hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all text-gray-700">
+                            수정
+                        </a>
+                        <form action="{{ route('board.destroy', $post->idx) }}" 
+                              method="POST" 
+                              onsubmit="return confirmDelete()">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" 
+                                    class="inline-flex items-center justify-center px-6 h-12 bg-red-500 text-white rounded-xl hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-200 transition-all">
+                                삭제
+                            </button>
+                        </form>
+                    @endif
                     <button onclick="likePost({{ $post->idx }})" 
                             class="inline-flex items-center justify-center px-6 h-12 bg-yellow-100 text-yellow-800 rounded-xl hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-yellow-200 transition-all">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -62,6 +78,16 @@
 
 @push('scripts')
 <script>
+function confirmDelete() {
+    if (confirm('정말 삭제하시겠습니까?')) {
+        if (typeof LoadingManager !== 'undefined') {
+            LoadingManager.show();
+        }
+        return true;
+    }
+    return false;
+}
+
 function likePost(idx) {
     fetch(`/board/${idx}/like`, {
         method: 'POST',
