@@ -8,12 +8,10 @@
         <p class="text-gray-600">나의 삶의 목표와 꿈을 정리해보세요</p>
     </div>
 
-    @foreach($types as $type)
     <div class="mb-12">
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold">{{ $typeLabels[$type] }}</h2>
-            <button class="add-button bg-dark text-secondary px-4 py-2 rounded-lg hover:bg-dark/90 transition-colors duration-200 flex items-center text-sm"
-                    data-type="{{ $type }}">
+            <h2 class="text-2xl font-bold text-dark">나의 목표</h2>
+            <button class="add-button bg-point text-cdark px-4 py-2 rounded-lg transition-colors duration-200 flex items-center text-sm">
                 <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                 </svg>
@@ -27,16 +25,16 @@
                 <div class="overflow-x-auto">
                     <table class="min-w-full">
                         <thead>
-                            <tr class="bg-dark">
-                                <th class="px-6 py-4 text-left text-secondary font-semibold">카테고리</th>
-                                <th class="px-6 py-4 text-left text-secondary font-semibold">항목</th>
-                                <th class="px-6 py-4 text-left text-secondary font-semibold">예상비용</th>
-                                <th class="px-6 py-4 text-left text-secondary font-semibold">예상소요시간</th>
-                                <th class="px-6 py-4 text-left text-secondary font-semibold w-24">작업</th>
+                            <tr class="bg-point">
+                                <th class="px-6 py-4 text-left text-cdark">카테고리</th>
+                                <th class="px-6 py-4 text-left text-cdark">항목</th>
+                                <th class="px-6 py-4 text-left text-cdark">예상비용</th>
+                                <th class="px-6 py-4 text-left text-cdark">예상소요시간</th>
+                                <th class="px-6 py-4 text-left text-cdark w-24">작업</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($lifeSearches[$type] as $item)
+                            @forelse($lifeSearches as $item)
                             <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors duration-150" data-id="{{ $item->idx }}">
                                 <td class="px-6 py-4">{{ $item->mq_category }}</td>
                                 <td class="px-6 py-4">{{ $item->mq_content }}</td>
@@ -46,7 +44,6 @@
                                     <div class="flex space-x-2">
                                         <button class="text-dark hover:text-dark/70 transition-colors duration-200 edit-button" 
                                                 data-id="{{ $item->idx }}"
-                                                data-type="{{ $item->mq_type }}"
                                                 data-category="{{ $item->mq_category }}"
                                                 data-content="{{ $item->mq_content }}"
                                                 data-price="{{ $item->mq_price }}"
@@ -65,7 +62,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                                <td colspan="5" class="px-6 py-4 text-center text-text-dark">
                                     데이터가 없습니다.
                                 </td>
                             </tr>
@@ -78,7 +75,7 @@
 
         <!-- 모바일 카드 뷰 -->
         <div class="md:hidden">
-            @forelse($lifeSearches[$type] as $item)
+            @forelse($lifeSearches as $item)
             <div class="bg-white rounded-lg shadow-lg p-4 mb-4" data-id="{{ $item->idx }}">
                 <div class="flex justify-between items-start mb-4">
                     <div>
@@ -88,7 +85,6 @@
                     <div class="flex space-x-2">
                         <button class="text-dark hover:text-dark/70 transition-colors duration-200 edit-button"
                                 data-id="{{ $item->idx }}"
-                                data-type="{{ $item->mq_type }}"
                                 data-category="{{ $item->mq_category }}"
                                 data-content="{{ $item->mq_content }}"
                                 data-price="{{ $item->mq_price }}"
@@ -116,13 +112,12 @@
                 </div>
             </div>
             @empty
-            <div class="bg-white rounded-lg shadow-lg p-4 text-center text-gray-500">
+            <div class="bg-white rounded-lg shadow-lg p-4 text-center text-text-dark">
                 데이터가 없습니다.
             </div>
             @endforelse
         </div>
     </div>
-    @endforeach
 </div>
 
 <!-- 모달 -->
@@ -130,7 +125,7 @@
     <div class="bg-white p-8 rounded-lg w-full max-w-md">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-dark" id="modalTitle">추가하기</h2>
-            <button type="button" id="closeModal" class="text-gray-500 hover:text-gray-700">
+            <button type="button" id="closeModal" class="text-text-dark hover:text-gray-700">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
@@ -140,16 +135,6 @@
             @csrf
             <input type="hidden" id="itemId">
             <div class="space-y-4">
-                <div>
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="mq_type">
-                        유형
-                    </label>
-                    <select id="mq_type" name="mq_type" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-dark">
-                        <option value="want_to_do">하고 싶은 것</option>
-                        <option value="want_to_go">가고 싶은 곳</option>
-                        <option value="want_to_share">나누고 싶은 것</option>
-                    </select>
-                </div>
                 <div>
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="mq_category">
                         카테고리
@@ -181,10 +166,10 @@
                 </div>
             </div>
             <div class="flex justify-end space-x-3 mt-6">
-                <button type="button" id="cancelButton" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200">
+                <button type="button" id="cancelButton" class="px-4 py-2 bg-secondary border border-gray-300 text-cdark rounded-lg transition-colors duration-200">
                     취소
                 </button>
-                <button type="submit" id="submitButton" class="px-4 py-2 bg-dark text-secondary rounded-lg hover:bg-dark/90 transition-colors duration-200">
+                <button type="submit" id="submitButton" class="px-4 py-2 bg-point text-cdark rounded-lg transition-colors duration-200">
                     저장
                 </button>
             </div>
@@ -224,7 +209,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = button.dataset;
             
             document.getElementById('itemId').value = data.id;
-            document.getElementById('mq_type').value = data.type;
             document.getElementById('mq_category').value = data.category;
             document.getElementById('mq_content').value = data.content;
             document.getElementById('mq_price').value = numberWithCommas(data.price);
@@ -242,7 +226,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const id = e.target.closest('button').dataset.id;
             try {
-                LoadingManager.show();  // 로딩 시작
+                LoadingManager.show();
                 
                 const response = await fetch(`/guidebook/life-search/${id}`, {
                     method: 'DELETE',
@@ -259,7 +243,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } catch (error) {
                 console.error('Error:', error);
                 alert('삭제 중 오류가 발생했습니다.');
-                LoadingManager.hide();  // 에러 발생 시 로딩 숨김
+                LoadingManager.hide();
             }
         });
     });
@@ -267,7 +251,6 @@ document.addEventListener('DOMContentLoaded', function() {
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        // 항목 필드 유효성 검사
         const contentInput = document.getElementById('mq_content');
         const contentError = document.getElementById('contentError');
         
@@ -281,12 +264,11 @@ document.addEventListener('DOMContentLoaded', function() {
         contentInput.classList.remove('border-red-500');
         contentError.classList.add('hidden');
         
-        LoadingManager.show();  // 로딩 시작
+        LoadingManager.show();
         
         const formData = new FormData(form);
         const id = document.getElementById('itemId').value;
         
-        // 금액 필드의 콤마 제거
         const price = formData.get('mq_price').replace(/,/g, '');
         formData.set('mq_price', price);
         
@@ -314,11 +296,10 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (error) {
             console.error('Error:', error);
             alert('저장 중 오류가 발생했습니다.');
-            LoadingManager.hide();  // 에러 발생 시 로딩 숨김
+            LoadingManager.hide();
         }
     });
 
-    // 입력 시 에러 표시 제거
     document.getElementById('mq_content').addEventListener('input', function() {
         if (this.value.trim()) {
             this.classList.remove('border-red-500');
@@ -326,24 +307,17 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // ESC 키로 모달 닫기
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
             closeModalHandler();
         }
     });
     
-    // 각 타입별 추가 버튼에 대한 이벤트 리스너
-    document.querySelectorAll('.add-button').forEach(button => {
-        button.addEventListener('click', () => {
-            const type = button.dataset.type;
-            document.getElementById('mq_type').value = type;
-            modalTitle.textContent = '추가하기';
-            openModal();
-        });
+    document.querySelector('.add-button').addEventListener('click', () => {
+        modalTitle.textContent = '추가하기';
+        openModal();
     });
 
-    // 금액 입력 필드에 포맷팅 적용
     initNumberFormatting('#mq_price');
 });
 </script>

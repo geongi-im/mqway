@@ -15,41 +15,25 @@ class LifeSearchController extends Controller
 
     public function index()
     {
-        $types = [
-            LifeSearch::TYPE_DO,
-            LifeSearch::TYPE_GO,
-            LifeSearch::TYPE_SHARE
-        ];
-
-        $lifeSearches = [];
-        $typeLabels = [];
-
-        foreach ($types as $type) {
-            $lifeSearches[$type] = LifeSearch::where('mq_type', $type)
-                ->where('mq_user_id', auth()->user()->mq_user_id)  // 현재 로그인한 사용자의 데이터만 조회
-                ->orderBy('mq_reg_date', 'desc')
-                ->get();
-            $typeLabels[$type] = LifeSearch::getTypeLabel($type);
-        }
+        $lifeSearches = LifeSearch::where('mq_user_id', auth()->user()->mq_user_id)
+            ->orderBy('mq_reg_date', 'desc')
+            ->get();
 
         return view('guidebook.life-search', [
-            'lifeSearches' => $lifeSearches,
-            'types' => $types,
-            'typeLabels' => $typeLabels
+            'lifeSearches' => $lifeSearches
         ]);
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'mq_type' => 'required|string',
             'mq_category' => 'required|string|max:50',
             'mq_content' => 'required|string',
             'mq_price' => 'required|integer',
             'mq_expected_time' => 'required|string|max:50'
         ]);
 
-        $validated['mq_user_id'] = auth()->user()->mq_user_id;  // 현재 로그인한 사용자의 ID 추가
+        $validated['mq_user_id'] = auth()->user()->mq_user_id;
         $validated['mq_reg_date'] = Carbon::now();
         
         LifeSearch::create($validated);
@@ -63,11 +47,10 @@ class LifeSearchController extends Controller
     public function update(Request $request, $idx)
     {
         $lifeSearch = LifeSearch::where('idx', $idx)
-            ->where('mq_user_id', auth()->user()->mq_user_id)  // 현재 사용자의 데이터만 수정 가능
+            ->where('mq_user_id', auth()->user()->mq_user_id)
             ->firstOrFail();
 
         $validated = $request->validate([
-            'mq_type' => 'required|string',
             'mq_category' => 'required|string|max:50',
             'mq_content' => 'required|string',
             'mq_price' => 'required|integer',
@@ -87,7 +70,7 @@ class LifeSearchController extends Controller
     public function destroy($idx)
     {
         $lifeSearch = LifeSearch::where('idx', $idx)
-            ->where('mq_user_id', auth()->user()->mq_user_id)  // 현재 사용자의 데이터만 삭제 가능
+            ->where('mq_user_id', auth()->user()->mq_user_id)
             ->firstOrFail();
 
         $lifeSearch->delete();

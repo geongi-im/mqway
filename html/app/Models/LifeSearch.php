@@ -12,7 +12,6 @@ class LifeSearch extends Model
 
     protected $fillable = [
         'mq_user_id',
-        'mq_type',
         'mq_category',
         'mq_content',
         'mq_price',
@@ -26,19 +25,6 @@ class LifeSearch extends Model
         'mq_reg_date' => 'datetime',
         'mq_update_date' => 'datetime'
     ];
-
-    const TYPE_DO = 'want_to_do';
-    const TYPE_GO = 'want_to_go';
-    const TYPE_SHARE = 'want_to_share';
-
-    public static function getTypeLabel($type)
-    {
-        return [
-            self::TYPE_DO => '하고 싶은 것',
-            self::TYPE_GO => '가고 싶은 곳',
-            self::TYPE_SHARE => '나누고 싶은 것'
-        ][$type] ?? '';
-    }
 
     public function member()
     {
