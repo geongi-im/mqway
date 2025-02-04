@@ -99,7 +99,7 @@
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                         </svg>
-                        항목 추가하기
+                        항목 추가
                     </button>
                 </div>
             </div>
@@ -158,7 +158,7 @@
                     <div class="flex space-x-4 mt-4">
                         <!-- 샘플 가져오기 버튼 -->
                         <button onclick="openSampleModal()" 
-                                class="px-6 py-2 bg-secondary text-dark border border-gray-300 rounded-lg hover:bg-secondary/90 transition-colors duration-200 flex items-center">
+                                class="px-6 py-2 bg-secondary text-cdark border border-gray-300 rounded-lg hover:bg-secondary/90 transition-colors duration-200 flex items-center">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                             </svg>
@@ -166,11 +166,11 @@
                         </button>
                         <!-- 지출 항목 추가 버튼 -->
                         <button onclick="document.getElementById('addExpenseButton').click()" 
-                                class="px-6 py-2 bg-point text-point rounded-lg transition-colors duration-200 flex items-center">
+                                class="px-6 py-2 bg-point text-cdark rounded-lg transition-colors duration-200 flex items-center">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                             </svg>
-                            항목 추가하기
+                            항목 추가
                         </button>
                     </div>
                 </div>
@@ -183,8 +183,8 @@
 <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
     <div class="bg-white p-8 rounded-lg w-full max-w-md">
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-dark" id="modalTitle">항목 추가</h2>
-            <button type="button" id="closeModal" class="text-text-dark hover:text-gray-700">
+            <h2 class="text-2xl font-bold text-cdark" id="modalTitle">항목 추가</h2>
+            <button type="button" id="closeModal" class="text-cdark hover:text-gray-700">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
