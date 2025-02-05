@@ -12,6 +12,7 @@ use App\Http\Controllers\LifeSearchController;
 use App\Http\Controllers\DataInsertController;
 use App\Http\Controllers\RealityCheckController;
 use App\Http\Controllers\RoadmapController;
+use App\Http\Controllers\Auth\LoginController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -25,10 +26,14 @@ use App\Http\Controllers\RoadmapController;
 
 Route::get('/', [IndexController::class, 'index']);
 
-// 로그인 페이지
+// 로그인 페이지 (guest 미들웨어 적용)
 Route::get('/login', function () {
+    // 이미 로그인된 경우 메인 페이지로 리다이렉트
+    if (Auth::check()) {
+        return redirect('/');
+    }
     return view('auth.login');
-})->name('login');
+})->name('login')->middleware('guest');
 
 // 로그아웃
 Route::post('/logout', function () {
@@ -37,7 +42,8 @@ Route::post('/logout', function () {
 });
 
 // Google 로그인
-Route::post('/auth/google/callback', [GoogleController::class, 'handleCallback']);
+Route::get('/auth/google', [LoginController::class, 'redirectToGoogle'])->name('login.google');
+Route::get('/auth/google/callback', [LoginController::class, 'handleGoogleCallback']);
 
 // 뉴스
 Route::get('/news', [NewsController::class, 'index']);
@@ -77,6 +83,8 @@ Route::middleware('auth')->group(function () {
 
 // 원하는 삶 라우트
 Route::prefix('guidebook/life-search')->group(function () {
+    Route::get('/get-samples', [LifeSearchController::class, 'getSamples'])->name('guidebook.life-search.get-samples');
+    Route::post('/apply-samples', [LifeSearchController::class, 'applySamples'])->name('guidebook.life-search.apply-samples');
     Route::get('/', [LifeSearchController::class, 'index'])->name('guidebook.life-search');
     Route::post('/', [LifeSearchController::class, 'store'])->name('guidebook.life-search.store');
     Route::put('/{id}', [LifeSearchController::class, 'update'])->name('guidebook.life-search.update');

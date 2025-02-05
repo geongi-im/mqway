@@ -11,12 +11,21 @@
     <div class="mb-12">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-dark">나의 목표</h2>
-            <button class="add-button bg-point text-cdark px-4 py-2 rounded-lg transition-colors duration-200 flex items-center text-sm">
-                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                </svg>
-                추가하기
-            </button>
+            <div class="flex space-x-4">
+                <button onclick="openSampleModal()" 
+                        class="bg-secondary border border-gray-300 text-cdark px-4 py-2 rounded-lg transition-colors duration-200 flex items-center text-sm">
+                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                    </svg>
+                    샘플 가져오기
+                </button>
+                <button class="add-button bg-point text-cdark px-4 py-2 rounded-lg transition-colors duration-200 flex items-center text-sm">
+                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    추가하기
+                </button>
+            </div>
         </div>
 
         <!-- PC 테이블 뷰 -->
@@ -177,6 +186,47 @@
     </div>
 </div>
 
+<!-- 샘플 모달 -->
+<div id="sampleModal" class="fixed inset-0 bg-black/50 z-50 hidden">
+    <!-- 모달 컨테이너 -->
+    <div class="relative h-full sm:flex sm:items-center sm:justify-center">
+        <!-- 모달 내용 -->
+        <div class="h-full w-full sm:w-[450px] bg-white">
+            <!-- 모달 헤더 -->
+            <div class="sticky top-0 z-10 bg-white border-b border-gray-200">
+                <div class="flex items-center justify-between p-4">
+                    <h2 class="text-xl font-bold text-dark">샘플 가져오기</h2>
+                    <button onclick="closeSampleModal()" class="text-gray-400 hover:text-gray-500">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 모달 본문 -->
+            <div class="h-[calc(100%-120px)] overflow-y-auto" id="sampleCardContainer">
+                <div class="p-4 space-y-4" id="sampleCardList">
+                    <!-- 카드들이 여기에 동적으로 추가됨 -->
+                </div>
+                <!-- 로딩 인디케이터 -->
+                <div id="loadingIndicator" class="hidden p-4 text-center">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-gray-200 border-t-point"></div>
+                </div>
+            </div>
+
+            <!-- 하단 고정 영역 -->
+            <div class="sticky bottom-0 bg-white border-t border-gray-200 p-4">
+                <button id="completeSelectionBtn" 
+                        class="w-full py-3 rounded-lg font-medium transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50 bg-gray-200 text-gray-500"
+                        disabled>
+                    선택완료
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -319,6 +369,178 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     initNumberFormatting('#mq_price');
+});
+
+let selectedCards = new Set();
+let page = 1;
+let loading = false;
+let hasMore = true;
+
+function openSampleModal() {
+    const modal = document.getElementById('sampleModal');
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    
+    // 모달이 열릴 때 첫 페이지 로드
+    loadSampleCards();
+}
+
+function closeSampleModal() {
+    const modal = document.getElementById('sampleModal');
+    modal.classList.add('hidden');
+    document.body.style.overflow = 'auto';
+    
+    // 모달이 닫힐 때 상태 초기화
+    selectedCards.clear();
+    page = 1;
+    loading = false;
+    hasMore = true;
+    document.getElementById('sampleCardList').innerHTML = '';
+    updateCompleteButton();
+}
+
+function updateCompleteButton() {
+    const completeBtn = document.getElementById('completeSelectionBtn');
+    if (selectedCards.size > 0) {
+        completeBtn.classList.remove('bg-gray-200', 'text-gray-500');
+        completeBtn.classList.add('bg-point', 'text-cdark');
+        completeBtn.disabled = false;
+    } else {
+        completeBtn.classList.add('bg-gray-200', 'text-gray-500');
+        completeBtn.classList.remove('bg-point', 'text-cdark');
+        completeBtn.disabled = true;
+    }
+}
+
+function toggleCardSelection(cardId) {
+    const card = document.querySelector(`[data-card-id="${cardId}"]`);
+    if (selectedCards.has(cardId)) {
+        selectedCards.delete(cardId);
+        card.classList.remove('border-point', 'border-2');
+        card.classList.add('border-gray-200');
+    } else {
+        selectedCards.add(cardId);
+        card.classList.add('border-point', 'border-2');
+        card.classList.remove('border-gray-200');
+    }
+    updateCompleteButton();
+}
+
+async function loadSampleCards() {
+    if (loading || !hasMore) return;
+    
+    loading = true;
+    document.getElementById('loadingIndicator').classList.remove('hidden');
+    
+    try {
+        const response = await fetch(`/guidebook/life-search/get-samples?page=${page}`, {
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        
+        const data = await response.json();
+        
+        if (data.cards.length === 0) {
+            hasMore = false;
+            return;
+        }
+
+        // 카테고리별 배경색 매핑
+        const categoryColors = {
+            '여행': 'bg-blue-100 text-blue-800',
+            '취미': 'bg-green-100 text-green-800',
+            '음식': 'bg-orange-100 text-orange-800',
+            '문화': 'bg-purple-100 text-purple-800',
+            '학습': 'bg-yellow-100 text-yellow-800',
+            '건강': 'bg-red-100 text-red-800',
+            '생활': 'bg-gray-100 text-gray-800'
+        };
+        
+        const cardList = document.getElementById('sampleCardList');
+        data.cards.forEach(card => {
+            const cardElement = document.createElement('div');
+            cardElement.className = 'bg-white rounded-lg border border-gray-200 p-4 transition-all duration-200';
+            cardElement.setAttribute('data-card-id', card.id);
+            cardElement.innerHTML = `
+                <div class="flex items-start space-x-3">
+                    <div class="flex-shrink-0">
+                        <input type="checkbox" 
+                               class="w-5 h-5 rounded border-gray-300 text-point focus:ring-point"
+                               onchange="toggleCardSelection('${card.id}')">
+                    </div>
+                    <div class="flex-grow">
+                        <div class="inline-block px-2.5 py-0.5 rounded-full text-sm font-medium mb-2 ${categoryColors[card.category] || 'bg-gray-100 text-gray-800'}">
+                            ${card.category}
+                        </div>
+                        <div class="font-medium mb-2">${card.content}</div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">필요금액</span>
+                            <span class="font-medium">${numberWithCommas(card.price)}원</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">목표일자</span>
+                            <span class="font-medium">${card.target_date}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            cardList.appendChild(cardElement);
+        });
+        
+        page++;
+        hasMore = data.has_more;
+        
+    } catch (error) {
+        console.error('Error loading sample cards:', error);
+    } finally {
+        loading = false;
+        document.getElementById('loadingIndicator').classList.add('hidden');
+    }
+}
+
+// 무한 스크롤 구현
+document.getElementById('sampleCardContainer').addEventListener('scroll', function(e) {
+    const { scrollTop, scrollHeight, clientHeight } = e.target;
+    if (scrollHeight - scrollTop <= clientHeight + 100) { // 하단에서 100px 전에 로드
+        loadSampleCards();
+    }
+});
+
+// 선택완료 버튼 클릭 이벤트
+document.getElementById('completeSelectionBtn').addEventListener('click', async function() {
+    if (selectedCards.size === 0) return;
+    
+    try {
+        LoadingManager.show();
+        
+        // 선택된 카드들의 데이터를 서버로 전송
+        const response = await fetch('/guidebook/life-search/apply-samples', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({
+                selectedCards: Array.from(selectedCards)
+            })
+        });
+        
+        if (response.ok) {
+            window.location.reload();
+        } else {
+            throw new Error('샘플 적용에 실패했습니다.');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('샘플 적용 중 오류가 발생했습니다.');
+        LoadingManager.hide();
+    }
 });
 </script>
 @endpush
