@@ -7,69 +7,31 @@
         
         <!-- Google 로그인 버튼 -->
         <div class="flex justify-center">
-            <div id="g_id_onload"
-                 data-client_id="{{ config('services.google.client_id') }}"
-                 data-callback="handleCredentialResponse"
-                 data-auto_prompt="false"
-                 data-auto_select="false"
-                 data-prompt_parent_id="g_id_onload">
-            </div>
-            <div class="g_id_signin"
-                 data-type="standard"
-                 data-size="large"
-                 data-theme="outline"
-                 data-text="sign_in_with"
-                 data-shape="rectangular"
-                 data-logo_alignment="left">
-            </div>
+            <button onclick="openGoogleLogin()" 
+                    class="flex items-center justify-center gap-2 w-full px-3 sm:px-6 py-3 text-sm sm:text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all whitespace-nowrap">
+                <img src="https://www.google.com/favicon.ico" alt="Google" class="w-5 h-5">
+                <span class="truncate">Google 계정으로 로그인</span>
+            </button>
         </div>
     </div>
 </main>
 
-<!-- Google Identity Services 라이브러리 -->
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-
 @push('scripts')
 <script>
-function handleCredentialResponse(response) {
-    // 로딩 시작
-    LoadingManager.show();
-    
-    // 서버로 토큰 전송
-    fetch('{{ config('services.google.redirect') }}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-        },
-        body: JSON.stringify({
-            credential: response.credential
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            window.location.href = '{{ url('/') }}';
-        } else {
-            LoadingManager.hide(); // 에러 발생 시 로딩 숨김
-            alert('로그인 처리 중 오류가 발생했습니다.');
-        }
-    })
-    .catch(error => {
-        LoadingManager.hide(); // 에러 발생 시 로딩 숨김
-        console.error('Error:', error);
-        alert('로그인 처리 중 오류가 발생했습니다.');
-    });
-}
+function openGoogleLogin() {
+    // 팝업 창 크기와 위치 계산
+    const width = 500;
+    const height = 600;
+    const left = (window.screen.width / 2) - (width / 2);
+    const top = (window.screen.height / 2) - (height / 2);
 
-// 콘솔 에러 메시지 숨기기
-const originalError = console.error;
-console.error = function(...args) {
-    if (args[0]?.includes('Cross-Origin-Opener-Policy')) {
-        return;
-    }
-    originalError.apply(console, args);
-};
+    // 팝업 창 열기
+    const popup = window.open(
+        '{{ route('login.google') }}',
+        'GoogleLogin',
+        `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no,location=no,status=no`
+    );
+}
 </script>
 @endpush
 @endsection 

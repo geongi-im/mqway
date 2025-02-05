@@ -20,7 +20,11 @@ RUN apt-get update && apt-get install -y \
     php7.2-xml \
     php7.2-zip \
     php7.2-bcmath \
-    php7.2-curl
+    php7.2-curl \
+    php7.2-gmp \
+    php7.2-json \
+    php7.2-intl \
+    php7.2-gd
 
 # Composer 설치 (2.2 버전)
 RUN curl -sS https://getcomposer.org/installer | php -- --version=2.2.18 --install-dir=/usr/local/bin --filename=composer
