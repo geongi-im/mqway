@@ -15,16 +15,34 @@ class LifeSearch extends Model
         'mq_category',
         'mq_content',
         'mq_price',
-        'mq_expected_time',
+        'mq_target_date',
         'mq_reg_date',
         'mq_update_date'
     ];
 
     protected $casts = [
         'mq_price' => 'integer',
+        'mq_target_date' => 'date',
         'mq_reg_date' => 'datetime',
         'mq_update_date' => 'datetime'
     ];
+
+    // 카테고리별 색상 매핑
+    public static $categoryColors = [
+        '여행' => 'bg-blue-100 text-blue-800',
+        '취미' => 'bg-green-100 text-green-800',
+        '음식' => 'bg-orange-100 text-orange-800',
+        '문화' => 'bg-purple-100 text-purple-800',
+        '학습' => 'bg-yellow-100 text-yellow-800',
+        '건강' => 'bg-red-100 text-red-800',
+        '생활' => 'bg-gray-100 text-gray-800'
+    ];
+
+    // 카테고리 색상 클래스를 가져오는 메서드
+    public function getCategoryColorClass()
+    {
+        return self::$categoryColors[$this->mq_category] ?? 'bg-gray-100 text-gray-800';
+    }
 
     public function member()
     {

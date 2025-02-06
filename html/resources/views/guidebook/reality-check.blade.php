@@ -260,7 +260,7 @@
 <div id="sampleModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
     <div class="bg-white rounded-lg w-full max-w-md mx-4 overflow-hidden">
         <!-- 모달 헤더 -->
-        <div class="bg-point p-4">
+        <div class="bg-white p-4">
             <div class="flex justify-between items-center">
                 <h2 class="text-xl font-bold text-cdark">샘플 가져오기</h2>
                 <button type="button" onclick="closeSampleModal()" class="text-cdark hover:text-secondary/80">

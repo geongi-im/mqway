@@ -10,7 +10,9 @@
 
     <div class="mb-12">
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-dark">나의 목표</h2>
+            <div class="flex items-center space-x-4">
+                <span class="text-lg text-gray-600">필요금액: {{ number_format($lifeSearches->sum('mq_price')) }}원</span>
+            </div>
             <div class="flex space-x-4">
                 <button onclick="openSampleModal()" 
                         class="bg-secondary border border-gray-300 text-cdark px-4 py-2 rounded-lg transition-colors duration-200 flex items-center text-sm">
@@ -35,10 +37,10 @@
                     <table class="min-w-full">
                         <thead>
                             <tr class="bg-point">
-                                <th class="px-6 py-4 text-left text-cdark">카테고리</th>
-                                <th class="px-6 py-4 text-left text-cdark">항목</th>
-                                <th class="px-6 py-4 text-left text-cdark">예상비용</th>
-                                <th class="px-6 py-4 text-left text-cdark">예상소요시간</th>
+                                <th class="px-6 py-4 text-left text-cdark w-32">카테고리</th>
+                                <th class="px-6 py-4 text-left text-cdark">목표</th>
+                                <th class="px-6 py-4 text-left text-cdark">목표일자</th>
+                                <th class="px-6 py-4 text-left text-cdark">필요금액</th>
                                 <th class="px-6 py-4 text-left text-cdark w-24">작업</th>
                             </tr>
                         </thead>
@@ -47,8 +49,8 @@
                             <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors duration-150" data-id="{{ $item->idx }}">
                                 <td class="px-6 py-4">{{ $item->mq_category }}</td>
                                 <td class="px-6 py-4">{{ $item->mq_content }}</td>
+                                <td class="px-6 py-4">{{ $item->mq_target_date ? date('Y-m-d', strtotime($item->mq_target_date)) : '' }}</td>
                                 <td class="px-6 py-4">{{ number_format($item->mq_price) }}원</td>
-                                <td class="px-6 py-4">{{ $item->mq_expected_time }}</td>
                                 <td class="px-6 py-4">
                                     <div class="flex space-x-2">
                                         <button class="text-dark hover:text-dark/70 transition-colors duration-200 edit-button" 
@@ -56,7 +58,7 @@
                                                 data-category="{{ $item->mq_category }}"
                                                 data-content="{{ $item->mq_content }}"
                                                 data-price="{{ $item->mq_price }}"
-                                                data-time="{{ $item->mq_expected_time }}">
+                                                data-target-date="{{ $item->mq_target_date ? date('Y-m-d', strtotime($item->mq_target_date)) : '' }}">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                             </svg>
@@ -88,8 +90,10 @@
             <div class="bg-white rounded-lg shadow-lg p-4 mb-4" data-id="{{ $item->idx }}">
                 <div class="flex justify-between items-start mb-4">
                     <div>
+                        <span class="inline-block px-2.5 py-0.5 rounded-full text-sm font-medium {{ $item->getCategoryColorClass() }} mb-2">
+                            {{ $item->mq_category }}
+                        </span>
                         <h3 class="font-bold text-lg">{{ $item->mq_content }}</h3>
-                        <span class="text-sm text-gray-600">{{ $item->mq_category }}</span>
                     </div>
                     <div class="flex space-x-2">
                         <button class="text-dark hover:text-dark/70 transition-colors duration-200 edit-button"
@@ -97,7 +101,7 @@
                                 data-category="{{ $item->mq_category }}"
                                 data-content="{{ $item->mq_content }}"
                                 data-price="{{ $item->mq_price }}"
-                                data-time="{{ $item->mq_expected_time }}">
+                                data-target-date="{{ $item->mq_target_date ? date('Y-m-d', strtotime($item->mq_target_date)) : '' }}">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                             </svg>
@@ -111,12 +115,12 @@
                 </div>
                 <div class="space-y-2">
                     <div class="flex justify-between text-sm">
-                        <span class="text-gray-600">예상비용</span>
-                        <span>{{ number_format($item->mq_price) }}원</span>
+                        <span class="text-gray-600">목표일자</span>
+                        <span>{{ $item->mq_target_date ? date('Y-m-d', strtotime($item->mq_target_date)) : '' }}</span>
                     </div>
                     <div class="flex justify-between text-sm">
-                        <span class="text-gray-600">예상소요시간</span>
-                        <span>{{ $item->mq_expected_time }}</span>
+                        <span class="text-gray-600">필요금액</span>
+                        <span>{{ number_format($item->mq_price) }}원</span>
                     </div>
                 </div>
             </div>
@@ -152,26 +156,36 @@
                 </div>
                 <div>
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="mq_content">
-                        항목 <span class="text-red-500">*</span>
+                        목표 <span class="text-red-500">*</span>
                     </label>
                     <input type="text" 
                            id="mq_content" 
                            name="mq_content" 
                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-dark"
                            required>
-                    <p id="contentError" class="hidden text-red-500 text-xs mt-1">항목을 입력해주세요.</p>
+                    <p id="contentError" class="hidden text-red-500 text-xs mt-1">목표를 입력해주세요.</p>
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="mq_target_date">
+                        목표일자 <span class="text-red-500">*</span>
+                    </label>
+                    <input type="date" 
+                           id="mq_target_date" 
+                           name="mq_target_date" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-dark"
+                           required>
+                    <p id="targetDateError" class="hidden text-red-500 text-xs mt-1">목표일자를 선택해주세요.</p>
                 </div>
                 <div>
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="mq_price">
-                        예상비용
+                        필요금액 <span class="text-red-500">*</span>
                     </label>
-                    <input type="text" id="mq_price" name="mq_price" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-dark">
-                </div>
-                <div>
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="mq_expected_time">
-                        예상소요시간
-                    </label>
-                    <input type="text" id="mq_expected_time" name="mq_expected_time" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-dark">
+                    <input type="text" 
+                           id="mq_price" 
+                           name="mq_price" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-dark"
+                           required>
+                    <p id="priceError" class="hidden text-red-500 text-xs mt-1">필요금액을 입력해주세요.</p>
                 </div>
             </div>
             <div class="flex justify-end space-x-3 mt-6">
@@ -195,17 +209,36 @@
             <!-- 모달 헤더 -->
             <div class="sticky top-0 z-10 bg-white border-b border-gray-200">
                 <div class="flex items-center justify-between p-4">
-                    <h2 class="text-xl font-bold text-dark">샘플 가져오기</h2>
+                    <h2 class="text-xl font-bold text-cdark">샘플 가져오기</h2>
                     <button onclick="closeSampleModal()" class="text-gray-400 hover:text-gray-500">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                     </button>
                 </div>
+                <!-- 카테고리 필터 -->
+                <div class="px-4 pb-4 hidden" id="categoryFilterContainer">
+                    <div class="relative">
+                        <!-- 왼쪽 그라데이션 -->
+                        <div class="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none"></div>
+                        <!-- 오른쪽 그라데이션 -->
+                        <div class="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none"></div>
+                        <!-- 스크롤 가능한 컨테이너 -->
+                        <div class="overflow-x-auto hide-scrollbar">
+                            <div class="flex space-x-2 py-1 px-2 min-w-max" id="categoryFilters">
+                                <button class="category-filter active whitespace-nowrap px-3 py-1 rounded-full text-sm font-medium bg-point text-cdark transition-colors duration-200"
+                                        data-category="all">
+                                    전체
+                                </button>
+                                <!-- 카테고리 버튼들이 동적으로 추가됨 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <!-- 모달 본문 -->
-            <div class="h-[calc(100%-120px)] overflow-y-auto" id="sampleCardContainer">
+            <div class="h-[calc(100%-200px)] overflow-y-auto" id="sampleCardContainer">
                 <div class="p-4 space-y-4" id="sampleCardList">
                     <!-- 카드들이 여기에 동적으로 추가됨 -->
                 </div>
@@ -216,7 +249,7 @@
             </div>
 
             <!-- 하단 고정 영역 -->
-            <div class="sticky bottom-0 bg-white border-t border-gray-200 p-4">
+            <div class="sticky bottom-0 bg-white border-t border-gray-200 p-4 hidden" id="completeButtonContainer">
                 <button id="completeSelectionBtn" 
                         class="w-full py-3 rounded-lg font-medium transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50 bg-gray-200 text-gray-500"
                         disabled>
@@ -262,7 +295,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('mq_category').value = data.category;
             document.getElementById('mq_content').value = data.content;
             document.getElementById('mq_price').value = numberWithCommas(data.price);
-            document.getElementById('mq_expected_time').value = data.time;
+            document.getElementById('mq_target_date').value = data.targetDate;
             
             modalTitle.textContent = '수정하기';
             isEditing = true;
@@ -302,17 +335,53 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
         
         const contentInput = document.getElementById('mq_content');
-        const contentError = document.getElementById('contentError');
+        const targetDateInput = document.getElementById('mq_target_date');
+        const priceInput = document.getElementById('mq_price');
         
+        const contentError = document.getElementById('contentError');
+        const targetDateError = document.getElementById('targetDateError');
+        const priceError = document.getElementById('priceError');
+        
+        let hasError = false;
+        
+        // 목표 유효성 검사
         if (!contentInput.value.trim()) {
             contentInput.classList.add('border-red-500');
             contentError.classList.remove('hidden');
             contentInput.focus();
-            return;
+            hasError = true;
+        } else {
+            contentInput.classList.remove('border-red-500');
+            contentError.classList.add('hidden');
         }
         
-        contentInput.classList.remove('border-red-500');
-        contentError.classList.add('hidden');
+        // 목표일자 유효성 검사
+        if (!targetDateInput.value) {
+            targetDateInput.classList.add('border-red-500');
+            targetDateError.classList.remove('hidden');
+            if (!hasError) {
+                targetDateInput.focus();
+                hasError = true;
+            }
+        } else {
+            targetDateInput.classList.remove('border-red-500');
+            targetDateError.classList.add('hidden');
+        }
+        
+        // 필요금액 유효성 검사
+        if (!priceInput.value.trim()) {
+            priceInput.classList.add('border-red-500');
+            priceError.classList.remove('hidden');
+            if (!hasError) {
+                priceInput.focus();
+                hasError = true;
+            }
+        } else {
+            priceInput.classList.remove('border-red-500');
+            priceError.classList.add('hidden');
+        }
+        
+        if (hasError) return;
         
         LoadingManager.show();
         
@@ -350,10 +419,25 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // 입력 필드 이벤트 리스너 추가
     document.getElementById('mq_content').addEventListener('input', function() {
         if (this.value.trim()) {
             this.classList.remove('border-red-500');
             document.getElementById('contentError').classList.add('hidden');
+        }
+    });
+
+    document.getElementById('mq_target_date').addEventListener('change', function() {
+        if (this.value) {
+            this.classList.remove('border-red-500');
+            document.getElementById('targetDateError').classList.add('hidden');
+        }
+    });
+
+    document.getElementById('mq_price').addEventListener('input', function() {
+        if (this.value.trim()) {
+            this.classList.remove('border-red-500');
+            document.getElementById('priceError').classList.add('hidden');
         }
     });
 
@@ -375,13 +459,30 @@ let selectedCards = new Set();
 let page = 1;
 let loading = false;
 let hasMore = true;
+let categories = new Set();
+let currentCategory = 'all';
 
 function openSampleModal() {
     const modal = document.getElementById('sampleModal');
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
     
-    // 모달이 열릴 때 첫 페이지 로드
+    // 상태 초기화
+    selectedCards.clear();
+    page = 1;
+    loading = false;
+    hasMore = true;
+    categories = new Set();
+    currentCategory = 'all';
+    document.getElementById('sampleCardList').innerHTML = '';
+    
+    // 전체 버튼 초기화 및 클릭 이벤트 추가
+    const allButton = document.querySelector('.category-filter[data-category="all"]');
+    allButton.onclick = () => filterByCategory('all');
+    allButton.classList.add('bg-point');
+    allButton.classList.remove('bg-secondary');
+    
+    // 첫 페이지 로드
     loadSampleCards();
 }
 
@@ -395,7 +496,20 @@ function closeSampleModal() {
     page = 1;
     loading = false;
     hasMore = true;
+    categories = new Set();
     document.getElementById('sampleCardList').innerHTML = '';
+    
+    // 카테고리 필터 초기화
+    document.getElementById('categoryFilterContainer').classList.add('hidden');
+    const categoryFilters = document.getElementById('categoryFilters');
+    const allButton = categoryFilters.querySelector('[data-category="all"]');
+    // 전체 버튼만 남기고 나머지 카테고리 버튼 제거
+    while (categoryFilters.lastChild && categoryFilters.lastChild !== allButton) {
+        categoryFilters.removeChild(categoryFilters.lastChild);
+    }
+    
+    // 선택완료 버튼 숨기기 및 초기화
+    document.getElementById('completeButtonContainer').classList.add('hidden');
     updateCompleteButton();
 }
 
@@ -414,16 +528,63 @@ function updateCompleteButton() {
 
 function toggleCardSelection(cardId) {
     const card = document.querySelector(`[data-card-id="${cardId}"]`);
+    const checkbox = card.querySelector('input[type="checkbox"]');
+    
     if (selectedCards.has(cardId)) {
         selectedCards.delete(cardId);
-        card.classList.remove('border-point', 'border-2');
-        card.classList.add('border-gray-200');
+        card.classList.remove('border-point', 'border-4');
+        card.classList.add('border-gray-200', 'border');
+        checkbox.checked = false;
     } else {
         selectedCards.add(cardId);
-        card.classList.add('border-point', 'border-2');
-        card.classList.remove('border-gray-200');
+        card.classList.add('border-point', 'border-4');
+        card.classList.remove('border-gray-200', 'border');
+        checkbox.checked = true;
     }
     updateCompleteButton();
+}
+
+function updateCategoryFilters() {
+    const filterContainer = document.querySelector('#categoryFilters');
+    const existingCategories = new Set([...filterContainer.querySelectorAll('.category-filter:not([data-category="all"])')]
+        .map(btn => btn.dataset.category));
+    
+    // 새로운 카테고리만 추가
+    categories.forEach(category => {
+        if (!existingCategories.has(category)) {
+            const button = document.createElement('button');
+            button.className = 'category-filter whitespace-nowrap px-3 py-1 rounded-full text-sm font-medium bg-secondary text-cdark transition-colors duration-200';
+            button.setAttribute('data-category', category);
+            button.textContent = category;
+            button.onclick = () => filterByCategory(category);
+            filterContainer.appendChild(button);
+        }
+    });
+}
+
+function filterByCategory(category) {
+    currentCategory = category;
+    
+    // 버튼 스타일 업데이트
+    document.querySelectorAll('.category-filter').forEach(btn => {
+        if (btn.dataset.category === category) {
+            btn.classList.add('bg-point');
+            btn.classList.remove('bg-secondary');
+        } else {
+            btn.classList.remove('bg-point');
+            btn.classList.add('bg-secondary');
+        }
+    });
+    
+    // 카드 필터링
+    document.querySelectorAll('#sampleCardList > div').forEach(card => {
+        const cardCategory = card.querySelector('.category-label').textContent.trim();
+        if (category === 'all' || cardCategory === category) {
+            card.classList.remove('hidden');
+        } else {
+            card.classList.add('hidden');
+        }
+    });
 }
 
 async function loadSampleCards() {
@@ -464,34 +625,48 @@ async function loadSampleCards() {
         
         const cardList = document.getElementById('sampleCardList');
         data.cards.forEach(card => {
+            // 카테고리 수집
+            categories.add(card.category);
+            
             const cardElement = document.createElement('div');
-            cardElement.className = 'bg-white rounded-lg border border-gray-200 p-4 transition-all duration-200';
+            cardElement.className = 'bg-white rounded-lg border border-gray-200 p-4 transition-all duration-200 cursor-pointer hover:bg-gray-50';
+            if (currentCategory !== 'all' && currentCategory !== card.category) {
+                cardElement.classList.add('hidden');
+            }
             cardElement.setAttribute('data-card-id', card.id);
             cardElement.innerHTML = `
                 <div class="flex items-start space-x-3">
-                    <div class="flex-shrink-0">
+                    <div class="flex-shrink-0 pt-1">
                         <input type="checkbox" 
                                class="w-5 h-5 rounded border-gray-300 text-point focus:ring-point"
-                               onchange="toggleCardSelection('${card.id}')">
+                               onclick="event.stopPropagation()">
                     </div>
                     <div class="flex-grow">
-                        <div class="inline-block px-2.5 py-0.5 rounded-full text-sm font-medium mb-2 ${categoryColors[card.category] || 'bg-gray-100 text-gray-800'}">
-                            ${card.category}
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="category-label inline-block px-2.5 py-0.5 rounded-full text-sm font-medium ${categoryColors[card.category] || 'bg-gray-100 text-gray-800'}">
+                                ${card.category}
+                            </div>
+                            <span class="font-medium text-sm text-cdark">${numberWithCommas(card.price)}원</span>
                         </div>
-                        <div class="font-medium mb-2">${card.content}</div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-600">필요금액</span>
-                            <span class="font-medium">${numberWithCommas(card.price)}원</span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-600">목표일자</span>
-                            <span class="font-medium">${card.target_date}</span>
-                        </div>
+                        <div class="font-medium text-gray-900">${card.content}</div>
                     </div>
                 </div>
             `;
+            
+            // 카드 클릭 이벤트 추가
+            cardElement.addEventListener('click', () => toggleCardSelection(card.id));
+            
             cardList.appendChild(cardElement);
         });
+        
+        // 첫 페이지 로드가 완료되면 카테고리 필터와 선택완료 버튼 표시
+        if (page === 1) {
+            document.getElementById('categoryFilterContainer').classList.remove('hidden');
+            document.getElementById('completeButtonContainer').classList.remove('hidden');
+        }
+        
+        // 카테고리 필터 업데이트
+        updateCategoryFilters();
         
         page++;
         hasMore = data.has_more;
@@ -543,5 +718,16 @@ document.getElementById('completeSelectionBtn').addEventListener('click', async 
     }
 });
 </script>
+
+<style>
+/* 스크롤바 숨기기 */
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.hide-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+</style>
 @endpush
 @endsection
