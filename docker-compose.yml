@@ -56,21 +56,3 @@ services:
       MYSQL_COLLATION: utf8mb4_unicode_ci
       TZ: Asia/Seoul
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
-
-  # node:
-  #   container_name: node_${COMPOSE_PROJECT_NAME}
-  #   image: node:18
-  #   volumes:
-  #     - ./html:/var/www/html
-  #   working_dir: /var/www/html
-  #   tty: true
-  #   stdin_open: true
-  #   command: >
-  #     sh -c "
-  #       rm -rf node_modules package-lock.json &&
-  #       npm install -g cross-env webpack webpack-cli laravel-mix &&
-  #       npm install cross-env camelcase webpack webpack-cli laravel-mix --save-dev &&
-  #       npm install &&
-  #       npm audit fix --force &&
-  #       npm run watch
-  #     "

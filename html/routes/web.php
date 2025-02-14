@@ -83,6 +83,7 @@ Route::middleware('auth')->group(function () {
 
 // 원하는 삶 라우트
 Route::prefix('guidebook/life-search')->group(function () {
+    Route::get('/get-categories', [LifeSearchController::class, 'getCategories'])->name('guidebook.life-search.get-categories');
     Route::get('/get-samples', [LifeSearchController::class, 'getSamples'])->name('guidebook.life-search.get-samples');
     Route::post('/apply-samples', [LifeSearchController::class, 'applySamples'])->name('guidebook.life-search.apply-samples');
     Route::get('/', [LifeSearchController::class, 'index'])->name('guidebook.life-search');

@@ -218,21 +218,16 @@
                 </div>
                 <!-- 카테고리 필터 -->
                 <div class="px-4 pb-4 hidden" id="categoryFilterContainer">
-                    <div class="relative">
-                        <!-- 왼쪽 그라데이션 -->
-                        <div class="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none"></div>
-                        <!-- 오른쪽 그라데이션 -->
-                        <div class="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none"></div>
-                        <!-- 스크롤 가능한 컨테이너 -->
-                        <div class="overflow-x-auto hide-scrollbar">
-                            <div class="flex space-x-2 py-1 px-2 min-w-max" id="categoryFilters">
-                                <button class="category-filter active whitespace-nowrap px-3 py-1 rounded-full text-sm font-medium bg-point text-cdark transition-colors duration-200"
-                                        data-category="all">
-                                    전체
-                                </button>
+                    <div class="relative category-swiper">
+                        <!-- Swiper 컨테이너 -->
+                        <div class="swiper">
+                            <div class="swiper-wrapper" id="categoryFilters">
                                 <!-- 카테고리 버튼들이 동적으로 추가됨 -->
                             </div>
                         </div>
+                        <!-- 네비게이션 버튼 -->
+                        <div class="swiper-button-prev"></div>
+                        <div class="swiper-button-next"></div>
                     </div>
                 </div>
             </div>
@@ -245,6 +240,12 @@
                 <!-- 로딩 인디케이터 -->
                 <div id="loadingIndicator" class="hidden p-4 text-center">
                     <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-gray-200 border-t-point"></div>
+                </div>
+                <!-- More 버튼 -->
+                <div id="moreButtonContainer" class="p-4 text-center hidden">
+                    <button id="loadMoreBtn" class="px-4 py-2 bg-secondary text-cdark rounded-lg hover:bg-secondary/80 transition-colors duration-200">
+                        더보기
+                    </button>
                 </div>
             </div>
 
@@ -260,7 +261,71 @@
     </div>
 </div>
 
+@push('styles')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+<style>
+/* 스크롤바 숨기기 */
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.hide-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+/* Swiper 커스텀 스타일 */
+.category-swiper {
+    width: 100%;
+    position: relative;
+}
+
+.category-swiper .swiper {
+    width: 100%;
+    padding: 0 32px; /* 네비게이션 버튼 공간 확보 */
+}
+
+.category-swiper .swiper-slide {
+    width: auto !important; /* 슬라이드 너비 자동 조정 */
+}
+
+.category-swiper .swiper-button-next,
+.category-swiper .swiper-button-prev {
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.category-swiper .swiper-button-prev {
+    left: 0;
+}
+
+.category-swiper .swiper-button-next {
+    right: 0;
+}
+
+.category-swiper .swiper-button-disabled {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* 추가 필요 CSS */
+.swiper-slide {
+    width: auto !important;
+}
+
+.category-filter {
+    display: inline-block;
+    width: max-content;
+}
+</style>
+@endpush
+
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const modal = document.getElementById('modal');
@@ -459,71 +524,200 @@ let selectedCards = new Set();
 let page = 1;
 let loading = false;
 let hasMore = true;
-let categories = new Set();
-let currentCategory = 'all';
+let categories = [];
+let currentCategory = null;
+let loadedCards = new Map();
+let categoryData = new Map();
 
-function openSampleModal() {
+async function openSampleModal() {
     const modal = document.getElementById('sampleModal');
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
     
     // 상태 초기화
-    selectedCards.clear();
     page = 1;
     loading = false;
     hasMore = true;
-    categories = new Set();
-    currentCategory = 'all';
+    categories = [];
+    currentCategory = null;
+    loadedCards.clear();
+    categoryData.clear();
     document.getElementById('sampleCardList').innerHTML = '';
     
-    // 전체 버튼 초기화 및 클릭 이벤트 추가
-    const allButton = document.querySelector('.category-filter[data-category="all"]');
-    allButton.onclick = () => filterByCategory('all');
-    allButton.classList.add('bg-point');
-    allButton.classList.remove('bg-secondary');
+    // 로딩 표시
+    document.getElementById('loadingIndicator').classList.remove('hidden');
     
-    // 첫 페이지 로드
-    loadSampleCards();
-}
-
-function closeSampleModal() {
-    const modal = document.getElementById('sampleModal');
-    modal.classList.add('hidden');
-    document.body.style.overflow = 'auto';
+    // 카테고리 정보 로드
+    await loadCategories();
     
-    // 모달이 닫힐 때 상태 초기화
-    selectedCards.clear();
-    page = 1;
-    loading = false;
-    hasMore = true;
-    categories = new Set();
-    document.getElementById('sampleCardList').innerHTML = '';
-    
-    // 카테고리 필터 초기화
-    document.getElementById('categoryFilterContainer').classList.add('hidden');
-    const categoryFilters = document.getElementById('categoryFilters');
-    const allButton = categoryFilters.querySelector('[data-category="all"]');
-    // 전체 버튼만 남기고 나머지 카테고리 버튼 제거
-    while (categoryFilters.lastChild && categoryFilters.lastChild !== allButton) {
-        categoryFilters.removeChild(categoryFilters.lastChild);
+    // 첫 번째 카테고리의 데이터 로드
+    if (categories.length > 0) {
+        currentCategory = categories[0].name;
+        filterByCategory(currentCategory);
     }
-    
-    // 선택완료 버튼 숨기기 및 초기화
-    document.getElementById('completeButtonContainer').classList.add('hidden');
-    updateCompleteButton();
 }
 
-function updateCompleteButton() {
-    const completeBtn = document.getElementById('completeSelectionBtn');
-    if (selectedCards.size > 0) {
-        completeBtn.classList.remove('bg-gray-200', 'text-gray-500');
-        completeBtn.classList.add('bg-point', 'text-cdark');
-        completeBtn.disabled = false;
+async function loadCategories() {
+    try {
+        const response = await fetch('/guidebook/life-search/get-categories', {
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        
+        const data = await response.json();
+        categories = data.categories;
+        
+        // 카테고리 필터 업데이트
+        updateCategoryFilters();
+        
+        // 카테고리 필터와 선택완료 버튼 표시
+        document.getElementById('categoryFilterContainer').classList.remove('hidden');
+        document.getElementById('completeButtonContainer').classList.remove('hidden');
+    } catch (error) {
+        console.error('Error loading categories:', error);
+    }
+}
+
+function updateCategoryFilters() {
+    const filterContainer = document.querySelector('#categoryFilters');
+    filterContainer.innerHTML = '';
+
+    categories.forEach(category => {
+        const slideDiv = document.createElement('div');
+        slideDiv.className = 'swiper-slide !w-auto';
+
+        const button = document.createElement('button');
+        button.className = `category-filter whitespace-nowrap px-3 py-1 rounded-full text-sm font-medium 
+            ${currentCategory === category.name ? 'bg-point' : 'bg-secondary'} text-cdark transition-colors duration-200`;
+        button.setAttribute('data-category', category.name);
+        button.textContent = `${category.name} (${category.count})`;
+        button.onclick = () => filterByCategory(category.name);
+        
+        slideDiv.appendChild(button);
+        filterContainer.appendChild(slideDiv);
+    });
+
+    // Swiper 재초기화 로직 개선
+    if (window.categorySwiper) {
+        window.categorySwiper.destroy();
+        window.categorySwiper = null;
+    }
+
+    // 50ms 지연 추가 (렌더링 완료 대기)
+    setTimeout(() => {
+        window.categorySwiper = new Swiper('.category-swiper .swiper', {
+            slidesPerView: 'auto',
+            spaceBetween: 8,
+            navigation: {
+                nextEl: '.category-swiper .swiper-button-next',
+                prevEl: '.category-swiper .swiper-button-prev',
+            },
+            breakpoints: {
+                320: { slidesPerView: 'auto', spaceBetween: 8 },
+                768: { slidesPerView: 'auto', spaceBetween: 12 }
+            }
+        });
+    }, 50);
+}
+
+async function filterByCategory(category) {
+    // 이미 로딩 중이면 리턴
+    if (loading) return;
+    
+    currentCategory = category;
+    
+    // 버튼 스타일 업데이트
+    document.querySelectorAll('.category-filter').forEach(btn => {
+        if (btn.dataset.category === category) {
+            btn.classList.add('bg-point');
+            btn.classList.remove('bg-secondary');
+        } else {
+            btn.classList.remove('bg-point');
+            btn.classList.add('bg-secondary');
+        }
+    });
+    
+    // 이미 로드된 데이터가 있는지 확인
+    if (!categoryData.has(category)) {
+        // 카테고리 버튼 비활성화
+        toggleCategoryButtons(true);
+        
+        // 카테고리 데이터 초기화
+        categoryData.set(category, { page: 1, hasMore: true });
+        document.getElementById('sampleCardList').innerHTML = '';
+        await loadSampleCards();
+        
+        // 카테고리 버튼 활성화
+        toggleCategoryButtons(false);
     } else {
-        completeBtn.classList.add('bg-gray-200', 'text-gray-500');
-        completeBtn.classList.remove('bg-point', 'text-cdark');
-        completeBtn.disabled = true;
+        // 저장된 카드 표시
+        displayCategoryCards(category);
     }
+}
+
+function displayCategoryCards(category) {
+    const cardList = document.getElementById('sampleCardList');
+    cardList.innerHTML = '';
+    
+    // 해당 카테고리의 모든 카드 표시
+    Array.from(loadedCards.values())
+        .filter(card => card.category === category)
+        .forEach(card => {
+            const cardElement = createCardElement(card, selectedCards.has(card.id));
+            cardList.appendChild(cardElement);
+        });
+    
+    // More 버튼 표시 여부 설정
+    const categoryInfo = categoryData.get(category);
+    document.getElementById('moreButtonContainer').classList.toggle('hidden', !categoryInfo.hasMore);
+}
+
+function createCardElement(card, isSelected = false) {
+    const cardElement = document.createElement('div');
+    cardElement.className = `bg-white rounded-lg border ${isSelected ? 'border-point border-4' : 'border-gray-200'} p-4 transition-all duration-200 cursor-pointer hover:bg-gray-50`;
+    cardElement.setAttribute('data-card-id', card.id);
+    
+    // 카테고리별 배경색 매핑
+    const categoryColors = {
+        '여행': 'bg-blue-100 text-blue-800',
+        '취미': 'bg-green-100 text-green-800',
+        '음식': 'bg-orange-100 text-orange-800',
+        '문화': 'bg-purple-100 text-purple-800',
+        '학습': 'bg-yellow-100 text-yellow-800',
+        '건강': 'bg-red-100 text-red-800',
+        '생활': 'bg-gray-100 text-gray-800'
+    };
+
+    cardElement.innerHTML = `
+        <div class="flex items-start space-x-3">
+            <div class="flex-shrink-0 pt-1">
+                <input type="checkbox" 
+                       class="w-5 h-5 rounded border-gray-300 text-point focus:ring-point"
+                       onclick="event.stopPropagation()"
+                       ${isSelected ? 'checked' : ''}>
+            </div>
+            <div class="flex-grow">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="category-label inline-block px-2.5 py-0.5 rounded-full text-sm font-medium ${categoryColors[card.category] || 'bg-gray-100 text-gray-800'}">
+                        ${card.category}
+                    </div>
+                    <span class="font-medium text-sm text-cdark">${numberWithCommas(card.price)}원</span>
+                </div>
+                <div class="font-medium text-gray-900">${card.content}</div>
+            </div>
+        </div>
+    `;
+    
+    // 카드 클릭 이벤트 추가
+    cardElement.addEventListener('click', () => toggleCardSelection(card.id));
+    
+    return cardElement;
 }
 
 function toggleCardSelection(cardId) {
@@ -544,57 +738,38 @@ function toggleCardSelection(cardId) {
     updateCompleteButton();
 }
 
-function updateCategoryFilters() {
-    const filterContainer = document.querySelector('#categoryFilters');
-    const existingCategories = new Set([...filterContainer.querySelectorAll('.category-filter:not([data-category="all"])')]
-        .map(btn => btn.dataset.category));
+function updateCompleteButton() {
+    const completeBtn = document.getElementById('completeSelectionBtn');
+    const selectedCount = selectedCards.size;
     
-    // 새로운 카테고리만 추가
-    categories.forEach(category => {
-        if (!existingCategories.has(category)) {
-            const button = document.createElement('button');
-            button.className = 'category-filter whitespace-nowrap px-3 py-1 rounded-full text-sm font-medium bg-secondary text-cdark transition-colors duration-200';
-            button.setAttribute('data-category', category);
-            button.textContent = category;
-            button.onclick = () => filterByCategory(category);
-            filterContainer.appendChild(button);
-        }
-    });
-}
-
-function filterByCategory(category) {
-    currentCategory = category;
-    
-    // 버튼 스타일 업데이트
-    document.querySelectorAll('.category-filter').forEach(btn => {
-        if (btn.dataset.category === category) {
-            btn.classList.add('bg-point');
-            btn.classList.remove('bg-secondary');
-        } else {
-            btn.classList.remove('bg-point');
-            btn.classList.add('bg-secondary');
-        }
-    });
-    
-    // 카드 필터링
-    document.querySelectorAll('#sampleCardList > div').forEach(card => {
-        const cardCategory = card.querySelector('.category-label').textContent.trim();
-        if (category === 'all' || cardCategory === category) {
-            card.classList.remove('hidden');
-        } else {
-            card.classList.add('hidden');
-        }
-    });
+    if (selectedCount > 0) {
+        completeBtn.textContent = `선택완료(${selectedCount})`;
+        completeBtn.classList.remove('bg-gray-200', 'text-gray-500');
+        completeBtn.classList.add('bg-point', 'text-cdark');
+        completeBtn.disabled = false;
+    } else {
+        completeBtn.textContent = '선택완료';
+        completeBtn.classList.add('bg-gray-200', 'text-gray-500');
+        completeBtn.classList.remove('bg-point', 'text-cdark');
+        completeBtn.disabled = true;
+    }
 }
 
 async function loadSampleCards() {
     if (loading || !hasMore) return;
     
+    const categoryInfo = categoryData.get(currentCategory);
+    if (!categoryInfo.hasMore) return;
+    
     loading = true;
     document.getElementById('loadingIndicator').classList.remove('hidden');
+    document.getElementById('loadMoreBtn').classList.add('opacity-50', 'cursor-not-allowed');
+    
+    // 카테고리 버튼 비활성화
+    toggleCategoryButtons(true);
     
     try {
-        const response = await fetch(`/guidebook/life-search/get-samples?page=${page}`, {
+        const response = await fetch(`/guidebook/life-search/get-samples?page=${categoryInfo.page}&category=${currentCategory}`, {
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                 'Accept': 'application/json'
@@ -608,126 +783,117 @@ async function loadSampleCards() {
         const data = await response.json();
         
         if (data.cards.length === 0) {
-            hasMore = false;
+            categoryInfo.hasMore = false;
+            document.getElementById('moreButtonContainer').classList.add('hidden');
             return;
         }
 
-        // 카테고리별 배경색 매핑
-        const categoryColors = {
-            '여행': 'bg-blue-100 text-blue-800',
-            '취미': 'bg-green-100 text-green-800',
-            '음식': 'bg-orange-100 text-orange-800',
-            '문화': 'bg-purple-100 text-purple-800',
-            '학습': 'bg-yellow-100 text-yellow-800',
-            '건강': 'bg-red-100 text-red-800',
-            '생활': 'bg-gray-100 text-gray-800'
-        };
-        
         const cardList = document.getElementById('sampleCardList');
         data.cards.forEach(card => {
-            // 카테고리 수집
-            categories.add(card.category);
-            
-            const cardElement = document.createElement('div');
-            cardElement.className = 'bg-white rounded-lg border border-gray-200 p-4 transition-all duration-200 cursor-pointer hover:bg-gray-50';
-            if (currentCategory !== 'all' && currentCategory !== card.category) {
-                cardElement.classList.add('hidden');
-            }
-            cardElement.setAttribute('data-card-id', card.id);
-            cardElement.innerHTML = `
-                <div class="flex items-start space-x-3">
-                    <div class="flex-shrink-0 pt-1">
-                        <input type="checkbox" 
-                               class="w-5 h-5 rounded border-gray-300 text-point focus:ring-point"
-                               onclick="event.stopPropagation()">
-                    </div>
-                    <div class="flex-grow">
-                        <div class="flex items-center justify-between mb-2">
-                            <div class="category-label inline-block px-2.5 py-0.5 rounded-full text-sm font-medium ${categoryColors[card.category] || 'bg-gray-100 text-gray-800'}">
-                                ${card.category}
-                            </div>
-                            <span class="font-medium text-sm text-cdark">${numberWithCommas(card.price)}원</span>
-                        </div>
-                        <div class="font-medium text-gray-900">${card.content}</div>
-                    </div>
-                </div>
-            `;
-            
-            // 카드 클릭 이벤트 추가
-            cardElement.addEventListener('click', () => toggleCardSelection(card.id));
-            
+            loadedCards.set(card.id, card);
+            const cardElement = createCardElement(card, selectedCards.has(card.id));
             cardList.appendChild(cardElement);
         });
         
-        // 첫 페이지 로드가 완료되면 카테고리 필터와 선택완료 버튼 표시
-        if (page === 1) {
-            document.getElementById('categoryFilterContainer').classList.remove('hidden');
-            document.getElementById('completeButtonContainer').classList.remove('hidden');
-        }
+        categoryInfo.page++;
+        categoryInfo.hasMore = data.has_more;
+        categoryData.set(currentCategory, categoryInfo);
         
-        // 카테고리 필터 업데이트
-        updateCategoryFilters();
-        
-        page++;
-        hasMore = data.has_more;
+        document.getElementById('moreButtonContainer').classList.toggle('hidden', !data.has_more);
         
     } catch (error) {
         console.error('Error loading sample cards:', error);
     } finally {
         loading = false;
         document.getElementById('loadingIndicator').classList.add('hidden');
+        document.getElementById('loadMoreBtn').classList.remove('opacity-50', 'cursor-not-allowed');
+        
+        // 카테고리 버튼 활성화
+        toggleCategoryButtons(false);
     }
 }
 
-// 무한 스크롤 구현
-document.getElementById('sampleCardContainer').addEventListener('scroll', function(e) {
-    const { scrollTop, scrollHeight, clientHeight } = e.target;
-    if (scrollHeight - scrollTop <= clientHeight + 100) { // 하단에서 100px 전에 로드
-        loadSampleCards();
-    }
-});
+// More 버튼 클릭 이벤트
+document.getElementById('loadMoreBtn').addEventListener('click', loadSampleCards);
 
-// 선택완료 버튼 클릭 이벤트
-document.getElementById('completeSelectionBtn').addEventListener('click', async function() {
-    if (selectedCards.size === 0) return;
+function closeSampleModal() {
+    const modal = document.getElementById('sampleModal');
+    modal.classList.add('hidden');
+    document.body.style.overflow = 'auto';
+    
+    // 모달이 닫힐 때 상태 초기화
+    selectedCards.clear();
+    page = 1;
+    loading = false;
+    hasMore = true;
+    categories = [];
+    currentCategory = null;
+    loadedCards.clear();
+    document.getElementById('sampleCardList').innerHTML = '';
+    
+    // 카테고리 필터 초기화
+    document.getElementById('categoryFilterContainer').classList.add('hidden');
+    const categoryFilters = document.getElementById('categoryFilters');
+    categoryFilters.innerHTML = ''; // 모든 카테고리 버튼 제거
+    
+    // Swiper 인스턴스 제거
+    if (window.categorySwiper) {
+        window.categorySwiper.destroy();
+        window.categorySwiper = null;
+    }
+    
+    // 선택완료 버튼 숨기기 및 초기화
+    document.getElementById('completeButtonContainer').classList.add('hidden');
+    updateCompleteButton();
+}
+
+// 카테고리 버튼 비활성화/활성화 함수 추가
+function toggleCategoryButtons(disabled) {
+    document.querySelectorAll('.category-filter').forEach(btn => {
+        btn.disabled = disabled;
+        if (disabled) {
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+        } else {
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+    });
+}
+
+// completeSelectionBtn 클릭 이벤트 핸들러 추가
+document.getElementById('completeSelectionBtn').addEventListener('click', async () => {
+    if (!confirm('선택한 샘플을 추가하시겠습니까?')) return;
     
     try {
         LoadingManager.show();
         
-        // 선택된 카드들의 데이터를 서버로 전송
         const response = await fetch('/guidebook/life-search/apply-samples', {
             method: 'POST',
             headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
             },
             body: JSON.stringify({
                 selectedCards: Array.from(selectedCards)
             })
         });
         
-        if (response.ok) {
-            window.location.reload();
+        if (!response.ok) {
+            throw new Error('샘플 추가에 실패했습니다.');
+        }
+        
+        const data = await response.json();
+        if (data.success) {
+            window.location.reload(); // 페이지 새로고침
         } else {
-            throw new Error('샘플 적용에 실패했습니다.');
+            throw new Error(data.message || '샘플 추가에 실패했습니다.');
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('샘플 적용 중 오류가 발생했습니다.');
+        alert(error.message);
+    } finally {
         LoadingManager.hide();
     }
 });
 </script>
-
-<style>
-/* 스크롤바 숨기기 */
-.hide-scrollbar::-webkit-scrollbar {
-    display: none;
-}
-.hide-scrollbar {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
-}
-</style>
 @endpush
 @endsection

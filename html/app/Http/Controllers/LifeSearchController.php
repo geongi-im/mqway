@@ -83,6 +83,27 @@ class LifeSearchController extends Controller
     }
 
     /**
+     * 카테고리 정보를 가져오는 API
+     */
+    public function getCategories()
+    {
+        $categories = LifeSearchSample::select('mq_s_category')
+            ->selectRaw('COUNT(*) as count')
+            ->groupBy('mq_s_category')
+            ->orderBy('count', 'desc')
+            ->get();
+
+        return response()->json([
+            'categories' => $categories->map(function($category) {
+                return [
+                    'name' => $category->mq_s_category,
+                    'count' => $category->count
+                ];
+            })
+        ]);
+    }
+
+    /**
      * 샘플 데이터를 가져오는 API
      */
     public function getSamples(Request $request)
@@ -90,9 +111,16 @@ class LifeSearchController extends Controller
         // 페이지네이션 처리
         $page = $request->input('page', 1);
         $perPage = 10;
+        $category = $request->input('category');
         
-        $samples = LifeSearchSample::orderBy('idx', 'asc')
-            ->paginate($perPage, ['*'], 'page', $page);
+        $query = LifeSearchSample::query();
+        
+        // 카테고리 필터링
+        if ($category) {
+            $query->where('mq_s_category', $category);
+        }
+        
+        $samples = $query->paginate($perPage, ['*'], 'page', $page);
 
         return response()->json([
             'cards' => $samples->map(function($sample) {
