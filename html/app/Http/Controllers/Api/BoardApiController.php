@@ -45,7 +45,7 @@ class BoardApiController extends Controller
                 'mq_original_image' => $originalImageName,
                 'mq_view_cnt' => 0,
                 'mq_like_cnt' => 0,
-                'mq_status' => 'Y',
+                'mq_status' => 1,
                 'mq_reg_date' => Carbon::now(),
             ]);
 
