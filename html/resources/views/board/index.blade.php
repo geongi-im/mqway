@@ -53,21 +53,15 @@
 
         <!-- 버튼 영역 -->
         <div class="flex items-center gap-2">
-            @if(request('search'))
-                <a href="{{ route('board.index') }}" 
-                   class="inline-flex items-center justify-center h-10 px-6 bg-text-dark text-white rounded-lg hover:bg-opacity-90 transition-all text-sm">
-                    전체목록
-                </a>
-            @endif
-            <a href="{{ route('board.create') }}" 
-               class="inline-flex items-center justify-center h-10 px-6 bg-point text-cdark rounded-lg hover:bg-opacity-90 transition-all text-sm">
-                <span class="flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            @auth
+                <a href="{{ route('board.create') }}" 
+                   class="inline-flex items-center justify-center h-10 px-4 bg-point text-cdark rounded-lg hover:bg-opacity-90 transition-all text-sm whitespace-nowrap">
+                    <svg class="w-5 h-5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </svg>
                     글쓰기
-                </span>
-            </a>
+                </a>
+            @endauth
         </div>
     </div>
 
@@ -111,7 +105,6 @@
                                 </span>
                             </div>
                             <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ $post->mq_title }}</h3>
-                            <p class="text-sm text-text-dark mb-4 h-12 overflow-hidden">{{ strip_tags($post->mq_content) }}</p>
                             <div class="flex items-center justify-between text-sm text-text-dark mt-auto">
                                 <span>{{ $post->mq_reg_date ? $post->mq_reg_date->format('Y-m-d') : '' }}</span>
                                 <div class="flex items-center gap-4">
