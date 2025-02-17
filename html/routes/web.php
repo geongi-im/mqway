@@ -54,10 +54,6 @@ Route::get('/board/create', [BoardController::class, 'create'])->name('board.cre
 Route::post('/board/upload-image', [BoardController::class, 'uploadImage'])->name('board.upload.image');
 Route::post('/board', [BoardController::class, 'store'])->name('board.store');
 Route::get('/board/{idx}', [BoardController::class, 'show'])->name('board.show');
-Route::get('/board/{idx}/edit', [BoardController::class, 'edit'])->name('board.edit');
-Route::put('/board/{idx}', [BoardController::class, 'update'])->name('board.update');
-Route::delete('/board/{idx}', [BoardController::class, 'destroy'])->name('board.destroy');
-Route::post('/board/{idx}/like', [BoardController::class, 'like'])->name('board.like');
 
 // 게시판 (회원 전용)
 Route::middleware('auth')->group(function () {
