@@ -9,24 +9,33 @@
     </div>
 
     <div class="mb-12">
-        <div class="flex justify-between items-center mb-6">
-            <div class="flex items-center space-x-4">
-                <span class="text-lg text-gray-600">필요금액: {{ number_format($lifeSearches->sum('mq_price')) }}원</span>
-            </div>
-            <div class="flex space-x-4">
-                <button onclick="openSampleModal()" 
-                        class="bg-secondary border border-gray-300 text-cdark px-4 py-2 rounded-lg transition-colors duration-200 flex items-center text-sm">
-                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                    </svg>
-                    샘플 가져오기
-                </button>
-                <button class="add-button bg-point text-cdark px-4 py-2 rounded-lg transition-colors duration-200 flex items-center text-sm">
-                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                    </svg>
-                    추가하기
-                </button>
+        <!-- 상단 영역 -->
+        <div class="bg-white rounded-lg shadow-lg p-4 mb-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <!-- 필요금액 영역 -->
+                <div class="flex items-center">
+                    <span class="text-lg font-medium text-gray-900">필요금액</span>
+                    <span class="ml-2 text-xl font-bold text-cdark">
+                        {{ number_format($lifeSearches->sum('mq_price')) }}원
+                    </span>
+                </div>
+                
+                <!-- 버튼 영역 -->
+                <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <button onclick="openSampleModal()" 
+                            class="flex-1 sm:flex-none bg-secondary border border-gray-300 text-cdark px-4 py-2 rounded-lg transition-colors duration-200 flex items-center justify-center text-sm">
+                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                        </svg>
+                        샘플 가져오기
+                    </button>
+                    <button class="add-button flex-1 sm:flex-none bg-point text-cdark px-4 py-2 rounded-lg transition-colors duration-200 flex items-center justify-center text-sm">
+                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        추가하기
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -264,28 +273,38 @@
 @push('styles')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 <style>
-/* 스크롤바 숨기기 */
-.hide-scrollbar::-webkit-scrollbar {
-    display: none;
-}
+
+/* 필요하다면 스크롤바를 숨기는 옵션도 추가 가능 */
 .hide-scrollbar {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none; /* IE, Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
-/* Swiper 커스텀 스타일 */
+/* Swiper 기본 구조에 맞춰서 스타일링 */
 .category-swiper {
-    width: 100%;
-    position: relative;
+  width: 100%;
+  position: relative;
 }
 
 .category-swiper .swiper {
-    width: 100%;
-    padding: 0 32px; /* 네비게이션 버튼 공간 확보 */
+  width: 100%;
+  /* freeMode를 쓰는 경우 스크롤이 필요하다면 overflow 설정 */
+  /* overflow: hidden; (필요에 따라 조절) */
+}
+
+.category-swiper .swiper-wrapper {
+  /* 필요하다면 flex나 정렬 옵션 조정 가능 */
 }
 
 .category-swiper .swiper-slide {
-    width: auto !important; /* 슬라이드 너비 자동 조정 */
+  /* Swiper가 slidesPerView: 'auto' 일 때 알아서 width를 잡습니다 */
+  /* width: auto; 등을 굳이 강제할 필요는 없습니다 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .category-swiper .swiper-button-next,
@@ -310,6 +329,15 @@
 .category-swiper .swiper-button-disabled {
     opacity: 0;
     pointer-events: none;
+}
+
+/* 카테고리 버튼은 슬라이드 안에 들어가는 요소이므로
+   따로 display를 지정하기보다는 padding, 색상 정도만 주시면 됩니다. */
+.category-filter {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.875rem;
+    margin: 0; /* swiper-slide로 분리되므로 margin 대신 spaceBetween 옵션 사용 */
 }
 
 /* 추가 필요 CSS */
@@ -588,41 +616,44 @@ function updateCategoryFilters() {
     const filterContainer = document.querySelector('#categoryFilters');
     filterContainer.innerHTML = '';
 
+    // 카테고리 버튼 생성 시 각 카테고리는 반드시 swiper-slide 로 감싸기
     categories.forEach(category => {
+        // 슬라이드 하나 생성
         const slideDiv = document.createElement('div');
-        slideDiv.className = 'swiper-slide !w-auto';
-
-        const button = document.createElement('button');
-        button.className = `category-filter whitespace-nowrap px-3 py-1 rounded-full text-sm font-medium 
-            ${currentCategory === category.name ? 'bg-point' : 'bg-secondary'} text-cdark transition-colors duration-200`;
-        button.setAttribute('data-category', category.name);
-        button.textContent = `${category.name} (${category.count})`;
-        button.onclick = () => filterByCategory(category.name);
+        // Swiper가 인식하도록 클래스명 지정
+        slideDiv.classList.add('swiper-slide');
         
+        // 버튼 생성
+        const button = document.createElement('button');
+        button.className = 'category-filter bg-secondary text-cdark';
+        button.textContent = `${category.name} (${category.count})`;
+        button.dataset.category = category.name;
+        button.onclick = () => filterByCategory(category.name);
+
+        // 슬라이드에 버튼 삽입
         slideDiv.appendChild(button);
+        // 래퍼(swiper-wrapper)에 추가
         filterContainer.appendChild(slideDiv);
     });
 
-    // Swiper 재초기화 로직 개선
+    // Swiper 초기화
+    // 이미 존재한다면 destroy 후 재초기화하는 부분은 동일
     if (window.categorySwiper) {
-        window.categorySwiper.destroy();
-        window.categorySwiper = null;
+        window.categorySwiper.destroy(true, true);
     }
 
     // 50ms 지연 추가 (렌더링 완료 대기)
     setTimeout(() => {
         window.categorySwiper = new Swiper('.category-swiper .swiper', {
             slidesPerView: 'auto',
-            spaceBetween: 8,
+            spaceBetween: 8, // 슬라이드 간격
             navigation: {
                 nextEl: '.category-swiper .swiper-button-next',
                 prevEl: '.category-swiper .swiper-button-prev',
             },
-            breakpoints: {
-                320: { slidesPerView: 'auto', spaceBetween: 8 },
-                768: { slidesPerView: 'auto', spaceBetween: 12 }
-            }
-        });
+            // 필요하면 자유 스크롤 모드
+            // freeMode: true,
+            });
     }, 50);
 }
 

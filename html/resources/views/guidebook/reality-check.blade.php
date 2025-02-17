@@ -231,6 +231,8 @@
                            id="expected_amount" 
                            name="expected_amount" 
                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-dark"
+                           maxlength="13"
+                           oninput="this.value = this.value.replace(/[^0-9]/g, '');"
                            required>
                 </div>
                 <div>
@@ -241,6 +243,8 @@
                            id="actual_amount" 
                            name="actual_amount" 
                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-dark"
+                           maxlength="13"
+                           oninput="this.value = this.value.replace(/[^0-9]/g, '');"
                            required>
                 </div>
             </div>
@@ -764,6 +768,10 @@ function updateSliderPosition() {
 
 // 샘플 선택 함수
 async function selectSample() {
+    // 확인 창 추가
+    const isConfirmed = confirm('항목을 불러오시겠습니까?');
+    if (!isConfirmed) return;
+
     LoadingManager.show();
     try {
         const response = await fetch('/guidebook/reality-check/apply-sample', {
