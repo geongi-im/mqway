@@ -55,9 +55,12 @@ class BoardController extends Controller
         
         // 이미지 경로 처리
         foreach ($posts as $post) {
-            $post->mq_image = $post->mq_image 
-                ? asset('storage/' . $post->mq_image)
-                : asset('images/content/no_image.jpeg');
+            // 이미지 경로가 이미 URL 형식인지 확인
+            if ($post->mq_image && !filter_var($post->mq_image, FILTER_VALIDATE_URL)) {
+                $post->mq_image = asset('storage/' . $post->mq_image);
+            } elseif (!$post->mq_image) {
+                $post->mq_image = asset('images/content/no_image.jpeg');
+            }
         }
         
         return view('board.index', [
@@ -223,12 +226,20 @@ class BoardController extends Controller
      */
     public function like($idx)
     {
-        $board = Board::findOrFail($idx);
-        $board->increment('mq_like_cnt');
-        
-        return response()->json([
-            'likes' => $board->mq_like_cnt
-        ]);
+        try {
+            $board = Board::findOrFail($idx);
+            $board->increment('mq_like_cnt');
+            
+            return response()->json([
+                'success' => true,
+                'likes' => $board->fresh()->mq_like_cnt
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => '좋아요 처리 중 오류가 발생했습니다.'
+            ], 500);
+        }
     }
 
     /**

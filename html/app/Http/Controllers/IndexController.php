@@ -30,6 +30,13 @@ class IndexController extends Controller
             $post->mq_content = Str::limit(strip_tags($post->mq_content), 50);
             return $post;
         });
+
+        // 이미지 경로 처리
+        foreach ($posts as $post) {
+            $post->mq_image = $post->mq_image 
+                ? asset('storage/' . $post->mq_image)
+                : asset('images/content/no_image.jpeg');
+        }
         
         $latestNews = News::orderBy('mq_published_date', 'desc')
                          ->take(4)
