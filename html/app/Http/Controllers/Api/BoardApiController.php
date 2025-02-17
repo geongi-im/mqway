@@ -31,8 +31,11 @@ class BoardApiController extends Controller
                 $image = $request->file('image');
                 $originalImageName = $image->getClientOriginalName();
                 
-                $randomName = Str::random(32) . '.' . $image->getClientOriginalExtension();
-                $imagePath = $image->storeAs('uploads/board', $randomName, 'public');
+                $extension = $image->getClientOriginalExtension();
+                $randomName = Str::random(32) . '.' . $extension;
+                
+                $storedPath = $image->storeAs('uploads/board', $randomName, 'public');
+                $imagePath = $storedPath;
             }
 
             // 게시글 생성
