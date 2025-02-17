@@ -23,7 +23,7 @@ class BoardController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Board::query();
+        $query = Board::where('mq_status', 1);
 
         // 검색어 처리
         if ($request->has('search')) {
@@ -128,7 +128,7 @@ class BoardController extends Controller
      */
     public function show($idx)
     {
-        $post = Board::findOrFail($idx);
+        $post = Board::where('mq_status', 1)->findOrFail($idx);
         
         // 이미지 경로 처리
         $post->mq_image = $post->mq_image 
@@ -204,7 +204,7 @@ class BoardController extends Controller
     }
 
     /**
-     * 게시글 삭제 (소프트 삭제)
+     * 게시글 삭제 (하드 삭제)
      */
     public function destroy($idx)
     {
@@ -215,8 +215,13 @@ class BoardController extends Controller
             return redirect()->route('board.show', $idx)->with('error', '삭제 권한이 없습니다.');
         }
 
-        $board->mq_status = 0;  // 소프트 삭제
-        $board->save();
+        // 이미지 파일 삭제
+        if ($board->mq_image) {
+            Storage::disk('public')->delete($board->mq_image);
+        }
+
+        // 데이터베이스에서 완전히 삭제
+        $board->delete();
 
         return redirect()->route('board.index')->with('success', '게시글이 삭제되었습니다.');
     }

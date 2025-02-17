@@ -66,12 +66,12 @@
                            class="inline-flex items-center justify-center h-10 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all text-gray-700 text-sm">
                             수정
                         </a>
-                        <form action="{{ route('board.destroy', $post->idx) }}" 
-                              method="POST" 
+                        <form action="{{ route('board.destroy', $post->idx) }}"
+                              method="POST"
                               onsubmit="return confirmDelete()">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" 
+                            <button type="submit"
                                     class="inline-flex items-center justify-center h-10 px-4 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-200 transition-all text-sm">
                                 삭제
                             </button>

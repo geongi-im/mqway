@@ -24,7 +24,7 @@ class IndexController extends Controller
 
     public function index()
     {
-        $query = Board::query();
+        $query = Board::where('mq_status', 1);
         $query->orderBy('mq_reg_date', 'desc');
         $posts = $query->paginate(10)->map(function ($post) {
             $post->mq_content = Str::limit(strip_tags($post->mq_content), 50);

@@ -90,43 +90,43 @@
     @else
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @foreach($posts as $post)
-            <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow h-full">
-                <a href="{{ route('board.show', $post->idx) }}" class="block h-full">
-                    <div class="flex flex-col h-full">
-                        <div class="bg-gray-50 flex items-center justify-center" style="height: 240px;">
-                            <img src="{{ $post->mq_image }}" 
-                                 alt="게시글 이미지" 
-                                 class="w-full h-full object-contain p-2">
-                        </div>
-                        <div class="p-4 flex-1 flex flex-col">
-                            <div class="mb-2">
-                                <span class="inline-block px-2 py-1 {{ $categoryColors[$post->mq_category] }} text-xs font-medium rounded-md">
-                                    {{ $post->mq_category }}
-                                </span>
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow h-full">
+                    <a href="{{ route('board.show', $post->idx) }}" class="block h-full">
+                        <div class="flex flex-col h-full">
+                            <div class="bg-gray-50 flex items-center justify-center" style="height: 240px;">
+                                <img src="{{ $post->mq_image }}" 
+                                     alt="게시글 이미지" 
+                                     class="w-full h-full object-contain p-2">
                             </div>
-                            <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ $post->mq_title }}</h3>
-                            <div class="flex items-center justify-between text-sm text-text-dark mt-auto">
-                                <span>{{ $post->mq_reg_date ? $post->mq_reg_date->format('Y-m-d') : '' }}</span>
-                                <div class="flex items-center gap-4">
-                                    <span class="flex items-center gap-1">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
-                                        {{ $post->mq_view_cnt }}
+                            <div class="p-4 flex-1 flex flex-col">
+                                <div class="mb-2">
+                                    <span class="inline-block px-2 py-1 {{ $categoryColors[$post->mq_category] }} text-xs font-medium rounded-md">
+                                        {{ $post->mq_category }}
                                     </span>
-                                    <span class="flex items-center gap-1">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                        </svg>
-                                        {{ $post->mq_like_cnt }}
-                                    </span>
+                                </div>
+                                <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ $post->mq_title }}</h3>
+                                <div class="flex items-center justify-between text-sm text-text-dark mt-auto">
+                                    <span>{{ $post->mq_reg_date ? $post->mq_reg_date->format('Y-m-d') : '' }}</span>
+                                    <div class="flex items-center gap-4">
+                                        <span class="flex items-center gap-1">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                            {{ $post->mq_view_cnt }}
+                                        </span>
+                                        <span class="flex items-center gap-1">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                            </svg>
+                                            {{ $post->mq_like_cnt }}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </a>
-            </div>
+                    </a>
+                </div>
             @endforeach
         </div>
     @endif
