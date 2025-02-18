@@ -20,22 +20,26 @@ class BoardApiController extends Controller
                 'content' => 'required|string',
                 'category' => 'required|string|max:50',
                 'writer' => 'required|string|max:50',
-                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+                'image.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
             ]);
 
             // 이미지 처리
-            $imagePath = null;
-            $originalImageName = null;
+            $imagePaths = [];
+            $originalImageNames = [];
             
             if ($request->hasFile('image')) {
-                $image = $request->file('image');
-                $originalImageName = $image->getClientOriginalName();
-                
-                $extension = $image->getClientOriginalExtension();
-                $randomName = Str::random(32) . '.' . $extension;
-                
-                $storedPath = $image->storeAs('uploads/board', $randomName, 'public');
-                $imagePath = $storedPath;
+                foreach ($request->file('image') as $image) {
+                    $originalImageName = $image->getClientOriginalName();
+                    $extension = $image->getClientOriginalExtension();
+                    $randomName = Str::random(32) . '.' . $extension;
+                    
+                    // 파일 저장
+                    $image->storeAs('uploads/board', $randomName, 'public');
+                    
+                    // DB에는 파일명만 저장
+                    $imagePaths[] = $randomName;
+                    $originalImageNames[] = $originalImageName;
+                }
             }
 
             // 게시글 생성
@@ -44,13 +48,18 @@ class BoardApiController extends Controller
                 'mq_content' => $request->content,
                 'mq_category' => $request->category,
                 'mq_writer' => $request->writer,
-                'mq_image' => $imagePath,
-                'mq_original_image' => $originalImageName,
+                'mq_image' => $imagePaths,
+                'mq_original_image' => $originalImageNames,
                 'mq_view_cnt' => 0,
                 'mq_like_cnt' => 0,
                 'mq_status' => 1,
                 'mq_reg_date' => Carbon::now(),
             ]);
+
+            // 이미지 URL 생성
+            $imageUrls = array_map(function($filename) {
+                return asset('storage/uploads/board/' . $filename);
+            }, $imagePaths);
 
             return response()->json([
                 'success' => true,
@@ -60,7 +69,7 @@ class BoardApiController extends Controller
                     'title' => $board->mq_title,
                     'category' => $board->mq_category,
                     'writer' => $board->mq_writer,
-                    'image_url' => $board->mq_image,
+                    'image_urls' => $imageUrls,
                     'created_at' => $board->mq_reg_date->format('Y-m-d H:i:s')
                 ]
             ], 201);

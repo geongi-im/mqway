@@ -1,5 +1,5 @@
 <!-- 햄버거 메뉴 오버레이 -->
-<div id="menuOverlay" class="menu-overlay fixed inset-0 bg-point z-50 flex flex-col items-center justify-center">
+<div id="menuOverlay" class="menu-overlay fixed inset-0 bg-point z-[100] flex flex-col items-center justify-center">
     <button id="closeMenu" class="absolute top-4 right-4 text-cdark hover:text-cgray text-3xl">&times;</button>
     <nav class="text-left w-full max-w-md px-8">
         <ul class="space-y-6 text-2xl">
@@ -91,6 +91,15 @@
 .guidebook-toggle.active + .submenu {
     display: block;
     max-height: 200px;
+}
+
+/* 메뉴 오버레이가 활성화되었을 때 하단 요소들과 상호작용 차단 */
+.menu-overlay.active {
+    pointer-events: auto;
+}
+
+.menu-overlay.active ~ nav {
+    pointer-events: none;
 }
 </style>
 
