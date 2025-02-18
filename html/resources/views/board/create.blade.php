@@ -54,25 +54,36 @@
 
                 <!-- 메인 이미지 업로드 -->
                 <div class="space-y-2">
-                    <label for="mq_image" class="block text-sm font-medium text-gray-700">메인 이미지</label>
-                    <div class="relative">
-                        <input type="file" 
-                               name="mq_image" 
-                               id="mq_image"
-                               accept="image/*"
-                               class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                               onchange="updateFileLabel(this)">
-                        <div class="w-full h-12 px-4 border border-gray-300 rounded-xl bg-white flex items-center justify-between cursor-pointer hover:border-yellow-500 transition-all">
-                            <span id="fileLabel" class="text-text-dark">이미지를 선택하세요</span>
-                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                            </svg>
-                        </div>
-                        <p class="mt-2 text-sm text-text-dark">최대 2MB까지 업로드 가능합니다.</p>
+                    <div class="flex justify-between items-center">
+                        <label class="block text-sm font-medium text-gray-700">첨부 이미지</label>
                     </div>
-                    @error('mq_image')
-                        <p class="text-sm text-red-500">{{ $message }}</p>
-                    @enderror
+
+                    <div id="fileUploadContainer">
+                        <!-- 첫 번째 파일 입력 -->
+                        <div class="file-input-group relative mb-3">
+                            <input type="file" 
+                                   name="mq_image[]" 
+                                   accept="image/*"
+                                   class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                   onchange="updateFileLabel(this)">
+                            <div class="w-full h-12 px-4 border border-gray-300 rounded-xl bg-white flex items-center justify-between cursor-pointer hover:border-yellow-500 transition-all">
+                                <span class="file-label text-text-dark">이미지를 선택하세요</span>
+                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between mt-4">
+                        <p class="text-sm text-text-dark">최대 5개까지 업로드 가능 (파일당 2MB 이하)</p>
+                        <button type="button" 
+                                class="btn-image-plus px-3 py-1.5 bg-point text-cdark hover:bg-opacity-90 transition-all text-xs font-medium rounded-xl flex items-center gap-1.5" 
+                                onclick="addFileInput()">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- 버튼 영역 -->
@@ -169,9 +180,36 @@
             console.error('Error:', error);
         });
 
-    // 파일 선택 시 라벨 업데이트
+    // 파일 입력 추가 기능
+    function addFileInput() {
+        const container = document.getElementById('fileUploadContainer');
+        const inputs = container.getElementsByClassName('file-input-group');
+        
+        if(inputs.length >= 5) {
+            alert('최대 5개까지 업로드 가능합니다.');
+            return;
+        }
+
+        const newInput = inputs[0].cloneNode(true);
+        newInput.querySelector('input').value = '';
+        newInput.querySelector('.file-label').textContent = '이미지를 선택하세요';
+        
+        // 삭제 버튼 추가
+        const deleteButton = document.createElement('button');
+        deleteButton.type = 'button';
+        deleteButton.className = 'absolute -right-8 top-1/2 -translate-y-1/2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors text-sm';
+        deleteButton.innerHTML = '×';
+        deleteButton.onclick = function() {
+            this.parentElement.remove();
+        };
+        
+        newInput.appendChild(deleteButton);
+        container.appendChild(newInput);
+    }
+
+    // 파일 라벨 업데이트
     function updateFileLabel(input) {
-        const label = document.getElementById('fileLabel');
+        const label = input.parentElement.querySelector('.file-label');
         label.textContent = input.files[0] ? input.files[0].name : '이미지를 선택하세요';
     }
 </script>
@@ -189,6 +227,45 @@
 }
 .ck.ck-toolbar .ck-toolbar__items {
     flex-wrap: wrap;
+}
+
+/* 버튼을 완전한 원형으로 만들 경우 */
+.btn-image-plus {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+}
+
+.file-input-group {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.file-input-group:last-child {
+    margin-bottom: 0;
+}
+
+/* 삭제 버튼이 있는 입력 그룹에 여백 추가 */
+.file-input-group:not(:first-child) {
+    padding-right: 0;
+    margin-right: 2rem;
+}
+
+/* 버튼 스타일 수정 */
+.btn-image-plus {
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.btn-image-plus:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 </style>
 @endpush

@@ -33,9 +33,14 @@ class IndexController extends Controller
 
         // 이미지 경로 처리
         foreach ($posts as $post) {
-            $post->mq_image = $post->mq_image 
-                ? asset('storage/' . $post->mq_image)
-                : asset('images/content/no_image.jpeg');
+            if (is_array($post->mq_image) && !empty($post->mq_image)) {
+                $filename = $post->mq_image[0];
+                $post->mq_image = !filter_var($filename, FILTER_VALIDATE_URL) 
+                    ? asset('storage/uploads/board/' . $filename)
+                    : $filename;
+            } else {
+                $post->mq_image = asset('images/content/no_image.jpeg');
+            }
         }
         
         $latestNews = News::orderBy('mq_published_date', 'desc')

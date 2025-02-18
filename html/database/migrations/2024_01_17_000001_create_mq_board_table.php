@@ -15,8 +15,8 @@ class CreateMqBoardTable extends Migration
             $table->increments('idx');  // Auto-increment primary key
             $table->string('mq_title');  // 게시글 제목
             $table->text('mq_content');  // 게시글 내용
-            $table->string('mq_image')->nullable();  // 게시글 이미지 URL
-            $table->string('mq_original_image')->nullable();  // 이미지 원본 이름
+            $table->text('mq_image')->nullable();  // 게시글 이미지 URL
+            $table->text('mq_original_image')->nullable();  // 이미지 원본 이름
             $table->string('mq_writer');  // 작성자
             $table->string('mq_category');
             $table->integer('mq_view_cnt')->default(0);  // 조회수

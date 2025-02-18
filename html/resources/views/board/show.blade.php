@@ -39,10 +39,16 @@
 
             <!-- 이미지 -->
             @if($post->mq_image)
-                <div class="mb-8">
-                    <img src="{{ $post->mq_image }}" 
-                         alt="{{ $post->mq_original_image ?? '게시글 이미지' }}"
-                         class="max-w-full h-auto rounded-lg shadow-md">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                    @foreach($post->mq_image as $index => $image)
+                        <a href="{{ asset($image) }}" 
+                           target="_blank"
+                           class="block aspect-square hover:opacity-90 transition-opacity">
+                            <img src="{{ asset($image) }}" 
+                                 alt="{{ $post->mq_original_image[$index] ?? '게시글 이미지' }}"
+                                 class="w-full h-full object-contain bg-gray-50 rounded-lg shadow-md cursor-pointer p-2">
+                        </a>
+                    @endforeach
                 </div>
             @endif
 

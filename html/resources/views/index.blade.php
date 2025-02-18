@@ -327,7 +327,7 @@
                 <a href="{{ route('board.show', $post->idx) }}" class="block h-full">
                 <div class="bg-white rounded-lg overflow-hidden shadow-lg h-full flex flex-col">
                     <div class="bg-gray-50 flex items-center justify-center" style="height: 240px;">
-                        <img src="{{ $post->mq_image }}" 
+                        <img src="{{ asset($post->mq_image) }}" 
                              alt="게시글 이미지" 
                              class="w-full h-full object-contain p-2">
                     </div>

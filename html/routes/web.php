@@ -61,6 +61,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/board/{idx}', [BoardController::class, 'update'])->name('board.update');
     Route::delete('/board/{idx}', [BoardController::class, 'destroy'])->name('board.destroy');
     Route::post('/board/{idx}/like', [BoardController::class, 'like'])->name('board.like');
+    Route::post('/board/delete-image/{idx}/{filename}', [BoardController::class, 'deleteImage'])->name('board.delete-image');
 });
 
 // Pick

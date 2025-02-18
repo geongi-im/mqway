@@ -55,10 +55,12 @@ class BoardController extends Controller
         
         // 이미지 경로 처리
         foreach ($posts as $post) {
-            // 이미지 경로가 이미 URL 형식인지 확인
-            if ($post->mq_image && !filter_var($post->mq_image, FILTER_VALIDATE_URL)) {
-                $post->mq_image = asset('storage/' . $post->mq_image);
-            } elseif (!$post->mq_image) {
+            if (is_array($post->mq_image) && !empty($post->mq_image)) {
+                $filename = $post->mq_image[0];
+                $post->mq_image = !filter_var($filename, FILTER_VALIDATE_URL) 
+                    ? asset('storage/uploads/board/' . $filename)
+                    : $filename;
+            } else {
                 $post->mq_image = asset('images/content/no_image.jpeg');
             }
         }
@@ -89,8 +91,23 @@ class BoardController extends Controller
             'mq_title' => 'required|max:255',
             'mq_content' => 'required',
             'mq_category' => 'required|in:' . implode(',', $this->categories),
-            'mq_image' => 'nullable|image|max:2048'
+            'mq_image.*' => 'image|max:2048'
         ]);
+
+        $imagePaths = [];
+        $originalNames = [];
+
+        if ($request->hasFile('mq_image')) {
+            foreach ($request->file('mq_image') as $file) {
+                $originalName = $file->getClientOriginalName();
+                $extension = $file->getClientOriginalExtension();
+                $randomName = Str::random(32).'.'.$extension;
+                $file->storeAs('uploads/board', $randomName, 'public');
+                
+                $imagePaths[] = $randomName;
+                $originalNames[] = $originalName;
+            }
+        }
 
         $board = new Board();
         $board->mq_title = $request->mq_title;
@@ -101,21 +118,8 @@ class BoardController extends Controller
         $board->mq_like_cnt = 0;
         $board->mq_status = 1;
         
-        // 이미지 처리
-        if ($request->hasFile('mq_image')) {
-            $file = $request->file('mq_image');
-            $originalName = $file->getClientOriginalName();
-            $extension = $file->getClientOriginalExtension();
-            
-            // 난수화된 파일명 생성 (32자 랜덤 문자열 + 확장자)
-            $randomName = Str::random(32) . '.' . $extension;
-            
-            // uploads/board 디렉토리에 저장
-            $path = $file->storeAs('uploads/board', $randomName, 'public');
-            
-            $board->mq_image = $path;
-            $board->mq_original_image = $originalName;
-        }
+        $board->mq_image = $imagePaths;
+        $board->mq_original_image = $originalNames;
 
         $board->mq_reg_date = now();
         $board->save();
@@ -130,10 +134,14 @@ class BoardController extends Controller
     {
         $post = Board::where('mq_status', 1)->findOrFail($idx);
         
-        // 이미지 경로 처리
-        $post->mq_image = $post->mq_image 
-            ? asset('storage/' . $post->mq_image)
-            : asset('images/content/no_image.jpeg');
+        // 이미지 배열 처리
+        if (is_array($post->mq_image)) {
+            $post->mq_image = array_map(function($filename) {
+                return asset('storage/uploads/board/' . $filename);
+            }, $post->mq_image);
+        } else {
+            $post->mq_image = [asset('images/content/no_image.jpeg')];
+        }
         
         // 조회수 증가
         $post->increment('mq_view_cnt');
@@ -150,7 +158,6 @@ class BoardController extends Controller
     public function edit($idx)
     {
         $post = Board::findOrFail($idx);
-        $categories = ['테크', '경제', '산업', '증권'];
         
         // 작성자 체크
         if ($post->mq_writer !== Auth::user()->mq_user_id) {
@@ -159,7 +166,7 @@ class BoardController extends Controller
 
         return view('board.edit', [
             'post' => $post,
-            'categories' => $categories
+            'categories' => $this->categories
         ]);
     }
 
@@ -171,8 +178,8 @@ class BoardController extends Controller
         $request->validate([
             'mq_title' => 'required|max:255',
             'mq_content' => 'required',
-            'mq_category' => 'required|in:테크,경제,사회,문화,스포츠',
-            'mq_image' => 'nullable|image|max:2048'
+            'mq_category' => 'required|in:' . implode(',', $this->categories),
+            'mq_image.*' => 'nullable|image|max:2048'
         ]);
 
         $board = Board::findOrFail($idx);
@@ -187,14 +194,24 @@ class BoardController extends Controller
         $board->mq_category = $request->mq_category;
         
         // 이미지 처리
+        $imagePaths = is_array($board->mq_image) ? $board->mq_image : [];
+        $originalNames = is_array($board->mq_original_image) ? $board->mq_original_image : [];
+        
         if ($request->hasFile('mq_image')) {
-            // 기존 이미지 삭제
-            if ($board->mq_image) {
-                Storage::disk('public')->delete($board->mq_image);
+            foreach ($request->file('mq_image') as $file) {
+                if ($file->isValid()) {
+                    $originalName = $file->getClientOriginalName();
+                    $extension = $file->getClientOriginalExtension();
+                    $randomName = Str::random(32).'.'.$extension;
+                    $file->storeAs('uploads/board', $randomName, 'public');
+                    
+                    $imagePaths[] = $randomName;
+                    $originalNames[] = $originalName;
+                }
             }
             
-            $path = $request->file('mq_image')->store('board', 'public');
-            $board->mq_image = $path;
+            $board->mq_image = $imagePaths;
+            $board->mq_original_image = $originalNames;
         }
 
         $board->mq_update_date = now();
@@ -216,8 +233,10 @@ class BoardController extends Controller
         }
 
         // 이미지 파일 삭제
-        if ($board->mq_image) {
-            Storage::disk('public')->delete($board->mq_image);
+        if (is_array($board->mq_image)) {
+            foreach ($board->mq_image as $image) {
+                Storage::disk('public')->delete('uploads/board/' . $image);
+            }
         }
 
         // 데이터베이스에서 완전히 삭제
@@ -279,5 +298,59 @@ class BoardController extends Controller
                 'message' => '이미지 업로드에 실패했습니다.'
             ]
         ], 400);
+    }
+
+    /**
+     * 이미지 삭제 API
+     */
+    public function deleteImage($idx, $filename)
+    {
+        try {
+            $board = Board::findOrFail($idx);
+            
+            // 작성자 체크
+            if ($board->mq_writer !== Auth::user()->mq_user_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => '삭제 권한이 없습니다.'
+                ], 403);
+            }
+
+            // 이미지 배열에서 해당 파일명 찾기
+            if (is_array($board->mq_image)) {
+                $index = array_search($filename, $board->mq_image);
+                if ($index !== false) {
+                    // 실제 파일 삭제
+                    Storage::disk('public')->delete('uploads/board/' . $filename);
+                    
+                    // 배열에서 제거
+                    $images = $board->mq_image;
+                    $originalNames = $board->mq_original_image;
+                    unset($images[$index]);
+                    unset($originalNames[$index]);
+                    
+                    // 배열 재정렬
+                    $board->mq_image = array_values($images);
+                    $board->mq_original_image = array_values($originalNames);
+                    $board->save();
+                    
+                    return response()->json([
+                        'success' => true,
+                        'message' => '이미지가 삭제되었습니다.'
+                    ]);
+                }
+            }
+            
+            return response()->json([
+                'success' => false,
+                'message' => '이미지를 찾을 수 없습니다.'
+            ], 404);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => '이미지 삭제 중 오류가 발생했습니다.'
+            ], 500);
+        }
     }
 } 

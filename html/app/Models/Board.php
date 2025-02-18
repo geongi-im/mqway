@@ -41,4 +41,9 @@ class Board extends Model
     {
         return $value ? Carbon::parse($value) : null;
     }
+
+    protected $casts = [
+        'mq_image' => 'array',
+        'mq_original_image' => 'array'
+    ];
 } 
