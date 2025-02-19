@@ -99,7 +99,7 @@
             <div class="bg-white rounded-lg shadow-lg p-4 mb-4" data-id="{{ $item->idx }}">
                 <div class="flex justify-between items-start mb-4">
                     <div>
-                        <span class="inline-block px-2.5 py-0.5 rounded-full text-sm font-medium {{ $item->getCategoryColorClass() }} mb-2">
+                        <span class="inline-block px-2.5 py-0.5 rounded-md text-sm font-medium {{ $item->getCategoryColorClass() }} mb-2">
                             {{ $item->mq_category }}
                         </span>
                         <h3 class="font-bold text-lg">{{ $item->mq_content }}</h3>
@@ -735,7 +735,7 @@ function createCardElement(card, isSelected = false) {
             </div>
             <div class="flex-grow">
                 <div class="flex items-center justify-between mb-2">
-                    <div class="category-label inline-block px-2.5 py-0.5 rounded-full text-sm font-medium ${categoryColors[card.category] || 'bg-gray-100 text-gray-800'}">
+                    <div class="category-label inline-block px-2.5 py-0.5 rounded-md text-sm font-medium ${categoryColors[card.category] || 'bg-gray-100 text-gray-800'}">
                         ${card.category}
                     </div>
                     <span class="font-medium text-sm text-cdark">${numberWithCommas(card.price)}원</span>

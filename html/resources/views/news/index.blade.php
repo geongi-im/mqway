@@ -14,7 +14,7 @@
             <div class="flex gap-2 overflow-x-auto pb-2 w-full md:w-auto">
                 @foreach($categories as $category)
                 <a href="{{ $category === '전체' ? url('/news') : request()->fullUrlWithQuery(['category' => $category]) }}" 
-                   class="px-4 py-2 rounded-full transition-colors whitespace-nowrap text-cdark
+                   class="px-4 py-2 rounded-md transition-colors whitespace-nowrap text-cdark
                          {{ (request('category', '전체') === $category) ? 'bg-point' : 'bg-white' }}">
                     {{ $category }}
                 </a>
@@ -48,7 +48,7 @@
             <div class="p-6">
                 <!-- 상단 메타 정보 -->
                 <div class="flex items-center gap-3 text-sm text-text-dark mb-3">
-                    <span class="{{ $categoryColors[$item->mq_category] }} px-3 py-1 rounded-full">
+                    <span class="{{ $categoryColors[$item->mq_category] }} px-3 py-1 rounded-md">
                         {{ $item->mq_category }}
                     </span>
                     <time datetime="{{ $item->mq_reg_date }}">

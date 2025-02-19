@@ -6,7 +6,7 @@
         <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-8">
             <!-- 카테고리 -->
             <div class="mb-4">
-                <span class="inline-block px-3 py-1 {{ $categoryColors[$post->mq_category] }} rounded-full text-sm font-medium">
+                <span class="inline-block px-3 py-1 {{ $categoryColors[$post->mq_category] }} rounded-md text-sm font-medium">
                     {{ $post->mq_category }}
                 </span>
             </div>

@@ -385,7 +385,7 @@
         @foreach($latestNews as $news)
         <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
             <div class="flex items-center gap-3 text-sm text-text-dark mb-3">
-                <span class="{{ $newsCategoryColors[$news->mq_category] }} px-3 py-1 rounded-full">
+                <span class="{{ $newsCategoryColors[$news->mq_category] }} px-3 py-1 rounded-md">
                     {{ $news->mq_category }}
                 </span>
                 <time datetime="{{ $news->mq_reg_date }}">
