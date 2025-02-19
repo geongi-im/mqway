@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\News;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class NewsController extends Controller
 {
@@ -54,5 +55,74 @@ class NewsController extends Controller
     {
         $news = News::findOrFail($idx);
         return view('news.show', compact('news'));
+    }
+
+    /**
+     * 새로운 뉴스를 저장합니다.
+     */
+    public function store(Request $request)
+    {
+        try {
+            $request->validate([
+                'category' => 'required|string|max:50',
+                'title' => 'required|string|max:255',
+                'content' => 'required|string',
+                'company' => 'required|string|max:100',
+                'source_url' => 'required|url',
+                'published_date' => 'required|date',
+                'step1_score' => 'required|integer|min:0|max:10'
+            ]);
+
+            // 뉴스 데이터 준비
+            $newsData = [
+                'mq_category' => $request->category,
+                'mq_title' => $request->title,
+                'mq_content' => $request->content,
+                'mq_company' => $request->company,
+                'mq_source_url' => $request->source_url,
+                'mq_published_date' => $request->published_date,
+                'mq_step1_score' => $request->step1_score,
+                'mq_status' => 1,
+                'mq_reg_date' => Carbon::now(),
+                'mq_update_date' => Carbon::now()
+            ];
+
+            // 새로운 뉴스 생성
+            $news = new News();
+            foreach ($newsData as $key => $value) {
+                $news->$key = $value;
+            }
+            $news->save();
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => '뉴스가 성공적으로 저장되었습니다.',
+                    'data' => $news
+                ], 201);
+            }
+
+            return redirect()->route('news.index')->with('success', '뉴스가 성공적으로 저장되었습니다.');
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => '입력값 검증 실패',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+            return back()->withErrors($e->errors())->withInput();
+
+        } catch (\Exception $e) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => '뉴스 저장 중 오류가 발생했습니다.',
+                    'error' => $e->getMessage()
+                ], 500);
+            }
+            return back()->with('error', '뉴스 저장 중 오류가 발생했습니다.')->withInput();
+        }
     }
 } 

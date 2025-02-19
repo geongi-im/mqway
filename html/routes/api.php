@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Api\BoardApiController;
+use App\Http\Controllers\Api\NewsApiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,3 +20,10 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::post('/board', [BoardApiController::class, 'store']);
+
+// 뉴스 API 라우트
+Route::prefix('news')->group(function () {
+    Route::get('/rss', [NewsApiController::class, 'rssList']);
+    Route::get('/check', [NewsApiController::class, 'checkDuplicate']);
+    Route::post('/', [NewsApiController::class, 'store']);
+});
