@@ -48,13 +48,12 @@ class NewsApiController extends Controller
     public function checkDuplicate(Request $request)
     {
         $request->validate([
-            'source_url' => 'required|url'
+            'url' => 'required|url'
         ]);
 
-        $exists = News::where('mq_source_url', $request->source_url)->exists();
+        $exists = News::where('mq_source_url', $request->url)->exists();
 
         return response()->json([
-            'success' => true,
             'exists' => $exists
         ]);
     }
