@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Board;
+use App\Traits\BoardCategoryColorTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -10,19 +11,16 @@ use Illuminate\Support\Str;
 
 class BoardController extends Controller
 {
-    protected $categories = ['경제용어', 'RS랭킹', '순매수대금', '거래량'];
-    protected $categoryColors = [
-        '경제용어' => 'bg-yellow-100 text-yellow-800',
-        'RS랭킹' => 'bg-blue-100 text-blue-800',
-        '순매수대금' => 'bg-green-100 text-green-800',
-        '거래량' => 'bg-red-100 text-red-800'
-    ];
+    use BoardCategoryColorTrait;
 
     /**
      * 게시글 목록
      */
     public function index(Request $request)
     {
+        $categories = $this->getCategories();
+        $categoryColors = $this->getCategoryColors();
+
         $query = Board::where('mq_status', 1);
 
         // 검색어 처리
@@ -67,8 +65,8 @@ class BoardController extends Controller
         
         return view('board.index', [
             'posts' => $posts,
-            'categories' => $this->categories,
-            'categoryColors' => $this->categoryColors,
+            'categories' => $categories,
+            'categoryColors' => $categoryColors,
         ]);
     }
 
@@ -77,8 +75,15 @@ class BoardController extends Controller
      */
     public function create()
     {
+        // 카테고리 목록을 DB에서 가져오기
+        $categories = Board::select('mq_category')
+            ->distinct()
+            ->orderBy('mq_category')
+            ->pluck('mq_category')
+            ->toArray();
+
         return view('board.create', [
-            'categories' => $this->categories
+            'categories' => $categories
         ]);
     }
 
@@ -87,10 +92,16 @@ class BoardController extends Controller
      */
     public function store(Request $request)
     {
+        // 유효한 카테고리 목록 가져오기
+        $validCategories = Board::select('mq_category')
+            ->distinct()
+            ->pluck('mq_category')
+            ->toArray();
+
         $request->validate([
             'mq_title' => 'required|max:255',
             'mq_content' => 'required',
-            'mq_category' => 'required|in:' . implode(',', $this->categories),
+            'mq_category' => 'required|in:' . implode(',', $validCategories),
             'mq_image.*' => 'image|max:2048'
         ]);
 
@@ -148,7 +159,7 @@ class BoardController extends Controller
 
         return view('board.show', [
             'post' => $post,
-            'categoryColors' => $this->categoryColors,
+            'categoryColors' => $this->getCategoryColors(),
         ]);
     }
 
@@ -164,9 +175,16 @@ class BoardController extends Controller
             return redirect()->route('board.show', $idx)->with('error', '수정 권한이 없습니다.');
         }
 
+        // 카테고리 목록을 DB에서 가져오기
+        $categories = Board::select('mq_category')
+            ->distinct()
+            ->orderBy('mq_category')
+            ->pluck('mq_category')
+            ->toArray();
+
         return view('board.edit', [
             'post' => $post,
-            'categories' => $this->categories
+            'categories' => $categories
         ]);
     }
 
@@ -175,10 +193,16 @@ class BoardController extends Controller
      */
     public function update(Request $request, $idx)
     {
+        // 유효한 카테고리 목록 가져오기
+        $validCategories = Board::select('mq_category')
+            ->distinct()
+            ->pluck('mq_category')
+            ->toArray();
+
         $request->validate([
             'mq_title' => 'required|max:255',
             'mq_content' => 'required',
-            'mq_category' => 'required|in:' . implode(',', $this->categories),
+            'mq_category' => 'required|in:' . implode(',', $validCategories),
             'mq_image.*' => 'nullable|image|max:2048'
         ]);
 
