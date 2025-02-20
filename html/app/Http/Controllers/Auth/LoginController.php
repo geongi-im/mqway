@@ -124,7 +124,9 @@ class LoginController extends Controller
             Auth::login($user);
             
             // 리다이렉트 대신 스크립트 반환
-            return response()->view('auth.callback', [], 200);
+            return response()->view('auth.callback', [
+                'redirectUrl' => redirect()->intended()->getTargetUrl()
+            ], 200);
 
         } catch (Exception $e) {
             report($e);

@@ -5,12 +5,14 @@
 </head>
 <body>
     <script>
-    @if(isset($error))
-        window.opener.alert("{{ $error }}");
-    @else
-        window.opener.location.href = '/';
-    @endif
-    window.close();
+        @if(isset($error))
+            window.opener.alert('{{ $error }}');
+            window.close();
+        @else
+            // 부모 창 리다이렉트 후 팝업 닫기
+            window.opener.location.href = '{{ $redirectUrl ?? '/' }}';
+            window.close();
+        @endif
     </script>
 </body>
 </html> 
