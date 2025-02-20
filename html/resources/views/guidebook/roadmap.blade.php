@@ -4,194 +4,121 @@
 <div class="container mx-auto px-4 py-8">
     <!-- 상단 타이틀 및 설명 -->
     <div class="mb-8 text-center">
-        <h1 class="text-3xl font-bold text-gray-800 mb-2">로드맵 작성하기</h1>
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">로드맵 작성하기</h1>
         <p class="text-gray-700">목표 달성을 위한 재무 계획을 확인하세요</p>
     </div>
 
-    <!-- PC 버전 -->
-    <div class="hidden md:block">
-        <div class="grid grid-cols-2 gap-8 mb-8">
-            <!-- 왼쪽: 목표 금액 및 진행 상황 -->
-            <div class="bg-white rounded-lg shadow-lg p-8">
-                <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-4">목표 금액</h2>
-                    <div class="flex items-end mb-2">
-                        <span class="text-4xl font-bold text-gray-800">{{ number_format($data['targetAmount']) }}</span>
-                        <span class="text-xl text-gray-600 ml-2 mb-1">원</span>
+    @if(!$hasLifeGoal)
+        <!-- 목표금액이 없는 경우 -->
+        <div class="flex flex-col items-center justify-center min-h-[400px] bg-white rounded-lg shadow-lg p-8">
+            <svg class="w-12 h-12 md:w-16 md:h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+            </svg>
+            <h2 class="text-lg md:text-xl font-bold text-gray-800 mb-4">목표 설정을 먼저 진행해주세요.</h2>
+            <a href="{{ route('guidebook.life-search') }}" 
+               class="inline-flex items-center px-6 py-3 bg-point text-cdark rounded-lg hover:bg-opacity-90 transition-all">
+                <span class="mr-2">바로가기</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </a>
+        </div>
+    @elseif(!$hasExpenses)
+        <!-- 지출 데이터가 없는 경우 -->
+        <div class="flex flex-col items-center justify-center min-h-[400px] bg-white rounded-lg shadow-lg p-8">
+            <svg class="w-12 h-12 md:w-16 md:h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+            </svg>
+            <h2 class="text-lg md:text-xl font-bold text-gray-800 mb-4">월별 지출 내역을 먼저 작성해주세요.</h2>
+            <a href="{{ route('guidebook.reality-check') }}" 
+               class="inline-flex items-center px-6 py-3 bg-point text-cdark rounded-lg hover:bg-opacity-90 transition-all">
+                <span class="mr-2">바로가기</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </a>
+        </div>
+    @else
+        <div class="space-y-6">
+            <!-- 월간 지출 분석 -->
+            <div class="bg-white rounded-lg shadow-lg p-4 md:p-8">
+                <h2 class="text-xl md:text-2xl font-bold text-dark mb-4 md:mb-6">월간 지출 분석</h2>
+                <div id="expenseChart" class="w-full" style="height: 360px;"></div>
+            </div>
+
+            <!-- 목표 금액 및 진행 상황 -->
+            <div class="bg-white rounded-lg shadow-lg p-4 md:p-8">
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <h2 class="text-lg md:text-2xl font-bold text-gray-800 mb-2">목표 금액</h2>
+                        <p class="text-xl md:text-4xl font-bold text-gray-800">
+                            {{ number_format($data['targetAmount']) }}<span class="text-base md:text-xl text-gray-600 ml-1">원</span>
+                        </p>
                     </div>
-                    <!-- 진행 게이지 바 (PC) -->
-                    <div class="relative mt-6">
-                        <div class="h-4 bg-gray-200 rounded-full overflow-hidden">
-                            <div class="h-full bg-gray-800 transition-all duration-500 relative"
-                                 style="width: {{ ($data['currentAmount'] / $data['targetAmount']) * 100 }}%">
-                                <span class="absolute -right-2 -top-8 bg-gray-800 text-white px-2 py-1 rounded text-sm whitespace-nowrap">
-                                    {{ number_format(($data['currentAmount'] / $data['targetAmount']) * 100, 1) }}%
-                                </span>
-                            </div>
-                        </div>
-                        <div class="flex justify-between mt-2 text-sm text-gray-600">
-                            <span>현재: {{ number_format($data['currentAmount']) }}원</span>
-                            <span>목표: {{ number_format($data['targetAmount']) }}원</span>
-                        </div>
+                    <div class="text-right">
+                        <h3 class="text-lg md:text-2xl font-bold text-gray-800 mb-2">남은 기간</h3>
+                        <p class="text-xl md:text-4xl font-bold text-gray-800">
+                            {{ $data['remainingMonths'] }}<span class="text-base md:text-xl text-gray-600 ml-1">개월</span>
+                        </p>
                     </div>
                 </div>
 
                 <!-- 월 저축액 게이지 바 -->
-                <div class="mb-6 pt-6 border-t">
+                <div class="mt-6 pt-6 border-t">
                     <div class="flex justify-between items-center mb-2">
-                        <h3 class="text-lg font-bold text-gray-800">월 저축액</h3>
-                        <span class="text-lg font-bold text-gray-800" id="monthlySavingDisplay">2,200,000원</span>
+                        <h3 class="text-base md:text-lg font-bold text-gray-800">월 저축액</h3>
+                        <div class="flex items-center">
+                            <input type="text" 
+                                   id="monthlySavingInput"
+                                   class="w-32 text-right px-2 py-1 border rounded mr-1 text-base md:text-lg font-bold text-gray-800" maxlength="9"
+                                   value="500,000">
+                            <span class="text-base md:text-lg font-bold text-gray-800">원</span>
+                        </div>
                     </div>
                     <div class="relative">
                         <input type="range" 
                                id="monthlySaving" 
-                               min="100000" 
-                               max="10000000" 
-                               step="100000" 
-                               value="2200000"
+                               min="10000" 
+                               max="3000000" 
+                               step="10000" 
+                               value="500000"
                                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
-                        <div class="flex justify-between mt-2 text-sm text-gray-600">
-                            <span>10만원</span>
-                            <span>1,000만원</span>
+                        <div class="flex justify-between mt-2 text-xs md:text-sm text-gray-600">
+                            <span>1만원</span>
+                            <span>300만원</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- 연평균 수익률 게이지 바 -->
-                <div class="pt-6 border-t">
+                <div class="mt-6 pt-6 border-t">
                     <div class="flex justify-between items-center mb-2">
-                        <h3 class="text-lg font-bold text-gray-800">연평균 수익률</h3>
-                        <span class="text-lg font-bold text-gray-800" id="annualReturnDisplay">10%</span>
+                        <h3 class="text-base md:text-lg font-bold text-gray-800">연평균 수익률</h3>
+                        <div class="flex items-center">
+                            <input type="text" 
+                                   id="annualReturnInput"
+                                   class="w-16 text-right px-2 py-1 border rounded mr-1 text-base md:text-lg font-bold text-gray-800"
+                                   value="10">
+                            <span class="text-base md:text-lg font-bold text-gray-800">%</span>
+                        </div>
                     </div>
                     <div class="relative">
                         <input type="range" 
                                id="annualReturn" 
                                min="0" 
-                               max="30" 
+                               max="50" 
                                step="0.1" 
                                value="10"
                                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
-                        <div class="flex justify-between mt-2 text-sm text-gray-600">
+                        <div class="flex justify-between mt-2 text-xs md:text-sm text-gray-600">
                             <span>0%</span>
-                            <span>30%</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="border-t pt-6 mt-6">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <h3 class="text-xl font-bold text-gray-800">남은 기간</h3>
-                            <p class="text-3xl font-bold text-gray-800 mt-2">{{ $data['remainingMonths'] }}<span class="text-base text-gray-600 ml-2">개월</span></p>
-                        </div>
-                        <div class="text-right">
-                            <h3 class="text-xl font-bold text-gray-800">월 필요 저축액</h3>
-                            <p class="text-3xl font-bold text-gray-800 mt-2" id="requiredSavingDisplay">
-                                {{ number_format(($data['targetAmount'] - $data['currentAmount']) / $data['remainingMonths']) }}<span class="text-base text-gray-600 ml-2">원</span>
-                            </p>
+                            <span>50%</span>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <!-- 오른쪽: 월간 지출 분석 -->
-            <div class="bg-white rounded-lg shadow-lg p-8">
-                <h2 class="text-2xl font-bold text-dark mb-6">월간 지출 분석</h2>
-                <div id="expenseChartPC" class="w-full" style="height: 380px;"></div>
-            </div>
         </div>
-    </div>
-
-    <!-- 모바일 버전 -->
-    <div class="md:hidden space-y-6">
-        <!-- 목표 금액 및 진행 상황 -->
-        <div class="bg-white rounded-lg shadow-lg p-6">
-            <div class="text-center mb-4">
-                <h2 class="text-xl font-bold text-gray-800">목표 금액</h2>
-                <p class="text-2xl font-bold text-gray-800 mt-1">
-                    {{ number_format($data['targetAmount']) }}원
-                </p>
-            </div>
-
-            <!-- 진행 게이지 바 (모바일) -->
-            <div class="relative pt-1">
-                <div class="h-3 bg-gray-200 rounded-full overflow-hidden">
-                    <div class="h-full bg-gray-800 transition-all duration-500 relative"
-                         style="width: {{ ($data['currentAmount'] / $data['targetAmount']) * 100 }}%">
-                    </div>
-                </div>
-                <div class="flex justify-between mt-2">
-                    <span class="text-xs font-semibold text-gray-600">
-                        현재: {{ number_format($data['currentAmount']) }}원
-                    </span>
-                    <span class="text-xs font-semibold text-gray-800">
-                        {{ number_format(($data['currentAmount'] / $data['targetAmount']) * 100, 1) }}%
-                    </span>
-                </div>
-            </div>
-
-            <!-- 월 저축액 게이지 바 (모바일) -->
-            <div class="mt-6 pt-6 border-t">
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="text-base font-bold text-gray-800">월 저축액</h3>
-                    <span class="text-base font-bold text-gray-800" id="monthlySavingDisplayMobile">2,200,000원</span>
-                </div>
-                <div class="relative">
-                    <input type="range" 
-                           id="monthlySavingMobile" 
-                           min="100000" 
-                           max="10000000" 
-                           step="100000" 
-                           value="2200000"
-                           class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
-                    <div class="flex justify-between mt-2 text-xs text-gray-600">
-                        <span>10만원</span>
-                        <span>1,000만원</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 연평균 수익률 게이지 바 (모바일) -->
-            <div class="mt-6 pt-6 border-t">
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="text-base font-bold text-gray-800">연평균 수익률</h3>
-                    <span class="text-base font-bold text-gray-800" id="annualReturnDisplayMobile">10%</span>
-                </div>
-                <div class="relative">
-                    <input type="range" 
-                           id="annualReturnMobile" 
-                           min="0" 
-                           max="30" 
-                           step="0.1" 
-                           value="10"
-                           class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
-                    <div class="flex justify-between mt-2 text-xs text-gray-600">
-                        <span>0%</span>
-                        <span>30%</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4 mt-6 pt-6 border-t">
-                <div class="text-center">
-                    <h3 class="text-sm font-bold text-gray-600">남은 기간</h3>
-                    <p class="text-xl font-bold text-gray-800 mt-1">{{ $data['remainingMonths'] }}개월</p>
-                </div>
-                <div class="text-center">
-                    <h3 class="text-sm font-bold text-gray-600">월 필요 저축액</h3>
-                    <p class="text-xl font-bold text-gray-800 mt-1" id="requiredSavingDisplayMobile">
-                        {{ number_format(($data['targetAmount'] - $data['currentAmount']) / $data['remainingMonths']) }}원
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <!-- 월간 지출 분석 -->
-        <div class="bg-white rounded-lg shadow-lg p-6">
-            <h2 class="text-xl font-bold text-dark mb-4">월간 지출 분석</h2>
-            <div id="expenseChartMobile" class="w-full" style="height: 360px;"></div>
-        </div>
-    </div>
+    @endif
 </div>
 
 @push('scripts')
@@ -199,26 +126,22 @@
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.6.0/dist/echarts.min.js"></script>
 
 <script>
+@if(isset($data))
 document.addEventListener('DOMContentLoaded', function() {
     const expenses = @json($data['monthlyExpenses']);
     const colors = [
         '#2C3E50', '#E67E22', '#27AE60', '#2980B9', 
         '#8E44AD', '#C0392B', '#16A085', '#D35400',
-        '#2ECC71', '#3498DB', '#9B59B6', '#E74C3C'
+        '#2ECC71', '#3498DB', '#9B59B6', '#E74C3C',
+        '#1ABC9C', '#F1C40F', '#E91E63', '#9C27B0',
+        '#3F51B5', '#00BCD4', '#4CAF50', '#FF9800'
     ];
 
     // 게이지바 관련 요소들
     const monthlySaving = document.getElementById('monthlySaving');
-    const monthlySavingDisplay = document.getElementById('monthlySavingDisplay');
+    const monthlySavingInput = document.getElementById('monthlySavingInput');
     const annualReturn = document.getElementById('annualReturn');
-    const annualReturnDisplay = document.getElementById('annualReturnDisplay');
-    const requiredSavingDisplay = document.getElementById('requiredSavingDisplay');
-
-    const monthlySavingMobile = document.getElementById('monthlySavingMobile');
-    const monthlySavingDisplayMobile = document.getElementById('monthlySavingDisplayMobile');
-    const annualReturnMobile = document.getElementById('annualReturnMobile');
-    const annualReturnDisplayMobile = document.getElementById('annualReturnDisplayMobile');
-    const requiredSavingDisplayMobile = document.getElementById('requiredSavingDisplayMobile');
+    const annualReturnInput = document.getElementById('annualReturnInput');
 
     // 게이지바 배경 업데이트 함수
     function updateRangeBackground(element) {
@@ -230,87 +153,165 @@ document.addEventListener('DOMContentLoaded', function() {
         element.style.backgroundSize = `${percentage}% 100%`;
     }
 
-    // 월 저축액 게이지바 이벤트 처리
-    function updateMonthlySaving(value) {
-        const formattedValue = numberWithCommas(value) + '원';
-        if (monthlySavingDisplay) monthlySavingDisplay.textContent = formattedValue;
-        if (monthlySavingDisplayMobile) monthlySavingDisplayMobile.textContent = formattedValue;
-        updateRequiredSaving();
-        
-        // 게이지바 배경 업데이트
-        updateRangeBackground(monthlySaving);
-        updateRangeBackground(monthlySavingMobile);
+    // 숫자만 추출하는 함수
+    function extractNumber(str) {
+        return parseInt(str.replace(/[^\d]/g, '')) || 0;
     }
 
-    // 연평균 수익률 게이지바 이벤트 처리
-    function updateAnnualReturn(value) {
-        const formattedValue = Math.round(value) + '%';
-        if (annualReturnDisplay) annualReturnDisplay.textContent = formattedValue;
-        if (annualReturnDisplayMobile) annualReturnDisplayMobile.textContent = formattedValue;
-        updateRequiredSaving();
+    // 남은 기간 계산 함수
+    function calculateRemainingPeriod(targetAmount, currentAmount, monthlySaving, annualReturn) {
+        // 월 저축액이 0이거나 음수인 경우 null 반환
+        if (monthlySaving <= 0) {
+            return null;
+        }
         
-        // 게이지바 배경 업데이트
-        updateRangeBackground(annualReturn);
-        updateRangeBackground(annualReturnMobile);
+        // 목표금액에서 현재금액을 뺀 나머지 금액
+        const remainingAmount = targetAmount - currentAmount;
+        
+        // 연평균 수익률이 0%인 경우
+        if (annualReturn === 0) {
+            return Math.ceil(remainingAmount / monthlySaving);
+        }
+        
+        // 월 이자율 계산 (연 수익률을 12로 나누어 계산)
+        const monthlyRate = (1 + annualReturn/100)**(1/12) - 1;
+        
+        // 남은 기간 계산 (로그 공식 사용)
+        const n = Math.ceil(Math.log((remainingAmount * monthlyRate / monthlySaving) + 1) / Math.log(1 + monthlyRate));
+        
+        return n;
     }
 
-    // 월 필요 저축액 계산 및 업데이트
-    function updateRequiredSaving() {
+    // 남은 기간 표시 업데이트 함수
+    function updateRemainingPeriod(months) {
+        const periodElement = document.querySelector('.text-right p.text-xl');
+        if (!periodElement) return;
+
+        // months가 null이면 텍스트를 비움
+        if (months === null) {
+            periodElement.innerHTML = '';
+            return;
+        }
+        
+        const years = Math.floor(months / 12);
+        const remainingMonths = months % 12;
+        
+        let periodText = '';
+        if (years > 0) {
+            periodText = `${years}년 ${remainingMonths}개월`;
+        } else {
+            periodText = `${remainingMonths}개월`;
+        }
+        
+        periodElement.innerHTML = `${periodText}<span class="text-base md:text-xl text-gray-600 ml-1"></span>`;
+    }
+
+    // 게이지바 이벤트 처리 함수
+    function updateMonthlySaving(value, isFromInput = false) {
+        if (!isFromInput) {
+            // 슬라이더나 blur 이벤트에서 호출된 경우
+            value = Math.max(10000, Math.min(3000000, value));
+            monthlySavingInput.value = numberWithCommas(value);
+            monthlySaving.value = value;
+            updateRangeBackground(monthlySaving);
+        } else {
+            // 직접 입력 중인 경우
+            monthlySaving.value = value;
+            updateRangeBackground(monthlySaving);
+        }
+        
         const targetAmount = {{ $data['targetAmount'] }};
         const currentAmount = {{ $data['currentAmount'] }};
-        const remainingMonths = {{ $data['remainingMonths'] }};
-        const monthlyAmount = (targetAmount - currentAmount) / remainingMonths;
-        
-        const formattedValue = numberWithCommas(Math.round(monthlyAmount)) + '원';
-        if (requiredSavingDisplay) {
-            requiredSavingDisplay.innerHTML = `${formattedValue}<span class="text-base text-gray-600 ml-2">원</span>`;
-        }
-        if (requiredSavingDisplayMobile) {
-            requiredSavingDisplayMobile.textContent = formattedValue;
-        }
+        const annualReturnValue = parseFloat(annualReturn.value);
+        const months = calculateRemainingPeriod(targetAmount, currentAmount, parseInt(value), annualReturnValue);
+        updateRemainingPeriod(months);
     }
 
-    // PC 버전 이벤트 리스너
+    // 연평균 수익률 게이지바 이벤트 처리 함수
+    function updateAnnualReturn(value, isFromInput = false) {
+        if (!isFromInput) {
+            // 슬라이더나 blur 이벤트에서 호출된 경우
+            value = Math.max(0, Math.min(50, value));
+            annualReturnInput.value = value;
+            annualReturn.value = value;
+            updateRangeBackground(annualReturn);
+        } else {
+            // 직접 입력 중인 경우
+            annualReturn.value = value;
+            updateRangeBackground(annualReturn);
+        }
+        
+        const targetAmount = {{ $data['targetAmount'] }};
+        const currentAmount = {{ $data['currentAmount'] }};
+        const monthlySavingValue = parseInt(monthlySaving.value);
+        const months = calculateRemainingPeriod(targetAmount, currentAmount, monthlySavingValue, parseFloat(value));
+        updateRemainingPeriod(months);
+    }
+
+    // 이벤트 리스너
     if (monthlySaving) {
         monthlySaving.addEventListener('input', (e) => {
             updateMonthlySaving(e.target.value);
-            updateRangeBackground(e.target);
         });
     }
     if (annualReturn) {
         annualReturn.addEventListener('input', (e) => {
-            updateAnnualReturn(e.target.value);
-            updateRangeBackground(e.target);
+            updateAnnualReturn(parseFloat(e.target.value));
         });
     }
 
-    // 모바일 버전 이벤트 리스너
-    if (monthlySavingMobile) {
-        monthlySavingMobile.addEventListener('input', (e) => {
-            updateMonthlySaving(e.target.value);
-            updateRangeBackground(e.target);
+    // 텍스트 입력 이벤트
+    if (monthlySavingInput) {
+        monthlySavingInput.addEventListener('input', (e) => {
+            // 입력 중에는 콤마를 제거하고 숫자만 추출
+            let value = e.target.value.replace(/[^\d]/g, '');
+            // 콤마 추가
+            e.target.value = value ? numberWithCommas(value) : '';
+            updateMonthlySaving(value || 0, true);
+        });
+        
+        monthlySavingInput.addEventListener('blur', (e) => {
+            let value = extractNumber(e.target.value);
+            value = Math.max(10000, Math.min(3000000, value));
+            updateMonthlySaving(value);
+        });
+
+        monthlySavingInput.addEventListener('focus', (e) => {
+            // 포커스 시 콤마 제거
+            let value = e.target.value.replace(/,/g, '');
+            e.target.value = value;
         });
     }
-    if (annualReturnMobile) {
-        annualReturnMobile.addEventListener('input', (e) => {
-            updateAnnualReturn(e.target.value);
-            updateRangeBackground(e.target);
+    
+    if (annualReturnInput) {
+        annualReturnInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/[^\d.]/g, '');
+            // 소수점 처리
+            if (value.split('.').length > 2) value = value.replace(/\.+$/, '');
+            e.target.value = value;
+            updateAnnualReturn(parseFloat(value) || 0, true);
+        });
+        
+        annualReturnInput.addEventListener('blur', (e) => {
+            let value = parseFloat(e.target.value) || 0;
+            value = Math.max(0, Math.min(50, value));
+            updateAnnualReturn(value);
         });
     }
 
     // 초기값 설정
-    updateMonthlySaving(monthlySaving ? monthlySaving.value : 2200000);
+    updateMonthlySaving(monthlySaving ? monthlySaving.value : 500000);
     updateAnnualReturn(annualReturn ? annualReturn.value : 10);
 
     // 초기 게이지바 배경 설정
-    [monthlySaving, monthlySavingMobile, annualReturn, annualReturnMobile].forEach(element => {
+    [monthlySaving, annualReturn].forEach(element => {
         if (element) updateRangeBackground(element);
     });
 
-    // PC 차트 설정
-    if (document.getElementById('expenseChartPC')) {
-        const pcChart = echarts.init(document.getElementById('expenseChartPC'));
-        const pcOption = {
+    // 차트 설정
+    if (document.getElementById('expenseChart')) {
+        const chart = echarts.init(document.getElementById('expenseChart'));
+        const option = {
             color: colors,
             tooltip: {
                 trigger: 'item',
@@ -324,11 +325,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 orient: 'horizontal',
                 bottom: '0',
                 left: 'center',
-                itemWidth: 14,
-                itemHeight: 14,
+                itemWidth: 12,
+                itemHeight: 12,
                 textStyle: { 
                     color: '#2C3E50',
-                    fontSize: 12
+                    fontSize: '12'
                 },
                 type: 'scroll',
                 pageTextStyle: {
@@ -338,7 +339,7 @@ document.addEventListener('DOMContentLoaded', function() {
             series: [{
                 name: '월간 지출',
                 type: 'pie',
-                radius: ['44%', '77%'],
+                radius: ['44%', '70%'],
                 center: ['50%', '45%'],
                 avoidLabelOverlap: false,
                 itemStyle: {
@@ -348,101 +349,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 label: {
                     show: false,
-                    position: 'center',
-                    color: '#2C3E50'
+                    position: 'center'
                 },
                 emphasis: {
                     label: {
                         show: true,
                         fontSize: '20',
-                        fontWeight: 'bold',
-                        color: '#2C3E50'
+                        fontWeight: 'bold'
                     }
                 },
                 labelLine: {
-                    show: true,
-                    length: 10,
-                    length2: 10,
-                    lineStyle: {
-                        color: '#2C3E50'
-                    }
+                    show: true
                 },
                 data: expenses
             }]
         };
-        pcChart.setOption(pcOption);
-        window.addEventListener('resize', () => pcChart.resize());
-    }
-
-    // 모바일 차트 설정
-    if (document.getElementById('expenseChartMobile')) {
-        const mobileChart = echarts.init(document.getElementById('expenseChartMobile'));
-        const mobileOption = {
-            color: colors,
-            tooltip: {
-                trigger: 'item',
-                formatter: function(params) {
-                    return `${params.name}<br/>
-                            ${numberWithCommas(params.value)}원<br/>
-                            ${params.percent}%`;
-                }
-            },
-            legend: {
-                orient: 'horizontal',
-                bottom: '0',
-                left: 'center',
-                itemWidth: 10,
-                itemHeight: 10,
-                textStyle: { 
-                    color: '#2C3E50',
-                    fontSize: 11
-                },
-                type: 'scroll',
-                pageTextStyle: {
-                    color: '#2C3E50'
-                }
-            },
-            series: [{
-                name: '월간 지출',
-                type: 'pie',
-                radius: ['44%', '66%'],
-                center: ['50%', '55%'],
-                avoidLabelOverlap: false,
-                itemStyle: {
-                    borderRadius: 4,
-                    borderColor: '#fff',
-                    borderWidth: 2
-                },
-                label: {
-                    show: false,
-                    position: 'center',
-                    color: '#2C3E50'
-                },
-                emphasis: {
-                    label: {
-                        show: true,
-                        fontSize: '20',
-                        fontWeight: 'bold',
-                        color: '#2C3E50'
-                    }
-                },
-                labelLine: {
-                    show: true,
-                    length: 10,
-                    length2: 10,
-                    lineStyle: {
-                        color: '#2C3E50'
-                    }
-                },
-                data: expenses
-            }]
-        };
-        mobileChart.setOption(mobileOption);
-        window.addEventListener('resize', () => mobileChart.resize());
+        chart.setOption(option);
+        window.addEventListener('resize', () => chart.resize());
     }
 });
+@endif
 
-// 숫자 포맷팅 함수
 function numberWithCommas(x) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
@@ -505,6 +432,18 @@ input[type="range"]::-moz-range-progress {
     background-color: #1f2937;
     border-radius: 5px;
     height: 8px;
+}
+
+@media (max-width: 768px) {
+    input[type="range"]::-webkit-slider-thumb {
+        height: 16px;
+        width: 16px;
+    }
+    
+    input[type="range"]::-moz-range-thumb {
+        height: 16px;
+        width: 16px;
+    }
 }
 </style>
 @endpush
