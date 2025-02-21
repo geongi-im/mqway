@@ -68,6 +68,7 @@
     <!-- 숨겨진 폼 (필터용) -->
     <form id="filterForm" action="{{ route('board.index') }}" method="GET" class="hidden">
         <input type="hidden" name="search" value="{{ request('search') }}">
+        <input type="hidden" name="page" value="{{ request('page') }}">
     </form>
 
     <!-- 게시글 그리드 -->
@@ -132,8 +133,8 @@
     @endif
 
     <!-- 페이지네이션 -->
-    <div class="mt-8">
-        {{ $posts->links() }}
+    <div class="mt-8 flex justify-center">
+        {{ $posts->appends(request()->query())->links() }}
     </div>
 </div>
 
