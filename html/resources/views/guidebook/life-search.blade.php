@@ -19,7 +19,7 @@
                         {{ number_format($lifeSearches->sum('mq_price')) }}원
                     </span>
                 </div>
-                
+                    
                 <!-- 버튼 영역 -->
                 <div class="flex items-center gap-2 w-full sm:w-auto">
                     <button onclick="openSampleModal()" 
@@ -209,6 +209,58 @@
     </div>
 </div>
 
+<style>
+#categorySlider {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    min-width: 100%;
+    padding: 0 1px;
+}
+
+#categorySlider::-webkit-scrollbar {
+    display: none;
+}
+
+.category-filter {
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    min-width: 80px;
+    text-align: center;
+    padding: 0.75rem 1.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 슬라이더 컨테이너 스타일 */
+.slider-container {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+}
+
+/* 좌우 버튼 공통 스타일 */
+.slider-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+}
+
+.slider-button:hover {
+    background: #f3f4f6;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.slider-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+</style>
 <!-- 샘플 모달 -->
 <div id="sampleModal" class="fixed inset-0 bg-black/50 z-50 hidden">
     <!-- 모달 컨테이너 -->
@@ -225,18 +277,25 @@
                         </svg>
                     </button>
                 </div>
+
                 <!-- 카테고리 필터 -->
-                <div class="px-4 pb-4 hidden" id="categoryFilterContainer">
-                    <div class="relative category-swiper">
-                        <!-- Swiper 컨테이너 -->
-                        <div class="swiper">
-                            <div class="swiper-wrapper" id="categoryFilters">
-                                <!-- 카테고리 버튼들이 동적으로 추가됨 -->
+                <div class="px-4 pb-4 relative" id="categoryFilterContainer">
+                    <div class="flex items-center">
+                        <button id="slideLeft" class="p-2 bg-white rounded-full shadow-md hover:bg-gray-50 focus:outline-none">
+                            <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+                        <div class="overflow-x-hidden flex-1 mx-2">
+                            <div id="categorySlider" class="flex gap-2 transition-transform duration-300 ease-out">
+                                <!-- 카테고리 버튼들이 여기에 동적으로 추가됨 -->
                             </div>
                         </div>
-                        <!-- 네비게이션 버튼 -->
-                        <div class="swiper-button-prev"></div>
-                        <div class="swiper-button-next"></div>
+                        <button id="slideRight" class="p-2 bg-white rounded-full shadow-md hover:bg-gray-50 focus:outline-none">
+                            <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -259,7 +318,7 @@
             </div>
 
             <!-- 하단 고정 영역 -->
-            <div class="sticky bottom-0 bg-white border-t border-gray-200 p-4 hidden" id="completeButtonContainer">
+            <div class="sticky bottom-0 bg-white border-t border-gray-200 p-4" id="completeButtonContainer">
                 <button id="completeSelectionBtn" 
                         class="w-full py-3 rounded-lg font-medium transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50 bg-gray-200 text-gray-500"
                         disabled>
@@ -270,90 +329,7 @@
     </div>
 </div>
 
-@push('styles')
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-<style>
-
-/* 필요하다면 스크롤바를 숨기는 옵션도 추가 가능 */
-.hide-scrollbar {
-  -ms-overflow-style: none; /* IE, Edge */
-  scrollbar-width: none; /* Firefox */
-}
-.hide-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-
-/* Swiper 기본 구조에 맞춰서 스타일링 */
-.category-swiper {
-  width: 100%;
-  position: relative;
-}
-
-.category-swiper .swiper {
-  width: 100%;
-  /* freeMode를 쓰는 경우 스크롤이 필요하다면 overflow 설정 */
-  /* overflow: hidden; (필요에 따라 조절) */
-}
-
-.category-swiper .swiper-wrapper {
-  /* 필요하다면 flex나 정렬 옵션 조정 가능 */
-}
-
-.category-swiper .swiper-slide {
-  /* Swiper가 slidesPerView: 'auto' 일 때 알아서 width를 잡습니다 */
-  /* width: auto; 등을 굳이 강제할 필요는 없습니다 */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.category-swiper .swiper-button-next,
-.category-swiper .swiper-button-prev {
-    top: 50%;
-    transform: translateY(-50%);
-    width: 32px;
-    height: 32px;
-    background: white;
-    border-radius: 50%;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.category-swiper .swiper-button-prev {
-    left: 0;
-}
-
-.category-swiper .swiper-button-next {
-    right: 0;
-}
-
-.category-swiper .swiper-button-disabled {
-    opacity: 0;
-    pointer-events: none;
-}
-
-/* 카테고리 버튼은 슬라이드 안에 들어가는 요소이므로
-   따로 display를 지정하기보다는 padding, 색상 정도만 주시면 됩니다. */
-.category-filter {
-    padding: 0.25rem 0.75rem;
-    border-radius: 1rem;
-    font-size: 0.875rem;
-    margin: 0; /* swiper-slide로 분리되므로 margin 대신 spaceBetween 옵션 사용 */
-}
-
-/* 추가 필요 CSS */
-.swiper-slide {
-    width: auto !important;
-}
-
-.category-filter {
-    display: inline-block;
-    width: max-content;
-}
-</style>
-@endpush
-
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const modal = document.getElementById('modal');
@@ -576,13 +552,7 @@ async function openSampleModal() {
     document.getElementById('loadingIndicator').classList.remove('hidden');
     
     // 카테고리 정보 로드
-    await loadCategories();
-    
-    // 첫 번째 카테고리의 데이터 로드
-    if (categories.length > 0) {
-        currentCategory = categories[0].name;
-        filterByCategory(currentCategory);
-    }
+    loadCategories();
 }
 
 async function loadCategories() {
@@ -604,57 +574,104 @@ async function loadCategories() {
         // 카테고리 필터 업데이트
         updateCategoryFilters();
         
-        // 카테고리 필터와 선택완료 버튼 표시
-        document.getElementById('categoryFilterContainer').classList.remove('hidden');
-        document.getElementById('completeButtonContainer').classList.remove('hidden');
+        // 첫 번째 카테고리 자동 선택
+        if (categories.length > 0) {
+            currentCategory = categories[0].name;
+            filterByCategory(currentCategory);
+            
+            // 첫 번째 카테고리 버튼에 선택 스타일 적용
+            const firstCategoryBtn = document.querySelector('.category-filter');
+            if (firstCategoryBtn) {
+                firstCategoryBtn.classList.remove('bg-secondary');
+                firstCategoryBtn.classList.add('bg-point');
+            }
+        }
+        
     } catch (error) {
         console.error('Error loading categories:', error);
     }
 }
 
 function updateCategoryFilters() {
-    const filterContainer = document.querySelector('#categoryFilters');
-    filterContainer.innerHTML = '';
+    const slider = document.getElementById('categorySlider');
+    slider.innerHTML = ''; // 기존 카테고리 버튼 제거
 
-    // 카테고리 버튼 생성 시 각 카테고리는 반드시 swiper-slide 로 감싸기
+    // 카테고리 버튼 생성
     categories.forEach(category => {
-        // 슬라이드 하나 생성
-        const slideDiv = document.createElement('div');
-        // Swiper가 인식하도록 클래스명 지정
-        slideDiv.classList.add('swiper-slide');
-        
-        // 버튼 생성
         const button = document.createElement('button');
-        button.className = 'category-filter bg-secondary text-cdark';
-        button.textContent = `${category.name} (${category.count})`;
+        button.className = 'category-filter px-4 py-2 bg-secondary text-cdark rounded-full text-sm font-medium hover:bg-opacity-80 transition-all';
+        button.textContent = category.name;
         button.dataset.category = category.name;
         button.onclick = () => filterByCategory(category.name);
-
-        // 슬라이드에 버튼 삽입
-        slideDiv.appendChild(button);
-        // 래퍼(swiper-wrapper)에 추가
-        filterContainer.appendChild(slideDiv);
+        slider.appendChild(button);
     });
 
-    // Swiper 초기화
-    // 이미 존재한다면 destroy 후 재초기화하는 부분은 동일
-    if (window.categorySwiper) {
-        window.categorySwiper.destroy(true, true);
+    // 슬라이더 초기화
+    initializeSlider();
+    updateCategoryCount();
+}
+
+// 카테고리별 선택된 샘플 개수 업데이트 함수 추가
+function updateCategoryCount() {
+    // 카테고리별 선택된 카드 개수 계산
+    const categoryCount = {};
+    selectedCards.forEach(cardId => {
+        const card = loadedCards.get(cardId);
+        if (card) {
+            categoryCount[card.category] = (categoryCount[card.category] || 0) + 1;
+        }
+    });
+
+    // 각 카테고리 버튼 텍스트 업데이트
+    document.querySelectorAll('.category-filter').forEach(btn => {
+        const category = btn.dataset.category;
+        const count = categoryCount[category] || 0;
+        
+        if (count > 0) {
+            btn.textContent = `${category} (${count})`;
+        } else {
+            btn.textContent = category;
+        }
+    });
+}
+
+function initializeSlider() {
+    const slider = document.getElementById('categorySlider');
+    const leftBtn = document.getElementById('slideLeft');
+    const rightBtn = document.getElementById('slideRight');
+    let scrollAmount = 0;
+    const step = 200; // 한 번에 스크롤할 픽셀 양
+
+    // 왼쪽 버튼 클릭 이벤트
+    leftBtn.addEventListener('click', () => {
+        scrollAmount = Math.max(scrollAmount - step, 0);
+        slider.style.transform = `translateX(-${scrollAmount}px)`;
+        updateButtonVisibility();
+    });
+
+    // 오른쪽 버튼 클릭 이벤트
+    rightBtn.addEventListener('click', () => {
+        const maxScroll = slider.scrollWidth - slider.parentElement.clientWidth;
+        scrollAmount = Math.min(scrollAmount + step, maxScroll);
+        slider.style.transform = `translateX(-${scrollAmount}px)`;
+        updateButtonVisibility();
+    });
+
+    // 버튼 표시/숨김 상태 업데이트
+    function updateButtonVisibility() {
+        leftBtn.style.opacity = scrollAmount <= 0 ? '0.5' : '1';
+        leftBtn.style.cursor = scrollAmount <= 0 ? 'default' : 'pointer';
+
+        const maxScroll = slider.scrollWidth - slider.parentElement.clientWidth;
+        rightBtn.style.opacity = scrollAmount >= maxScroll ? '0.5' : '1';
+        rightBtn.style.cursor = scrollAmount >= maxScroll ? 'default' : 'pointer';
     }
 
-    // 50ms 지연 추가 (렌더링 완료 대기)
-    setTimeout(() => {
-        window.categorySwiper = new Swiper('.category-swiper .swiper', {
-            slidesPerView: 'auto',
-            spaceBetween: 8, // 슬라이드 간격
-            navigation: {
-                nextEl: '.category-swiper .swiper-button-next',
-                prevEl: '.category-swiper .swiper-button-prev',
-            },
-            // 필요하면 자유 스크롤 모드
-            // freeMode: true,
-            });
-    }, 50);
+    // 초기 버튼 상태 설정
+    updateButtonVisibility();
+
+    // 창 크기 변경 시 버튼 상태 업데이트
+    window.addEventListener('resize', updateButtonVisibility);
 }
 
 async function filterByCategory(category) {
@@ -730,7 +747,6 @@ function createCardElement(card, isSelected = false) {
             <div class="flex-shrink-0 pt-1">
                 <input type="checkbox" 
                        class="w-5 h-5 rounded border-gray-300 text-point focus:ring-point"
-                       onclick="event.stopPropagation()"
                        ${isSelected ? 'checked' : ''}>
             </div>
             <div class="flex-grow">
@@ -747,6 +763,13 @@ function createCardElement(card, isSelected = false) {
     
     // 카드 클릭 이벤트 추가
     cardElement.addEventListener('click', () => toggleCardSelection(card.id));
+    
+    // 체크박스 클릭 이벤트 추가
+    const checkbox = cardElement.querySelector('input[type="checkbox"]');
+    checkbox.addEventListener('click', (e) => {
+        e.stopPropagation(); // 이벤트 버블링 방지
+        toggleCardSelection(card.id);
+    });
     
     return cardElement;
 }
@@ -767,6 +790,7 @@ function toggleCardSelection(cardId) {
         checkbox.checked = true;
     }
     updateCompleteButton();
+    updateCategoryCount(); // 카테고리 카운트 업데이트 추가
 }
 
 function updateCompleteButton() {
@@ -774,7 +798,16 @@ function updateCompleteButton() {
     const selectedCount = selectedCards.size;
     
     if (selectedCount > 0) {
-        completeBtn.textContent = `선택완료(${selectedCount})`;
+        // 선택된 카드들의 가격 합산
+        let totalPrice = 0;
+        selectedCards.forEach(cardId => {
+            const card = loadedCards.get(cardId);
+            if (card) {
+                totalPrice += parseInt(card.price);
+            }
+        });
+        
+        completeBtn.textContent = `${selectedCount}개 선택완료 (${numberWithCommas(totalPrice)}원)`;
         completeBtn.classList.remove('bg-gray-200', 'text-gray-500');
         completeBtn.classList.add('bg-point', 'text-cdark');
         completeBtn.disabled = false;
@@ -889,7 +922,7 @@ function toggleCategoryButtons(disabled) {
         }
     });
 }
-
+    
 // completeSelectionBtn 클릭 이벤트 핸들러 추가
 document.getElementById('completeSelectionBtn').addEventListener('click', async () => {
     if (!confirm('선택한 샘플을 추가하시겠습니까?')) return;
