@@ -1318,7 +1318,7 @@ document.addEventListener('DOMContentLoaded', function() {
         formData.append('_method', 'DELETE');
         formData.append('_token', '{{ csrf_token() }}');
         
-        fetch(`{{ url('guidebook/reality-check') }}/${id}`, {
+        fetch(`/guidebook/reality-check/${id}`, {
             method: 'POST',
             body: formData
         })
