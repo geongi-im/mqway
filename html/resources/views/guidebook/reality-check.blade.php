@@ -588,7 +588,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Ajax 요청으로 데이터 가져오기
-        fetch(`{{ route('guidebook.reality-check.get-expenses') }}?type=${type}`)
+        fetch(`/guidebook/reality-check/get-expenses?type=${type}`)
             .then(response => {
                 return response.json();
             })
@@ -627,8 +627,8 @@ document.addEventListener('DOMContentLoaded', function() {
             return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         };
         
-        switch(tabName) {
-            case 'statistics':
+            switch(tabName) {
+                case 'statistics':
                 // 통계 탭 - 수입/지출 차트 및 테이블
                 updateChart('incomeChart', prepareChartData(incomeData), '수입 분석', statisticsIncomeChart);
                 updateChart('expenseChart', prepareChartData(expenseData), '지출 분석', statisticsExpenseChart);
@@ -637,9 +637,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 // 합계 정보 업데이트
                 document.getElementById('totalIncome').textContent = formatNumber(totalIncome) + '원';
                 document.getElementById('totalExpense').textContent = formatNumber(totalExpense) + '원';
-                break;
+                    break;
                 
-            case 'expense':
+                case 'expense':
                 // 지출 탭 - 지출 차트 및 테이블
                 updateChart('expenseOnlyChart', prepareChartData(expenseData), '지출 분석', expenseOnlyChart);
                 updateTable(expenses, 'expenseTable', false);
@@ -1722,8 +1722,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert('샘플 데이터가 성공적으로 적용되었습니다.');
                 // 모달 닫기
                 closeSampleModal();
-                // 데이터 새로고침
-                fetchExpenses('all');
+
+                //페이지 새로고침
+                location.reload();
             } else {
                 alert(data.message || '샘플 데이터 적용 중 오류가 발생했습니다.');
             }
