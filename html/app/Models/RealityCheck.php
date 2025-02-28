@@ -12,9 +12,9 @@ class RealityCheck extends Model
 
     protected $fillable = [
         'mq_user_id',
+        'mq_type',
         'mq_category',
-        'mq_expected_amount',
-        'mq_actual_amount',
+        'mq_price',
         'mq_reg_date',
         'mq_update_date'
     ];

@@ -4,654 +4,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\RealityCheck;
+use App\Models\RealityCheckSample;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 
 class RealityCheckController extends Controller
 {
-    private $samples = [
-        '10' => [
-            'male' => [
-                [
-                    'name' => '최학생',
-                    'description' => '용돈으로 생활하는 활발한 고등학생',
-                    'expenses' => [
-                        '식비' => 150000,
-                        '카페·간식' => 50000,
-                        '편의점·마트·잡화' => 30000,
-                        '쇼핑' => 50000,
-                        '취미·여가' => 70000,
-                        '교통·자동차' => 20000,
-                        '교육' => 100000,
-                    ]
-                ],
-                [
-                    'name' => '박겜돌',
-                    'description' => '게임과 유튜브를 즐기는 중학생',
-                    'expenses' => [
-                        '식비' => 100000,
-                        '카페·간식' => 30000,
-                        '편의점·마트·잡화' => 40000,
-                        '취미·여가' => 100000,
-                    ]
-                ],
-                [
-                    'name' => '김운동',
-                    'description' => '운동을 좋아하는 활동적인 중학생',
-                    'expenses' => [
-                        '식비' => 120000,
-                        '편의점·마트·잡화' => 50000,
-                        '취미·여가' => 80000,
-                        '교통·자동차' => 10000,
-                    ]
-                ],
-                [
-                    'name' => '윤모범',
-                    'description' => '학업에 집중하는 조용한 고등학생',
-                    'expenses' => [
-                        '식비' => 130000,
-                        '카페·간식' => 20000,
-                        '편의점·마트·잡화' => 20000,
-                        '교육' => 150000,
-                    ]
-                ],
-                [
-                    'name' => '강스타',
-                    'description' => '패션과 힙합을 사랑하는 고등학생',
-                    'expenses' => [
-                        '식비' => 140000,
-                        '카페·간식' => 40000,
-                        '편의점·마트·잡화' => 30000,
-                        '쇼핑' => 120000,
-                        '취미·여가' => 50000,
-                    ]
-                ]
-            ],
-            'female' => [
-                [
-                    'name' => '이뷰티',
-                    'description' => '뷰티와 패션에 관심 많은 여고생',
-                    'expenses' => [
-                        '식비' => 130000,
-                        '카페·간식' => 40000,
-                        '편의점·마트·잡화' => 30000,
-                        '쇼핑' => 100000,
-                        '취미·여가' => 60000,
-                    ]
-                ],
-                [
-                    'name' => '정소녀',
-                    'description' => '문학소녀 감성의 중학생',
-                    'expenses' => [
-                        '식비' => 110000,
-                        '카페·간식' => 20000,
-                        '편의점·마트·잡화' => 20000,
-                        '취미·여가' => 50000,
-                        '교육' => 30000,
-                    ]
-                ],
-                [
-                    'name' => '배먹방',
-                    'description' => '맛있는 음식을 찾아다니는 먹방 꿈나무',
-                    'expenses' => [
-                        '식비' => 180000,
-                        '카페·간식' => 60000,
-                        '편의점·마트·잡화' => 30000,
-                        '취미·여가' => 40000,
-                    ]
-                ],
-                [
-                    'name' => '송예술',
-                    'description' => '그림과 음악을 사랑하는 예비 예술가',
-                    'expenses' => [
-                        '식비' => 120000,
-                        '카페·간식' => 30000,
-                        '편의점·마트·잡화' => 20000,
-                        '취미·여가' => 70000,
-                        '교육' => 50000,
-                    ]
-                ],
-                [
-                    'name' => '하톡톡',
-                    'description' => 'SNS 소통을 즐기는 활발한 여중생',
-                    'expenses' => [
-                        '식비' => 140000,
-                        '카페·간식' => 50000,
-                        '편의점·마트·잡화' => 40000,
-                        '쇼핑' => 60000,
-                        '취미·여가' => 60000,
-                        '통신' => 30000,
-                    ]
-                ]
-            ]
-        ],
-        '2030' => [
-            'male' => [
-                [
-                    'name' => '김개발',
-                    'description' => 'IT 스타트업 개발자, 맥주와 커피를 즐김',
-                    'expenses' => [
-                        '식비' => 400000,
-                        '주거·통신' => 600000,
-                        '카페·간식' => 100000,
-                        '편의점·마트·잡화' => 80000,
-                        '술·유흥' => 150000,
-                        '취미·여가' => 120000,
-                        '교통·자동차' => 50000,
-                    ]
-                ],
-                [
-                    'name' => '박창업',
-                    'description' => '푸드트럭 창업 준비생, 절약과 미래 투자',
-                    'expenses' => [
-                        '식비' => 300000,
-                        '주거·통신' => 550000,
-                        '편의점·마트·잡화' => 50000,
-                        '저축·투자' => 500000,
-                    ]
-                ],
-                [
-                    'name' => '최여행',
-                    'description' => '자유로운 영혼의 여행 작가, 뚜벅이 생활',
-                    'expenses' => [
-                        '식비' => 350000,
-                        '주거·통신' => 400000,
-                        '카페·간식' => 60000,
-                        '편의점·마트·잡화' => 40000,
-                        '취미·여가' => 80000,
-                        '교통·자동차' => 30000,
-                    ]
-                ],
-                [
-                    'name' => '정직장',
-                    'description' => '평범한 회사원, 소소한 행복 추구',
-                    'expenses' => [
-                        '식비' => 500000,
-                        '주거·통신' => 700000,
-                        '카페·간식' => 80000,
-                        '편의점·마트·잡화' => 70000,
-                        '술·유흥' => 100000,
-                        '쇼핑' => 80000,
-                        '취미·여가' => 100000,
-                        '교통·자동차' => 80000,
-                    ]
-                ],
-                [
-                    'name' => '고효율',
-                    'description' => '재테크에 관심 많은 짠돌이 직장인',
-                    'expenses' => [
-                        '식비' => 300000,
-                        '주거·통신' => 500000,
-                        '편의점·마트·잡화' => 30000,
-                        '저축·투자' => 1000000,
-                    ]
-                ]
-            ],
-            'female' => [
-                [
-                    'name' => '윤디자',
-                    'description' => '패션 디자이너, 톡톡 튀는 소비',
-                    'expenses' => [
-                        '식비' => 450000,
-                        '주거·통신' => 650000,
-                        '카페·간식' => 90000,
-                        '편의점·마트·잡화' => 70000,
-                        '쇼핑' => 200000,
-                        '취미·여가' => 100000,
-                    ]
-                ],
-                [
-                    'name' => '한커리어',
-                    'description' => '워커홀릭 커리어우먼, 자기 계발 투자',
-                    'expenses' => [
-                        '식비' => 550000,
-                        '주거·통신' => 800000,
-                        '카페·간식' => 120000,
-                        '편의점·마트·잡화' => 90000,
-                        '쇼핑' => 150000,
-                        '교육' => 200000,
-                        '의료·건강·피트니스' => 100000,
-                        '교통·자동차' => 100000,
-                    ]
-                ],
-                [
-                    'name' => '강주부',
-                    'description' => '알뜰살뜰 주부, 가정 경제 책임자',
-                    'expenses' => [
-                        '식비' => 600000,
-                        '주거·통신' => 750000,
-                        '편의점·마트·잡화' => 300000,
-                        '의료·건강·피트니스' => 50000,
-                        '교육' => 150000,
-                    ]
-                ],
-                [
-                    'name' => '차예술',
-                    'description' => '감성적인 플로리스트, 꽃처럼 아름다운 소비',
-                    'expenses' => [
-                        '식비' => 400000,
-                        '주거·통신' => 600000,
-                        '카페·간식' => 80000,
-                        '편의점·마트·잡화' => 60000,
-                        '쇼핑' => 100000,
-                        '취미·여가' => 150000,
-                    ]
-                ],
-                [
-                    'name' => '서알뜰',
-                    'description' => '계획적인 소비 습관을 가진 직장인',
-                    'expenses' => [
-                        '식비' => 400000,
-                        '주거·통신' => 700000,
-                        '편의점·마트·잡화' => 50000,
-                        '쇼핑' => 70000,
-                        '저축·투자' => 400000,
-                    ]
-                ]
-            ]
-        ],
-        '3040' => [
-            'male' => [
-                [
-                    'name' => '배벤처',
-                    'description' => '성공을 향해 달리는 IT 벤처 대표',
-                    'expenses' => [
-                        '식비' => 600000,
-                        '주거·통신' => 1000000,
-                        '카페·간식' => 100000,
-                        '술·유흥' => 200000,
-                        '쇼핑' => 150000,
-                        '취미·여가' => 200000,
-                        '교통·자동차' => 300000,
-                        '저축·투자' => 1500000,
-                    ]
-                ],
-                [
-                    'name' => '오과장',
-                    'description' => '평범한 직장인 가장, 가족을 위한 소비',
-                    'expenses' => [
-                        '식비' => 800000,
-                        '주거·통신' => 900000,
-                        '편의점·마트·잡화' => 400000,
-                        '술·유흥' => 100000,
-                        '취미·여가' => 100000,
-                        '교통·자동차' => 200000,
-                        '교육' => 250000,
-                        '저축·투자' => 500000,
-                    ]
-                ],
-                [
-                    'name' => '문교사',
-                    'description' => '책임감 강한 고등학교 교사, 교육 관련 지출',
-                    'expenses' => [
-                        '식비' => 500000,
-                        '주거·통신' => 700000,
-                        '카페·간식' => 70000,
-                        '편의점·마트·잡화' => 60000,
-                        '취미·여가' => 100000,
-                        '교육' => 100000,
-                        '저축·투자' => 300000,
-                    ]
-                ],
-                [
-                    'name' => '염사업',
-                    'description' => '자영업 식당 사장, 사업 확장 고민',
-                    'expenses' => [
-                        '식비' => 400000,
-                        '주거·통신' => 800000,
-                        '편의점·마트·잡화' => 70000,
-                        '술·유흥' => 150000,
-                        '취미·여가' => 80000,
-                        '교통·자동차' => 150000,
-                        '저축·투자' => 400000,
-                    ]
-                ],
-                [
-                    'name' => '하프리',
-                    'description' => '자유로운 프리랜서 개발자, 유연한 소비',
-                    'expenses' => [
-                        '식비' => 450000,
-                        '주거·통신' => 650000,
-                        '카페·간식' => 90000,
-                        '편의점·마트·잡화' => 50000,
-                        '취미·여가' => 120000,
-                        '여행·숙박' => 100000,
-                    ]
-                ]
-            ],
-            'female' => [
-                [
-                    'name' => '권변호',
-                    'description' => '능력 있는 변호사, 자기 투자 아끼지 않음',
-                    'expenses' => [
-                        '식비' => 700000,
-                        '주거·통신' => 1200000,
-                        '카페·간식' => 150000,
-                        '쇼핑' => 300000,
-                        '취미·여가' => 250000,
-                        '의료·건강·피트니스' => 200000,
-                        '교통·자동차' => 200000,
-                        '저축·투자' => 2000000,
-                    ]
-                ],
-                [
-                    'name' => '성선생',
-                    'description' => '꼼꼼한 초등학교 교사, 교육과 가족 중심',
-                    'expenses' => [
-                        '식비' => 700000,
-                        '주거·통신' => 850000,
-                        '편의점·마트·잡화' => 350000,
-                        '교육' => 200000,
-                        '저축·투자' => 400000,
-                    ]
-                ],
-                [
-                    'name' => '장전문',
-                    'description' => '섬세한 전문직 여성, 자기 관리 철저',
-                    'expenses' => [
-                        '식비' => 600000,
-                        '주거·통신' => 900000,
-                        '카페·간식' => 100000,
-                        '쇼핑' => 150000,
-                        '의료·건강·피트니스' => 150000,
-                        '교통·자동차' => 100000,
-                        '저축·투자' => 800000,
-                    ]
-                ],
-                [
-                    'name' => '진육아',
-                    'description' => '워킹맘, 육아와 직장 생활 병행',
-                    'expenses' => [
-                        '식비' => 750000,
-                        '주거·통신' => 800000,
-                        '편의점·마트·잡화' => 400000,
-                        '카페·간식' => 50000,
-                        '교육' => 300000,
-                        '교통·자동차' => 150000,
-                    ]
-                ],
-                [
-                    'name' => '홍스타',
-                    'description' => 'SNS 인플루언서, 화려한 삶과 소비',
-                    'expenses' => [
-                        '식비' => 500000,
-                        '주거·통신' => 800000,
-                        '카페·간식' => 100000,
-                        '쇼핑' => 500000,
-                        '취미·여가' => 300000,
-                        '여행·숙박' => 200000,
-                        '교통·자동차' => 100000,
-                    ]
-                ]
-            ]
-        ],
-        '5060' => [
-            'male' => [
-                [
-                    'name' => '고이사',
-                    'description' => '은퇴 준비하는 기업 임원, 건강과 미래 설계',
-                    'expenses' => [
-                        '식비' => 600000,
-                        '주거·통신' => 1000000,
-                        '카페·간식' => 80000,
-                        '술·유흥' => 100000,
-                        '취미·여가' => 200000,
-                        '의료·건강·피트니스' => 250000,
-                        '교통·자동차' => 200000,
-                        '저축·투자' => 1000000,
-                    ]
-                ],
-                [
-                    'name' => '나정비',
-                    'description' => '정년퇴직 후 소규모 카센터 운영, 소소한 행복',
-                    'expenses' => [
-                        '식비' => 500000,
-                        '주거·통신' => 800000,
-                        '편의점·마트·잡화' => 100000,
-                        '술·유흥' => 80000,
-                        '취미·여가' => 100000,
-                        '의료·건강·피트니스' => 150000,
-                        '교통·자동차' => 150000,
-                    ]
-                ],
-                [
-                    'name' => '도농부',
-                    'description' => '귀농하여 자연을 벗삼아 사는 농부',
-                    'expenses' => [
-                        '식비' => 400000,
-                        '주거·통신' => 500000,
-                        '편의점·마트·잡화' => 80000,
-                        '취미·여가' => 50000,
-                        '의료·건강·피트니스' => 100000,
-                        '교통·자동차' => 100000,
-                    ]
-                ],
-                [
-                    'name' => '류교장',
-                    'description' => '퇴직 교장, 봉사활동과 배움에 열정',
-                    'expenses' => [
-                        '식비' => 450000,
-                        '주거·통신' => 700000,
-                        '카페·간식' => 50000,
-                        '편의점·마트·잡화' => 70000,
-                        '취미·여가' => 80000,
-                        '교육' => 50000,
-                        '의료·건강·피트니스' => 120000,
-                        '교통·자동차' => 80000,
-                    ]
-                ],
-                [
-                    'name' => '마건물',
-                    'description' => '부동산 임대업으로 안정적인 노후',
-                    'expenses' => [
-                        '식비' => 550000,
-                        '주거·통신' => 900000,
-                        '카페·간식' => 70000,
-                        '술·유흥' => 100000,
-                        '취미·여가' => 150000,
-                        '의료·건강·피트니스' => 200000,
-                        '교통·자동차' => 100000,
-                    ]
-                ]
-            ],
-            'female' => [
-                [
-                    'name' => '강사장',
-                    'description' => '식당 운영 베테랑 사장님, 손주 사랑',
-                    'expenses' => [
-                        '식비' => 600000,
-                        '주거·통신' => 800000,
-                        '편의점·마트·잡화' => 150000,
-                        '의료·건강·피트니스' => 150000,
-                        '용돈' => 200000,
-                        '저축·투자' => 300000,
-                    ]
-                ],
-                [
-                    'name' => '신여사',
-                    'description' => '우아한 취미 생활을 즐기는 은퇴 교사',
-                    'expenses' => [
-                        '식비' => 500000,
-                        '주거·통신' => 700000,
-                        '카페·간식' => 80000,
-                        '쇼핑' => 100000,
-                        '취미·여가' => 200000,
-                        '의료·건강·피트니스' => 150000,
-                        '여행·숙박' => 100000,
-                    ]
-                ],
-                [
-                    'name' => '안보건',
-                    'description' => '건강 전도사, 퇴직 후 건강 강사',
-                    'expenses' => [
-                        '식비' => 550000,
-                        '주거·통신' => 750000,
-                        '카페·간식' => 60000,
-                        '편의점·마트·잡화' => 100000,
-                        '의료·건강·피트니스' => 200000,
-                        '교통·자동차' => 80000,
-                    ]
-                ],
-                [
-                    'name' => '윤미용',
-                    'description' => '미용실 운영, 아름다움을 추구하는 삶',
-                    'expenses' => [
-                        '식비' => 500000,
-                        '주거·통신' => 800000,
-                        '편의점·마트·잡화' => 120000,
-                        '쇼핑' => 150000,
-                        '의료·건강·피트니스' => 100000,
-                        '저축·투자' => 200000,
-                    ]
-                ],
-                [
-                    'name' => '차절약',
-                    'description' => '검소한 생활 습관, 노후 대비 철저',
-                    'expenses' => [
-                        '식비' => 400000,
-                        '주거·통신' => 600000,
-                        '편의점·마트·잡화' => 50000,
-                        '의료·건강·피트니스' => 100000,
-                        '저축·투자' => 500000,
-                    ]
-                ]
-            ]
-        ],
-        '60' => [
-            'male' => [
-                [
-                    'name' => '김고전',
-                    'description' => '옛 추억을 그리워하는 전직 은행원',
-                    'expenses' => [
-                        '식비' => 400000,
-                        '주거·통신' => 700000,
-                        '카페·간식' => 30000,
-                        '편의점·마트·잡화' => 60000,
-                        '술·유흥' => 50000,
-                        '취미·여가' => 70000,
-                        '의료·건강·피트니스' => 150000,
-                        '교통·자동차' => 50000,
-                    ]
-                ],
-                [
-                    'name' => '이소박',
-                    'description' => '소박한 삶을 즐기는 은퇴 공무원',
-                    'expenses' => [
-                        '식비' => 350000,
-                        '주거·통신' => 600000,
-                        '편의점·마트·잡화' => 40000,
-                        '취미·여가' => 50000,
-                        '의료·건강·피트니스' => 120000,
-                        '교통·자동차' => 30000,
-                    ]
-                ],
-                [
-                    'name' => '최자연',
-                    'description' => '자연 속에서 여유로운 노후를 보내는 은퇴자',
-                    'expenses' => [
-                        '식비' => 300000,
-                        '주거·통신' => 500000,
-                        '편의점·마트·잡화' => 30000,
-                        '취미·여가' => 40000,
-                        '의료·건강·피트니스' => 100000,
-                        '교통·자동차' => 20000,
-                    ]
-                ],
-                [
-                    'name' => '박봉사',
-                    'description' => '봉사활동으로 활기찬 노후를 보내는 사회복지사 출신',
-                    'expenses' => [
-                        '식비' => 380000,
-                        '주거·통신' => 650000,
-                        '편의점·마트·잡화' => 50000,
-                        '취미·여가' => 60000,
-                        '의료·건강·피트니스' => 130000,
-                        '교통·자동차' => 40000,
-                    ]
-                ],
-                [
-                    'name' => '임학구',
-                    'description' => '배움에 대한 열정이 식지 않는 평생 학습자',
-                    'expenses' => [
-                        '식비' => 420000,
-                        '주거·통신' => 750000,
-                        '카페·간식' => 40000,
-                        '편의점·마트·잡화' => 50000,
-                        '취미·여가' => 80000,
-                        '교육' => 80000,
-                        '의료·건강·피트니스' => 140000,
-                        '교통·자동차' => 40000,
-                    ]
-                ]
-            ],
-            'female' => [
-                [
-                    'name' => '오여유',
-                    'description' => '여유로운 노후를 즐기는 낭만적인 시니어',
-                    'expenses' => [
-                        '식비' => 450000,
-                        '주거·통신' => 700000,
-                        '카페·간식' => 60000,
-                        '쇼핑' => 80000,
-                        '취미·여가' => 120000,
-                        '의료·건강·피트니스' => 150000,
-                        '여행·숙박' => 80000,
-                    ]
-                ],
-                [
-                    'name' => '조절약',
-                    'description' => '알뜰하게 생활하는 현명한 노년',
-                    'expenses' => [
-                        '식비' => 350000,
-                        '주거·통신' => 550000,
-                        '편의점·마트·잡화' => 40000,
-                        '의료·건강·피트니스' => 100000,
-                        '저축·투자' => 200000,
-                    ]
-                ],
-                [
-                    'name' => '손건강',
-                    'description' => '건강 관리에 힘쓰는 액티브 시니어',
-                    'expenses' => [
-                        '식비' => 400000,
-                        '주거·통신' => 650000,
-                        '편의점·마트·잡화' => 60000,
-                        '취미·여가' => 80000,
-                        '의료·건강·피트니스' => 200000,
-                        '교통·자동차' => 50000,
-                    ]
-                ],
-                [
-                    'name' => '백낭만',
-                    'description' => '낭만적인 노년을 꿈꾸는 시니어 모델',
-                    'expenses' => [
-                        '식비' => 480000,
-                        '주거·통신' => 750000,
-                        '카페·간식' => 70000,
-                        '쇼핑' => 150000,
-                        '취미·여가' => 150000,
-                        '의료·건강·피트니스' => 120000,
-                        '여행·숙박' => 100000,
-                        '교통·자동차' => 60000,
-                    ]
-                ],
-                [
-                    'name' => '하소통',
-                    'description' => '디지털 소통을 즐기는 스마트 시니어',
-                    'expenses' => [
-                        '식비' => 430000,
-                        '주거·통신' => 700000,
-                        '카페·간식' => 50000,
-                        '편의점·마트·잡화' => 60000,
-                        '취미·여가' => 100000,
-                        '의료·건강·피트니스' => 130000,
-                        '통신' => 50000,
-                    ]
-                ]
-            ]
-        ]
-    ];
-
     public function __construct()
     {
         $this->middleware('auth');  // 로그인 필요
@@ -662,61 +20,137 @@ class RealityCheckController extends Controller
      */
     public function index()
     {
-        $expenses = RealityCheck::where('mq_user_id', Auth::user()->mq_user_id)
-            ->orderBy('idx', 'desc')
-            ->get();
-
+        // 빈 컬렉션을 전달하여 초기 페이지 로드 시 데이터를 표시하지 않음
+        // 실제 데이터는 Ajax를 통해 불러옴
+        $expenses = collect([]);
+        
         return view('guidebook.reality-check', compact('expenses'));
     }
 
+    /**
+     * 샘플 데이터 가져오기
+     */
     public function getSamples(Request $request)
     {
-        $gender = $request->input('gender');
-        $age = $request->input('age');
+        $gender = $request->query('gender');
+        $age = $request->query('age');
 
-        if (isset($this->samples[$age][$gender])) {
-            return response()->json($this->samples[$age][$gender]);
+        // 파라미터가 없는 경우 기본값 설정
+        if (empty($gender) || empty($age)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => '성별과 연령대 파라미터가 필요합니다.'
+            ], 400);
         }
 
-        // 다른 연령대의 샘플 데이터는 추후 추가
-        return response()->json([]);
+        // DB에서 해당 성별과 연령대에 맞는 샘플 데이터 조회
+        $samples = RealityCheckSample::where('mq_s_gender', $gender)
+            ->where('mq_s_age', $age)
+            ->get();
+
+        // 클라이언트에 맞게 데이터 포맷팅
+        $formattedSamples = $samples->map(function($sample) {
+            $content = $sample->mq_s_content;
+            
+            // 지출 항목 포맷팅
+            $expenses = [];
+            if (isset($content['expenses']) && is_array($content['expenses'])) {
+                foreach ($content['expenses'] as $expense) {
+                    if (isset($expense['category']) && isset($expense['price'])) {
+                        $expenses[$expense['category']] = $expense['price'];
+                    }
+                }
+            }
+            
+            // 수입 항목 포맷팅 - 배열 형태로 유지
+            $income = [];
+            if (isset($content['income']) && is_array($content['income'])) {
+                $income = $content['income'];
+            }
+            
+            return [
+                'name' => $sample->mq_s_name,
+                'description' => $sample->mq_s_description,
+                'expenses' => $expenses,
+                'income' => $income
+            ];
+        });
+
+        return response()->json($formattedSamples);
     }
 
+    /**
+     * 샘플 데이터 적용하기
+     */
     public function applySample(Request $request)
     {
         $gender = $request->input('gender');
         $age = $request->input('age');
-        $sampleIndex = $request->input('sampleIndex');
+        $sampleIndex = $request->input('sampleIndex', 0);
 
         try {
-            $sample = null;
+            // DB에서 해당 성별과 연령대에 맞는 샘플 데이터 조회
+            $samples = RealityCheckSample::where('mq_s_gender', $gender)
+                ->where('mq_s_age', $age)
+                ->get();
+
+            if ($samples->isEmpty() || !isset($samples[$sampleIndex])) {
+                return response()->json([
+                    'status' => 'error', 
+                    'message' => '해당하는 샘플 데이터가 없습니다.'
+                ], 404);
+            }
+
+            $sample = $samples[$sampleIndex];
+            $content = $sample->mq_s_content;
             
-            if (isset($this->samples[$age][$gender])) {
-                $sample = $this->samples[$age][$gender][$sampleIndex];
-            }
-
-            if ($sample) {
-                // 기존 데이터 삭제
-                //RealityCheck::where('mq_user_id', Auth::user()->mq_user_id)->delete();
-                
-                // 새로운 샘플 데이터 추가
-                foreach ($sample['expenses'] as $category => $amount) {
-                    RealityCheck::create([
-                        'mq_user_id' => Auth::user()->mq_user_id,
-                        'mq_category' => $category,
-                        'mq_expected_amount' => $amount,
-                        'mq_actual_amount' => $amount,
-                        'mq_reg_date' => now(),
-                        'mq_update_date' => now()
-                    ]);
+            // 트랜잭션 시작
+            \DB::beginTransaction();
+            
+            // 지출 항목 추가
+            if (isset($content['expenses']) && is_array($content['expenses'])) {
+                foreach ($content['expenses'] as $expense) {
+                    if (isset($expense['category']) && isset($expense['price'])) {
+                        RealityCheck::create([
+                            'mq_user_id' => Auth::user()->mq_user_id,
+                            'mq_category' => $expense['category'],
+                            'mq_price' => $expense['price'],
+                            'mq_type' => 0, // 지출
+                            'mq_reg_date' => now(),
+                            'mq_update_date' => now()
+                        ]);
+                    }
                 }
-
-                return response()->json(['status' => 'success']);
             }
+            
+            // 수입 항목 추가
+            if (isset($content['income']) && is_array($content['income'])) {
+                foreach ($content['income'] as $income) {
+                    if (isset($income['category']) && isset($income['price'])) {
+                        RealityCheck::create([
+                            'mq_user_id' => Auth::user()->mq_user_id,
+                            'mq_category' => $income['category'],
+                            'mq_price' => $income['price'],
+                            'mq_type' => 1, // 수입
+                            'mq_reg_date' => now(),
+                            'mq_update_date' => now()
+                        ]);
+                    }
+                }
+            }
+            
+            // 트랜잭션 커밋
+            \DB::commit();
 
-            return response()->json(['status' => 'error', 'message' => '해당하는 샘플 데이터가 없습니다.']);
+            return response()->json(['status' => 'success']);
         } catch (\Exception $e) {
-            return response()->json(['status' => 'error', 'message' => '샘플 적용 중 오류가 발생했습니다.'], 500);
+            // 트랜잭션 롤백
+            \DB::rollBack();
+            
+            return response()->json([
+                'status' => 'error', 
+                'message' => '샘플 적용 중 오류가 발생했습니다: ' . $e->getMessage()
+            ], 500);
         }
     }
 
@@ -728,15 +162,15 @@ class RealityCheckController extends Controller
         try {
             $validated = $request->validate([
                 'mq_category' => 'required|string|max:50',
-                'mq_expected_amount' => 'required|integer|min:0',
-                'mq_actual_amount' => 'required|integer|min:0'
+                'mq_price' => 'required|integer|min:0',
+                'mq_type' => 'required|integer|in:0,1'
             ]);
 
             $expense = RealityCheck::create([
                 'mq_user_id' => auth()->user()->mq_user_id,
+                'mq_type' => $request->input('mq_type'),
                 'mq_category' => $validated['mq_category'],
-                'mq_expected_amount' => $validated['mq_expected_amount'],
-                'mq_actual_amount' => $validated['mq_actual_amount'],
+                'mq_price' => $validated['mq_price'],
                 'mq_reg_date' => now()
             ]);
 
@@ -765,14 +199,14 @@ class RealityCheckController extends Controller
 
             $validated = $request->validate([
                 'mq_category' => 'required|string|max:50',
-                'mq_expected_amount' => 'required|integer|min:0',
-                'mq_actual_amount' => 'required|integer|min:0'
+                'mq_price' => 'required|integer|min:0',
+                'mq_type' => 'required|integer|in:0,1'
             ]);
 
             $expense->update([
+                'mq_type' => $request->input('mq_type'),
                 'mq_category' => $validated['mq_category'],
-                'mq_expected_amount' => $validated['mq_expected_amount'],
-                'mq_actual_amount' => $validated['mq_actual_amount'],
+                'mq_price' => $validated['mq_price'],
                 'mq_update_date' => now()
             ]);
 
@@ -812,5 +246,26 @@ class RealityCheckController extends Controller
                 'status' => 'error'
             ], 500);
         }
+    }
+
+    /**
+     * Ajax 요청을 통해 지출/수입 데이터 가져오기
+     */
+    public function getExpenses(Request $request)
+    {
+        $type = $request->input('type');
+        $query = RealityCheck::where('mq_user_id', Auth::user()->mq_user_id);
+        
+        // type이 'all'이 아닌 경우 mq_type으로 필터링
+        if ($type !== 'all') {
+            $query->where('mq_type', $type);
+        }
+        
+        $expenses = $query->orderBy('idx', 'desc')->get();
+        
+        return response()->json([
+            'status' => 'success',
+            'data' => $expenses
+        ]);
     }
 } 
