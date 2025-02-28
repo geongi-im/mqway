@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto px-4 py-8">
+<div class="container mx-auto px-4 py-8 max-w-[768px]">
     <!-- 상단 타이틀 및 설명 -->
     <div class="mb-8 text-center">
         <h1 class="text-3xl font-bold text-dark mb-2">원하는 삶 찾기</h1>
@@ -48,7 +48,6 @@
                             <tr class="bg-point">
                                 <th class="px-6 py-4 text-left text-cdark w-32">카테고리</th>
                                 <th class="px-6 py-4 text-left text-cdark">목표</th>
-                                <th class="px-6 py-4 text-left text-cdark">목표일자</th>
                                 <th class="px-6 py-4 text-left text-cdark">필요금액</th>
                                 <th class="px-6 py-4 text-left text-cdark w-24">작업</th>
                             </tr>
@@ -58,7 +57,6 @@
                             <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors duration-150" data-id="{{ $item->idx }}">
                                 <td class="px-6 py-4">{{ $item->mq_category }}</td>
                                 <td class="px-6 py-4">{{ $item->mq_content }}</td>
-                                <td class="px-6 py-4">{{ $item->mq_target_date ? date('Y-m-d', strtotime($item->mq_target_date)) : '' }}</td>
                                 <td class="px-6 py-4">{{ number_format($item->mq_price) }}원</td>
                                 <td class="px-6 py-4">
                                     <div class="flex space-x-2">
@@ -124,10 +122,6 @@
                 </div>
                 <div class="space-y-2">
                     <div class="flex justify-between text-sm">
-                        <span class="text-gray-600">목표일자</span>
-                        <span>{{ $item->mq_target_date ? date('Y-m-d', strtotime($item->mq_target_date)) : '' }}</span>
-                    </div>
-                    <div class="flex justify-between text-sm">
                         <span class="text-gray-600">필요금액</span>
                         <span>{{ number_format($item->mq_price) }}원</span>
                     </div>
@@ -159,9 +153,23 @@
             <div class="space-y-4">
                 <div>
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="mq_category">
-                        카테고리
+                        카테고리 <span class="text-red-500">*</span>
                     </label>
-                    <input type="text" id="mq_category" name="mq_category" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-dark">
+                    <select id="mq_category" 
+                            name="mq_category" 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-dark"
+                            required>
+                        <option value="">카테고리 선택</option>
+                        <option value="건강">건강</option>
+                        <option value="문화">문화</option>
+                        <option value="생활">생활</option>
+                        <option value="여행">여행</option>
+                        <option value="음식">음식</option>
+                        <option value="취미">취미</option>
+                        <option value="학습">학습</option>
+                        <option value="기타">기타</option>
+                    </select>
+                    <p id="categoryError" class="hidden text-red-500 text-xs mt-1">카테고리를 선택해주세요.</p>
                 </div>
                 <div>
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="mq_content">
@@ -173,17 +181,6 @@
                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-dark"
                            required>
                     <p id="contentError" class="hidden text-red-500 text-xs mt-1">목표를 입력해주세요.</p>
-                </div>
-                <div>
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="mq_target_date">
-                        목표일자 <span class="text-red-500">*</span>
-                    </label>
-                    <input type="date" 
-                           id="mq_target_date" 
-                           name="mq_target_date" 
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-dark"
-                           required>
-                    <p id="targetDateError" class="hidden text-red-500 text-xs mt-1">목표일자를 선택해주세요.</p>
                 </div>
                 <div>
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="mq_price">
@@ -364,7 +361,6 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('mq_category').value = data.category;
             document.getElementById('mq_content').value = data.content;
             document.getElementById('mq_price').value = numberWithCommas(data.price);
-            document.getElementById('mq_target_date').value = data.targetDate;
             
             modalTitle.textContent = '수정하기';
             isEditing = true;
@@ -404,37 +400,38 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
         
         const contentInput = document.getElementById('mq_content');
-        const targetDateInput = document.getElementById('mq_target_date');
         const priceInput = document.getElementById('mq_price');
         
         const contentError = document.getElementById('contentError');
-        const targetDateError = document.getElementById('targetDateError');
         const priceError = document.getElementById('priceError');
         
         let hasError = false;
+        
+        // 카테고리 유효성 검사
+        const categorySelect = document.getElementById('mq_category');
+        if (!categorySelect.value) {
+            categorySelect.classList.add('border-red-500');
+            document.getElementById('categoryError').classList.remove('hidden');
+            if (!hasError) {
+                categorySelect.focus();
+                hasError = true;
+            }
+        } else {
+            categorySelect.classList.remove('border-red-500');
+            document.getElementById('categoryError').classList.add('hidden');
+        }
         
         // 목표 유효성 검사
         if (!contentInput.value.trim()) {
             contentInput.classList.add('border-red-500');
             contentError.classList.remove('hidden');
-            contentInput.focus();
-            hasError = true;
-        } else {
-            contentInput.classList.remove('border-red-500');
-            contentError.classList.add('hidden');
-        }
-        
-        // 목표일자 유효성 검사
-        if (!targetDateInput.value) {
-            targetDateInput.classList.add('border-red-500');
-            targetDateError.classList.remove('hidden');
             if (!hasError) {
-                targetDateInput.focus();
+                contentInput.focus();
                 hasError = true;
             }
         } else {
-            targetDateInput.classList.remove('border-red-500');
-            targetDateError.classList.add('hidden');
+            contentInput.classList.remove('border-red-500');
+            contentError.classList.add('hidden');
         }
         
         // 필요금액 유효성 검사
@@ -493,13 +490,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (this.value.trim()) {
             this.classList.remove('border-red-500');
             document.getElementById('contentError').classList.add('hidden');
-        }
-    });
-
-    document.getElementById('mq_target_date').addEventListener('change', function() {
-        if (this.value) {
-            this.classList.remove('border-red-500');
-            document.getElementById('targetDateError').classList.add('hidden');
         }
     });
 

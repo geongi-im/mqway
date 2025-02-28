@@ -30,12 +30,12 @@ class LifeSearchController extends Controller
         $validated = $request->validate([
             'mq_category' => 'required|string|max:50',
             'mq_content' => 'required|string',
-            'mq_price' => 'required|integer',
-            'mq_target_date' => 'nullable|date'
+            'mq_price' => 'required|integer'
         ]);
 
         $validated['mq_user_id'] = auth()->user()->mq_user_id;
         $validated['mq_reg_date'] = Carbon::now();
+        $validated['mq_target_date'] = Carbon::now();  // 현재 날짜로 설정
         
         LifeSearch::create($validated);
 
@@ -54,11 +54,11 @@ class LifeSearchController extends Controller
         $validated = $request->validate([
             'mq_category' => 'required|string|max:50',
             'mq_content' => 'required|string',
-            'mq_price' => 'required|integer',
-            'mq_target_date' => 'nullable|date'
+            'mq_price' => 'required|integer'
         ]);
 
         $validated['mq_update_date'] = Carbon::now();
+        $validated['mq_target_date'] = Carbon::now();  // 현재 날짜로 설정
 
         $lifeSearch->update($validated);
 
@@ -128,8 +128,7 @@ class LifeSearchController extends Controller
                     'id' => $sample->idx,
                     'category' => $sample->mq_s_category,
                     'content' => $sample->mq_s_content,
-                    'price' => $sample->mq_s_price,
-                    'target_date' => $sample->mq_s_target_date ? $sample->mq_s_target_date->format('Y-m-d') : null
+                    'price' => $sample->mq_s_price
                 ];
             }),
             'has_more' => $samples->hasMorePages()
@@ -155,7 +154,7 @@ class LifeSearchController extends Controller
                     'mq_category' => $sample->mq_s_category,
                     'mq_content' => $sample->mq_s_content,
                     'mq_price' => $sample->mq_s_price,
-                    'mq_target_date' => $sample->mq_s_target_date,
+                    'mq_target_date' => Carbon::now(),  // 현재 날짜로 설정
                     'mq_reg_date' => now()
                 ]);
             }

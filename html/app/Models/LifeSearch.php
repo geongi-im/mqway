@@ -35,7 +35,8 @@ class LifeSearch extends Model
         '문화' => 'bg-purple-100 text-purple-800',
         '학습' => 'bg-yellow-100 text-yellow-800',
         '건강' => 'bg-red-100 text-red-800',
-        '생활' => 'bg-gray-100 text-gray-800'
+        '생활' => 'bg-gray-100 text-gray-800',
+        '기타' => 'bg-indigo-100 text-indigo-800'
     ];
 
     // 카테고리 색상 클래스를 가져오는 메서드
