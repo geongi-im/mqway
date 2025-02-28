@@ -1234,11 +1234,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             // API 엔드포인트 설정
-            let url = '{{ route("guidebook.reality-check.store") }}';
+            let url = '/guidebook/reality-check';
             let method = 'POST';
             
             if (mode === 'edit' && id) {
-                url = `{{ url('guidebook/reality-check') }}/${id}`;
+                url = `/guidebook/reality-check/${id}`;
                 formData.append('_method', 'PUT'); // PUT 요청을 위한 _method 필드 추가
             }
             
