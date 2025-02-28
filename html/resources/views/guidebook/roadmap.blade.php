@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto px-4 py-8">
+<div class="container mx-auto px-4 py-8 max-w-[768px]">
     <!-- 상단 타이틀 및 설명 -->
     <div class="mb-8 text-center">
         <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">로드맵 작성하기</h1>
@@ -40,12 +40,6 @@
         </div>
     @else
         <div class="space-y-6">
-            <!-- 월간 지출 분석 -->
-            <div class="bg-white rounded-lg shadow-lg p-4 md:p-8">
-                <h2 class="text-xl md:text-2xl font-bold text-dark mb-4 md:mb-6">월간 지출 분석</h2>
-                <div id="expenseChart" class="w-full" style="height: 360px;"></div>
-            </div>
-
             <!-- 목표 금액 및 진행 상황 -->
             <div class="bg-white rounded-lg shadow-lg p-4 md:p-8">
                 <div class="grid grid-cols-2 gap-4 mb-4">
@@ -369,10 +363,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 @endif
-
-function numberWithCommas(x) {
-    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}
 </script>
 
 <style>

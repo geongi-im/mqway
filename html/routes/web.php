@@ -95,8 +95,9 @@ Route::prefix('guidebook/reality-check')->group(function () {
     Route::post('/', [RealityCheckController::class, 'store'])->name('guidebook.reality-check.store');
     Route::put('/{idx}', [RealityCheckController::class, 'update'])->name('guidebook.reality-check.update');
     Route::delete('/{idx}', [RealityCheckController::class, 'destroy'])->name('guidebook.reality-check.destroy');
-    Route::post('/get-samples', [RealityCheckController::class, 'getSamples'])->name('guidebook.reality-check.get-samples');
+    Route::get('/samples', [RealityCheckController::class, 'getSamples'])->name('guidebook.reality-check.samples');
     Route::post('/apply-sample', [RealityCheckController::class, 'applySample'])->name('guidebook.reality-check.apply-sample');
+    Route::get('/get-expenses', [RealityCheckController::class, 'getExpenses'])->name('guidebook.reality-check.get-expenses');
 });
 
 // 로드맵
