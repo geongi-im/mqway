@@ -57,6 +57,31 @@
                     </div>
                 </div>
 
+                <!-- 현재 재정 상태 -->
+                <div class="mt-6 pt-6 border-t">
+                    <h2 class="text-lg md:text-2xl font-bold text-gray-800 mb-4">월별 수입/지출 내역</h2>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="text-center p-3 border rounded-lg">
+                            <h3 class="text-base font-semibold text-green-600 mb-1">총 수입</h3>
+                            <p class="text-lg md:text-2xl font-bold text-gray-800">
+                                {{ number_format($data['totalIncome']) }}<span class="text-sm md:text-base text-gray-600 ml-1">원</span>
+                            </p>
+                        </div>
+                        <div class="text-center p-3 border rounded-lg">
+                            <h3 class="text-base font-semibold text-red-600 mb-1">총 지출</h3>
+                            <p class="text-lg md:text-2xl font-bold text-gray-800">
+                                {{ number_format($data['totalExpense']) }}<span class="text-sm md:text-base text-gray-600 ml-1">원</span>
+                            </p>
+                        </div>
+                        <div class="text-center p-3 border rounded-lg">
+                            <h3 class="text-base font-semibold {{ $data['difference'] >= 0 ? 'text-blue-600' : 'text-red-600' }} mb-1">수입-지출</h3>
+                            <p class="text-lg md:text-2xl font-bold {{ $data['difference'] >= 0 ? 'text-blue-600' : 'text-red-600' }}">
+                                {{ number_format($data['difference']) }}<span class="text-sm md:text-base text-gray-600 ml-1">원</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- 월 저축액 게이지 바 -->
                 <div class="mt-6 pt-6 border-t">
                     <div class="flex justify-between items-center mb-2">
@@ -65,7 +90,7 @@
                             <input type="text" 
                                    id="monthlySavingInput"
                                    class="w-32 text-right px-2 py-1 border rounded mr-1 text-base md:text-lg font-bold text-gray-800" maxlength="9"
-                                   value="500,000">
+                                   value="{{ number_format(max(10000, $data['difference'])) }}">
                             <span class="text-base md:text-lg font-bold text-gray-800">원</span>
                         </div>
                     </div>
@@ -73,40 +98,157 @@
                         <input type="range" 
                                id="monthlySaving" 
                                min="10000" 
-                               max="3000000" 
+                               max="{{ $data['totalIncome'] }}" 
                                step="10000" 
-                               value="500000"
+                               value="{{ max(10000, $data['difference']) }}"
                                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
                         <div class="flex justify-between mt-2 text-xs md:text-sm text-gray-600">
                             <span>1만원</span>
-                            <span>300만원</span>
+                            <span>{{ number_format($data['totalIncome']) }}원</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- 연평균 수익률 게이지 바 -->
+                <!-- 투자 포트폴리오 선택 -->
                 <div class="mt-6 pt-6 border-t">
-                    <div class="flex justify-between items-center mb-2">
-                        <h3 class="text-base md:text-lg font-bold text-gray-800">연평균 수익률</h3>
-                        <div class="flex items-center">
-                            <input type="text" 
-                                   id="annualReturnInput"
-                                   class="w-16 text-right px-2 py-1 border rounded mr-1 text-base md:text-lg font-bold text-gray-800"
-                                   value="10">
-                            <span class="text-base md:text-lg font-bold text-gray-800">%</span>
+                    <h3 class="text-base md:text-lg font-bold text-gray-800 mb-4">투자 포트폴리오 선택</h3>
+                    <div class="space-y-4">
+                        <!-- 5% 수익률 포트폴리오 -->
+                        <div class="portfolio-option border-2 rounded-lg p-4 cursor-pointer active hover:shadow-lg transition-all duration-300" data-return="5">
+                            <div class="flex justify-between items-center mb-3">
+                                <div>
+                                    <h4 class="text-base font-bold text-blue-800">안정형 포트폴리오</h4>
+                                    <p class="text-sm text-blue-600">보수적인 투자자에게 적합</p>
+                                </div>
+                                <div class="flex items-center bg-blue-100 px-3 py-1 rounded-full">
+                                    <span class="text-lg font-bold text-blue-800">5%</span>
+                                    <span class="text-sm text-blue-600 ml-1">수익률</span>
+                                </div>
+                            </div>
+                            <div class="bg-blue-50 rounded-lg p-4 mb-3">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="flex items-center">
+                                        <div class="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
+                                        <div>
+                                            <p class="text-sm font-semibold text-gray-700">국채 및 정부채권</p>
+                                            <p class="text-lg font-bold text-blue-800">50%</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <div class="w-2 h-2 bg-blue-400 rounded-full mr-2"></div>
+                                        <div>
+                                            <p class="text-sm font-semibold text-gray-700">회사채</p>
+                                            <p class="text-lg font-bold text-blue-800">30%</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <div class="w-2 h-2 bg-blue-300 rounded-full mr-2"></div>
+                                        <div>
+                                            <p class="text-sm font-semibold text-gray-700">우량 배당주</p>
+                                            <p class="text-lg font-bold text-blue-800">15%</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <div class="w-2 h-2 bg-blue-200 rounded-full mr-2"></div>
+                                        <div>
+                                            <p class="text-sm font-semibold text-gray-700">현금성 자산</p>
+                                            <p class="text-lg font-bold text-blue-800">5%</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="relative">
-                        <input type="range" 
-                               id="annualReturn" 
-                               min="0" 
-                               max="50" 
-                               step="0.1" 
-                               value="10"
-                               class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
-                        <div class="flex justify-between mt-2 text-xs md:text-sm text-gray-600">
-                            <span>0%</span>
-                            <span>50%</span>
+                        
+                        <!-- 10% 수익률 포트폴리오 -->
+                        <div class="portfolio-option border-2 rounded-lg p-4 cursor-pointer hover:shadow-lg transition-all duration-300" data-return="10">
+                            <div class="flex justify-between items-center mb-3">
+                                <div>
+                                    <h4 class="text-base font-bold text-green-800">성장형 포트폴리오</h4>
+                                    <p class="text-sm text-green-600">중립적인 투자자에게 적합</p>
+                                </div>
+                                <div class="flex items-center bg-green-100 px-3 py-1 rounded-full">
+                                    <span class="text-lg font-bold text-green-800">10%</span>
+                                    <span class="text-sm text-green-600 ml-1">수익률</span>
+                                </div>
+                            </div>
+                            <div class="bg-green-50 rounded-lg p-4 mb-3">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="flex items-center">
+                                        <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                                        <div>
+                                            <p class="text-sm font-semibold text-gray-700">주식(국내/해외)</p>
+                                            <p class="text-lg font-bold text-green-800">50%</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <div class="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+                                        <div>
+                                            <p class="text-sm font-semibold text-gray-700">채권</p>
+                                            <p class="text-lg font-bold text-green-800">30%</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <div class="w-2 h-2 bg-green-300 rounded-full mr-2"></div>
+                                        <div>
+                                            <p class="text-sm font-semibold text-gray-700">리츠(REITs)</p>
+                                            <p class="text-lg font-bold text-green-800">10%</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <div class="w-2 h-2 bg-green-200 rounded-full mr-2"></div>
+                                        <div>
+                                            <p class="text-sm font-semibold text-gray-700">대체 투자</p>
+                                            <p class="text-lg font-bold text-green-800">10%</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 15% 수익률 포트폴리오 -->
+                        <div class="portfolio-option border-2 rounded-lg p-4 cursor-pointer hover:shadow-lg transition-all duration-300" data-return="15">
+                            <div class="flex justify-between items-center mb-3">
+                                <div>
+                                    <h4 class="text-base font-bold text-purple-800">공격형 포트폴리오</h4>
+                                    <p class="text-sm text-purple-600">적극적인 투자자에게 적합</p>
+                                </div>
+                                <div class="flex items-center bg-purple-100 px-3 py-1 rounded-full">
+                                    <span class="text-lg font-bold text-purple-800">15%</span>
+                                    <span class="text-sm text-purple-600 ml-1">수익률</span>
+                                </div>
+                            </div>
+                            <div class="bg-purple-50 rounded-lg p-4 mb-3">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="flex items-center">
+                                        <div class="w-2 h-2 bg-purple-500 rounded-full mr-2"></div>
+                                        <div>
+                                            <p class="text-sm font-semibold text-gray-700">고성장 주식</p>
+                                            <p class="text-lg font-bold text-purple-800">60%</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <div class="w-2 h-2 bg-purple-400 rounded-full mr-2"></div>
+                                        <div>
+                                            <p class="text-sm font-semibold text-gray-700">벤처/스타트업</p>
+                                            <p class="text-lg font-bold text-purple-800">20%</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <div class="w-2 h-2 bg-purple-300 rounded-full mr-2"></div>
+                                        <div>
+                                            <p class="text-sm font-semibold text-gray-700">대체 투자</p>
+                                            <p class="text-lg font-bold text-purple-800">15%</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <div class="w-2 h-2 bg-purple-200 rounded-full mr-2"></div>
+                                        <div>
+                                            <p class="text-sm font-semibold text-gray-700">현금성 자산</p>
+                                            <p class="text-lg font-bold text-purple-800">5%</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -134,8 +276,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // 게이지바 관련 요소들
     const monthlySaving = document.getElementById('monthlySaving');
     const monthlySavingInput = document.getElementById('monthlySavingInput');
-    const annualReturn = document.getElementById('annualReturn');
-    const annualReturnInput = document.getElementById('annualReturnInput');
+    
+    // 포트폴리오 선택 관련 변수 및 함수
+    let selectedPortfolioReturn = 5; // 기본값 5%
 
     // 게이지바 배경 업데이트 함수
     function updateRangeBackground(element) {
@@ -152,28 +295,9 @@ document.addEventListener('DOMContentLoaded', function() {
         return parseInt(str.replace(/[^\d]/g, '')) || 0;
     }
 
-    // 남은 기간 계산 함수
-    function calculateRemainingPeriod(targetAmount, currentAmount, monthlySaving, annualReturn) {
-        // 월 저축액이 0이거나 음수인 경우 null 반환
-        if (monthlySaving <= 0) {
-            return null;
-        }
-        
-        // 목표금액에서 현재금액을 뺀 나머지 금액
-        const remainingAmount = targetAmount - currentAmount;
-        
-        // 연평균 수익률이 0%인 경우
-        if (annualReturn === 0) {
-            return Math.ceil(remainingAmount / monthlySaving);
-        }
-        
-        // 월 이자율 계산 (연 수익률을 12로 나누어 계산)
-        const monthlyRate = (1 + annualReturn/100)**(1/12) - 1;
-        
-        // 남은 기간 계산 (로그 공식 사용)
-        const n = Math.ceil(Math.log((remainingAmount * monthlyRate / monthlySaving) + 1) / Math.log(1 + monthlyRate));
-        
-        return n;
+    // 숫자에 콤마 추가하는 함수
+    function numberWithCommas(x) {
+        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
 
     // 남은 기간 표시 업데이트 함수
@@ -199,12 +323,47 @@ document.addEventListener('DOMContentLoaded', function() {
         
         periodElement.innerHTML = `${periodText}<span class="text-base md:text-xl text-gray-600 ml-1"></span>`;
     }
+    
+    // 수익률을 고려한 남은 기간 계산 함수
+    function calculateRemainingPeriodWithReturn(targetAmount, currentAmount, monthlySaving, annualReturn) {
+        // 월 저축액이 0이거나 음수인 경우 null 반환
+        if (monthlySaving <= 0) {
+            return null;
+        }
+        
+        // 목표금액에서 현재금액을 뺀 나머지 금액
+        const remainingAmount = targetAmount - currentAmount;
+        
+        // 연평균 수익률이 0%인 경우
+        if (annualReturn === 0) {
+            return Math.ceil(remainingAmount / monthlySaving);
+        }
+        
+        // 월 이자율 계산 (연 수익률을 12로 나누어 계산)
+        const monthlyRate = (1 + annualReturn/100)**(1/12) - 1;
+        
+        // 남은 기간 계산 (로그 공식 사용)
+        const n = Math.ceil(Math.log((remainingAmount * monthlyRate / monthlySaving) + 1) / Math.log(1 + monthlyRate));
+        
+        return n;
+    }
+    
+    // 남은 기간 재계산 함수
+    function recalculateRemainingPeriod() {
+        const targetAmount = {{ $data['targetAmount'] }};
+        const currentAmount = {{ $data['currentAmount'] }};
+        const monthlySavingValue = parseInt(monthlySaving.value);
+        
+        // 선택된 포트폴리오의 수익률로 계산
+        const months = calculateRemainingPeriodWithReturn(targetAmount, currentAmount, monthlySavingValue, selectedPortfolioReturn);
+        updateRemainingPeriod(months);
+    }
 
-    // 게이지바 이벤트 처리 함수
+    // 월 저축액 변경 시 남은 기간 재계산
     function updateMonthlySaving(value, isFromInput = false) {
         if (!isFromInput) {
             // 슬라이더나 blur 이벤트에서 호출된 경우
-            value = Math.max(10000, Math.min(3000000, value));
+            value = Math.max(10000, Math.min({{ $data['totalIncome'] }}, value));
             monthlySavingInput.value = numberWithCommas(value);
             monthlySaving.value = value;
             updateRangeBackground(monthlySaving);
@@ -214,43 +373,36 @@ document.addEventListener('DOMContentLoaded', function() {
             updateRangeBackground(monthlySaving);
         }
         
-        const targetAmount = {{ $data['targetAmount'] }};
-        const currentAmount = {{ $data['currentAmount'] }};
-        const annualReturnValue = parseFloat(annualReturn.value);
-        const months = calculateRemainingPeriod(targetAmount, currentAmount, parseInt(value), annualReturnValue);
-        updateRemainingPeriod(months);
+        // 선택된 포트폴리오의 수익률로 계산
+        recalculateRemainingPeriod();
     }
 
-    // 연평균 수익률 게이지바 이벤트 처리 함수
-    function updateAnnualReturn(value, isFromInput = false) {
-        if (!isFromInput) {
-            // 슬라이더나 blur 이벤트에서 호출된 경우
-            value = Math.max(0, Math.min(50, value));
-            annualReturnInput.value = value;
-            annualReturn.value = value;
-            updateRangeBackground(annualReturn);
-        } else {
-            // 직접 입력 중인 경우
-            annualReturn.value = value;
-            updateRangeBackground(annualReturn);
-        }
-        
-        const targetAmount = {{ $data['targetAmount'] }};
-        const currentAmount = {{ $data['currentAmount'] }};
-        const monthlySavingValue = parseInt(monthlySaving.value);
-        const months = calculateRemainingPeriod(targetAmount, currentAmount, monthlySavingValue, parseFloat(value));
-        updateRemainingPeriod(months);
-    }
+    // 초기 게이지바 배경 설정
+    if (monthlySaving) updateRangeBackground(monthlySaving);
 
+    // 포트폴리오 선택 이벤트 처리
+    const portfolioOptions = document.querySelectorAll('.portfolio-option');
+    
+    portfolioOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            // 기존 선택 해제
+            portfolioOptions.forEach(opt => opt.classList.remove('active'));
+            
+            // 현재 선택 활성화
+            this.classList.add('active');
+            
+            // 선택된 수익률 저장
+            selectedPortfolioReturn = parseFloat(this.getAttribute('data-return'));
+            
+            // 남은 기간 재계산
+            recalculateRemainingPeriod();
+        });
+    });
+    
     // 이벤트 리스너
     if (monthlySaving) {
         monthlySaving.addEventListener('input', (e) => {
             updateMonthlySaving(e.target.value);
-        });
-    }
-    if (annualReturn) {
-        annualReturn.addEventListener('input', (e) => {
-            updateAnnualReturn(parseFloat(e.target.value));
         });
     }
 
@@ -266,7 +418,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         monthlySavingInput.addEventListener('blur', (e) => {
             let value = extractNumber(e.target.value);
-            value = Math.max(10000, Math.min(3000000, value));
+            value = Math.max(10000, Math.min({{ $data['totalIncome'] }}, value));
             updateMonthlySaving(value);
         });
 
@@ -277,30 +429,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    if (annualReturnInput) {
-        annualReturnInput.addEventListener('input', (e) => {
-            let value = e.target.value.replace(/[^\d.]/g, '');
-            // 소수점 처리
-            if (value.split('.').length > 2) value = value.replace(/\.+$/, '');
-            e.target.value = value;
-            updateAnnualReturn(parseFloat(value) || 0, true);
-        });
-        
-        annualReturnInput.addEventListener('blur', (e) => {
-            let value = parseFloat(e.target.value) || 0;
-            value = Math.max(0, Math.min(50, value));
-            updateAnnualReturn(value);
-        });
-    }
-
     // 초기값 설정
-    updateMonthlySaving(monthlySaving ? monthlySaving.value : 500000);
-    updateAnnualReturn(annualReturn ? annualReturn.value : 10);
-
-    // 초기 게이지바 배경 설정
-    [monthlySaving, annualReturn].forEach(element => {
-        if (element) updateRangeBackground(element);
-    });
+    updateMonthlySaving(monthlySaving ? monthlySaving.value : {{ max(10000, $data['difference']) }});
+    
+    // 초기 계산 실행
+    recalculateRemainingPeriod();
 
     // 차트 설정
     if (document.getElementById('expenseChart')) {
@@ -385,55 +518,34 @@ input[type="range"]::-webkit-slider-thumb {
     background: #1f2937;
     cursor: pointer;
     box-shadow: 0 0 2px 0 #555;
-    transition: background .3s ease-in-out;
 }
 
-input[type="range"]::-webkit-slider-runnable-track {
-    -webkit-appearance: none;
-    box-shadow: none;
-    border: none;
-    background: transparent;
+/* 포트폴리오 선택 스타일 */
+.portfolio-option {
+    transition: all 0.3s ease;
+    border-color: #e5e7eb;
 }
 
-input[type="range"]::-webkit-slider-thumb:hover {
-    box-shadow: 0 0 0 2px #fff, 0 0 0 4px #1f2937;
+.portfolio-option:hover {
+    transform: translateY(-2px);
 }
 
-/* Firefox 지원 */
-input[type="range"]::-moz-range-thumb {
-    height: 20px;
-    width: 20px;
-    border-radius: 50%;
-    background: #1f2937;
-    cursor: pointer;
-    box-shadow: 0 0 2px 0 #555;
-    transition: background .3s ease-in-out;
-    border: none;
+.portfolio-option[data-return="5"].active {
+    border-color: #1e40af;
+    background-color: #f8fafc;
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1), 0 2px 4px -1px rgba(59, 130, 246, 0.06);
 }
 
-input[type="range"]::-moz-range-track {
-    background: #e5e7eb;
-    border-radius: 5px;
-    height: 8px;
-    border: none;
+.portfolio-option[data-return="10"].active {
+    border-color: #15803d;
+    background-color: #f8fafc;
+    box-shadow: 0 4px 6px -1px rgba(34, 197, 94, 0.1), 0 2px 4px -1px rgba(34, 197, 94, 0.06);
 }
 
-input[type="range"]::-moz-range-progress {
-    background-color: #1f2937;
-    border-radius: 5px;
-    height: 8px;
-}
-
-@media (max-width: 768px) {
-    input[type="range"]::-webkit-slider-thumb {
-        height: 16px;
-        width: 16px;
-    }
-    
-    input[type="range"]::-moz-range-thumb {
-        height: 16px;
-        width: 16px;
-    }
+.portfolio-option[data-return="15"].active {
+    border-color: #6b21a8;
+    background-color: #f8fafc;
+    box-shadow: 0 4px 6px -1px rgba(168, 85, 247, 0.1), 0 2px 4px -1px rgba(168, 85, 247, 0.06);
 }
 </style>
 @endpush

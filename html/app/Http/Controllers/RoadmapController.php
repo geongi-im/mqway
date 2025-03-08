@@ -32,13 +32,28 @@ class RoadmapController extends Controller
         $expenses = RealityCheck::where('mq_user_id', Auth::user()->mq_user_id)
             ->orderBy('idx', 'desc')
             ->get();
+            
+        // 총 수입과 총 지출 계산
+        $totalIncome = RealityCheck::where('mq_user_id', Auth::user()->mq_user_id)
+            ->where('mq_type', 1) // 수입
+            ->sum('mq_price');
+            
+        $totalExpense = RealityCheck::where('mq_user_id', Auth::user()->mq_user_id)
+            ->where('mq_type', 0) // 지출
+            ->sum('mq_price');
+            
+        // 수입과 지출의 차이 계산
+        $difference = $totalIncome - $totalExpense;
 
         // 기본 데이터 설정
         $data = [
             'targetAmount' => $totalTargetAmount, // DB에서 가져온 목표금액
             'currentAmount' => 0, // 현재 모은 금액 (5천만원)
             'remainingMonths' => 60,     // 남은 기간 (5년)
-            'monthlyExpenses' => []
+            'monthlyExpenses' => [],
+            'totalIncome' => $totalIncome,
+            'totalExpense' => $totalExpense,
+            'difference' => $difference
         ];
 
         // 지출 데이터가 없는 경우
