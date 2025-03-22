@@ -49,7 +49,7 @@ class BoardController extends Controller
                 $query->orderBy('mq_reg_date', 'desc');
         }
 
-        $posts = $query->paginate(10);
+        $posts = $query->paginate(12);
         
         // 이미지 경로 처리
         foreach ($posts as $post) {
