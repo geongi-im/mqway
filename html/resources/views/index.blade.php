@@ -741,7 +741,7 @@
             chatMessages.scrollTop = chatMessages.scrollHeight;
             
             // Gemini API에 메시지 전송 (서버 사이드 라우트를 통해)
-            fetch('{{ route("chatbot.send") }}', {
+            fetch('/api/chatbot', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
