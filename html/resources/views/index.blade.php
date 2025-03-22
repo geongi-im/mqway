@@ -1056,7 +1056,7 @@
     // 챗봇 대화 내용 초기화 함수
     function resetChatbotConversation() {
         // 서버에 세션 초기화 요청
-        fetch('{{ route("chatbot.reset") }}', {
+        fetch('/api/chatbot/reset', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
