@@ -13,6 +13,7 @@ use App\Http\Controllers\DataInsertController;
 use App\Http\Controllers\RealityCheckController;
 use App\Http\Controllers\RoadmapController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\GeminiBotController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -112,3 +113,7 @@ Route::get('/privacy', function () {
 Route::get('/service', function () {
     return view('service');
 })->name('service');
+
+// 챗봇 API 라우트
+Route::post('/api/chatbot', [GeminiBotController::class, 'sendMessage'])->name('chatbot.send');
+Route::post('/api/chatbot/reset', [GeminiBotController::class, 'resetConversation'])->name('chatbot.reset');
