@@ -3,6 +3,11 @@
 @section('content')
 <!-- Swiper CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+<!-- Marked.js - 마크다운 파서 -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<!-- 코드 하이라이팅을 위한 Highlight.js (선택사항) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.7.0/styles/github.min.css">
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.7.0/lib/highlight.min.js"></script>
 
 <style>
 /* 메인 배너 스타일 */
@@ -279,6 +284,7 @@
     white-space: pre-wrap;
     line-height: 1.5;
 }
+
 </style>
 
 <!-- 메인 배너 슬라이더 -->
@@ -788,7 +794,7 @@
                         </svg>
                     </div>
                     <div class="bg-white p-3 rounded-lg shadow-sm max-w-[80%]">
-                        <p class="text-gray-800 bot-response"></p>
+                        <div class="text-gray-800 bot-response markdown-content"></div>
                         <span class="text-xs text-gray-500 mt-1 block">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
                     </div>
                 `;
@@ -805,6 +811,16 @@
                             // 스트림이 완료되었을 때 최종 확인
                             if (!botResponseElement.textContent.trim()) {
                                 botResponseElement.textContent = '응답 생성 중 오류가 발생했습니다. 다시 시도해주세요.';
+                            } else {
+                                // 스트림 완료 후 전체 텍스트에 마크다운 적용
+                                botResponseElement.innerHTML = marked.parse(botResponseElement.textContent);
+                                
+                                // 코드 블록에 highlight.js 적용 (선택 사항)
+                                if (typeof hljs !== 'undefined') {
+                                    botResponseElement.querySelectorAll('pre code').forEach((block) => {
+                                        hljs.highlightElement(block);
+                                    });
+                                }
                             }
                             
                             // 디버깅: 최종 응답 로깅
@@ -896,12 +912,10 @@
                                         
                                         // 텍스트 정제: 다양한 줄바꿈 및 특수 문자 처리
                                         extractedText = extractedText
-                                            // 이중 이스케이프된 개행 문자(\\n)를 HTML <br>로 변환
-                                            .replace(/\\\\n/g, '<br>')
-                                            // 단일 이스케이프된 개행 문자(\n)를 HTML <br>로 변환
-                                            .replace(/\\n/g, '<br>')
-                                            // 순수 개행 문자를 HTML <br>로 변환
-                                            .replace(/\n/g, '<br>')
+                                            // 이중 이스케이프된 개행 문자(\\n)를 변환
+                                            .replace(/\\\\n/g, '\n')
+                                            // 단일 이스케이프된 개행 문자(\n)를 변환
+                                            .replace(/\\n/g, '\n')
                                             // 백슬래시와 별표 정리 (\*)
                                             .replace(/\\\*/g, '*')
                                             // 이스케이프된 특수 문자 정리
@@ -909,18 +923,26 @@
                                             .replace(/\\'/g, "'")
                                             .replace(/\\\\/g, "\\");
                                         
+                                        // 유니코드 이스케이프 시퀀스(\uXXXX) 처리
+                                        extractedText = extractedText.replace(/\\u([0-9a-fA-F]{4})/g, function(match, p1) {
+                                            return String.fromCodePoint(parseInt(p1, 16));
+                                        });
+                                        
                                         botResponseText += extractedText;
                                         
-                                        // HTML 태그가 포함된 텍스트 처리를 위해 innerHTML 사용
-                                        botResponseElement.innerHTML = botResponseText
-                                            // 텍스트 마지막에 남아있는 불필요한 백슬래시 제거
+                                        // 옵션 1: 스트리밍 중 마크다운 실시간 렌더링
+                                        // botResponseElement.innerHTML = marked.parse(botResponseText)
+                                        //    .replace(/\\$/g, '')
+                                        //    .replace(/\\ /g, ' ');
+                                        
+                                        // 옵션 2: 마크다운 구문을 그대로 표시하고, 스트림 완료 후 한번에 렌더링
+                                        botResponseElement.textContent = botResponseText
                                             .replace(/\\$/g, '')
-                                            // 불필요한 백슬래시 + 공백 제거
                                             .replace(/\\ /g, ' ');
                                         
                                         // 디버깅: 현재까지 누적된 전체 응답 확인
                                         console.log('누적된 전체 응답:', botResponseText);
-                                            
+                                        
                                         chatMessages.scrollTop = chatMessages.scrollHeight;
                                     } else {
                                         console.warn('텍스트를 추출할 수 없음:', cleanData);
@@ -985,7 +1007,7 @@
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
         
-        // 챗봇 메시지 추가 함수
+        // 챗봇 메시지 추가 함수 (마크다운 지원 추가)
         function addBotMessage(message) {
             const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
             
@@ -998,7 +1020,7 @@
                     </svg>
                 </div>
                 <div class="bg-white p-3 rounded-lg shadow-sm max-w-[80%]">
-                    <p class="text-gray-800">${message}</p>
+                    <div class="text-gray-800 markdown-content">${marked.parse(message)}</div>
                     <span class="text-xs text-gray-500 mt-1 block">${time}</span>
                 </div>
             `;
@@ -1006,6 +1028,27 @@
             chatMessages.appendChild(messageElement);
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
+
+        // Marked.js 설정
+        marked.setOptions({
+            gfm: true,               // GitHub Flavored Markdown
+            breaks: true,            // 줄바꿈을 <br>로 변환
+            sanitize: false,         // HTML 태그 허용
+            smartLists: true,        // 스마트 리스트
+            smartypants: true,       // 스마트 구두점
+            xhtml: false,            // XHTML 사용 여부
+            highlight: function(code, lang) {
+                // highlight.js가 로드되어 있으면 코드 하이라이팅 적용
+                if (typeof hljs !== 'undefined' && lang && hljs.getLanguage(lang)) {
+                    try {
+                        return hljs.highlight(code, { language: lang }).value;
+                    } catch (e) {
+                        console.error('코드 하이라이팅 오류:', e);
+                    }
+                }
+                return code;
+            }
+        });
     });
     
     // 챗봇 모달 닫기 함수
