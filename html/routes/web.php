@@ -14,6 +14,7 @@ use App\Http\Controllers\RealityCheckController;
 use App\Http\Controllers\RoadmapController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\GeminiBotController;
+use App\Http\Controllers\MqtestController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -117,3 +118,6 @@ Route::get('/service', function () {
 // 챗봇 API 라우트
 Route::post('/api/chatbot', [GeminiBotController::class, 'sendMessage'])->name('chatbot.send');
 Route::post('/api/chatbot/reset', [GeminiBotController::class, 'resetConversation'])->name('chatbot.reset');
+
+// 경제 상식 테스트
+Route::get('/api/quiz', [MqtestController::class, 'getQuizData'])->name('quiz.get');

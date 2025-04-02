@@ -5,9 +5,6 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 <!-- Marked.js - 마크다운 파서 -->
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<!-- 코드 하이라이팅을 위한 Highlight.js (선택사항) -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.7.0/styles/github.min.css">
-<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.7.0/lib/highlight.min.js"></script>
 
 <style>
 /* 메인 배너 스타일 */
@@ -338,13 +335,20 @@
     <div class="swiper-pagination"></div>
 </div>
 
-<!-- 캐시플로우 챗봇 버튼 -->
-<div class="container mx-auto px-4 mb-8 text-center">
+<!-- 챗봇과 경제 상식 테스트 버튼 -->
+<div class="container mx-auto px-4 mb-8 text-center flex flex-col md:flex-row justify-center gap-4">
     <button id="chatbotBtn" class="bg-point hover:bg-point/90 text-cdark px-8 py-3 rounded-lg shadow-lg font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-xl flex items-center justify-center mx-auto">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
         </svg>
         캐시플로우 챗봇과 대화하기
+    </button>
+    
+    <button id="startQuizBtn" class="bg-point hover:bg-point/90 text-cdark px-8 py-3 rounded-lg shadow-lg font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-xl flex items-center justify-center mx-auto">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        경제 상식 테스트
     </button>
 </div>
 
@@ -814,13 +818,6 @@
                             } else {
                                 // 스트림 완료 후 전체 텍스트에 마크다운 적용
                                 botResponseElement.innerHTML = marked.parse(botResponseElement.textContent);
-                                
-                                // 코드 블록에 highlight.js 적용 (선택 사항)
-                                if (typeof hljs !== 'undefined') {
-                                    botResponseElement.querySelectorAll('pre code').forEach((block) => {
-                                        hljs.highlightElement(block);
-                                    });
-                                }
                             }
                             
                             // 디버깅: 최종 응답 로깅
@@ -1117,6 +1114,254 @@
             console.error('대화 내용 초기화 오류:', error);
         });
     }
+</script>
+
+<!-- 퀴즈 모달 -->
+<div id="quizModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center">
+    <div class="absolute inset-0 bg-white">
+        <!-- 닫기 버튼 -->
+        <button id="closeQuizBtn" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 z-10">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+
+        <!-- 콘텐츠 컨테이너 -->
+        <div class="w-full h-full overflow-y-auto">
+            <div class="max-w-3xl mx-auto px-4 py-8">
+                <!-- 진행 상태 바 -->
+                <div class="mb-8">
+                    <div class="relative pt-1">
+                        <div class="flex items-center justify-between">
+                            <div class="text-right">
+                                <span class="text-xs font-semibold inline-block text-blue-600">
+                                    <span id="currentQuestionNumber">0</span>/10
+                                </span>
+                            </div>
+                        </div>
+                        <div class="overflow-hidden h-2 text-xs flex rounded bg-blue-100">
+                            <div id="progressBar" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500 transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="quizContent" class="space-y-8">
+                    <!-- 퀴즈 내용이 여기에 동적으로 로드됩니다 -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const startQuizBtn = document.getElementById('startQuizBtn');
+    const closeQuizBtn = document.getElementById('closeQuizBtn');
+    const quizModal = document.getElementById('quizModal');
+    const quizContent = document.getElementById('quizContent');
+    const progressBar = document.getElementById('progressBar');
+    const currentQuestionNumber = document.getElementById('currentQuestionNumber');
+    
+    let currentQuestion = 0;
+    let score = 0;
+    let quizData = [];
+    let userAnswers = [];
+    
+    // 퀴즈 시작 버튼 클릭 이벤트
+    startQuizBtn.addEventListener('click', function() {
+        fetch('/api/quiz')
+            .then(response => response.json())
+            .then(data => {
+                quizData = data;
+                currentQuestion = 0;
+                score = 0;
+                showQuestion();
+                quizModal.classList.remove('hidden');
+                quizModal.classList.add('flex');
+                updateProgress();
+            })
+            .catch(error => {
+                console.error('Error loading quiz data:', error);
+                alert('퀴즈 데이터를 불러오는 중 오류가 발생했습니다.');
+            });
+    });
+    
+    // 모달 닫기 버튼 클릭 이벤트
+    closeQuizBtn.addEventListener('click', function() {
+        if(confirm('퀴즈를 종료하시겠습니까?')) {
+            quizModal.classList.add('hidden');
+            quizModal.classList.remove('flex');
+        }
+    });
+    
+    // 진행 상태 업데이트 함수
+    function updateProgress() {
+        const progress = (currentQuestion / quizData.length) * 100;
+        progressBar.style.width = `${progress}%`;
+        currentQuestionNumber.textContent = currentQuestion;
+    }
+    
+    // 퀴즈 문제 표시 함수
+    function showQuestion() {
+        if (currentQuestion < quizData.length) {
+            const question = quizData[currentQuestion];
+            let html = `
+                <div class="max-w-2xl mx-auto">
+                    <div class="text-center mb-12">
+                        <div class="text-blue-500 text-3xl font-bold mb-6">Q${currentQuestion + 1}.</div>
+                        <h3 class="text-2xl font-semibold text-gray-800">${question.question}</h3>
+                    </div>
+                    <div class="space-y-4 max-w-xl mx-auto">
+                        ${question.options.map((option, index) => `
+                            <button onclick="checkAnswer(${index})" 
+                                    class="w-full p-4 text-center text-gray-700 bg-white border-2 border-gray-200 rounded-full hover:border-blue-500 hover:bg-blue-50 transition-all duration-200">
+                                ${option}
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            quizContent.innerHTML = html;
+        } else {
+            showResults();
+        }
+        updateProgress();
+    }
+    
+    // 정답 확인 함수
+    window.checkAnswer = function(selectedIndex) {
+        const correctAnswer = quizData[currentQuestion].correctAnswer;
+        
+        // 사용자의 답안 저장
+        userAnswers[currentQuestion] = selectedIndex;
+        
+        if (selectedIndex === correctAnswer) {
+            score++;
+        }
+        
+        currentQuestion++;
+        showQuestion();
+    };
+    
+    // 결과 메시지 함수 추가
+    function getResultMessage(score, total) {
+        if (score === total) {
+            return {
+                emoji: '✅',
+                title: '완벽해요! 🎉\n당신은 진정한 경제 상식 마스터!',
+                message: '경제 흐름이 눈에 보이기 시작했어요.\n지금 바로 다음 퀴즈에도 도전해보세요!'
+            };
+        } else if (score >= 8) {
+            return {
+                emoji: '🥳',
+                title: '아주 훌륭해요! 💪\n거의 다 왔어요!',
+                message: '경제를 보는 눈이 남다르네요.\n아쉬운 한두 문제만 복습하면 금방 만점입니다!'
+            };
+        } else if (score >= 6) {
+            return {
+                emoji: '👍',
+                title: '좋은 출발이에요! 🚀\n기본은 충분히 갖췄어요.',
+                message: '이제 조금만 더 공부하면 만점도 가능해요.\n틀린 문제는 다시 한 번 체크해보는 건 어떨까요?'
+            };
+        } else {
+            return {
+                emoji: '🙈',
+                title: '아직은 조금 아쉬워요... 😅\n하지만 시작이 반이에요!',
+                message: '경제 상식은 누구나 처음엔 어렵지만,\n계속 풀다 보면 분명 실력이 쑥쑥 올라갈 거예요!'
+            };
+        }
+    }
+
+    // 결과 표시 함수 수정
+    function showResults() {
+        const resultMessage = getResultMessage(score, quizData.length);
+        let html = `
+            <div class="max-w-2xl mx-auto text-center">
+                <div class="mb-12">
+                    <div class="text-6xl mb-6">${resultMessage.emoji}</div>
+                    <h3 class="text-3xl font-bold text-gray-800 mb-4">테스트 완료!</h3>
+                    <p class="text-2xl text-blue-600 font-semibold mb-4">당신의 점수: ${score} / ${quizData.length}</p>
+                    <div class="space-y-2">
+                        <p class="text-xl font-semibold text-gray-800 whitespace-pre-line">${resultMessage.title}</p>
+                        <p class="text-gray-600 whitespace-pre-line">${resultMessage.message}</p>
+                    </div>
+                </div>
+                
+                <div class="flex justify-center gap-6">
+                    <button onclick="showAnswers()" 
+                            class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-8 rounded-full transition-colors text-lg">
+                        정답 확인하기
+                    </button>
+                    <button onclick="quizModal.classList.add('hidden'); quizModal.classList.remove('flex');" 
+                            class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-8 rounded-full transition-colors text-lg">
+                        종료하기
+                    </button>
+                </div>
+            </div>
+        `;
+        quizContent.innerHTML = html;
+        progressBar.style.width = '100%';
+        currentQuestionNumber.textContent = quizData.length;
+    }
+
+    // 정답 확인 화면 함수 수정
+    window.showAnswers = function() {
+        let html = `
+            <div class="max-w-2xl mx-auto">
+                <div class="space-y-6">
+                    ${quizData.map((question, index) => {
+                        const isCorrect = userAnswers[index] === question.correctAnswer;
+                        const userAnswer = userAnswers[index];
+                        
+                        return `
+                            <div class="p-6 rounded-lg ${isCorrect ? 'bg-green-50' : 'bg-red-50'}">
+                                <div class="flex items-start gap-4">
+                                    <span class="text-blue-500 text-xl font-bold">Q${index + 1}.</span>
+                                    <div class="flex-1">
+                                        <p class="text-lg font-semibold text-gray-800">${question.question}</p>
+                                        
+                                        <div class="mt-3 space-y-2">
+                                            ${question.options.map((option, optionIndex) => `
+                                                <div class="flex items-center">
+                                                    <span class="w-6 h-6 flex items-center justify-center rounded-full mr-2 text-sm
+                                                        ${optionIndex === question.correctAnswer ? 'bg-blue-500 text-white' : 
+                                                          optionIndex === userAnswer ? 'bg-red-500 text-white' : 'bg-gray-200'}"
+                                                    >
+                                                        ${optionIndex === question.correctAnswer ? '✓' : 
+                                                          optionIndex === userAnswer ? '×' : ''}
+                                                    </span>
+                                                    <span class="${optionIndex === question.correctAnswer ? 'font-semibold text-blue-700' : 
+                                                                 optionIndex === userAnswer && !isCorrect ? 'text-red-700' : 'text-gray-700'}"
+                                                    >
+                                                        ${option}
+                                                    </span>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                        
+                                        <div class="mt-4">
+                                            <span class="inline-block px-2 py-1 rounded text-sm ${isCorrect ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'}">
+                                                ${isCorrect ? '정답입니다!' : '틀렸습니다'}
+                                            </span>
+                                            <p class="mt-2 text-gray-600">${question.explanation}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+                <div class="mt-8 text-center">
+                    <button onclick="quizModal.classList.add('hidden'); quizModal.classList.remove('flex');" 
+                            class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-8 rounded-full transition-colors text-lg">
+                        완료
+                    </button>
+                </div>
+            </div>
+        `;
+        quizContent.innerHTML = html;
+    }
+});
 </script>
 @endpush
 @endsection 
