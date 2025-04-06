@@ -15,6 +15,7 @@ use App\Http\Controllers\RoadmapController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\GeminiBotController;
 use App\Http\Controllers\MqtestController;
+use App\Http\Controllers\Api\ServerCheckController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -121,3 +122,6 @@ Route::post('/api/chatbot/reset', [GeminiBotController::class, 'resetConversatio
 
 // 경제 상식 테스트
 Route::get('/api/quiz', [MqtestController::class, 'getQuizData'])->name('quiz.get');
+
+// 서버 체크 API
+Route::get('/api/server-check', [ServerCheckController::class, 'serverCheck'])->name('api.server-check');
