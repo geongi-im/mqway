@@ -23,8 +23,8 @@ class CustomizeFormatter
                 true
             );
             
-            // 한국 시간대 설정
-            $formatter->setTimezone(new DateTimeZone('Asia/Seoul'));
+            // 한국 시간대 설정 (LineFormatter는 setTimezone 대신 setDateFormat을 사용)
+            $formatter->setDateFormat('Y-m-d H:i:s.u', new DateTimeZone('Asia/Seoul'));
             $handler->setFormatter($formatter);
         }
     }
