@@ -169,13 +169,36 @@ IMPORTANT REMINDERS:
                 // 응답 텍스트를 저장할 변수
                 $responseText = '';
                 
+                // 응답 완료 여부를 확인하는 플래그
+                $isFinished = false;
+                
                 // 각 데이터 청크를 SSE 형식으로 출력하는 콜백
-                curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($curl, $data) use (&$responseText) {
-                    // 데이터를 SSE 형식으로 출력
-                    echo "data: " . $data . "\n\n";
+                curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($curl, $data) use (&$responseText, &$isFinished) {
+                    // 데이터 정제: 시작 부분의 쉼표나 대괄호 제거
+                    $cleanData = trim($data);
                     
-                    // 응답 내용을 추출하여 저장
-                    $this->extractAndSaveResponse($data, $responseText);
+                    // 단순 배열 토큰은 건너뜀
+                    if ($cleanData === '[' || $cleanData === ']') {
+                        return strlen($data);
+                    }
+
+                    // 줄바꿈 문자 뒤의 쉼표 패턴을 찾아 처리
+                    $cleanData = preg_replace('/^[\n]*,/', '', $cleanData);
+                    
+                    // JSON 객체 앞의 쉼표 제거
+                    $cleanData = preg_replace('/^,\s*/', '', $cleanData);
+
+                    // JSON 객체 끝에 있는 대괄호 제거
+                    $cleanData = preg_replace('/\]\s*$/', '', $cleanData);
+                    
+                    // 쉼표 또는 대괄호로 시작하는 데이터 처리
+                    if (!empty($cleanData) && ($cleanData[0] === ',' || $cleanData[0] === '[')) {
+                        $cleanData = substr($cleanData, 1);
+                    }
+
+                    // 정제된 데이터를 SSE 형식으로 출력
+                    echo "data: " . $cleanData . "\n\n";
+                    $this->extractAndSaveResponse($cleanData, $responseText, $isFinished);
                     
                     flush();
                     ob_flush();
@@ -212,7 +235,8 @@ IMPORTANT REMINDERS:
                     'conversation_data' => $currentConversation
                 ]);
 
-                // 스트림 종료 알림
+                // isFinished가 true이거나 또는 API가 명시적으로 완료 신호를 보내지 않은 경우에도
+                // 응답이 종료되었을 때 클라이언트에게 [DONE] 신호 전송
                 echo "data: [DONE]\n\n";
                 flush();
                 ob_flush();
@@ -233,26 +257,59 @@ IMPORTANT REMINDERS:
     /**
      * 응답 데이터에서 텍스트 내용을 추출하고 저장
      */
-    private function extractAndSaveResponse($data, &$responseText) {
-        // 디버깅: 응답 데이터 로깅
-        Log::debug('API 응답 데이터 청크: ' . $data);
-        
-        // JSON 데이터 체크
-        if (strpos($data, '"text"') !== false) {
-            // JSON 데이터에서 text 필드 추출 시도
-            if (preg_match('/"text"\s*:\s*"([^"]*)"/s', $data, $matches)) {
-                $extractedText = $matches[1];
+    private function extractAndSaveResponse($data, &$responseText, &$isFinished) {
+        try {
+            // 디버깅: 응답 데이터 로깅
+            Log::debug('API 응답 데이터 청크: ' . $data);
+            
+            // 데이터가 이미 정제되어 있으므로 바로 JSON 파싱 시도
+            $jsonData = json_decode($data, true);
+            
+            if ($jsonData === null) {
+                $errorMsg = 'JSON 파싱 실패: ' . json_last_error_msg();
+                Log::warning($errorMsg);
+                echo "data: [ERROR] " . $errorMsg . "\n\n";
+                return;
+            }
+            
+            // finishReason 체크
+            if (isset($jsonData['candidates'][0]['finishReason']) && $jsonData['candidates'][0]['finishReason'] === 'STOP') {
+                $isFinished = true;
+                Log::debug('응답 완료 감지: finishReason=STOP');
+            }
+            
+            // 텍스트 추출
+            if (isset($jsonData['candidates'][0]['content']['parts'][0]['text'])) {
+                $extractedText = $jsonData['candidates'][0]['content']['parts'][0]['text'];
+                
+                // 유니코드 이스케이프 시퀀스 처리
+                $extractedText = preg_replace_callback('/\\\\u([0-9a-fA-F]{4})/', function ($matches) {
+                    return mb_convert_encoding(pack('H*', $matches[1]), 'UTF-8', 'UCS-2BE');
+                }, $extractedText);
+                
+                // 이스케이프된 문자 처리
+                $extractedText = str_replace(
+                    ['\\n', '\\r', '\\"', "\\'", '\\\\'],
+                    ["\n", "\r", '"', "'", '\\'],
+                    $extractedText
+                );
+                
                 $responseText .= $extractedText;
                 
                 // 디버깅: 추출된 텍스트 로깅
                 Log::debug('추출된 텍스트: ' . $extractedText);
                 Log::debug('누적된 전체 텍스트: ' . $responseText);
+            } else {
+                // 텍스트 필드가 없는 경우
+                $errorMsg = '응답에서 텍스트를 찾을 수 없습니다';
+                Log::warning($errorMsg);
+                echo "data: [ERROR] " . $errorMsg . "\n\n";
             }
-        }
-        
-        // 추가: finishReason이 포함되어 있는 경우 로깅 (마지막 응답인지 확인)
-        if (strpos($data, '"finishReason"') !== false) {
-            Log::debug('최종 응답 감지 (finishReason 포함)');
+            
+        } catch (\Exception $e) {
+            $errorMsg = 'JSON 처리 중 오류: ' . $e->getMessage();
+            Log::error($errorMsg);
+            echo "data: [ERROR] " . $errorMsg . "\n\n";
         }
     }
     

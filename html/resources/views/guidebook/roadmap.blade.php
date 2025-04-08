@@ -194,7 +194,7 @@
                                             <p class="text-lg font-bold text-green-800">10%</p>
                                         </div>
                                     </div>
-                                    <div class="flex items-center">
+                        <div class="flex items-center">
                                         <div class="w-2 h-2 bg-green-200 rounded-full mr-2"></div>
                                         <div>
                                             <p class="text-sm font-semibold text-gray-700">대체 투자</p>
@@ -247,8 +247,8 @@
                                             <p class="text-lg font-bold text-purple-800">5%</p>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
+                        </div>
+                    </div>
                         </div>
                     </div>
                 </div>
@@ -323,7 +323,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         periodElement.innerHTML = `${periodText}<span class="text-base md:text-xl text-gray-600 ml-1"></span>`;
     }
-    
+
     // 수익률을 고려한 남은 기간 계산 함수
     function calculateRemainingPeriodWithReturn(targetAmount, currentAmount, monthlySaving, annualReturn) {
         // 월 저축액이 0이거나 음수인 경우 null 반환
@@ -398,7 +398,7 @@ document.addEventListener('DOMContentLoaded', function() {
             recalculateRemainingPeriod();
         });
     });
-    
+
     // 이벤트 리스너
     if (monthlySaving) {
         monthlySaving.addEventListener('input', (e) => {
@@ -428,7 +428,7 @@ document.addEventListener('DOMContentLoaded', function() {
             e.target.value = value;
         });
     }
-    
+
     // 초기값 설정
     updateMonthlySaving(monthlySaving ? monthlySaving.value : {{ max(10000, $data['difference']) }});
     

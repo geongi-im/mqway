@@ -341,7 +341,7 @@
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
         </svg>
-        캐시플로우 챗봇과 대화하기
+        캐시플로우 챗봇 대화하기
     </button>
     
     <button id="startQuizBtn" class="bg-point hover:bg-point/90 text-cdark px-8 py-3 rounded-lg shadow-lg font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-xl flex items-center justify-center mx-auto">
@@ -821,28 +821,30 @@
                             }
                             
                             // 디버깅: 최종 응답 로깅
-                            console.log('최종 응답 완료:', botResponseText);
+                            //console.log('최종 응답 완료:', botResponseText);
                             return;
                         }
                         
                         const chunk = decoder.decode(value, { stream: true });
-                        console.log('원본 청크:', chunk); // 디버깅용
+                        //console.log('원본 청크:', chunk); // 디버깅용
                         const lines = chunk.split('\n\n');
                         
                         lines.forEach(line => {
-                            if (line.startsWith('data: ')) {
-                                const data = line.substring(6).trim(); // 'data: ' 접두사 제거 및 공백 제거
+                            // 개행 문자로 시작하는 경우도 처리
+                            const trimmedLine = line.trim();
+                            if (trimmedLine.startsWith('data: ')) {
+                                const data = trimmedLine.substring(6).trim(); // 'data: ' 접두사 제거 및 공백 제거
                                 
+                                // [DONE] 메시지 처리 - isStreamComplete 표시만 하고 계속 진행
                                 if (data === '[DONE]') {
                                     console.log('스트림 종료 신호 받음');
                                     isStreamComplete = true;
-                                    // 응답 텍스트 최종 확인
-                                    console.log('최종 텍스트:', botResponseText);
-                                    return;
+                                    return; // forEach 내부의 현재 아이템만 스킵, 루프는 계속 진행
                                 }
                                 
+                                // 에러 메시지 처리
                                 if (data.startsWith('[ERROR]')) {
-                                    botResponseElement.textContent = '죄송합니다. 응답 생성 중 오류가 발생했습니다.';
+                                    botResponseElement.textContent = '죄송합니다. 응답 생성 중 오류가 발생했습니다. 다시 시도해주세요.';
                                     return;
                                 }
                                 
@@ -875,51 +877,14 @@
                                                 jsonData.candidates[0].content.parts.length > 0) {
                                                 
                                                 extractedText = jsonData.candidates[0].content.parts[0].text;
-                                                console.log('JSON 파싱으로 추출된 텍스트:', extractedText);
                                             }
                                         } catch (parseError) {
                                             console.warn('JSON 파싱 실패:', parseError);
                                         }
                                     }
                                     
-                                    // 방법 2: 정규식으로 텍스트 필드 추출 (개선된 패턴 - 멀티라인 지원)
-                                    if (extractedText === null && cleanData.includes('"text"')) {
-                                        // 개선된 정규식: /s 플래그로 멀티라인 지원, 이스케이프된 쌍따옴표 허용
-                                        const textMatch = /"text"\s*:\s*"((?:\\"|[^"])*)"/s.exec(cleanData);
-                                        if (textMatch && textMatch[1]) {
-                                            extractedText = textMatch[1];
-                                            console.log('정규식으로 추출된 텍스트:', extractedText);
-                                        }
-                                    }
-                                    
-                                    // 방법 3: 마지막 리조트로 finishReason 확인
-                                    if (extractedText === null && cleanData.includes('"finishReason"')) {
-                                        console.log('finishReason 감지됨, 마지막 청크일 가능성 있음');
-                                        // 다른 정규식으로 한번 더 시도 (멀티라인 지원)
-                                        const altTextMatch = /"text"\s*:\s*"((?:\\"|[^"])*)"/s.exec(cleanData);
-                                        if (altTextMatch && altTextMatch[1]) {
-                                            extractedText = altTextMatch[1];
-                                            console.log('finishReason 포함 청크에서 추출된 텍스트:', extractedText);
-                                        }
-                                    }
-                                    
                                     // 텍스트가 추출되었으면 화면에 표시
                                     if (extractedText !== null && extractedText !== undefined) {
-                                        console.log('추출된 텍스트:', extractedText);
-                                        
-                                        // 텍스트 정제: 다양한 줄바꿈 및 특수 문자 처리
-                                        extractedText = extractedText
-                                            // 이중 이스케이프된 개행 문자(\\n)를 변환
-                                            .replace(/\\\\n/g, '\n')
-                                            // 단일 이스케이프된 개행 문자(\n)를 변환
-                                            .replace(/\\n/g, '\n')
-                                            // 백슬래시와 별표 정리 (\*)
-                                            .replace(/\\\*/g, '*')
-                                            // 이스케이프된 특수 문자 정리
-                                            .replace(/\\"/g, '"')
-                                            .replace(/\\'/g, "'")
-                                            .replace(/\\\\/g, "\\");
-                                        
                                         // 유니코드 이스케이프 시퀀스(\uXXXX) 처리
                                         extractedText = extractedText.replace(/\\u([0-9a-fA-F]{4})/g, function(match, p1) {
                                             return String.fromCodePoint(parseInt(p1, 16));
@@ -927,12 +892,7 @@
                                         
                                         botResponseText += extractedText;
                                         
-                                        // 옵션 1: 스트리밍 중 마크다운 실시간 렌더링
-                                        // botResponseElement.innerHTML = marked.parse(botResponseText)
-                                        //    .replace(/\\$/g, '')
-                                        //    .replace(/\\ /g, ' ');
-                                        
-                                        // 옵션 2: 마크다운 구문을 그대로 표시하고, 스트림 완료 후 한번에 렌더링
+                                        // 마크다운 실시간 렌더링 중단 - 스트림 완료 후 처리
                                         botResponseElement.textContent = botResponseText
                                             .replace(/\\$/g, '')
                                             .replace(/\\ /g, ' ');
@@ -985,7 +945,6 @@
             
             // 이미지 처리 로직 강화
             if (imageSrc && imageSrc !== '') {
-                console.log("이미지 소스: ", imageSrc); // 디버깅
                 contentHtml += `<div class="flex justify-center w-full mb-2"><img src="${imageSrc}" class="max-w-full max-h-48 rounded-lg" alt="첨부 이미지"></div>`;
             }
             
