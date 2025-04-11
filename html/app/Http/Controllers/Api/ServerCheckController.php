@@ -42,7 +42,7 @@ class ServerCheckController extends Controller
             // 2. 비활성 서버 체크 - 5분 이상 응답이 없는 서버 찾기
             $inactiveServers = DB::select("
                 SELECT * FROM server_check 
-                WHERE sc_datetime < NOW() - INTERVAL 5 MINUTE
+                WHERE sc_watch = 1 AND sc_datetime < NOW() - INTERVAL 5 MINUTE
             ");
             
             // 비활성 서버가 있으면 알림 발송
