@@ -125,3 +125,8 @@ Route::get('/api/quiz', [MqtestController::class, 'getQuizData'])->name('quiz.ge
 
 // 서버 체크 API
 Route::get('/api/server-check', [ServerCheckController::class, 'serverCheck'])->name('api.server-check');
+
+// ads.txt 라우트
+Route::get('/ads.txt', function () {
+    return response()->file(public_path('ads.txt'));
+});
