@@ -33,6 +33,8 @@
             transform: translateX(0);
         }
     </style>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7078035340110573"
+    crossorigin="anonymous"></script>
 </head>
 <body class="bg-primary min-h-screen flex flex-col">
     <!-- Header -->
