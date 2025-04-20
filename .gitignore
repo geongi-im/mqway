@@ -61,3 +61,7 @@ coverage.xml
 # Dependencies
 package-lock.json
 yarn.lock
+
+# cursor environment
+.cursor/
+*.mdc
