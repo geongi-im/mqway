@@ -16,6 +16,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\GeminiBotController;
 use App\Http\Controllers\MqtestController;
 use App\Http\Controllers\Api\ServerCheckController;
+use App\Http\Controllers\CashflowController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -125,3 +126,9 @@ Route::get('/api/quiz', [MqtestController::class, 'getQuizData'])->name('quiz.ge
 
 // 서버 체크 API
 Route::get('/api/server-check', [ServerCheckController::class, 'serverCheck'])->name('api.server-check');
+
+// Cashflow 라우트
+Route::prefix('cashflow')->group(function () {
+    Route::get('/introduction', [CashflowController::class, 'introduction'])->name('cashflow.introduction');
+    Route::get('/process', [CashflowController::class, 'process'])->name('cashflow.process');
+});

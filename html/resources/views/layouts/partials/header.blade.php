@@ -42,6 +42,32 @@
                     </li>
                 </ul>
             </li>
+            <li class="relative">
+                <a href="#" class="text-cdark hover:text-cgray cashflow-toggle flex items-center justify-between py-2 {{ request()->is('cashflow*') ? 'font-bold border-l-4 border-secondary pl-4 -ml-4' : '' }}">
+                    <span>Cashflow</span>
+                    <svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </a>
+                <ul class="cashflow-submenu hidden space-y-1 ml-4 border-l-2 border-secondary/20">
+                    <li class="relative">
+                        <a href="{{ route('cashflow.introduction') }}" 
+                           class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6 
+                           {{ request()->routeIs('cashflow.introduction') ? 'font-bold bg-dark/10' : '' }}">
+                            Cashflow 소개
+                            <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-0 bg-secondary transition-all duration-200"></span>
+                        </a>
+                    </li>
+                    <li class="relative">
+                        <a href="{{ route('cashflow.process') }}" 
+                           class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6
+                           {{ request()->routeIs('cashflow.process') ? 'font-bold bg-dark/10' : '' }}">
+                            Cashflow 진행
+                            <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-0 bg-secondary transition-all duration-200"></span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
             <!--
             <li>
                 <a href="{{ url('/pick') }}" class="text-point hover:text-secondary/80 block py-2 {{ request()->is('pick*') ? 'font-bold border-l-4 border-secondary pl-4 -ml-4' : '' }}">
@@ -69,12 +95,12 @@
 </div>
 
 <style>
-.submenu {
+.submenu, .cashflow-submenu {
     transition: all 0.3s ease-in-out;
     max-height: 0;
     overflow: hidden;
 }
-.submenu.show {
+.submenu.show, .cashflow-submenu.show {
     display: block;
     max-height: 200px;
     margin-top: 0.5rem;
@@ -83,12 +109,12 @@
 .submenu-item:hover .absolute {
     height: 70%;
 }
-.guidebook-toggle.active svg {
+.guidebook-toggle.active svg, .cashflow-toggle.active svg {
     transform: rotate(180deg);
 }
 
 /* Active 상태일 때 서브메뉴 자동 표시 */
-.guidebook-toggle.active + .submenu {
+.guidebook-toggle.active + .submenu, .cashflow-toggle.active + .cashflow-submenu {
     display: block;
     max-height: 200px;
 }
@@ -148,11 +174,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const closeMenu = document.getElementById('closeMenu');
     const guidebookToggle = document.querySelector('.guidebook-toggle');
     const submenu = document.querySelector('.submenu');
+    const cashflowToggle = document.querySelector('.cashflow-toggle');
+    const cashflowSubmenu = document.querySelector('.cashflow-submenu');
 
     // Guidebook 섹션이 active 상태일 때 자동으로 서브메뉴 표시
     if (window.location.pathname.includes('/guidebook')) {
         guidebookToggle.classList.add('active');
         submenu.classList.add('show');
+    }
+
+    // Cashflow 섹션이 active 상태일 때 자동으로 서브메뉴 표시
+    if (window.location.pathname.includes('/cashflow')) {
+        cashflowToggle.classList.add('active');
+        cashflowSubmenu.classList.add('show');
     }
 
     menuButton.addEventListener('click', () => {
@@ -176,6 +210,12 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
         submenu.classList.toggle('show');
         guidebookToggle.classList.toggle('active');
+    });
+
+    cashflowToggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        cashflowSubmenu.classList.toggle('show');
+        cashflowToggle.classList.toggle('active');
     });
 });
 </script>
