@@ -538,7 +538,7 @@
         });
         
         // 데이터 가져오기
-        fetch('{{ asset("storage/etc/2019_2024_market_data.json") }}')
+        fetch('/storage/etc/2019_2024_market_data.json')
             .then(response => {
                 if (!response.ok) throw new Error('데이터를 불러오는 중 오류가 발생했습니다.');
                 return response.json();
