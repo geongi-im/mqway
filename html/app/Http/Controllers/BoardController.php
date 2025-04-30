@@ -3,15 +3,33 @@
 namespace App\Http\Controllers;
 
 use App\Models\Board;
-use App\Traits\BoardCategoryColorTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
-class BoardController extends Controller
+class BoardController extends AbstractBoardController
 {
-    use BoardCategoryColorTrait;
+    protected $modelClass = Board::class;
+    protected $viewPath = 'board';
+    protected $routePrefix = 'board';
+    protected $uploadPath = 'uploads/board';
+    
+    /**
+     * 하드 삭제 사용 (기존 코드에서는 하드 삭제 사용)
+     */
+    protected function useHardDelete()
+    {
+        return true;
+    }
+    
+    /**
+     * 페이지당 게시글 수 설정
+     */
+    protected function getItemsPerPage()
+    {
+        return 12;
+    }
 
     /**
      * 게시글 목록
@@ -124,7 +142,7 @@ class BoardController extends Controller
         $board->mq_title = $request->mq_title;
         $board->mq_content = $request->mq_content;
         $board->mq_category = $request->mq_category;
-        $board->mq_writer = Auth::user()->mq_user_id;
+        $board->mq_user_id = Auth::user()->mq_user_id;
         $board->mq_view_cnt = 0;
         $board->mq_like_cnt = 0;
         $board->mq_status = 1;
@@ -171,7 +189,7 @@ class BoardController extends Controller
         $post = Board::findOrFail($idx);
         
         // 작성자 체크
-        if ($post->mq_writer !== Auth::user()->mq_user_id) {
+        if ($post->mq_user_id !== Auth::user()->mq_user_id) {
             return redirect()->route('board.show', $idx)->with('error', '수정 권한이 없습니다.');
         }
 
@@ -209,7 +227,7 @@ class BoardController extends Controller
         $board = Board::findOrFail($idx);
         
         // 작성자 체크
-        if ($board->mq_writer !== Auth::user()->mq_user_id) {
+        if ($board->mq_user_id !== Auth::user()->mq_user_id) {
             return redirect()->route('board.show', $idx)->with('error', '수정 권한이 없습니다.');
         }
 
@@ -252,7 +270,7 @@ class BoardController extends Controller
         $board = Board::findOrFail($idx);
         
         // 작성자 체크
-        if ($board->mq_writer !== Auth::user()->mq_user_id) {
+        if ($board->mq_user_id !== Auth::user()->mq_user_id) {
             return redirect()->route('board.show', $idx)->with('error', '삭제 권한이 없습니다.');
         }
 
@@ -333,7 +351,7 @@ class BoardController extends Controller
             $board = Board::findOrFail($idx);
             
             // 작성자 체크
-            if ($board->mq_writer !== Auth::user()->mq_user_id) {
+            if ($board->mq_user_id !== Auth::user()->mq_user_id) {
                 return response()->json([
                     'success' => false,
                     'message' => '삭제 권한이 없습니다.'

@@ -20,7 +20,7 @@
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
-                    <span>{{ $post->mq_writer }}</span>
+                    <span>{{ $post->mq_user_id }}</span>
                 </div>
                 <div class="flex items-center">
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -67,7 +67,7 @@
                 
                 <!-- 우측 버튼 그룹 -->
                 <div class="flex items-center gap-2">
-                    @if(auth()->check() && auth()->user()->mq_user_id === $post->mq_writer)
+                    @if(auth()->check() && auth()->user()->mq_user_id === $post->mq_user_id)
                         <a href="{{ route('board.edit', $post->idx) }}" 
                            class="inline-flex items-center justify-center h-10 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all text-gray-700 text-sm">
                             수정

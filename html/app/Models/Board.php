@@ -15,7 +15,7 @@ class Board extends Model
         'mq_title',
         'mq_content',
         'mq_category',
-        'mq_writer',
+        'mq_user_id',
         'mq_image',
         'mq_original_image',
         'mq_view_cnt',
