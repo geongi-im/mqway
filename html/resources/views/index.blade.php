@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Auth;
 .mainBanner {
     position: relative;
     width: 100%;
-    height: 600px;
+    height: 65vh; /* 화면 높이의 65%로 확장 */
     background: #34383d;
     overflow: hidden;
 }
@@ -31,6 +31,7 @@ use Illuminate\Support\Facades\Auth;
     position: relative;
     width: 100%;
     height: 100%;
+    background-color: #f8f8f8; /* 배경색 추가 */
 }
 
 .mainBanner .banner-image {
@@ -42,17 +43,18 @@ use Illuminate\Support\Facades\Auth;
 .mainBanner .banner-image img {
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: contain; /* cover에서 contain으로 변경하여 이미지가 짤리지 않도록 함 */
     object-position: center;
 }
 
 .mainBanner .banner-content {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.6));
+    background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7)); /* 그라데이션 강화 */
     display: flex;
-    align-items: center;
+    align-items: flex-end; /* 중앙에서 아래쪽으로 정렬 변경 */
     padding: 0 20px;
+    padding-bottom: 120px; /* 하단 여백 추가 */
 }
 
 .mainBanner .banner-content .text-container {
@@ -63,12 +65,31 @@ use Illuminate\Support\Facades\Auth;
 }
 
 .mainBanner .banner-content h2 {
-    font-size: 3rem;
+    font-size: 3.0rem; /* 글자 크기 증가 */
     line-height: 1.3;
     font-weight: 700;
     color: #fff;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.6); /* 텍스트 그림자 강화 */
     text-align: center;
+    margin-bottom: 1.5rem; /* 버튼과의 간격 */
+}
+
+/* CTA 버튼 추가 */
+.mainBanner .banner-content .cta-button {
+    display: inline-block;
+    background-color: #ffd100; /* 포인트 색상 */
+    color: #333;
+    font-weight: 600;
+    padding: 0.75rem 2rem;
+    border-radius: 50px;
+    font-size: 1.125rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.mainBanner .banner-content .cta-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.4);
 }
 
 /* 네비게이션 버튼 */
@@ -184,8 +205,8 @@ use Illuminate\Support\Facades\Auth;
 
 @media (max-width: 768px) {
     .mainBanner {
-        height: 300px;
-        padding: 15px 0;
+        height: 50vh; /* 모바일에서도 높이 확장 */
+        padding: 0;
     }
 
     .mainBanner .banner-image {
@@ -194,10 +215,11 @@ use Illuminate\Support\Facades\Auth;
 
     .mainBanner .banner-content {
         background: linear-gradient(to bottom, 
-            rgba(0,0,0,0.3) 0%,
-            rgba(0,0,0,0.5) 50%,
-            rgba(0,0,0,0.3) 100%
+            rgba(0,0,0,0.2) 0%,
+            rgba(0,0,0,0.6) 50%,
+            rgba(0,0,0,0.8) 100%
         );
+        padding-bottom: 80px; /* 모바일 하단 여백 조정 */
     }
 
     .mainBanner .banner-content .text-container {
@@ -206,15 +228,17 @@ use Illuminate\Support\Facades\Auth;
     }
 
     .mainBanner .banner-content h2 {
-        font-size: 1.125rem;
+        font-size: 1.5rem; /* 모바일 글자 크기 조정 */
         line-height: 1.5;
         letter-spacing: -0.02em;
         text-align: center;
         word-break: keep-all;
+        margin-bottom: 1rem;
     }
 
-    .mainBanner .banner-content h2 br {
-        display: inline;
+    .mainBanner .banner-content .cta-button {
+        padding: 0.5rem 1.5rem;
+        font-size: 1rem;
     }
 
     /* 네비게이션 버튼 크기 조정 */
@@ -262,12 +286,16 @@ use Illuminate\Support\Facades\Auth;
 
 @media (min-width: 769px) and (max-width: 1024px) {
     .mainBanner {
-        height: 400px;
-        padding: 20px 0;
+        height: 55vh; /* 태블릿 높이 설정 */
+        padding: 0;
+    }
+
+    .mainBanner .banner-content {
+        padding-bottom: 100px; /* 태블릿 하단 여백 조정 */
     }
 
     .mainBanner .banner-content h2 {
-        font-size: 1.75rem;
+        font-size: 2.0rem; /* 태블릿 글자 크기 조정 */
         line-height: 1.4;
         text-align: center;
     }
@@ -308,40 +336,33 @@ use Illuminate\Support\Facades\Auth;
     <div class="swiper-wrapper">
         <div class="swiper-slide">
             <div class="banner-image">
-                <img src="{{ asset('images/banner/main_banner_01.png') }}" alt="배너1">
+                <img src="{{ asset('images/banner/main_banner_10.png') }}" alt="배너1">
                 <div class="banner-content">
                     <div class="text-container">
-                        <h2>라떼 한잔으로<br>원하는 삶을 누리세요</h2>
+                        <h2>경제는 지식이 아닌 습관입니다.<br>지금 바로 시작하세요.</h2>
+                        <a href="javascript:void(0)" class="cta-button" onclick="document.getElementById('startQuizBtn').click(); return false;">경제 상식 테스트</a>
                     </div>
                 </div>
             </div>
         </div>
         <div class="swiper-slide">
             <div class="banner-image">
-                <img src="{{ asset('images/banner/main_banner_02.png') }}" alt="배너2">
+                <img src="{{ asset('images/banner/main_banner_11.png') }}" alt="배너2">
                 <div class="banner-content">
                     <div class="text-container">
-                        <h2>한 달의 구독료로<br>당신만의 자산을 시작하세요</h2>
+                        <h2>용돈이 아니라,<br>인생을 가르치는 시간입니다.</h2>
+                        <a href="{{ url('/news') }}" class="cta-button">주요 뉴스 보기</a>
                     </div>
                 </div>
             </div>
         </div>
         <div class="swiper-slide">
             <div class="banner-image">
-                <img src="{{ asset('images/banner/main_banner_03.png') }}" alt="배너3">
+                <img src="{{ asset('images/banner/main_banner_12.png') }}" alt="배너3">
                 <div class="banner-content">
                     <div class="text-container">
-                        <h2>취침 전에 클릭 한 번,<br>꿈 같은 미래가 시작됩니다</h2>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="swiper-slide">
-            <div class="banner-image">
-                <img src="{{ asset('images/banner/main_banner_04.png') }}" alt="배너4">
-                <div class="banner-content">
-                    <div class="text-container">
-                        <h2>출근길 10분,<br>투자 지식을 쌓는 최적의 시간</h2>
+                    <h2>부모의 한마디가<br>아이의 금융감각을 만듭니다.</h2>
+                        <a href="{{ url('/board-content') }}" class="cta-button">추천 콘텐츠 보기</a>
                     </div>
                 </div>
             </div>
@@ -363,6 +384,7 @@ use Illuminate\Support\Facades\Auth;
 </div>
 
 <!-- 챗봇과 경제 상식 테스트 버튼 -->
+<!--
 <div class="container mx-auto px-4 mb-8 text-center flex flex-col md:flex-row justify-center gap-4">
     <button id="chatbotBtn" class="bg-point hover:bg-point/90 text-cdark px-8 py-3 rounded-lg shadow-lg font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-xl flex items-center justify-center mx-auto w-full md:w-72">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -378,6 +400,7 @@ use Illuminate\Support\Facades\Auth;
         <span>경제 상식 테스트</span>
     </button>
 </div>
+-->
 
 <!-- 콘텐츠1 슬라이더 -->
 <div class="container mx-auto px-4 mb-16">
@@ -621,6 +644,22 @@ use Illuminate\Support\Facades\Auth;
                 slidesPerView: 4,
             },
         },
+    });
+    
+    // 배너 CTA 버튼 클릭 이벤트
+    document.addEventListener('DOMContentLoaded', function() {
+        const bannerCtaBtn = document.getElementById('bannerCtaBtn');
+        if (bannerCtaBtn) {
+            bannerCtaBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                // 로그인 상태에 따라 다른 동작 수행
+                @if(Auth::check())
+                    window.location.href = "{{ url('/board-content') }}";
+                @else
+                    window.location.href = "{{ route('login') }}";
+                @endif
+            });
+        }
     });
     
     // ECharts Line Race 차트
