@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Board;
+use App\Models\BoardContent;
+use App\Models\BoardResearch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -11,7 +13,34 @@ use Carbon\Carbon;
 
 class BoardApiController extends Controller
 {
+    /**
+     * 일반 게시판에 게시글 저장
+     */
     public function store(Request $request)
+    {
+        return $this->processStore($request, 'general');
+    }
+
+    /**
+     * 콘텐츠 게시판에 게시글 저장
+     */
+    public function storeContent(Request $request)
+    {
+        return $this->processStore($request, 'content');
+    }
+
+    /**
+     * 리서치 게시판에 게시글 저장
+     */
+    public function storeResearch(Request $request)
+    {
+        return $this->processStore($request, 'research');
+    }
+
+    /**
+     * 게시판 타입별 저장 프로세스 처리
+     */
+    private function processStore(Request $request, $type)
     {
         try {
             // 요청 데이터 검증
@@ -22,6 +51,18 @@ class BoardApiController extends Controller
                 'writer' => 'required|string|max:50',
                 'image.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
             ]);
+
+            // 게시판 타입에 따른 업로드 경로와 모델 설정
+            $uploadPath = 'uploads/board';
+            $model = Board::class;
+
+            if ($type === 'content') {
+                $uploadPath = 'uploads/board_content';
+                $model = BoardContent::class;
+            } elseif ($type === 'research') {
+                $uploadPath = 'uploads/board_research';
+                $model = BoardResearch::class;
+            }
 
             // 이미지 처리
             $imagePaths = [];
@@ -34,7 +75,7 @@ class BoardApiController extends Controller
                     $randomName = Str::random(32) . '.' . $extension;
                     
                     // 파일 저장
-                    $image->storeAs('uploads/board', $randomName, 'public');
+                    $image->storeAs($uploadPath, $randomName, 'public');
                     
                     // DB에는 파일명만 저장
                     $imagePaths[] = $randomName;
@@ -43,11 +84,11 @@ class BoardApiController extends Controller
             }
 
             // 게시글 생성
-            $board = Board::create([
+            $board = $model::create([
                 'mq_title' => $request->title,
                 'mq_content' => $request->content,
                 'mq_category' => $request->category,
-                'mq_writer' => $request->writer,
+                'mq_user_id' => $request->writer,
                 'mq_image' => $imagePaths,
                 'mq_original_image' => $originalImageNames,
                 'mq_view_cnt' => 0,
@@ -57,8 +98,8 @@ class BoardApiController extends Controller
             ]);
 
             // 이미지 URL 생성
-            $imageUrls = array_map(function($filename) {
-                return asset('storage/uploads/board/' . $filename);
+            $imageUrls = array_map(function($filename) use ($uploadPath) {
+                return asset('storage/' . $uploadPath . '/' . $filename);
             }, $imagePaths);
 
             return response()->json([
@@ -68,7 +109,7 @@ class BoardApiController extends Controller
                     'id' => $board->idx,
                     'title' => $board->mq_title,
                     'category' => $board->mq_category,
-                    'writer' => $board->mq_writer,
+                    'writer' => $board->mq_user_id,
                     'image_urls' => $imageUrls,
                     'created_at' => $board->mq_reg_date->format('Y-m-d H:i:s')
                 ]
