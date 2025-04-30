@@ -19,7 +19,14 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+// 일반 게시판 API 라우트
 Route::post('/board', [BoardApiController::class, 'store']);
+
+// 콘텐츠 게시판 API 라우트
+Route::post('/board-content', [BoardApiController::class, 'storeContent']);
+
+// 리서치 게시판 API 라우트
+Route::post('/board-research', [BoardApiController::class, 'storeResearch']);
 
 // 뉴스 API 라우트
 Route::prefix('news')->group(function () {

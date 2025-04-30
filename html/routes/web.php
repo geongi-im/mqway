@@ -17,6 +17,8 @@ use App\Http\Controllers\GeminiBotController;
 use App\Http\Controllers\MqtestController;
 use App\Http\Controllers\Api\ServerCheckController;
 use App\Http\Controllers\CashflowController;
+use App\Http\Controllers\BoardContentController;
+use App\Http\Controllers\BoardResearchController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -66,6 +68,36 @@ Route::middleware('auth')->group(function () {
     Route::delete('/board/{idx}', [BoardController::class, 'destroy'])->name('board.destroy');
     Route::post('/board/{idx}/like', [BoardController::class, 'like'])->name('board.like');
     Route::post('/board/delete-image/{idx}/{filename}', [BoardController::class, 'deleteImage'])->name('board.delete-image');
+});
+
+// 추천 콘텐츠 게시판 (비회원도 볼 수 있음, 글쓰기는 회원만)
+Route::prefix('board-content')->group(function () {
+    // 비회원도 접근 가능한 라우트
+    Route::get('/', [BoardContentController::class, 'index'])->name('board-content.index');
+    Route::get('/create', [BoardContentController::class, 'create'])->name('board-content.create')->middleware('auth');
+    Route::post('/', [BoardContentController::class, 'store'])->name('board-content.store')->middleware('auth');
+    Route::get('/{idx}/edit', [BoardContentController::class, 'edit'])->name('board-content.edit')->middleware('auth');
+    Route::put('/{idx}', [BoardContentController::class, 'update'])->name('board-content.update')->middleware('auth');
+    Route::delete('/{idx}', [BoardContentController::class, 'destroy'])->name('board-content.destroy')->middleware('auth');
+    Route::post('/{idx}/like', [BoardContentController::class, 'like'])->name('board-content.like')->middleware('auth');
+    Route::post('/upload-image', [BoardContentController::class, 'uploadImage'])->name('board-content.upload.image')->middleware('auth');
+    Route::post('/delete-image/{idx}/{filename}', [BoardContentController::class, 'deleteImage'])->name('board-content.delete-image')->middleware('auth');
+    Route::get('/{idx}', [BoardContentController::class, 'show'])->name('board-content.show');
+});
+
+// 투자 리서치 게시판 (회원 전용)
+Route::prefix('board-research')->middleware('auth')->group(function () {
+    // 모든 라우트에 auth 미들웨어 적용
+    Route::get('/', [BoardResearchController::class, 'index'])->name('board-research.index');
+    Route::get('/create', [BoardResearchController::class, 'create'])->name('board-research.create');
+    Route::post('/', [BoardResearchController::class, 'store'])->name('board-research.store');
+    Route::get('/{idx}/edit', [BoardResearchController::class, 'edit'])->name('board-research.edit');
+    Route::put('/{idx}', [BoardResearchController::class, 'update'])->name('board-research.update');
+    Route::delete('/{idx}', [BoardResearchController::class, 'destroy'])->name('board-research.destroy');
+    Route::post('/{idx}/like', [BoardResearchController::class, 'like'])->name('board-research.like');
+    Route::post('/upload-image', [BoardResearchController::class, 'uploadImage'])->name('board-research.upload.image');
+    Route::post('/delete-image/{idx}/{filename}', [BoardResearchController::class, 'deleteImage'])->name('board-research.delete-image');
+    Route::get('/{idx}', [BoardResearchController::class, 'show'])->name('board-research.show');
 });
 
 // Pick
