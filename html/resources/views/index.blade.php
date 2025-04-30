@@ -7,8 +7,6 @@ use Illuminate\Support\Facades\Auth;
 
 <!-- Swiper CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-<!-- Marked.js - 마크다운 파서 -->
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <!-- ECharts 라이브러리 -->
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 
@@ -340,7 +338,7 @@ use Illuminate\Support\Facades\Auth;
                 <div class="banner-content">
                     <div class="text-container">
                         <h2>경제는 지식이 아닌 습관입니다.<br>지금 바로 시작하세요.</h2>
-                        <a href="javascript:void(0)" class="cta-button" onclick="document.getElementById('startQuizBtn').click(); return false;">경제 상식 테스트</a>
+                        <a href="javascript:void(0)" class="cta-button" id="startQuizBtn">경제 상식 테스트</a>
                     </div>
                 </div>
             </div>
@@ -382,25 +380,6 @@ use Illuminate\Support\Facades\Auth;
     </div>
     <div id="lineRaceChart" class="w-full bg-white p-4 rounded-lg shadow-md" style="width: 100%; height: 450px !important; display: block; overflow: hidden;"></div>
 </div>
-
-<!-- 챗봇과 경제 상식 테스트 버튼 -->
-<!--
-<div class="container mx-auto px-4 mb-8 text-center flex flex-col md:flex-row justify-center gap-4">
-    <button id="chatbotBtn" class="bg-point hover:bg-point/90 text-cdark px-8 py-3 rounded-lg shadow-lg font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-xl flex items-center justify-center mx-auto w-full md:w-72">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-        </svg>
-        <span>캐시플로우 챗봇 대화하기</span>
-    </button>
-    
-    <button id="startQuizBtn" class="bg-point hover:bg-point/90 text-cdark px-8 py-3 rounded-lg shadow-lg font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-xl flex items-center justify-center mx-auto w-full md:w-72">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <span>경제 상식 테스트</span>
-    </button>
-</div>
--->
 
 <!-- 콘텐츠1 슬라이더 -->
 <div class="container mx-auto px-4 mb-16">
@@ -660,6 +639,14 @@ use Illuminate\Support\Facades\Auth;
                 @endif
             });
         }
+        
+        // 챗봇 이벤트 연결
+        const chatbotBtn = document.getElementById('chatbotBtn');
+        if (chatbotBtn) {
+            chatbotBtn.addEventListener('click', function() {
+                openChatbotModal();
+            });
+        }
     });
     
     // ECharts Line Race 차트
@@ -855,73 +842,6 @@ use Illuminate\Support\Facades\Auth;
             }
         }
     });
-
-    // 챗봇 모달 닫기 함수
-    function closeChatbotModal() {
-        // 확인 다이얼로그 표시
-        if (confirm("대화 내용이 초기화됩니다. 계속 진행하시겠습니까?")) {
-            const modal = document.getElementById('chatbotModal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-            document.body.style.overflow = 'auto';
-        }
-    }
-
-    // 챗봇 모달 열기 함수
-    function openChatbotModal() {
-        const modal = document.getElementById('chatbotModal');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        document.body.style.overflow = 'hidden';
-        
-        // 대화창 초기화
-        const chatMessages = document.getElementById('chatMessages');
-        chatMessages.innerHTML = '';
-        
-        // 세션에서 대화 내용 초기화
-        resetChatbotConversation();
-        
-        // 초기 메시지 추가
-        const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        
-        const messageElement = document.createElement('div');
-        messageElement.className = 'flex mb-4';
-        messageElement.innerHTML = `
-            <div class="w-10 h-10 rounded-full bg-secondary flex items-center justify-center flex-shrink-0 mr-3">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-cdark" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                </svg>
-            </div>
-            <div class="bg-white p-3 rounded-lg shadow-sm max-w-[80%]">
-                <p class="text-gray-800">안녕하세요. 캐시플로우 챗봇입니다. 캐시플로우 설명에 대해 궁금한점을 물어보세요!</p>
-                <span class="text-xs text-gray-500 mt-1 block">${time}</span>
-            </div>
-        `;
-        
-        chatMessages.appendChild(messageElement);
-    }
-    
-    // 챗봇 대화 내용 초기화 함수
-    function resetChatbotConversation() {
-        // 서버에 세션 초기화 요청
-        fetch('/api/chatbot/reset', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                console.warn('대화 내용 초기화 실패');
-            } else {
-                console.log('대화 내용 초기화 성공');
-            }
-        })
-        .catch(error => {
-            console.error('대화 내용 초기화 오류:', error);
-        });
-    }
 </script>
 
 <!-- 퀴즈 모달 -->
