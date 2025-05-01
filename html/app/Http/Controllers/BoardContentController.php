@@ -7,9 +7,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use App\Traits\BoardCategoryColorTrait;
 
 class BoardContentController extends AbstractBoardController
 {
+    use BoardCategoryColorTrait;
+    
     protected $modelClass = BoardContent::class;
     protected $viewPath = 'board_content';
     protected $routePrefix = 'board-content';
@@ -74,17 +77,12 @@ class BoardContentController extends AbstractBoardController
     }
     
     /**
-     * 게시글 작성 폼 표시 - 추상 클래스의 메소드를 활용
+     * 게시글 작성 폼 표시 - 고정된 카테고리 사용
      */
     public function create()
     {
-        // 카테고리 목록을 DB에서 직접 가져오기
-        $model = app($this->modelClass);
-        $categories = $model::select('mq_category')
-            ->distinct()
-            ->orderBy('mq_category')
-            ->pluck('mq_category')
-            ->toArray();
+        // 고정된 카테고리 목록 사용
+        $categories = $this->getBoardContentCategories();
         
         // 필요한 경우 추가 데이터를 뷰에 전달
         return view($this->viewPath.'.create', [

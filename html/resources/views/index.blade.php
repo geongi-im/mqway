@@ -405,7 +405,7 @@ use Illuminate\Support\Facades\Auth;
                     </div>
                     <div class="p-4 flex-1 flex flex-col">
                         <div class="mb-2">
-                            <span class="inline-block px-2 py-1 {{ $boardCategoryColors[$post->mq_category] }} text-xs font-medium rounded-md">
+                            <span class="inline-block px-2 py-1 {{ $boardContentColors[$post->mq_category] }} text-xs font-medium rounded-md">
                                 {{ $post->mq_category }}
                             </span>
                         </div>
@@ -467,7 +467,7 @@ use Illuminate\Support\Facades\Auth;
                     </div>
                     <div class="p-4 flex-1 flex flex-col">
                         <div class="mb-2">
-                            <span class="inline-block px-2 py-1 {{ $boardCategoryColors[$post->mq_category] }} text-xs font-medium rounded-md">
+                            <span class="inline-block px-2 py-1 {{ $boardResearchColors[$post->mq_category] }} text-xs font-medium rounded-md">
                                 {{ $post->mq_category }}
                             </span>
                         </div>

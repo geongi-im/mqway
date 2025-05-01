@@ -76,13 +76,18 @@ class IndexController extends Controller
                          ->take(4)
                          ->get();
 
+        // 각 게시판별 카테고리 색상 설정
+        $boardContentColors = $this->getCategoryColors('board_content');
+        $boardResearchColors = $this->getCategoryColors('board_research');
+
         return view('index', [
             'recommendedContents' => $recommendedContents,
             'researchContents' => $researchContents,
             'latestNews' => $latestNews,
             'isLoggedIn' => $isLoggedIn,
             'newsCategoryColors' => $this->newsCategoryColors,
-            'boardCategoryColors' => $this->getCategoryColors(),
+            'boardContentColors' => $boardContentColors,
+            'boardResearchColors' => $boardResearchColors,
         ]);
     }
 } 

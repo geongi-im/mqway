@@ -36,6 +36,10 @@ abstract class AbstractBoardController extends Controller
             });
         }
         
+        // 게시판별 카테고리 가져오기
+        $boardType = $this->getBoardTypeFromModelClass();
+        $categories = $this->getCategories($boardType);
+        
         // 카테고리 필터
         if ($request->has('category') && $request->category != '') {
             $query->where('mq_category', $request->category);
@@ -58,10 +62,13 @@ abstract class AbstractBoardController extends Controller
         // 이미지 처리
         $this->processListImages($posts);
         
+        // 게시판별 적절한 카테고리 색상 선택
+        $categoryColors = $this->getCategoryColors($boardType);
+        
         return view($this->viewPath.'.index', [
             'posts' => $posts,
-            'categories' => $this->getCategories(),
-            'categoryColors' => $this->getCategoryColors(),
+            'categories' => $categories,
+            'categoryColors' => $categoryColors,
         ]);
     }
     
@@ -70,13 +77,9 @@ abstract class AbstractBoardController extends Controller
      */
     public function create()
     {
-        $model = app($this->modelClass);
-        // 카테고리 목록을 DB에서 가져오기
-        $categories = $model::select('mq_category')
-            ->distinct()
-            ->orderBy('mq_category')
-            ->pluck('mq_category')
-            ->toArray();
+        // 게시판별 카테고리 가져오기
+        $boardType = $this->getBoardTypeFromModelClass();
+        $categories = $this->getCategories($boardType);
 
         return view($this->viewPath.'.create', [
             'categories' => $categories
@@ -90,11 +93,9 @@ abstract class AbstractBoardController extends Controller
     {
         $model = app($this->modelClass);
         
-        // 유효한 카테고리 목록 가져오기
-        $validCategories = $model::select('mq_category')
-            ->distinct()
-            ->pluck('mq_category')
-            ->toArray();
+        // 게시판별 카테고리 가져오기
+        $boardType = $this->getBoardTypeFromModelClass();
+        $validCategories = $this->getCategories($boardType);
 
         // 유효성 검사
         $this->validatePostRequest($request, $validCategories);
@@ -166,9 +167,12 @@ abstract class AbstractBoardController extends Controller
             session(['viewed_post_' . $idx => true]);
         }
 
+        // 게시판별 적절한 카테고리 색상 선택
+        $boardType = $this->getBoardTypeFromModelClass();
+
         return view($this->viewPath.'.show', [
             'post' => $post,
-            'categoryColors' => $this->getCategoryColors(),
+            'categoryColors' => $this->getCategoryColors($boardType),
         ]);
     }
     
@@ -186,12 +190,9 @@ abstract class AbstractBoardController extends Controller
                 ->with('error', '수정 권한이 없습니다.');
         }
 
-        // 카테고리 목록을 DB에서 가져오기
-        $categories = $model::select('mq_category')
-            ->distinct()
-            ->orderBy('mq_category')
-            ->pluck('mq_category')
-            ->toArray();
+        // 게시판별 카테고리 가져오기
+        $boardType = $this->getBoardTypeFromModelClass();
+        $categories = $this->getCategories($boardType);
 
         return view($this->viewPath.'.edit', [
             'post' => $post,
@@ -213,11 +214,9 @@ abstract class AbstractBoardController extends Controller
                 ->with('error', '수정 권한이 없습니다.');
         }
 
-        // 유효한 카테고리 목록 가져오기
-        $validCategories = $model::select('mq_category')
-            ->distinct()
-            ->pluck('mq_category')
-            ->toArray();
+        // 게시판별 카테고리 가져오기
+        $boardType = $this->getBoardTypeFromModelClass();
+        $validCategories = $this->getCategories($boardType);
 
         // 유효성 검사
         $this->validatePostRequest($request, $validCategories);
@@ -505,15 +504,37 @@ abstract class AbstractBoardController extends Controller
     }
     
     /**
-     * 모델 클래스에서 카테고리 목록 가져오기
+     * 카테고리 목록 가져오기 (Trait 사용)
      */
-    protected function getCategories()
+    protected function getCategories($boardType)
     {
+        if ($boardType === 'board_content') {
+            return $this->getBoardContentCategories();
+        } else if ($boardType === 'board_research') {
+            return $this->getBoardResearchCategories();
+        }
+        
+        // 기본 동작 (이전 코드)
         $model = app($this->modelClass);
         return $model::select('mq_category')
             ->distinct()
             ->orderBy('mq_category')
             ->pluck('mq_category')
             ->toArray();
+    }
+    
+    /**
+     * 모델 클래스명으로부터 게시판 타입 결정
+     */
+    protected function getBoardTypeFromModelClass()
+    {
+        if (strpos($this->modelClass, 'BoardContent') !== false) {
+            return 'board_content';
+        } else if (strpos($this->modelClass, 'BoardResearch') !== false) {
+            return 'board_research';
+        }
+        
+        // 기본값
+        return null;
     }
 } 

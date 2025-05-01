@@ -18,10 +18,16 @@ trait BoardCategoryColorTrait
         'bg-teal-100 text-teal-800',
         'bg-gray-100 text-gray-800'
     ];
+    
+    // 고정된 카테고리 목록 정의
+    protected $fixedCategories = [
+        'board_content' => ['투자명언', '경제용어'],
+        'board_research' => ['거래량', '순매수대금', 'RS랭킹', '증권사리포트', '기관순매수']
+    ];
 
-    protected function getCategoryColors()
+    protected function getCategoryColors($board = null)
     {
-        $categories = $this->getCategories();
+        $categories = $this->getCategories($board);
         $categoryColors = [];
         foreach ($categories as $index => $category) {
             $categoryColors[$category] = $this->predefinedColors[$index % count($this->predefinedColors)];
@@ -30,12 +36,31 @@ trait BoardCategoryColorTrait
         return $categoryColors;
     }
 
-    protected function getCategories()
+    protected function getCategories($board = null)
     {
-        return Board::select('mq_category')
-            ->distinct()
-            ->orderBy('mq_category')
-            ->pluck('mq_category')
-            ->toArray();
+        // board 파라미터에 따라 해당 게시판의 고정 카테고리 반환
+        if ($board && isset($this->fixedCategories[$board])) {
+            return $this->fixedCategories[$board];
+        }
+        
+        // board가 지정되지 않은 경우 모든 카테고리 반환
+        $allCategories = [];
+        foreach ($this->fixedCategories as $categories) {
+            $allCategories = array_merge($allCategories, $categories);
+        }
+        
+        return array_unique($allCategories);
+    }
+    
+    // 특정 게시판의 카테고리만 가져오는 메소드
+    protected function getBoardContentCategories()
+    {
+        return $this->fixedCategories['board_content'];
+    }
+    
+    // 투자 리서치 게시판의 카테고리만 가져오는 메소드
+    protected function getBoardResearchCategories() 
+    {
+        return $this->fixedCategories['board_research'];
     }
 } 
