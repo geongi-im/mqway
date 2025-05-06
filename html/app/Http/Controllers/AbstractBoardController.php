@@ -455,7 +455,14 @@ abstract class AbstractBoardController extends Controller
                     ? asset('storage/' . $this->uploadPath . '/' . $filename)
                     : $filename;
             } else {
-                $post->mq_image = asset('images/content/no_image.jpeg');
+                // 본문에서 이미지 추출
+                $firstImageSrc = extractFirstImageSrc($post->mq_content);
+                if ($firstImageSrc) {
+                    $post->mq_image = $firstImageSrc;
+                } else {
+                    // 이미지가 없으면 기본 이미지 설정
+                    $post->mq_image = asset('images/content/no_image.jpeg');
+                }
             }
         }
     }
@@ -470,7 +477,15 @@ abstract class AbstractBoardController extends Controller
                 return asset('storage/' . $this->uploadPath . '/' . $filename);
             }, $post->mq_image);
         } else {
-            $post->mq_image = [asset('images/content/no_image.jpeg')];
+            // 본문에서 이미지 추출
+            $firstImageSrc = extractFirstImageSrc($post->mq_content);
+            if ($firstImageSrc) {
+                // 본문에 이미지가 있으면 빈 배열로 설정
+                $post->mq_image = [];
+            } else {
+                // 이미지가 없으면 기본 이미지 설정
+                $post->mq_image = [asset('images/content/no_image.jpeg')];
+            }
         }
     }
     

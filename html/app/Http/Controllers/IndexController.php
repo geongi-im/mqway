@@ -31,6 +31,9 @@ class IndexController extends Controller
             ->take(10)
             ->get()
             ->map(function ($post) {
+                // 원본 콘텐츠 보존
+                $post->mq_original_content = $post->mq_content;
+                // 표시용 콘텐츠만 제한
                 $post->mq_content = Str::limit(strip_tags($post->mq_content), 50);
                 return $post;
             });
@@ -43,6 +46,9 @@ class IndexController extends Controller
                 ->take(8)
                 ->get()
                 ->map(function ($post) {
+                    // 원본 콘텐츠 보존
+                    $post->mq_original_content = $post->mq_content;
+                    // 표시용 콘텐츠만 제한
                     $post->mq_content = Str::limit(strip_tags($post->mq_content), 50);
                     return $post;
                 });
@@ -55,7 +61,13 @@ class IndexController extends Controller
                         ? asset('storage/uploads/board_research/' . $filename)
                         : $filename;
                 } else {
-                    $post->mq_image = asset('images/content/no_image.jpeg');
+                    // 본문에 이미지가 있는지 확인 (원본 콘텐츠 사용)
+                    $firstImageSrc = extractFirstImageSrc($post->mq_original_content);
+                    if ($firstImageSrc) {
+                        $post->mq_image = $firstImageSrc;
+                    } else {
+                        $post->mq_image = asset('images/content/no_image.jpeg');
+                    }
                 }
             }
         }
@@ -68,7 +80,13 @@ class IndexController extends Controller
                     ? asset('storage/uploads/board_content/' . $filename)
                     : $filename;
             } else {
-                $post->mq_image = asset('images/content/no_image.jpeg');
+                // 본문에 이미지가 있는지 확인 (원본 콘텐츠 사용)
+                $firstImageSrc = extractFirstImageSrc($post->mq_original_content);
+                if ($firstImageSrc) {
+                    $post->mq_image = $firstImageSrc;
+                } else {
+                    $post->mq_image = asset('images/content/no_image.jpeg');
+                }
             }
         }
         
