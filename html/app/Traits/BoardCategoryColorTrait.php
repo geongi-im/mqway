@@ -22,7 +22,8 @@ trait BoardCategoryColorTrait
     // 고정된 카테고리 목록 정의
     protected $fixedCategories = [
         'board_content' => ['투자명언', '경제용어'],
-        'board_research' => ['거래량', '순매수대금', 'RS랭킹', '증권사리포트', '기관순매수']
+        'board_research' => ['거래량', '순매수대금', 'RS랭킹', '증권사리포트', '기관순매수'],
+        'board_video' => ['경제기초', '경제뉴스']
     ];
 
     protected function getCategoryColors($board = null)
@@ -62,5 +63,11 @@ trait BoardCategoryColorTrait
     protected function getBoardResearchCategories() 
     {
         return $this->fixedCategories['board_research'];
+    }
+    
+    // 비디오 게시판의 카테고리만 가져오는 메소드
+    protected function getBoardVideoCategories() 
+    {
+        return $this->fixedCategories['board_video'];
     }
 } 

@@ -104,6 +104,14 @@
                             <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-0 bg-secondary transition-all duration-200"></span>
                         </a>
                     </li>
+                    <li class="relative">
+                        <a href="{{ route('board-video.index') }}" 
+                           class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6
+                           {{ request()->routeIs('board-video.index') ? 'font-bold bg-dark/10' : '' }}">
+                            쉽게 보는 경제
+                            <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-0 bg-secondary transition-all duration-200"></span>
+                        </a>
+                    </li>
                 </ul>
             </li>
             <li>

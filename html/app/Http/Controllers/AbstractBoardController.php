@@ -547,6 +547,8 @@ abstract class AbstractBoardController extends Controller
             return 'board_content';
         } else if (strpos($this->modelClass, 'BoardResearch') !== false) {
             return 'board_research';
+        } else if (strpos($this->modelClass, 'BoardVideo') !== false) {
+            return 'board_video';
         }
         
         // 기본값

@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\ServerCheckController;
 use App\Http\Controllers\CashflowController;
 use App\Http\Controllers\BoardContentController;
 use App\Http\Controllers\BoardResearchController;
+use App\Http\Controllers\BoardVideoController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -98,6 +99,21 @@ Route::prefix('board-research')->middleware('auth')->group(function () {
     Route::post('/upload-image', [BoardResearchController::class, 'uploadImage'])->name('board-research.upload.image');
     Route::post('/delete-image/{idx}/{filename}', [BoardResearchController::class, 'deleteImage'])->name('board-research.delete-image');
     Route::get('/{idx}', [BoardResearchController::class, 'show'])->name('board-research.show');
+});
+
+// 쉽게 보는 경제 비디오 게시판 (비회원도 볼 수 있음, 글쓰기는 회원만)
+Route::prefix('board-video')->group(function () {
+    // 비회원도 접근 가능한 라우트
+    Route::get('/', [BoardVideoController::class, 'index'])->name('board-video.index');
+    Route::get('/create', [BoardVideoController::class, 'create'])->name('board-video.create')->middleware('auth');
+    Route::post('/', [BoardVideoController::class, 'store'])->name('board-video.store')->middleware('auth');
+    Route::get('/{idx}/edit', [BoardVideoController::class, 'edit'])->name('board-video.edit')->middleware('auth');
+    Route::put('/{idx}', [BoardVideoController::class, 'update'])->name('board-video.update')->middleware('auth');
+    Route::delete('/{idx}', [BoardVideoController::class, 'destroy'])->name('board-video.destroy')->middleware('auth');
+    Route::post('/{idx}/like', [BoardVideoController::class, 'like'])->name('board-video.like')->middleware('auth');
+    Route::post('/upload-image', [BoardVideoController::class, 'uploadImage'])->name('board-video.upload.image')->middleware('auth');
+    Route::post('/delete-image/{idx}/{filename}', [BoardVideoController::class, 'deleteImage'])->name('board-video.delete-image')->middleware('auth');
+    Route::get('/{idx}', [BoardVideoController::class, 'show'])->name('board-video.show');
 });
 
 // Pick
