@@ -138,7 +138,7 @@ use Illuminate\Support\Facades\Auth;
 }
 
 /* 콘텐츠 슬라이더 스타일 */
-.contentSlider, .researchSlider {
+.contentSlider, .researchSlider, .videoSlider {
     position: relative;
     padding-bottom: 50px; /* 페이지네이션을 위한 하단 여백 */
 }
@@ -146,7 +146,9 @@ use Illuminate\Support\Facades\Auth;
 .contentSlider .swiper-button-next,
 .contentSlider .swiper-button-prev,
 .researchSlider .swiper-button-next,
-.researchSlider .swiper-button-prev {
+.researchSlider .swiper-button-prev,
+.videoSlider .swiper-button-next,
+.videoSlider .swiper-button-prev {
     color: #34383d;
     background: #fff;
     width: 40px;
@@ -157,19 +159,23 @@ use Illuminate\Support\Facades\Auth;
 }
 
 .contentSlider .swiper-button-next,
-.researchSlider .swiper-button-next {
+.researchSlider .swiper-button-next,
+.videoSlider .swiper-button-next {
     right: -5px;
 }
 
 .contentSlider .swiper-button-prev,
-.researchSlider .swiper-button-prev {
+.researchSlider .swiper-button-prev,
+.videoSlider .swiper-button-prev {
     left: -5px;
 }
 
 .contentSlider .swiper-button-next:hover,
 .contentSlider .swiper-button-prev:hover,
 .researchSlider .swiper-button-next:hover,
-.researchSlider .swiper-button-prev:hover {
+.researchSlider .swiper-button-prev:hover,
+.videoSlider .swiper-button-next:hover,
+.videoSlider .swiper-button-prev:hover {
     background: #f8f8f8;
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
@@ -177,18 +183,22 @@ use Illuminate\Support\Facades\Auth;
 .contentSlider .swiper-button-next:after,
 .contentSlider .swiper-button-prev:after,
 .researchSlider .swiper-button-next:after,
-.researchSlider .swiper-button-prev:after {
+.researchSlider .swiper-button-prev:after,
+.videoSlider .swiper-button-next:after,
+.videoSlider .swiper-button-prev:after {
     font-size: 18px;
 }
 
 .contentSlider .swiper-pagination,
-.researchSlider .swiper-pagination {
+.researchSlider .swiper-pagination,
+.videoSlider .swiper-pagination {
     bottom: 0 !important;
     position: absolute;
 }
 
 .contentSlider .swiper-pagination-bullet,
-.researchSlider .swiper-pagination-bullet {
+.researchSlider .swiper-pagination-bullet,
+.videoSlider .swiper-pagination-bullet {
     width: 8px;
     height: 8px;
     background: rgba(0, 0, 0, 0.2);
@@ -196,7 +206,8 @@ use Illuminate\Support\Facades\Auth;
 }
 
 .contentSlider .swiper-pagination-bullet-active,
-.researchSlider .swiper-pagination-bullet-active {
+.researchSlider .swiper-pagination-bullet-active,
+.videoSlider .swiper-pagination-bullet-active {
     background: #34383d;
     transform: scale(1.2);
 }
@@ -270,14 +281,16 @@ use Illuminate\Support\Facades\Auth;
         margin: 0 4px !important;
     }
 
-    .contentSlider, .researchSlider {
+    .contentSlider, .researchSlider, .videoSlider {
         padding: 0 15px 40px 15px;
     }
 
     .contentSlider .swiper-button-next,
     .contentSlider .swiper-button-prev,
     .researchSlider .swiper-button-next,
-    .researchSlider .swiper-button-prev {
+    .researchSlider .swiper-button-prev,
+    .videoSlider .swiper-button-next,
+    .videoSlider .swiper-button-prev {
         display: none;
     }
 }
@@ -406,6 +419,74 @@ use Illuminate\Support\Facades\Auth;
                     <div class="p-4 flex-1 flex flex-col">
                         <div class="mb-2">
                             <span class="inline-block px-2 py-1 {{ $boardContentColors[$post->mq_category] }} text-xs font-medium rounded-md">
+                                {{ $post->mq_category }}
+                            </span>
+                        </div>
+                        <h3 class="font-bold text-lg mb-2">{{ $post->mq_title }}</h3>
+                        <div class="mt-auto flex items-center justify-between text-sm text-text-dark">
+                            <span>{{ $post->mq_reg_date ? $post->mq_reg_date->format('Y-m-d') : '' }}</span>
+                            <div class="flex items-center gap-4">
+                                <span class="flex items-center gap-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                    {{ $post->mq_view_cnt }}
+                                </span>
+                                <span class="flex items-center gap-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                    </svg>
+                                    {{ $post->mq_like_cnt }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </a>
+            </div>
+            @endforeach
+        </div>
+        <!-- 네비게이션 버튼 -->
+        <div class="swiper-button-next"></div>
+        <div class="swiper-button-prev"></div>
+        <!-- 페이지네이션 -->
+        <div class="swiper-pagination"></div>
+    </div>
+</div>
+
+<!-- 쉽게 보는 경제 슬라이더 -->
+<div class="container mx-auto px-4 mb-16">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold mb-6">쉽게 보는 경제</h2>
+        <a href="{{ url('/board-video') }}" class="text-dark hover:text-dark/80 transition-colors flex items-center">
+            더보기
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+        </a>
+    </div>
+    <div class="swiper videoSlider">
+        <div class="swiper-wrapper">
+            @foreach($videoContents as $post)
+            <div class="swiper-slide">
+                <a href="{{ route('board-video.show', $post->idx) }}" class="block h-full">
+                <div class="bg-white rounded-lg overflow-hidden shadow-lg h-full flex flex-col">
+                    <div class="bg-gray-50 flex items-center justify-center relative" style="height: 240px;">
+                        <img src="{{ asset($post->mq_image) }}" 
+                             alt="비디오 썸네일" 
+                             class="w-full h-full object-cover">
+                        @if(isset($post->mq_video_url) && !empty($post->mq_video_url))
+                        <div class="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+                            <svg class="w-16 h-16 text-white opacity-80" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M8 5v14l11-7z" />
+                            </svg>
+                        </div>
+                        @endif
+                    </div>
+                    <div class="p-4 flex-1 flex flex-col">
+                        <div class="mb-2">
+                            <span class="inline-block px-2 py-1 {{ $boardVideoColors[$post->mq_category] }} text-xs font-medium rounded-md">
                                 {{ $post->mq_category }}
                             </span>
                         </div>
@@ -585,6 +666,31 @@ use Illuminate\Support\Facades\Auth;
         },
         pagination: {
             el: '.contentSlider .swiper-pagination',
+            clickable: true,
+        },
+        breakpoints: {
+            640: {
+                slidesPerView: 2,
+            },
+            768: {
+                slidesPerView: 3,
+            },
+            1024: {
+                slidesPerView: 4,
+            },
+        },
+    });
+    
+    // 쉽게 보는 경제 슬라이더
+    const videoSlider = new Swiper('.videoSlider', {
+        slidesPerView: 1,
+        spaceBetween: 20,
+        navigation: {
+            nextEl: '.videoSlider .swiper-button-next',
+            prevEl: '.videoSlider .swiper-button-prev',
+        },
+        pagination: {
+            el: '.videoSlider .swiper-pagination',
             clickable: true,
         },
         breakpoints: {

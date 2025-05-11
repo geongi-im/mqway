@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\BoardContent;
 use App\Models\BoardResearch;
+use App\Models\BoardVideo;
 use App\Models\News;
 use App\Traits\BoardCategoryColorTrait;
 use Illuminate\Support\Facades\Auth;
@@ -29,6 +30,19 @@ class IndexController extends Controller
         $recommendedContents = BoardContent::where('mq_status', 1)
             ->orderBy('mq_reg_date', 'desc')
             ->take(10)
+            ->get()
+            ->map(function ($post) {
+                // 원본 콘텐츠 보존
+                $post->mq_original_content = $post->mq_content;
+                // 표시용 콘텐츠만 제한
+                $post->mq_content = Str::limit(strip_tags($post->mq_content), 50);
+                return $post;
+            });
+
+        // 쉽게 보는 경제 콘텐츠 가져오기
+        $videoContents = BoardVideo::where('mq_status', 1)
+            ->orderBy('mq_reg_date', 'desc')
+            ->take(8)
             ->get()
             ->map(function ($post) {
                 // 원본 콘텐츠 보존
@@ -90,6 +104,41 @@ class IndexController extends Controller
             }
         }
         
+        // 이미지 경로 처리 - 쉽게 보는 경제
+        foreach ($videoContents as $post) {
+            if (is_array($post->mq_image) && !empty($post->mq_image)) {
+                // 업로드된 이미지가 있으면 그걸 사용
+                $filename = $post->mq_image[0];
+                $post->mq_image = !filter_var($filename, FILTER_VALIDATE_URL) 
+                    ? asset('storage/uploads/board_video/' . $filename)
+                    : $filename;
+            } else if (isset($post->mq_video_url) && !empty($post->mq_video_url)) {
+                // 비디오 URL이 있으면 YouTube 썸네일 추출
+                $thumbnailUrl = $this->getVideoThumbnail($post->mq_video_url);
+                if ($thumbnailUrl) {
+                    $post->mq_image = $thumbnailUrl;
+                } else {
+                    // 본문에서 이미지 추출
+                    $firstImageSrc = extractFirstImageSrc($post->mq_original_content);
+                    if ($firstImageSrc) {
+                        $post->mq_image = $firstImageSrc;
+                    } else {
+                        // 이미지가 없으면 기본 이미지 설정
+                        $post->mq_image = asset('images/content/no_image.jpeg');
+                    }
+                }
+            } else {
+                // 본문에서 이미지 추출
+                $firstImageSrc = extractFirstImageSrc($post->mq_original_content);
+                if ($firstImageSrc) {
+                    $post->mq_image = $firstImageSrc;
+                } else {
+                    // 이미지가 없으면 기본 이미지 설정
+                    $post->mq_image = asset('images/content/no_image.jpeg');
+                }
+            }
+        }
+        
         $latestNews = News::orderBy('mq_published_date', 'desc')
                          ->take(4)
                          ->get();
@@ -97,15 +146,37 @@ class IndexController extends Controller
         // 각 게시판별 카테고리 색상 설정
         $boardContentColors = $this->getCategoryColors('board_content');
         $boardResearchColors = $this->getCategoryColors('board_research');
+        $boardVideoColors = $this->getCategoryColors('board_video');
 
         return view('index', [
             'recommendedContents' => $recommendedContents,
+            'videoContents' => $videoContents,
             'researchContents' => $researchContents,
             'latestNews' => $latestNews,
             'isLoggedIn' => $isLoggedIn,
             'newsCategoryColors' => $this->newsCategoryColors,
             'boardContentColors' => $boardContentColors,
             'boardResearchColors' => $boardResearchColors,
+            'boardVideoColors' => $boardVideoColors,
         ]);
+    }
+    
+    /**
+     * 비디오 URL에서 썸네일 추출
+     */
+    protected function getVideoThumbnail($videoUrl)
+    {
+        // YouTube URL 패턴 인식
+        if (preg_match('/youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/', $videoUrl, $matches) || 
+            preg_match('/youtu\.be\/([a-zA-Z0-9_-]+)/', $videoUrl, $matches)) {
+            $videoId = $matches[1];
+            // YouTube 고품질 썸네일 URL 반환
+            return "https://img.youtube.com/vi/{$videoId}/hqdefault.jpg";
+        }
+        
+        // Vimeo URL 패턴 인식 (Vimeo는 API 호출 필요로 복잡하므로 생략)
+        // 다른 비디오 플랫폼은 필요에 따라 추가
+        
+        return null;
     }
 } 
