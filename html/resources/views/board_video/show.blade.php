@@ -26,7 +26,7 @@
                         </svg>
                     </div>
                     <span class="text-sm font-medium">
-                        {{ $post->user->mq_name ?? '알 수 없음' }}
+                        {{ $post->user->mq_user_id }}
                     </span>
                 </div>
                 <div class="flex items-center space-x-4">
