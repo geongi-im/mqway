@@ -104,3 +104,77 @@ function initNumberFormatting(selector) {
         });
     });
 }
+
+/**
+ * 숫자를 한국어 화폐 단위로 변환하는 함수
+ * 10000만원 → 1억원, 10억 5000만원 등으로 변환
+ * 
+ * @param {number|string} value - 변환할 숫자 또는 문자열
+ * @param {boolean} includeUnit - '원' 단위 포함 여부 (기본값: true)
+ * @param {boolean} includeManWon - 모든 결과에 '만원' 단위 표시 여부 (기본값: false)
+ * @returns {string} 한국어 화폐 단위로 변환된 문자열
+ */
+function formatKoreanCurrency(value, includeUnit = true, includeManWon = false) {
+    // 문자열이나 기타 타입을 숫자로 변환
+    const num = parseFloat(value.toString().replace(/[^\d.-]/g, ''));
+    
+    // 유효하지 않은 값이면 빈 문자열 반환
+    if (isNaN(num)) return '';
+    
+    // 절대값 사용 (음수 처리를 위해)
+    const absNum = Math.abs(num);
+    
+    // 원 단위 문자열
+    const unit = includeUnit ? '원' : '';
+    
+    // 조 단위 (1조 = 1,000,000,000,000)
+    if (absNum >= 1000000000000) {
+        const jo = Math.floor(absNum / 1000000000000);
+        const eok = Math.floor((absNum % 1000000000000) / 100000000);
+        const man = Math.floor((absNum % 100000000) / 10000);
+        
+        let result = jo + '조';
+        
+        if (eok > 0) {
+            result += ' ' + eok + '억';
+        }
+        
+        if (man > 0) {
+            result += ' ' + man + '만';
+        }
+        
+        return (num < 0 ? '-' : '') + result + unit;
+    }
+    
+    // 억 단위 (1억 = 100,000,000)
+    if (absNum >= 100000000) {
+        const eok = Math.floor(absNum / 100000000);
+        const man = Math.floor((absNum % 100000000) / 10000);
+        
+        let result = eok + '억';
+        
+        if (man > 0) {
+            result += ' ' + man + '만';
+        }
+        
+        return (num < 0 ? '-' : '') + result + unit;
+    }
+    
+    // 만 단위 (1만 = 10,000)
+    if (absNum >= 10000 || includeManWon) {
+        const man = Math.floor(absNum / 10000);
+        const remainder = Math.floor(absNum % 10000);
+        
+        let result = man + '만';
+        
+        // 1만 미만의 값이 있고 그 값이 1000 이상인 경우에만 추가
+        if (remainder >= 1000) {
+            result += ' ' + numberWithCommas(remainder);
+        }
+        
+        return (num < 0 ? '-' : '') + result + unit;
+    }
+    
+    // 1만 미만은 그냥 천단위 콤마로 표시
+    return (num < 0 ? '-' : '') + numberWithCommas(Math.floor(absNum)) + unit;
+}
