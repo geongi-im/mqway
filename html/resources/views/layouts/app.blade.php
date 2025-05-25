@@ -10,6 +10,8 @@
     <meta property="og:title" content="{{ config('app.name', 'MQWAY') }}">
     <meta property="og:description" content="경제 지능을 함께 키우는 교육 플랫폼">
     <meta property="og:type" content="website">
+    
+    <meta name="naver-site-verification" content="a3b7b869fb45b3421b38b4773bb8c172ecf12861" />
 
     <title>{{ config('app.name', 'MQWAY') }}</title>
 
