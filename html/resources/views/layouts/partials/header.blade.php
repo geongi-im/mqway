@@ -8,6 +8,11 @@
                     Home
                 </a>
             </li>
+            <li>
+                <a href="{{ route('introduce') }}" class="text-cdark hover:text-cgray block py-2 {{ request()->routeIs('introduce') ? 'font-bold border-l-4 border-secondary pl-4 -ml-4' : '' }}">
+                    Introduce
+                </a>
+            </li>
             <li class="relative">
                 <a href="#" class="text-cdark hover:text-cgray toggle-menu flex items-center justify-between py-2 {{ request()->is('guidebook*') ? 'font-bold border-l-4 border-secondary pl-4 -ml-4' : '' }}" data-target="guidebook">
                     <span>Guidebook</span>

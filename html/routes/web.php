@@ -33,6 +33,11 @@ use App\Http\Controllers\BoardVideoController;
 
 Route::get('/', [IndexController::class, 'index']);
 
+// Introduce 페이지 (커뮤니티 소개)
+Route::get('/introduce', function () {
+    return view('introduce');
+})->name('introduce');
+
 // 로그인 페이지 (guest 미들웨어 적용)
 Route::get('/login', function () {
     // 이미 로그인된 경우 메인 페이지로 리다이렉트
