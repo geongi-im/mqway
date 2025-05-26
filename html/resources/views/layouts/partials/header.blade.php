@@ -76,7 +76,7 @@
             
             <li>
                 <a href="{{ route('economy_term_game') }}" class="text-cdark hover:text-cgray block py-2 {{ request()->routeIs('economy_term_game') ? 'font-bold border-l-4 border-secondary pl-4 -ml-4' : '' }}">
-                    카드 맞추기 게임 
+                    Economy Term Game
                 </a>
             </li>
             <!--
