@@ -139,20 +139,30 @@ class EconomyTermGameController extends Controller
     public function getRanking()
     {
         try {
+            
             $rankings = EconomyTermGameHistory::with(['user' => function ($query) {
-                    $query->select('idx', 'mq_user_name');
-                }])
-                ->select('mq_user_id', 'mq_correct_count as score', 'mq_duration_time as time', 'mq_reg_date as date')
-                ->orderBy('mq_correct_count', 'desc')
-                ->orderBy('mq_duration_time', 'asc')
-                ->take(5)
-                ->get();
+                $query->select('mq_user_id', 'mq_user_name');
+            }])
+            ->select('mq_user_id', 'mq_correct_count as score', 'mq_duration_time as time', 'mq_reg_date as date')
+            ->orderBy('mq_correct_count', 'desc') // 점수가 높은 순
+            ->orderBy('mq_duration_time', 'asc')  // 점수가 같으면 시간이 적게 걸린 순
+            ->take(5) // 상위 5개 기록만 가져옴
+            ->get();
 
             $rankings->transform(function ($item) {
                 $minutes = floor($item->time / 60);
                 $seconds = $item->time % 60;
                 $item->time_formatted = sprintf('%02d:%02d', $minutes, $seconds);
-                $item->userName = $item->user ? $item->user->mq_user_name : '익명';
+                
+                // 사용자 이름 마스킹 처리
+                if ($item->user && $item->user->mq_user_name) {
+                    $name = $item->user->mq_user_name;
+                    $maskedName = mb_substr($name, 0, 2) . str_repeat('*', mb_strlen($name) - 2);
+                    $item->userName = $maskedName;
+                } else {
+                    $item->userName = '익명';
+                }
+                
                 unset($item->user);
                 return $item;
             });
