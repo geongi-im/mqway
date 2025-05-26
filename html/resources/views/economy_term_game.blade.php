@@ -175,6 +175,9 @@
 
 @push('scripts')
 <script>
+    // 로그인 상태를 JavaScript 변수로 전달
+    const IS_USER_LOGGED_IN = {{ Auth::check() ? 'true' : 'false' }};
+
     const ECONOMY_TERMS = @json($economyTerms);
 
     class EconomyCardGame {
@@ -193,7 +196,13 @@
         }
 
         initializeEventListeners() {
-            document.getElementById('startBtn').addEventListener('click', () => this.startGame());
+            document.getElementById('startBtn').addEventListener('click', () => {
+                if (!IS_USER_LOGGED_IN) {
+                    alert('로그인이 필요합니다.');
+                    return; // 로그인 안되어 있으면 게임 시작 중단
+                }
+                this.startGame();
+            });
             document.getElementById('passBtn').addEventListener('click', () => this.passQuestion());
             document.getElementById('playAgainBtn').addEventListener('click', () => this.resetGame());
             document.getElementById('backToMainBtn').addEventListener('click', () => this.goToMain());
