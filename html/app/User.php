@@ -37,7 +37,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'mq_user_id', 'mq_password', 'mq_email', 'mq_name', 'mq_level', 'mq_status'
+        'mq_user_id', 'mq_password', 'mq_email', 'mq_user_name', 'mq_level', 'mq_status'
     ];
 
     /**
@@ -85,7 +85,7 @@ class User extends Authenticatable
      */
     public function getNameAttribute()
     {
-        return $this->mq_name;
+        return $this->mq_user_name;
     }
 
     /**
