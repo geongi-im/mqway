@@ -118,7 +118,7 @@ class EconomyTermGameController extends Controller
 
         try {
             EconomyTermGameHistory::create([
-                'mq_user_id' => Auth::id(),
+                'mq_user_id' => Auth::user()->mq_user_id,
                 'mq_total_count' => $validatedData['total_questions'],
                 'mq_correct_count' => $validatedData['score'],
                 'mq_duration_time' => $validatedData['time'],
