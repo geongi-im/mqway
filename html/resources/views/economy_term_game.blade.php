@@ -479,10 +479,22 @@
 
         abandonGameAndGoToMain() {
             if (confirm('정말로 게임을 포기하고 메인 화면으로 돌아가시겠습니까?')) {
+                // 타이머 중지 및 초기화
                 this.stopTimer();
                 this.isGameActive = false;
+                this.startTime = null;
+                this.gameTime = 0;
+                this.currentQuestionIndex = 0;
+                this.score = 0;
+                
+                // 타이머 표시 초기화
+                document.getElementById('gameTimer').textContent = '00:00';
+                
+                // 화면 전환
                 this.hideScreen('gameScreen');
                 this.showScreen('mainScreen');
+                
+                // 랭킹 갱신
                 this.fetchAndDisplayRanking();
             }
         }
