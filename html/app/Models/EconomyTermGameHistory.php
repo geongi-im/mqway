@@ -57,6 +57,6 @@ class EconomyTermGameHistory extends Model
      */
     public function user()
     {
-        return $this->belongsTo(User::class, 'mq_user_id', 'idx');
+        return $this->belongsTo(User::class, 'mq_user_id', 'mq_user_id');
     }
 }
