@@ -20,6 +20,7 @@ use App\Http\Controllers\CashflowController;
 use App\Http\Controllers\BoardContentController;
 use App\Http\Controllers\BoardResearchController;
 use App\Http\Controllers\BoardVideoController;
+use App\Http\Controllers\EconomyTermGameController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -185,3 +186,8 @@ Route::prefix('cashflow')->group(function () {
     Route::get('/introduction', [CashflowController::class, 'introduction'])->name('cashflow.introduction');
     Route::get('/process', [CashflowController::class, 'process'])->name('cashflow.process');
 });
+
+// 경제 용어 카드 게임 페이지
+Route::get('/economy-term-game', [EconomyTermGameController::class, 'index'])->name('economy_term_game');
+Route::post('/economy-term-game/store', [EconomyTermGameController::class, 'storeGameResult'])->name('economy_term_game.store')->middleware('auth');
+Route::get('/economy-term-game/ranking', [EconomyTermGameController::class, 'getRanking'])->name('economy_term_game.ranking');

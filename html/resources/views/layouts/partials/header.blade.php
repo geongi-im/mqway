@@ -73,6 +73,12 @@
                     </li>
                 </ul>
             </li>
+            
+            <li>
+                <a href="{{ route('economy_term_game') }}" class="text-cdark hover:text-cgray block py-2 {{ request()->routeIs('economy_term_game') ? 'font-bold border-l-4 border-secondary pl-4 -ml-4' : '' }}">
+                    카드 맞추기 게임 
+                </a>
+            </li>
             <!--
             <li>
                 <a href="{{ url('/pick') }}" class="text-point hover:text-secondary/80 block py-2 {{ request()->is('pick*') ? 'font-bold border-l-4 border-secondary pl-4 -ml-4' : '' }}">
