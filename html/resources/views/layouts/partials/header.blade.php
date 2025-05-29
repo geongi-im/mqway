@@ -123,13 +123,17 @@
                             <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-0 bg-secondary transition-all duration-200"></span>
                         </a>
                     </li>
+                    <li class="relative">
+                        <a href="{{ route('board-news.index') }}" 
+                           class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6
+                           {{ request()->routeIs('board-news.index') ? 'font-bold bg-dark/10' : '' }}">
+                            뉴스 게시판
+                            <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-0 bg-secondary transition-all duration-200"></span>
+                        </a>
+                    </li>
                 </ul>
             </li>
-            <li>
-                <a href="{{ url('/news') }}" class="text-cdark hover:text-cgray block py-2 {{ request()->is('news*') ? 'font-bold border-l-4 border-secondary pl-4 -ml-4' : '' }}">
-                    News
-                </a>
-            </li>
+            
         </ul>
     </nav>
 </div>

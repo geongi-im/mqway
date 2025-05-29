@@ -59,7 +59,12 @@ Route::get('/auth/google', [LoginController::class, 'redirectToGoogle'])->name('
 Route::get('/auth/google/callback', [LoginController::class, 'handleGoogleCallback']);
 
 // 뉴스
-Route::get('/news', [NewsController::class, 'index']);
+// Route::get('/news', [NewsController::class, 'index']);
+
+// 뉴스 게시판
+Route::prefix('board-news')->group(function () {
+    Route::get('/', [NewsController::class, 'index'])->name('board-news.index');
+});
 
 // 게시판 (비회원 접근 가능)
 Route::get('/board', [BoardController::class, 'index'])->name('board.index');
