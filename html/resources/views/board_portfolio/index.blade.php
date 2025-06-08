@@ -116,7 +116,7 @@
                             <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 hidden md:table-cell">{{ $post->idx }}</td>
                             <td class="px-4 py-3 whitespace-nowrap">
                                 <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $categoryColors[$post->mq_investor_code] ?? 'bg-blue-100 text-blue-800' }}">
-                                    {{ $post->mq_investor_code }}
+                                    {{ strtoupper($post->mq_investor_code) }}
                                 </span>
                             </td>
                             <td class="px-4 py-3 text-sm">
