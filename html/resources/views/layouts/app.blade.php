@@ -49,6 +49,42 @@
         .menu-overlay.active {
             transform: translateX(0);
         }
+
+        /* 알림 메시지 스타일 */
+        .alert {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            width: auto;
+            max-width: 90%;
+            transition: all 0.3s ease;
+            opacity: 1;
+        }
+        .alert-success {
+            background-color: #dcfce7;
+            border-left: 4px solid #22c55e;
+            color: #166534;
+        }
+        .alert-error {
+            background-color: #fee2e2;
+            border-left: 4px solid #ef4444;
+            color: #991b1b;
+        }
+        .alert-info {
+            background-color: #e0f2fe;
+            border-left: 4px solid #38bdf8;
+            color: #075985;
+        }
+        .alert-warning {
+            background-color: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            color: #92400e;
+        }
     </style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7078035340110573"
     crossorigin="anonymous"></script>
@@ -56,6 +92,31 @@
 <body class="bg-primary min-h-screen flex flex-col">
     <!-- Header -->
     @include('layouts.partials.header')
+
+    <!-- 알림 메시지 -->
+    @if(session('success'))
+    <div class="alert alert-success" id="alert-message">
+        {{ session('success') }}
+    </div>
+    @endif
+
+    @if(session('error'))
+    <div class="alert alert-error" id="alert-message">
+        {{ session('error') }}
+    </div>
+    @endif
+
+    @if(session('info'))
+    <div class="alert alert-info" id="alert-message">
+        {{ session('info') }}
+    </div>
+    @endif
+
+    @if(session('warning'))
+    <div class="alert alert-warning" id="alert-message">
+        {{ session('warning') }}
+    </div>
+    @endif
 
     <!-- Main Content -->
     <main>
@@ -66,5 +127,19 @@
     @include('layouts.partials.footer')
 
     @stack('scripts')
+
+    <!-- 알림 메시지 자동 숨김 스크립트 -->
+    <script>
+        // 알림 메시지가 있으면 자동으로 숨기기
+        const alertMessage = document.getElementById('alert-message');
+        if (alertMessage) {
+            setTimeout(() => {
+                alertMessage.style.opacity = '0';
+                setTimeout(() => {
+                    alertMessage.style.display = 'none';
+                }, 500);
+            }, 3000);
+        }
+    </script>
 </body>
 </html> 
