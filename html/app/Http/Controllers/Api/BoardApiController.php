@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Board;
 use App\Models\BoardContent;
 use App\Models\BoardResearch;
+use App\Models\BoardPortfolio;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -35,6 +36,61 @@ class BoardApiController extends Controller
     public function storeResearch(Request $request)
     {
         return $this->processStore($request, 'research');
+    }
+
+    /**
+     * 포트폴리오 게시판에 게시글 저장
+     */
+    public function storePortfolio(Request $request)
+    {
+        try {
+            // 요청 데이터 검증
+            $request->validate([
+                'title' => 'required|string|max:255',
+                'portfolio_idx' => 'required|string',
+                'investor_code' => 'required|string|max:50',
+                'writer' => 'required|string|max:50'
+            ]);
+
+            $model = BoardPortfolio::class;
+            $board = $model::create([
+                'mq_title' => $request->title,
+                'mq_portfolio_idx' => $request->portfolio_idx,
+                'mq_investor_code' => $request->investor_code,
+                'mq_user_id' => $request->writer,
+                'mq_view_cnt' => 0,
+                'mq_like_cnt' => 0,
+                'mq_status' => 1,
+                'mq_reg_date' => Carbon::now(),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => '게시글이 성공적으로 등록되었습니다.',
+                'data' => [
+                    'id' => $board->idx,
+                    'title' => $board->mq_title,
+                    'portfolio_idx' => $board->mq_portfolio_idx,
+                    'investor_code' => $board->mq_investor_code,
+                    'writer' => $board->mq_user_id,
+                    'created_at' => $board->mq_reg_date->format('Y-m-d H:i:s')
+                ]
+            ], 201);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => '입력값 검증 실패',
+                'errors' => $e->errors()
+            ], 422);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => '게시글 등록 중 오류가 발생했습니다.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

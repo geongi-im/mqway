@@ -20,6 +20,7 @@ use App\Http\Controllers\CashflowController;
 use App\Http\Controllers\BoardContentController;
 use App\Http\Controllers\BoardResearchController;
 use App\Http\Controllers\BoardVideoController;
+use App\Http\Controllers\BoardPortfolioController;
 use App\Http\Controllers\EconomyTermGameController;
 /*
 |--------------------------------------------------------------------------
@@ -127,6 +128,19 @@ Route::prefix('board-video')->group(function () {
     Route::get('/{idx}', [BoardVideoController::class, 'show'])->name('board-video.show');
 });
 
+// 투자대가의 포트폴리오 게시판 (비회원도 볼 수 있음, 글쓰기는 회원만)
+Route::prefix('board-portfolio')->group(function () {
+    // 비회원도 접근 가능한 라우트
+    Route::get('/', [BoardPortfolioController::class, 'index'])->name('board-portfolio.index');
+    Route::get('/create', [BoardPortfolioController::class, 'create'])->name('board-portfolio.create')->middleware('auth');
+    Route::post('/', [BoardPortfolioController::class, 'store'])->name('board-portfolio.store')->middleware('auth');
+    Route::get('/{idx}/edit', [BoardPortfolioController::class, 'edit'])->name('board-portfolio.edit')->middleware('auth');
+    Route::put('/{idx}', [BoardPortfolioController::class, 'update'])->name('board-portfolio.update')->middleware('auth');
+    Route::delete('/{idx}', [BoardPortfolioController::class, 'destroy'])->name('board-portfolio.destroy')->middleware('auth');
+    Route::post('/{idx}/like', [BoardPortfolioController::class, 'like'])->name('board-portfolio.like')->middleware('auth');
+    Route::get('/{idx}', [BoardPortfolioController::class, 'show'])->name('board-portfolio.show');
+});
+
 // Pick
 Route::middleware('auth')->group(function () {
     Route::get('/pick', [PickController::class, 'index'])->name('pick.index');
@@ -190,6 +204,7 @@ Route::get('/api/server-check', [ServerCheckController::class, 'serverCheck'])->
 Route::prefix('cashflow')->group(function () {
     Route::get('/introduction', [CashflowController::class, 'introduction'])->name('cashflow.introduction');
     Route::get('/process', [CashflowController::class, 'process'])->name('cashflow.process');
+    Route::get('/helper', [CashflowController::class, 'helper'])->name('cashflow.helper');
 });
 
 // 경제 용어 카드 게임 페이지

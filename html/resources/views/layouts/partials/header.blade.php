@@ -63,6 +63,16 @@
                             <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-0 bg-secondary transition-all duration-200"></span>
                         </a>
                     </li>
+                    <!--
+                    <li class="relative">
+                        <a href="{{ route('cashflow.helper') }}" 
+                           class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6
+                           {{ request()->routeIs('cashflow.helper') ? 'font-bold bg-dark/10' : '' }}">
+                            Cashflow 도우미
+                            <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-0 bg-secondary transition-all duration-200"></span>
+                        </a>
+                    </li>
+                    -->
                     <li class="relative">
                         <a href="{{ route('cashflow.process') }}" 
                            class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6
@@ -131,6 +141,14 @@
                             <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-0 bg-secondary transition-all duration-200"></span>
                         </a>
                     </li>
+                    <li class="relative">
+                        <a href="{{ route('board-portfolio.index') }}" 
+                           class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6
+                           {{ request()->routeIs('board-portfolio.index') ? 'font-bold bg-dark/10' : '' }}">
+                            투자대가의 포트폴리오
+                            <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-0 bg-secondary transition-all duration-200"></span>
+                        </a>
+                    </li>
                 </ul>
             </li>
             
@@ -160,7 +178,7 @@
 /* Active 상태일 때 서브메뉴 자동 표시 */
 .toggle-menu.active + .submenu {
     display: block;
-    max-height: 200px;
+    max-height: 250px;
 }
 
 /* 메뉴 오버레이가 활성화되었을 때 하단 요소들과 상호작용 차단 */
