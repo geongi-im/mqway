@@ -21,4 +21,12 @@ class CashflowController extends Controller
     {
         return redirect()->route('cashflow.introduction')->with('alert', '준비중입니다.');
     }
+
+    /**
+     * Cashflow 도우미 페이지
+     */
+    public function helper()
+    {
+        return view('cashflow.helper');
+    }
 }
