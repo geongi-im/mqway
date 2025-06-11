@@ -84,7 +84,7 @@
                         </form>
                     @endif
                     <button onclick="likePost(event, {{ $post->idx }})" 
-                            class="inline-flex items-center justify-center gap-2 h-10 px-4 {{ auth()->check() ? 'bg-gray-100 hover:bg-yellow-100 hover:text-yellow-800' : 'bg-gray-50 cursor-not-allowed' }} text-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-200 transition-all group"
+                            class="inline-flex items-center justify-center gap-2 h-10 px-4 {{ $isLiked ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-600' }} rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-200 transition-all group"
                             title="{{ auth()->check() ? '좋아요' : '로그인이 필요합니다' }}">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
@@ -122,16 +122,12 @@ async function likePost(event, idx) {
             },
         });
 
-        if (response.status === 401) {
-            alert('로그인이 필요한 기능입니다.');
+        const data = await response.json();
+
+        if (!data.success) {
+            alert(data.message);
             return;
         }
-
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-
-        const data = await response.json();
         
         // 좋아요 수 업데이트
         const likeCountElements = document.querySelectorAll('button[onclick^="likePost"] span');
@@ -139,15 +135,14 @@ async function likePost(event, idx) {
             element.textContent = new Intl.NumberFormat().format(data.likes);
         });
         
-        // 버튼 스타일 변경
-        button.classList.remove('bg-gray-100', 'text-gray-600');
-        button.classList.add('bg-yellow-100', 'text-yellow-800');
-        
-        // 0.2초 후 원래 스타일로 복귀
-        setTimeout(() => {
+        // 버튼 스타일 변경 (좋아요 상태에 따라)
+        if (data.isLiked) {
+            button.classList.remove('bg-gray-100', 'text-gray-600');
+            button.classList.add('bg-yellow-100', 'text-yellow-800');
+        } else {
             button.classList.remove('bg-yellow-100', 'text-yellow-800');
             button.classList.add('bg-gray-100', 'text-gray-600');
-        }, 200);
+        }
         
     } catch (error) {
         console.error('Error:', error);

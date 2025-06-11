@@ -146,7 +146,7 @@
                     </form>
                 @endif
                 <button onclick="likePost(event, {{ $post->idx }})" 
-                        class="inline-flex items-center justify-center gap-2 h-10 px-4 {{ auth()->check() ? 'bg-gray-100 hover:bg-yellow-100 hover:text-yellow-800' : 'bg-gray-50 cursor-not-allowed' }} text-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-200 transition-all group"
+                        class="inline-flex items-center justify-center gap-2 h-10 px-4 {{ $isLiked ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-600' }} rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-200 transition-all group"
                         title="{{ auth()->check() ? '좋아요' : '로그인이 필요합니다' }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
@@ -164,87 +164,82 @@
 <script src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
 
 <script>
-    $(document).ready(function(){
-        // 이미지 슬라이더 초기화
-        var $slider = $('.image-slider').slick({
-            slidesToShow: 1,
-            slidesToScroll: 1,
-            arrows: false,
-            fade: true,
-            infinite: true
-        });
-        
-        // 슬라이더 인디케이터 업데이트
-        $slider.on('afterChange', function(event, slick, currentSlide){
-            $('.slider-indicator').text((currentSlide + 1) + ' / ' + slick.slideCount);
-        });
-        
-        // 이전/다음 버튼 이벤트
-        $('.slider-prev').click(function(){
-            $slider.slick('slickPrev');
-        });
-        
-        $('.slider-next').click(function(){
-            $slider.slick('slickNext');
-        });
+$(document).ready(function(){
+    // 이미지 슬라이더 초기화
+    var $slider = $('.image-slider').slick({
+        slidesToShow: 1,
+        slidesToScroll: 1,
+        arrows: false,
+        fade: true,
+        infinite: true
     });
     
-    // 삭제 확인 함수
-    function confirmDelete() {
-        return confirm('정말 삭제하시겠습니까?');
-    }
+    // 슬라이더 인디케이터 업데이트
+    $slider.on('afterChange', function(event, slick, currentSlide){
+        $('.slider-indicator').text((currentSlide + 1) + ' / ' + slick.slideCount);
+    });
+    
+    // 이전/다음 버튼 이벤트
+    $('.slider-prev').click(function(){
+        $slider.slick('slickPrev');
+    });
+    
+    $('.slider-next').click(function(){
+        $slider.slick('slickNext');
+    });
+});
 
-    async function likePost(event, idx) {
-        event.preventDefault();
-        
-        @guest
-            alert('로그인이 필요한 기능입니다.');
+// 삭제 확인 함수
+function confirmDelete() {
+    return confirm('정말 삭제하시겠습니까?');
+}
+
+async function likePost(event, idx) {
+    event.preventDefault();
+    
+    @guest
+        alert('로그인이 필요한 기능입니다.');
+        return;
+    @endguest
+    
+    try {
+        const button = event.currentTarget;
+        const response = await fetch(`/board-video/${idx}/like`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+        });
+
+        const data = await response.json();
+
+        if (!data.success) {
+            alert(data.message);
             return;
-        @endguest
+        }
+
+        // 좋아요 수 업데이트
+        const likeCountElements = document.querySelectorAll('button[onclick^="likePost"] span');
+        likeCountElements.forEach(element => {
+            element.textContent = new Intl.NumberFormat().format(data.likes);
+        });
         
-        try {
-            const button = event.currentTarget;
-            const response = await fetch(`/board-video/${idx}/like`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-            });
-
-            if (response.status === 401) {
-                alert('로그인이 필요한 기능입니다.');
-                return;
-            }
-
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-
-            const data = await response.json();
-            
-            // 좋아요 수 업데이트
-            const likeCountElements = document.querySelectorAll('button[onclick^="likePost"] span');
-            likeCountElements.forEach(element => {
-                element.textContent = new Intl.NumberFormat().format(data.likes);
-            });
-            
-            // 버튼 스타일 변경
+        // 버튼 스타일 변경 (좋아요 상태에 따라)
+        if (data.isLiked) {
             button.classList.remove('bg-gray-100', 'text-gray-600');
             button.classList.add('bg-yellow-100', 'text-yellow-800');
-            
-            // 0.2초 후 원래 스타일로 복귀
-            setTimeout(() => {
-                button.classList.remove('bg-yellow-100', 'text-yellow-800');
-                button.classList.add('bg-gray-100', 'text-gray-600');
-            }, 200);
-            
-        } catch (error) {
-            console.error('Error:', error);
-            alert('좋아요 처리 중 오류가 발생했습니다.');
+        } else {
+            button.classList.remove('bg-yellow-100', 'text-yellow-800');
+            button.classList.add('bg-gray-100', 'text-gray-600');
         }
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('좋아요 처리 중 오류가 발생했습니다.');
     }
+}
 </script>
 @endpush
 @endsection 

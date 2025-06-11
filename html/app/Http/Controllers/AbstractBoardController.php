@@ -170,9 +170,19 @@ abstract class AbstractBoardController extends Controller
         // 게시판별 적절한 카테고리 색상 선택
         $boardType = $this->getBoardTypeFromModelClass();
 
+        $isLiked = false;
+        if (auth()->check()) {
+            $isLiked = DB::table('mq_like_history')
+                ->where('mq_user_id', auth()->user()->mq_user_id)
+                ->where('mq_board_name', $this->getBoardTypeFromModelClass())
+                ->where('mq_board_idx', $idx)
+                ->exists();
+        }
+
         return view($this->viewPath.'.show', [
             'post' => $post,
             'categoryColors' => $this->getCategoryColors($boardType),
+            'isLiked' => $isLiked
         ]);
     }
     
@@ -310,19 +320,61 @@ abstract class AbstractBoardController extends Controller
     }
     
     /**
-     * 좋아요 기능
+     * 좋아요 기능 (토글 방식: 좋아요 추가/취소)
      */
     public function like($idx)
     {
         try {
             $model = app($this->modelClass);
             $board = $model::findOrFail($idx);
-            $board->increment('mq_like_cnt');
-            
-            return response()->json([
-                'success' => true,
-                'likes' => $board->fresh()->mq_like_cnt
-            ]);
+            $user = Auth::user();
+
+            if (!auth()->check()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => '로그인이 필요한 기능입니다.'
+                ], 401);
+            }
+
+            // 이미 좋아요를 눌렀는지 확인
+            $existingLike = DB::table('mq_like_history')
+                ->where('mq_user_id', $user->mq_user_id)
+                ->where('mq_board_name', $this->getBoardTypeFromModelClass())
+                ->where('mq_board_idx', $idx)
+                ->first();
+
+            if ($existingLike) {
+                // 좋아요 취소: 기록 삭제 및 좋아요 수 감소
+                DB::table('mq_like_history')
+                    ->where('idx', $existingLike->idx)
+                    ->delete();
+
+                $board->decrement('mq_like_cnt');
+
+                return response()->json([
+                    'success' => true,
+                    'likes' => $board->fresh()->mq_like_cnt,
+                    'isLiked' => false,
+                    'message' => '좋아요가 취소되었습니다.'
+                ]);
+            } else {
+                // 좋아요 추가: 기록 추가 및 좋아요 수 증가
+                DB::table('mq_like_history')->insert([
+                    'mq_user_id' => $user->mq_user_id,
+                    'mq_board_name' => $this->getBoardTypeFromModelClass(),
+                    'mq_board_idx' => $idx,
+                    'mq_reg_date' => now(),
+                ]);
+
+                $board->increment('mq_like_cnt');
+
+                return response()->json([
+                    'success' => true,
+                    'likes' => $board->fresh()->mq_like_cnt,
+                    'isLiked' => true,
+                    'message' => '좋아요가 추가되었습니다.'
+                ]);
+            }
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -549,6 +601,8 @@ abstract class AbstractBoardController extends Controller
             return 'board_research';
         } else if (strpos($this->modelClass, 'BoardVideo') !== false) {
             return 'board_video';
+        } else if (strpos($this->modelClass, 'BoardPortfolio') !== false) {
+            return 'board_portfolio';
         }
         
         // 기본값

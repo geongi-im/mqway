@@ -129,6 +129,15 @@ class BoardPortfolioController extends AbstractBoardController
                 'value' => (float)$item->portfolio_rate
             ];
         });
+
+        $isLiked = false;
+        if (auth()->check()) {
+            $isLiked = DB::table('mq_like_history')
+                ->where('mq_user_id', auth()->user()->mq_user_id)
+                ->where('mq_board_name', $this->getBoardTypeFromModelClass())
+                ->where('mq_board_idx', $idx)
+                ->exists();
+        }
         
         return view($this->viewPath.'.show', [
             'post' => $post,
@@ -136,7 +145,8 @@ class BoardPortfolioController extends AbstractBoardController
             'portfolioMeta' => $portfolioMeta,
             'portfolioDetails' => $portfolioDetails,
             'topHolding' => $topHolding,
-            'chartData' => $chartData
+            'chartData' => $chartData,
+            'isLiked' => $isLiked
         ]);
     }
     
