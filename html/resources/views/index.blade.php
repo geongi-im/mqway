@@ -400,7 +400,8 @@ use Illuminate\Support\Facades\Auth;
 <!-- 주요 경제지표 차트 -->
 <div class="container mx-auto px-4 mb-12">
     <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold">매달 만원씩 투자한다면<br><span class="text-base font-medium text-gray-600">(최근 5년간 애플/나스닥/예금 투자 비교)</span></h2>
+        <h2 class="text-2xl font-bold">매달 <input type="number" id="monthlyInvestment" class="border border-gray-300 rounded px-2 py-1 w-20 text-center font-bold text-blue-600" value="1" min="1" max="1000" step="1" onfocus="this.select()"> 만원씩 투자한다면?<br><span class="text-base font-medium text-gray-600">(최근 5년간 애플/나스닥/예금 투자 비교)</span></h2>
+        <button id="updateChartBtn" class="bg-point hover:bg-point/90 text-cdark px-4 py-2 rounded-lg shadow-sm font-medium transition-all duration-300 hover:scale-105">확인하기</button>
     </div>
     <div id="lineRaceChart" class="w-full bg-white p-4 rounded-lg shadow-md" style="width: 100%; height: 450px !important; display: block; overflow: hidden;"></div>
 </div>
@@ -765,9 +766,39 @@ use Illuminate\Support\Facades\Auth;
             });
         }
     });
+
+    function calculateCumulativeValues(data, monthlyInvestment) {
+        let results = [];
+        let cumulativeAAPL = 0;
+        let cumulativeQQQ = 0;
+        let cumulativeBank = 0;
+
+        for (let i = 0; i < data.length; i++) {
+            const monthData = data[i];
+
+            // 매달 동일 금액 신규 투자
+            cumulativeAAPL = cumulativeAAPL * (1 + monthData.AAPL) + monthlyInvestment;
+            cumulativeQQQ = cumulativeQQQ * (1 + monthData.QQQ) + monthlyInvestment;
+            cumulativeBank = cumulativeBank * (1 + monthData.bank) + monthlyInvestment;
+
+            results.push({
+                date: monthData.date,
+                애플: Math.round(cumulativeAAPL),
+                나스닥: Math.round(cumulativeQQQ),
+                예금: Math.round(cumulativeBank)
+            });
+        }
+
+        return results;
+    }
     
     // ECharts Line Race 차트
     window.addEventListener('load', function() {
+        // 숫자 형식 함수 - 천단위 콤마 추가
+        function numberWithCommas(x) {
+            return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+        
         // 차트 초기화
         const chartContainer = document.getElementById('lineRaceChart');
         if (!chartContainer || typeof echarts === 'undefined') {
@@ -796,13 +827,17 @@ use Illuminate\Support\Facades\Auth;
             maskColor: 'rgba(255, 255, 255, 0.8)'
         });
         
+        // 전역 변수로 원시 데이터 저장
+        let globalRawData = null;
+        
         // 데이터 가져오기
-        fetch('/storage/etc/2019_2024_market_data.json')
+        fetch('/storage/etc/2019_2024_market_month_change_rate.json')
             .then(response => {
                 if (!response.ok) throw new Error('데이터를 불러오는 중 오류가 발생했습니다.');
                 return response.json();
             })
             .then(rawData => {
+                globalRawData = rawData; // 전역 변수에 데이터 저장
                 loadChart(rawData);
             })
             .catch(error => {
@@ -816,6 +851,39 @@ use Illuminate\Support\Facades\Auth;
                 `;
             });
             
+        // 확인하기 버튼 클릭 이벤트 핸들러
+        document.getElementById('updateChartBtn').addEventListener('click', function() {
+            if (globalRawData) {
+                // 버튼 애니메이션 효과
+                this.classList.add('scale-95');
+                setTimeout(() => {
+                    this.classList.remove('scale-95');
+                }, 150);
+                
+                // 차트 다시 로드 (애니메이션 효과와 함께)
+                myChart.clear();
+                myChart.showLoading({
+                    text: '차트 업데이트 중...',
+                    color: '#4e79a7',
+                    textColor: '#34383d',
+                    maskColor: 'rgba(255, 255, 255, 0.8)'
+                });
+                
+                setTimeout(() => {
+                    loadChart(globalRawData);
+                    myChart.hideLoading();
+                }, 500);
+            }
+        });
+        
+        // 입력 필드에서 Enter 키 이벤트 처리
+        document.getElementById('monthlyInvestment').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && globalRawData) {
+                // Enter 키를 누르면 차트 다시 로드 (애니메이션 효과와 함께)
+                document.getElementById('updateChartBtn').click();
+            }
+        });
+            
         // 차트 로드 함수    
         function loadChart(rawData) {
             try {
@@ -828,16 +896,23 @@ use Illuminate\Support\Facades\Auth;
                 
                 // 원시 데이터를 날짜 기준으로 정렬
                 rawData.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                // 월별 투자 금액 가져오기 (기본값 1만원)
+                let inputValue = parseInt(document.getElementById('monthlyInvestment').value) || 1;
                 
-                // 데이터 처리 및 구성
-                const processedData = rawData.map(item => {
-                    return {
-                        date: item.date,
-                        '애플': parseFloat(item.AAPL.replace(/,/g, '')) || 0,
-                        '나스닥': parseFloat(item.QQQ.replace(/,/g, '')) || 0,
-                        '예금': parseFloat(item.bank.replace(/,/g, '')) || 0
-                    };
-                });
+                // 유효성 검사
+                if (inputValue < 1) {
+                    inputValue = 1;
+                    document.getElementById('monthlyInvestment').value = 1;
+                } else if (inputValue > 1000) {
+                    inputValue = 1000;
+                    document.getElementById('monthlyInvestment').value = 1000;
+                }
+                
+                // 입력값을 만원 단위로 변환 (1 → 10000)
+                const monthlyInvestment = inputValue * 10000;
+                
+                const processedData = calculateCumulativeValues(rawData, monthlyInvestment);
                 
                 // 시리즈 구성
                 assets.forEach(asset => {
@@ -872,9 +947,18 @@ use Illuminate\Support\Facades\Auth;
                 
                 // 차트 옵션 설정
                 const option = {
-                    animationDuration: 3000,
+                    animationDuration: 1000,
+                    animationEasing: 'cubicInOut',
                     dataset: {
                         source: processedData
+                    },
+                    title: {
+                        text: `매달 ${inputValue}만원 투자 시 수익 비교`,
+                        left: 'center',
+                        textStyle: {
+                            fontSize: 16,
+                            fontWeight: 'normal'
+                        }
                     },
                     tooltip: {
                         trigger: 'axis',
