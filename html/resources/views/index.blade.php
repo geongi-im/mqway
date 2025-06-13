@@ -362,7 +362,7 @@ use Illuminate\Support\Facades\Auth;
                 <div class="banner-content">
                     <div class="text-container">
                         <h2>용돈이 아니라,<br>인생을 가르치는 시간입니다.</h2>
-                        <a href="{{ url('/news') }}" class="cta-button">주요 뉴스 보기</a>
+                        <a href="{{ url('/board-news') }}" class="cta-button">주요 뉴스 보기</a>
                     </div>
                 </div>
             </div>
@@ -613,7 +613,7 @@ use Illuminate\Support\Facades\Auth;
 <div class="container mx-auto px-4 mb-12">
     <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-bold">주요 뉴스</h2>
-        <a href="{{ url('/news') }}" class="text-dark hover:text-dark/80 transition-colors flex items-center">
+        <a href="{{ url('/board-news') }}" class="text-dark hover:text-dark/80 transition-colors flex items-center">
             더보기
             <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
