@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\RealityCheck;
 use App\Models\LifeSearch;
+use App\Models\InvestorPortfolio;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Expense;
 
@@ -45,6 +46,9 @@ class RoadmapController extends Controller
         // 수입과 지출의 차이 계산
         $difference = $totalIncome - $totalExpense;
 
+        // 추천 포트폴리오 가져오기
+        $portfolios = $this->getRecommendedPortfolios();
+
         // 기본 데이터 설정
         $data = [
             'targetAmount' => $totalTargetAmount, // DB에서 가져온 목표금액
@@ -53,7 +57,8 @@ class RoadmapController extends Controller
             'monthlyExpenses' => [],
             'totalIncome' => $totalIncome,
             'totalExpense' => $totalExpense,
-            'difference' => $difference
+            'difference' => $difference,
+            'recommendedPortfolios' => $portfolios // 추천 포트폴리오 데이터 추가
         ];
 
         // 지출 데이터가 없는 경우
@@ -80,5 +85,38 @@ class RoadmapController extends Controller
             'hasExpenses' => true,
             'hasLifeGoal' => true
         ]);
+    }
+
+    private function fetchPortfoliosByReturnRange($min, $max, $limit)
+    {
+        return InvestorPortfolio::with('boardPortfolio')
+            ->whereBetween('portfolio_avg_return', [$min, $max])
+            ->orderByDesc('portfolio_avg_return')
+            ->limit($limit)
+            ->get(['idx', 'investor_name', 'portfolio_value', 'portfolio_avg_return'])
+            ->map(function ($portfolio) {
+                return [
+                    'idx' => $portfolio->idx,
+                    'investor_name' => $portfolio->investor_name,
+                    'portfolio_value' => $portfolio->portfolio_value,
+                    'portfolio_avg_return' => $portfolio->portfolio_avg_return,
+                    'board_portfolio_idx' => $portfolio->boardPortfolio->idx ?? null,
+                ];
+            });
+    }
+
+
+    private function getRecommendedPortfolios()
+    {
+        return [
+            'stable' => ($stable = $this->fetchPortfoliosByReturnRange(4, 6, 3))->isEmpty()
+                ? ['message' => '추천 포트폴리오를 준비중입니다'] : $stable,
+
+            'growth' => ($growth = $this->fetchPortfoliosByReturnRange(8, 10, 4))->isEmpty()
+                ? ['message' => '추천 포트폴리오를 준비중입니다'] : $growth,
+
+            'aggressive' => ($aggressive = $this->fetchPortfoliosByReturnRange(13, 100, 3))->isEmpty()
+                ? ['message' => '추천 포트폴리오를 준비중입니다'] : $aggressive,
+        ];
     }
 } 

@@ -157,6 +157,27 @@
                                     </div>
                                 </div>
                             </div>
+                            
+                            <!-- 안정형 투자 대가 리스트 (초기에 표시됨) -->
+                            <div class="portfolio-masters portfolio-masters-5 mt-4 border-t pt-4">
+                                <h5 class="text-sm font-bold text-gray-700 mb-3">추천 포트폴리오</h5>
+                                <div class="space-y-3">
+                                    @if(isset($data['recommendedPortfolios']['stable']) && !isset($data['recommendedPortfolios']['stable']['message']))
+                                        @foreach($data['recommendedPortfolios']['stable'] as $portfolio)
+                                            <a href="{{ route('board-portfolio.show', $portfolio['board_portfolio_idx']) }}" class="flex items-center justify-between p-3 bg-white border rounded-lg hover:bg-blue-50 transition-all">
+                                                <p class="font-semibold text-gray-800">{{ $portfolio['investor_name'] }} - {{ number_format($portfolio['portfolio_avg_return'], 1) }}%</p>
+                                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                                </svg>
+                                            </a>
+                                        @endforeach
+                                    @else
+                                        <div class="p-3 bg-blue-50 rounded-lg text-center">
+                                            <p class="text-blue-800">추천 포트폴리오를 준비중입니다</p>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
                         </div>
                         
                         <!-- 10% 수익률 포트폴리오 -->
@@ -194,13 +215,34 @@
                                             <p class="text-lg font-bold text-green-800">10%</p>
                                         </div>
                                     </div>
-                        <div class="flex items-center">
+                                    <div class="flex items-center">
                                         <div class="w-2 h-2 bg-green-200 rounded-full mr-2"></div>
                                         <div>
                                             <p class="text-sm font-semibold text-gray-700">대체 투자</p>
                                             <p class="text-lg font-bold text-green-800">10%</p>
                                         </div>
                                     </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 성장형 투자 대가 리스트 (초기에 숨겨짐) -->
+                            <div class="portfolio-masters portfolio-masters-10 mt-4 border-t pt-4 hidden">
+                                <h5 class="text-sm font-bold text-gray-700 mb-3">추천 포트폴리오</h5>
+                                <div class="space-y-3">
+                                    @if(isset($data['recommendedPortfolios']['growth']) && !isset($data['recommendedPortfolios']['growth']['message']))
+                                        @foreach($data['recommendedPortfolios']['growth'] as $portfolio)
+                                            <a href="{{ route('board-portfolio.show', $portfolio['board_portfolio_idx']) }}" class="flex items-center justify-between p-3 bg-white border rounded-lg hover:bg-green-50 transition-all">
+                                                <p class="font-semibold text-gray-800">{{ $portfolio['investor_name'] }} - {{ number_format($portfolio['portfolio_avg_return'], 1) }}%</p>
+                                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                                </svg>
+                                            </a>
+                                        @endforeach
+                                    @else
+                                        <div class="p-3 bg-green-50 rounded-lg text-center">
+                                            <p class="text-green-800">추천 포트폴리오를 준비중입니다</p>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -247,8 +289,29 @@
                                             <p class="text-lg font-bold text-purple-800">5%</p>
                                         </div>
                                     </div>
-                        </div>
-                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 공격형 투자 대가 리스트 (초기에 숨겨짐) -->
+                            <div class="portfolio-masters portfolio-masters-15 mt-4 border-t pt-4 hidden">
+                                <h5 class="text-sm font-bold text-gray-700 mb-3">추천 포트폴리오</h5>
+                                <div class="space-y-3">
+                                    @if(isset($data['recommendedPortfolios']['aggressive']) && !isset($data['recommendedPortfolios']['aggressive']['message']))
+                                        @foreach($data['recommendedPortfolios']['aggressive'] as $portfolio)
+                                            <a href="{{ route('board-portfolio.show', $portfolio['board_portfolio_idx']) }}" class="flex items-center justify-between p-3 bg-white border rounded-lg hover:bg-purple-50 transition-all">
+                                                <p class="font-semibold text-gray-800">{{ $portfolio['investor_name'] }} - {{ number_format($portfolio['portfolio_avg_return'], 1) }}%</p>
+                                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                                </svg>
+                                            </a>
+                                        @endforeach
+                                    @else
+                                        <div class="p-3 bg-purple-50 rounded-lg text-center">
+                                            <p class="text-purple-800">추천 포트폴리오를 준비중입니다</p>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -393,6 +456,26 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // 선택된 수익률 저장
             selectedPortfolioReturn = parseFloat(this.getAttribute('data-return'));
+            
+            // 모든 투자 대가 리스트 숨기기
+            document.querySelectorAll('.portfolio-masters').forEach(list => {
+                if (!list.classList.contains(`portfolio-masters-${selectedPortfolioReturn}`)) {
+                    // 선택되지 않은 리스트만 숨김
+                    list.style.maxHeight = '0px';
+                    list.classList.add('hidden');
+                }
+            });
+            
+            // 선택된 포트폴리오에 해당하는 투자 대가 리스트 표시
+            const selectedMastersList = document.querySelector(`.portfolio-masters-${selectedPortfolioReturn}`);
+            if (selectedMastersList) {
+                // hidden 클래스 제거
+                selectedMastersList.classList.remove('hidden');
+                // 슬라이드 다운 애니메이션 적용
+                setTimeout(() => {
+                    selectedMastersList.style.maxHeight = selectedMastersList.scrollHeight + 'px';
+                }, 10);
+            }
             
             // 남은 기간 재계산
             recalculateRemainingPeriod();
@@ -546,6 +629,22 @@ input[type="range"]::-webkit-slider-thumb {
     border-color: #6b21a8;
     background-color: #f8fafc;
     box-shadow: 0 4px 6px -1px rgba(168, 85, 247, 0.1), 0 2px 4px -1px rgba(168, 85, 247, 0.06);
+}
+
+/* 투자 대가 리스트 슬라이드 애니메이션 */
+.portfolio-masters {
+    overflow: hidden;
+    transition: max-height 0.5s ease-in-out;
+    max-height: 1000px; /* 충분히 큰 값으로 설정 */
+}
+
+.portfolio-masters.hidden {
+    max-height: 0;
+    overflow: hidden;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+    border-top: 0;
 }
 </style>
 @endpush
