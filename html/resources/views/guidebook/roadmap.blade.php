@@ -165,7 +165,7 @@
                                     @if(isset($data['recommendedPortfolios']['stable']) && !isset($data['recommendedPortfolios']['stable']['message']))
                                         @foreach($data['recommendedPortfolios']['stable'] as $portfolio)
                                             <a href="{{ route('board-portfolio.show', $portfolio['board_portfolio_idx']) }}" class="flex items-center justify-between p-3 bg-white border rounded-lg hover:bg-blue-50 transition-all">
-                                                <p class="font-semibold text-gray-800">{{ $portfolio['investor_name'] }} - {{ number_format($portfolio['portfolio_avg_return'], 1) }}%</p>
+                                                <p class="font-semibold text-gray-800">{{ $portfolio['investor_name'] }} - {{ number_format($portfolio['portfolio_avg_return'], 2) }}%</p>
                                                 <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                                 </svg>
@@ -232,7 +232,7 @@
                                     @if(isset($data['recommendedPortfolios']['growth']) && !isset($data['recommendedPortfolios']['growth']['message']))
                                         @foreach($data['recommendedPortfolios']['growth'] as $portfolio)
                                             <a href="{{ route('board-portfolio.show', $portfolio['board_portfolio_idx']) }}" class="flex items-center justify-between p-3 bg-white border rounded-lg hover:bg-green-50 transition-all">
-                                                <p class="font-semibold text-gray-800">{{ $portfolio['investor_name'] }} - {{ number_format($portfolio['portfolio_avg_return'], 1) }}%</p>
+                                                <p class="font-semibold text-gray-800">{{ $portfolio['investor_name'] }} - {{ number_format($portfolio['portfolio_avg_return'], 2) }}%</p>
                                                 <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                                 </svg>
@@ -299,7 +299,7 @@
                                     @if(isset($data['recommendedPortfolios']['aggressive']) && !isset($data['recommendedPortfolios']['aggressive']['message']))
                                         @foreach($data['recommendedPortfolios']['aggressive'] as $portfolio)
                                             <a href="{{ route('board-portfolio.show', $portfolio['board_portfolio_idx']) }}" class="flex items-center justify-between p-3 bg-white border rounded-lg hover:bg-purple-50 transition-all">
-                                                <p class="font-semibold text-gray-800">{{ $portfolio['investor_name'] }} - {{ number_format($portfolio['portfolio_avg_return'], 1) }}%</p>
+                                                <p class="font-semibold text-gray-800">{{ $portfolio['investor_name'] }} - {{ number_format($portfolio['portfolio_avg_return'], 2) }}%</p>
                                                 <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                                 </svg>

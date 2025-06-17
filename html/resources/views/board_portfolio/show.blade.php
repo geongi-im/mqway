@@ -508,8 +508,8 @@
                                 </div>
                                 <div class="summary-card">
                                     <div class="card-icon">📈</div>
-                                    <div class="card-value {{ $portfolioDetails->avg('reported_price_rate') < 0 ? 'negative' : 'positive' }}">
-                                        {{ $portfolioDetails->avg('reported_price_rate') ? number_format($portfolioDetails->avg('reported_price_rate'), 2) . '%' : 'N/A' }}
+                                    <div class="card-value {{ $portfolioMeta->portfolio_avg_return < 0 ? 'negative' : 'positive' }}">
+                                        {{ $portfolioMeta->portfolio_avg_return ? number_format($portfolioMeta->portfolio_avg_return, 2) . '%' : 'N/A' }}
                                     </div>
                                     <div class="card-label">평균 수익률</div>
                                 </div>
