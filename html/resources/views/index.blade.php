@@ -399,9 +399,9 @@ use Illuminate\Support\Facades\Auth;
 
 <!-- 주요 경제지표 차트 -->
 <div class="container mx-auto px-4 mb-12">
-    <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold">매달 <input type="number" id="monthlyInvestment" class="border border-gray-300 rounded px-2 py-1 w-20 text-center font-bold text-blue-600" value="1" min="1" max="1000" step="1" onfocus="this.select()"> 만원씩 투자한다면?<br><span class="text-base font-medium text-gray-600">(최근 5년간 애플/나스닥/예금 투자 비교)</span></h2>
-        <button id="updateChartBtn" class="bg-point hover:bg-point/90 text-cdark px-4 py-2 rounded-lg shadow-sm font-medium transition-all duration-300 hover:scale-105">확인하기</button>
+    <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
+        <h2 class="text-xl md:text-2xl font-bold">매달 <input type="number" id="monthlyInvestment" class="border border-gray-300 rounded px-2 py-1 w-20 text-center font-bold text-blue-600" value="1" min="1" max="1000" step="1" onfocus="this.select()"> 만원씩 투자한다면?<br><span class="text-sm md:text-base font-medium text-gray-600">(최근 5년간 애플/나스닥/예금 투자 비교)</span></h2>
+        <button id="updateChartBtn" class="bg-point hover:bg-point/90 text-cdark px-4 py-2 rounded-lg shadow-sm font-medium transition-all duration-300 hover:scale-105 w-full md:w-auto">확인하기</button>
     </div>
     <div id="lineRaceChart" class="w-full bg-white p-4 rounded-lg shadow-md" style="width: 100%; height: 450px !important; display: block; overflow: hidden;"></div>
 </div>
@@ -951,14 +951,6 @@ use Illuminate\Support\Facades\Auth;
                     animationEasing: 'cubicInOut',
                     dataset: {
                         source: processedData
-                    },
-                    title: {
-                        text: `매달 ${inputValue}만원 투자 시 수익 비교`,
-                        left: 'center',
-                        textStyle: {
-                            fontSize: 16,
-                            fontWeight: 'normal'
-                        }
                     },
                     tooltip: {
                         trigger: 'axis',
