@@ -12,19 +12,19 @@
 <div class="fixed-button">
     <div class="flex flex-col space-y-3">
         <!-- TOP 버튼 (스크롤 시 표시) -->
-        <button id="floatingBtn" class="bg-secondary hover:bg-secondary/90 text-cdark rounded-full shadow-lg flex flex-col items-center justify-center transition-all duration-300 hover:scale-105 opacity-0">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <button id="floatingBtn" class="bg-point hover:bg-point/90 text-cdark rounded-full shadow-lg flex flex-col items-center justify-center transition-all duration-300 hover:scale-105 opacity-0">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 11l7-7 7 7M5 19l7-7 7 7" />
             </svg>
-            <span class="text-xs font-bold">TOP</span>
+            <span class="text-sm font-bold">TOP</span>
         </button>
 
         <!-- 고객센터 버튼 (항상 표시) -->
-        <a href="http://pf.kakao.com/_xlEbJn/chat" target="_blank" class="bg-secondary hover:bg-secondary/90 text-cdark rounded-full shadow-lg flex flex-col items-center justify-center transition-all duration-300 hover:scale-105">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <a href="http://pf.kakao.com/_xlEbJn/chat" target="_blank" class="bg-point hover:bg-point/90 text-cdark rounded-full shadow-lg flex flex-col items-center justify-center transition-all duration-300 hover:scale-105">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
             </svg>
-            <span class="text-xs font-bold">상담</span>
+            <span class="text-sm font-bold">상담</span>
         </a>
     </div>
 </div>
@@ -38,8 +38,8 @@
     }
     
     .fixed-button button, .fixed-button a {
-        width: 3.5rem;
-        height: 3.5rem;
+        width: 4rem;
+        height: 4rem;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         transition: opacity 0.3s ease, transform 0.3s ease;
     }
@@ -51,8 +51,8 @@
         }
         
         .fixed-button button, .fixed-button a {
-            width: 3rem;
-            height: 3rem;
+            width: 3.5rem;
+            height: 3.5rem;
         }
     }
 </style>
