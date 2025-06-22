@@ -686,208 +686,68 @@ async function likePost(event, idx) {
 // 차트 데이터 설정
 const chartData = @json($chartData);
 
-// 색상 자동 생성 함수
-function generateColors(count) {
-    // 기본 색상 테마 - 금융/투자 테마에 적합한 색상들 (확장)
-    const baseColors = [
-        // 황금/주황 계열
-        { h: 45, s: 100, l: 50 },   // 황금색 #ffd700
-        { h: 36, s: 100, l: 50 },   // 골드 #ffaa00
-        { h: 27, s: 100, l: 50 },   // 주황색 #ff8800
-        { h: 18, s: 100, l: 50 },   // 다크 오렌지 #ff5500
-        
-        // 빨간 계열
-        { h: 9, s: 100, l: 50 },    // 밝은 빨강 #ff2200
-        { h: 0, s: 100, l: 50 },    // 빨강 #ff0000
-        { h: 354, s: 85, l: 47 },   // 선홍색
-        
-        // 분홍/자주 계열
-        { h: 350, s: 80, l: 50 },   // 자주색 #d9365e
-        { h: 340, s: 80, l: 50 },   // 핑크
-        { h: 330, s: 80, l: 50 },   // 밝은 핑크 #d935a3
-        { h: 320, s: 75, l: 50 },   // 매젠타
-        
-        // 보라 계열
-        { h: 310, s: 70, l: 50 },   // 연보라
-        { h: 300, s: 70, l: 50 },   // 보라색 #bf3fd9
-        { h: 285, s: 70, l: 50 },   // 중간 보라
-        { h: 270, s: 70, l: 50 },   // 진한 보라 #8c3fd9
-        { h: 260, s: 70, l: 45 },   // 남보라
-        
-        // 파랑 계열
-        { h: 250, s: 70, l: 50 },   // 남색
-        { h: 240, s: 70, l: 50 },   // 파란색 #3f3fd9
-        { h: 225, s: 80, l: 50 },   // 중간 파랑
-        { h: 210, s: 90, l: 50 },   // 하늘색 #0f88d9
-        { h: 195, s: 90, l: 50 },   // 밝은 청록
-        
-        // 청록/초록 계열
-        { h: 180, s: 90, l: 45 },   // 청록색 #0d9999
-        { h: 165, s: 90, l: 42 },   // 밝은 녹색
-        { h: 150, s: 90, l: 40 },   // 진한 녹색 #0d9957
-        { h: 135, s: 90, l: 40 },   // 중간 녹색
-        { h: 120, s: 90, l: 40 },   // 녹색 #0d990d
-        
-        // 라임/노랑 계열
-        { h: 105, s: 90, l: 45 },   // 연두색
-        { h: 90, s: 90, l: 45 },    // 라임색 #87cc0a
-        { h: 75, s: 90, l: 50 },    // 밝은 라임
-        { h: 60, s: 90, l: 50 },    // 노란색 #e6e619
-        
-        // 갈색 계열
-        { h: 30, s: 60, l: 40 },    // 갈색
-        { h: 20, s: 70, l: 35 },    // 진한 갈색
-        
-        // 회색 계열 (채도를 낮게 설정)
-        { h: 210, s: 10, l: 70 },   // 밝은 회색 (파랑빛)
-        { h: 0, s: 0, l: 60 },      // 중간 회색
-        { h: 210, s: 5, l: 40 }     // 어두운 회색 (파랑빛)
-    ];
-    
-    // 생성된 색상을 저장할 배열
-    const colors = [];
-    
-    // 더 많은 색상 생성을 위한 변형 계수
-    const hueVariations = 12;       // 색조 변형 수
-    const saturationSteps = 5;      // 채도 변형 단계 수
-    const lightnessSteps = 7;       // 밝기 변형 단계 수
-    
-    // 종목 수에 따라 색상 생성
-    for (let i = 0; i < count; i++) {
-        // 기본 색상 선택 (baseColors 배열 내에서 순환)
-        const baseColor = baseColors[i % baseColors.length];
-        
-        // 색상 변형을 위한 계수 계산
-        const variationIndex = Math.floor(i / baseColors.length);
-        
-        // 기본 색상값 복사
-        let h = baseColor.h;
-        let s = baseColor.s;
-        let l = baseColor.l;
-        
-        if (variationIndex > 0) {
-            // 변형 방식 결정 (4가지 변형 패턴을 더 세분화)
-            const variationType = variationIndex % 4;
-            const variationLevel = Math.floor(variationIndex / 4) + 1;
-            
-            // 변형 1: 색조(Hue) 변형 - 주 색상에서 조금씩 틀어짐
-            if (variationType === 0) {
-                // 색조 변형 (주 색상을 중심으로 ±30도 범위에서 변형)
-                const hueShift = ((variationLevel % hueVariations) - hueVariations/2) * (60/hueVariations);
-                h = ((baseColor.h + hueShift) + 360) % 360;
-            } 
-            // 변형 2: 채도(Saturation) 변형 - 더 선명하거나 탁한 색상
-            else if (variationType === 1) {
-                // 채도 변형 (기본 채도를 중심으로 ±30% 범위에서 변형)
-                const saturationMod = ((variationLevel % saturationSteps) - Math.floor(saturationSteps/2)) * (60/saturationSteps);
-                s = Math.max(20, Math.min(100, baseColor.s + saturationMod));
-            } 
-            // 변형 3: 밝기(Lightness) 변형 - 더 밝거나 어두운 색상
-            else if (variationType === 2) {
-                // 밝기 변형 (기본 밝기를 중심으로 ±25% 범위에서 변형)
-                const lightnessMod = ((variationLevel % lightnessSteps) - Math.floor(lightnessSteps/2)) * (50/lightnessSteps);
-                l = Math.max(20, Math.min(80, baseColor.l + lightnessMod));
-            } 
-            // 변형 4: 복합 변형 - 색조, 채도, 밝기 모두 변형
-            else {
-                // 복합 변형 (색조, 채도, 밝기 모두에 미묘한 변화)
-                const complexLevel = variationLevel % 10;
-                
-                // 색조 미세 변형
-                const hueComplex = ((complexLevel % 5) * 7 - 14) % 360;
-                h = ((baseColor.h + hueComplex) + 360) % 360;
-                
-                // 채도 미세 변형
-                const satComplex = ((complexLevel % 3) - 1) * 10;
-                s = Math.max(30, Math.min(100, baseColor.s + satComplex));
-                
-                // 밝기 미세 변형
-                const lightComplex = ((complexLevel % 7) - 3) * 5;
-                l = Math.max(25, Math.min(75, baseColor.l + lightComplex));
-            }
-        }
-        
-        // HSL을 HEX 색상 코드로 변환
-        colors.push(hslToHex(h, s, l));
-    }
-    
-    return colors;
-}
-
-// HSL 색상 모델을 HEX 색상 코드로 변환하는 함수
-function hslToHex(h, s, l) {
-    s /= 100;
-    l /= 100;
-    
-    const c = (1 - Math.abs(2 * l - 1)) * s;
-    const x = c * (1 - Math.abs((h / 60) % 2 - 1));
-    const m = l - c / 2;
-    
-    let r, g, b;
-    
-    if (0 <= h && h < 60) {
-        [r, g, b] = [c, x, 0];
-    } else if (60 <= h && h < 120) {
-        [r, g, b] = [x, c, 0];
-    } else if (120 <= h && h < 180) {
-        [r, g, b] = [0, c, x];
-    } else if (180 <= h && h < 240) {
-        [r, g, b] = [0, x, c];
-    } else if (240 <= h && h < 300) {
-        [r, g, b] = [x, 0, c];
-    } else {
-        [r, g, b] = [c, 0, x];
-    }
-    
-    // RGB 값을 HEX 코드로 변환
-    const toHex = (value) => {
-        const hex = Math.round((value + m) * 255).toString(16);
-        return hex.length === 1 ? '0' + hex : hex;
-    };
-    
-    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
-}
-
-// 카드 호버 효과
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.stock-card').forEach(card => {
-        card.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-5px) scale(1.02)';
-        });
-        
-        card.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0) scale(1)';
-        });
-    });
-    
-    // 도넛 차트 초기화
-    initDonutChart();
-    
-    // 탭 전환 기능 초기화
-    initTabSystem();
-});
-
 // 도넛 차트 초기화
 function initDonutChart() {
     const chartDom = document.getElementById('portfolioChart');
     const myChart = echarts.init(chartDom);
 
-    // 실제 데이터 사용
-    const chartItems = chartData.map(item => ({
-        value: item.value,
-        name: item.name,
-        itemStyle: {
-            borderRadius: 5,
-            borderWidth: 2,
-            borderColor: '#ffffff'
+    // ECharts 전용 색상 설정 (더 확실한 방법)
+    const echartsColors = [
+        '#FFD700', '#FF8C00', '#FF6B35', '#DC143C', '#B22222', '#8B0000',
+        '#FF1493', '#FF69B4', '#DA70D6', '#BA55D3', '#9370DB', '#8A2BE2',
+        '#4B0082', '#483D8B', '#6A5ACD', '#7B68EE', '#9966CC', '#8B008B',
+        '#4169E1', '#0000FF', '#1E90FF', '#00BFFF', '#87CEEB', '#87CEFA',
+        '#00CED1', '#20B2AA', '#48D1CC', '#40E0D0', '#00FFFF', '#E0FFFF',
+        '#00FF7F', '#32CD32', '#90EE90', '#98FB98', '#ADFF2F', '#9AFF9A',
+        '#FFFF00', '#FFFFE0', '#FFFACD', '#F0E68C', '#BDB76B', '#DAA520',
+        '#FFB6C1', '#FFA07A', '#FA8072', '#E9967A', '#F4A460', '#D2691E',
+        '#CD853F', '#BC8F8F', '#F5DEB3', '#DEB887', '#D2B48C', '#A0522D',
+        '#8FBC8F', '#556B2F', '#6B8E23', '#808000', '#228B22', '#006400'
+    ];
+
+    // 필요한 만큼 색상 생성
+    while (echartsColors.length < chartData.length) {
+        const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+        // 너무 밝거나 어두운 색상 제외
+        if (randomColor !== '#FFFFFF' && randomColor !== '#000000') {
+            echartsColors.push(randomColor);
         }
-    }));
+    }
+
+    // 데이터를 비율 순으로 정렬 (큰 것부터)
+    const sortedData = [...chartData].sort((a, b) => b.value - a.value);
+    const smallItems = sortedData.filter(item => item.value < 0.1);
+
+    // 실제 데이터 사용 - 더 확실한 색상 적용
+    const chartItems = sortedData.map((item, index) => {
+        const color = echartsColors[index % echartsColors.length];
+        
+        return {
+            value: item.value,
+            name: item.name,
+            itemStyle: {
+                color: color,
+                borderRadius: 3, // borderRadius를 줄여서 작은 항목도 잘 보이게
+                borderWidth: 1,  // borderWidth를 줄여서 작은 항목도 잘 보이게
+                borderColor: '#ffffff',
+                shadowBlur: 2,
+                shadowColor: 'rgba(0, 0, 0, 0.1)'
+            },
+            // 강제로 색상 지정
+            visualMap: {
+                color: color
+            }
+        };
+    });
 
     const option = {
         backgroundColor: 'transparent',
+        color: echartsColors.slice(0, chartData.length), // 실제 데이터 개수만큼만 색상 설정
         tooltip: {
             trigger: 'item',
-            formatter: '{b}: {c}%',
+            formatter: function(params) {
+                return `${params.name}\n${params.value}%`;
+            },
             backgroundColor: 'rgba(255, 255, 255, 0.95)',
             borderColor: '#ffd100',
             borderWidth: 1,
@@ -927,10 +787,12 @@ function initDonutChart() {
                 radius: ['40%', '70%'],
                 center: ['50%', '50%'],
                 avoidLabelOverlap: false,
+                minAngle: 2, // 최소 각도 설정으로 작은 항목도 보이게
+                minShowLabelAngle: 0, // 모든 라벨 표시
                 itemStyle: {
-                    borderRadius: 10,
+                    borderRadius: 8,
                     borderColor: '#ffffff',
-                    borderWidth: 2
+                    borderWidth: 1
                 },
                 label: {
                     show: false,
@@ -956,7 +818,6 @@ function initDonutChart() {
                     show: false
                 },
                 data: chartItems,
-                color: generateColors(chartItems.length),
                 animationType: 'scale',
                 animationEasing: 'elasticOut',
                 animationDelay: function (idx) {
@@ -1018,6 +879,26 @@ function initDonutChart() {
         myChart.setOption(newOption);
     });
 }
+
+// 카드 호버 효과 및 초기화
+document.addEventListener('DOMContentLoaded', function() {
+    // 카드 호버 효과
+    document.querySelectorAll('.stock-card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px) scale(1.02)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+    
+    // 도넛 차트 초기화
+    initDonutChart();
+    
+    // 탭 전환 기능 초기화
+    initTabSystem();
+});
 
 // 탭 시스템 초기화
 function initTabSystem() {
