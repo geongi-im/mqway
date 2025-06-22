@@ -83,12 +83,42 @@
                     </li>
                 </ul>
             </li>
-            
-            <li>
-                <a href="{{ route('economy_term_game') }}" class="text-cdark hover:text-cgray block py-2 {{ request()->routeIs('economy_term_game') ? 'font-bold border-l-4 border-secondary pl-4 -ml-4' : '' }}">
-                    Economy Term Game
+
+            <li class="relative">
+                <a href="#" class="text-cdark hover:text-cgray toggle-menu flex items-center justify-between py-2 {{ request()->is('tools*') ? 'font-bold border-l-4 border-secondary pl-4 -ml-4' : '' }}" data-target="tools">
+                    <span>Tools</span>
+                    <svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
                 </a>
+                <ul class="submenu tools-submenu hidden space-y-1 ml-4 border-l-2 border-secondary/20">
+                    <li class="relative">
+                        <a href="{{ route('tools.economy-term-game') }}" 
+                           class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6 
+                           {{ request()->routeIs('tools.economy-term-game') ? 'font-bold bg-dark/10' : '' }}">
+                            경제 용어 카드 맞추기
+                            <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-0 bg-secondary transition-all duration-200"></span>
+                        </a>
+                    </li>
+                    <li class="relative">
+                        <a href="{{ route('tools.financial-quiz') }}" 
+                           class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6 
+                           {{ request()->routeIs('tools.financial-quiz') ? 'font-bold bg-dark/10' : '' }}">
+                            경제 상식 퀴즈
+                            <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-0 bg-secondary transition-all duration-200"></span>
+                        </a>
+                    </li>
+                    <li class="relative">
+                        <a href="{{ route('tools.retirement-calculator') }}" 
+                           class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6 
+                           {{ request()->routeIs('tools.retirement-calculator') ? 'font-bold bg-dark/10' : '' }}">
+                            노후 자금 계산기
+                            <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-0 bg-secondary transition-all duration-200"></span>
+                        </a>
+                    </li>
+                </ul>
             </li>
+
             <!--
             <li>
                 <a href="{{ url('/pick') }}" class="text-point hover:text-secondary/80 block py-2 {{ request()->is('pick*') ? 'font-bold border-l-4 border-secondary pl-4 -ml-4' : '' }}">
@@ -245,6 +275,11 @@ document.addEventListener('DOMContentLoaded', function() {
     if (window.location.pathname.includes('/cashflow')) {
         document.querySelector('[data-target="cashflow"]').classList.add('active');
         document.querySelector('.cashflow-submenu').classList.add('show');
+    }
+
+    if (window.location.pathname.includes('/tools')) {
+        document.querySelector('[data-target="tools"]').classList.add('active');
+        document.querySelector('.tools-submenu').classList.add('show');
     }
     
     if (window.location.pathname.includes('/board')) {
