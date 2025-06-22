@@ -98,7 +98,7 @@ class EconomyTermGameController extends Controller
         ];
 
         $randomTerms = collect($economyTerms)->shuffle()->take(5)->values()->all();
-        return view('economy_term_game', ['economyTerms' => $randomTerms]);
+        return view('tools.economy-term-game', ['economyTerms' => $randomTerms]);
     }
 
     /**

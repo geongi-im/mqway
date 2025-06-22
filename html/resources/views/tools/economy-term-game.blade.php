@@ -346,7 +346,7 @@
 
         async fetchAndDisplayRanking(targetElementId = 'rankingList') {
             try {
-                const response = await fetch('{{ route("economy_term_game.ranking") }}');
+                const response = await fetch('{{ route("tools.economy-term-game.ranking") }}');
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -394,7 +394,7 @@
 
             try {
                 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-                const response = await fetch('{{ route("economy_term_game.store") }}', {
+                const response = await fetch('{{ route("tools.economy-term-game.store") }}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
