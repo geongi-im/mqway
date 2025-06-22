@@ -22,6 +22,9 @@ use App\Http\Controllers\BoardResearchController;
 use App\Http\Controllers\BoardVideoController;
 use App\Http\Controllers\BoardPortfolioController;
 use App\Http\Controllers\EconomyTermGameController;
+use App\Http\Controllers\FinancialQuizController;
+use App\Http\Controllers\RetirementCalculatorController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -207,7 +210,11 @@ Route::prefix('cashflow')->group(function () {
     Route::get('/helper', [CashflowController::class, 'helper'])->name('cashflow.helper');
 });
 
-// 경제 용어 카드 게임 페이지
-Route::get('/economy-term-game', [EconomyTermGameController::class, 'index'])->name('economy_term_game');
-Route::post('/economy-term-game/store', [EconomyTermGameController::class, 'storeGameResult'])->name('economy_term_game.store')->middleware('auth');
-Route::get('/economy-term-game/ranking', [EconomyTermGameController::class, 'getRanking'])->name('economy_term_game.ranking');
+// Tools 라우트
+Route::prefix('tools')->group(function () {
+    Route::get('/economy-term-game', [EconomyTermGameController::class, 'index'])->name('tools.economy-term-game');
+    Route::post('/economy-term-game/store', [EconomyTermGameController::class, 'storeGameResult'])->name('tools.economy-term-game.store')->middleware('auth');
+    Route::get('/economy-term-game/ranking', [EconomyTermGameController::class, 'getRanking'])->name('tools.economy-term-game.ranking');
+    Route::get('/financial-quiz', [FinancialQuizController::class, 'index'])->name('tools.financial-quiz');
+    Route::get('/retirement-calculator', [RetirementCalculatorController::class, 'index'])->name('tools.retirement-calculator');
+});
