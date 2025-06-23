@@ -207,7 +207,7 @@ Route::get('/api/server-check', [ServerCheckController::class, 'serverCheck'])->
 Route::prefix('cashflow')->group(function () {
     Route::get('/introduction', [CashflowController::class, 'introduction'])->name('cashflow.introduction');
     Route::get('/process', [CashflowController::class, 'process'])->name('cashflow.process');
-    Route::get('/helper', [CashflowController::class, 'helper'])->name('cashflow.helper');
+    Route::get('/helper', [CashflowController::class, 'helper'])->name('cashflow.helper')->middleware('auth');
 });
 
 // Tools 라우트
