@@ -412,6 +412,21 @@ body.scrolled #start-game-fixed-button {
                         </select>
                     </div>
                     
+                    <!-- 카드 검색 -->
+                    <div class="mb-4">
+                        <div class="relative">
+                            <input 
+                                type="text" 
+                                id="card-search-input" 
+                                placeholder="카드명으로 검색..." 
+                                class="w-full px-3 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                            >
+                            <svg class="absolute left-3 top-2.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    
                     <!-- 카테고리 탭 -->
                     <div id="category-tabs-container" class="mb-4 hidden">
                         <div class="flex flex-wrap gap-2" id="category-tabs">

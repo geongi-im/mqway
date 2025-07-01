@@ -805,8 +805,23 @@ Object.assign(CashflowGame.prototype, {
         modal.classList.remove('hidden');
     },
 
-    // 카드 목록 렌더링
-    renderCardList(cardType) {
+    // 카드 검색 필터링
+    filterCardsBySearch(cards, searchQuery) {
+        if (!searchQuery || searchQuery.trim() === '') {
+            return cards;
+        }
+        
+        const query = searchQuery.toLowerCase().trim();
+        return cards.filter(card => {
+            const title = (card.title || '').toLowerCase();
+            const originalTitle = (card.originalTitle || '').toLowerCase();
+            const description = (card.description || '').toLowerCase();
+            return title.includes(query) || originalTitle.includes(query) || description.includes(query);
+        });
+    },
+
+    // 카드 목록 렌더링 (기본 버전 - 사용되지 않음)
+    renderCardListSimple(cardType) {
         const cardListContainer = document.getElementById('card-list-container');
         if (!cardListContainer) return;
 
@@ -826,6 +841,29 @@ Object.assign(CashflowGame.prototype, {
         if (!cards || cards.length === 0) {
             cardListContainer.innerHTML = '<div class="text-center p-4 text-gray-500">카드가 없습니다.</div>';
             return;
+        }
+
+        // 검색 필터링
+        const searchInput = document.getElementById('card-search-input');
+        const searchQuery = searchInput ? searchInput.value : '';
+        cards = this.filterCardsBySearch(cards, searchQuery);
+
+        if (cards.length === 0) {
+            cardListContainer.innerHTML = '<div class="text-center p-4 text-gray-500">검색 결과가 없습니다.</div>';
+            return;
+        }
+
+        // 카드 정렬: Doodads는 가격순, 나머지는 타이틀순
+        if (normalizedCardType === 'Doodads') {
+            // 소비 카드는 가격 오름차순으로 정렬
+            cards.sort((a, b) => {
+                const costA = a.cost || 0;
+                const costB = b.cost || 0;
+                return costA - costB;
+            });
+        } else {
+            // 다른 카드들은 타이틀 순으로 정렬
+            cards.sort((a, b) => a.title.localeCompare(b.title, 'ko'));
         }
 
         // 간단한 카드 목록 표시
@@ -1317,8 +1355,28 @@ Object.assign(CashflowGame.prototype, {
             }
         }
         
-        // 카드를 타이틀 순으로 정렬
-        cards.sort((a, b) => a.title.localeCompare(b.title, 'ko'));
+        // 검색 필터링
+        const searchInput = document.getElementById('card-search-input');
+        const searchQuery = searchInput ? searchInput.value : '';
+        cards = this.filterCardsBySearch(cards, searchQuery);
+
+        if (cards.length === 0) {
+            cardListContainer.innerHTML = '<div class="text-center p-4 text-gray-500">검색 결과가 없습니다.</div>';
+            return;
+        }
+        
+        // 카드 정렬: Doodads는 가격순, 나머지는 타이틀순
+        if (normalizedCardType === 'Doodads') {
+            // 소비 카드는 가격 오름차순으로 정렬
+            cards.sort((a, b) => {
+                const costA = a.cost || 0;
+                const costB = b.cost || 0;
+                return costA - costB;
+            });
+        } else {
+            // 다른 카드들은 타이틀 순으로 정렬
+            cards.sort((a, b) => a.title.localeCompare(b.title, 'ko'));
+        }
         
         // 카드를 반복하여 DOM 요소 생성
         cards.forEach((card, index) => {
@@ -2268,12 +2326,26 @@ Object.assign(CashflowGame.prototype, {
     renderCardsByCategory(cards, cardType, selectedCategory) {
         const cardListContainer = document.getElementById('card-list-container');
         
+        // 검색 필터링 먼저 적용
+        const searchInput = document.getElementById('card-search-input');
+        const searchQuery = searchInput ? searchInput.value : '';
+        let filteredCards = this.filterCardsBySearch(cards, searchQuery);
+        
         // 선택된 카테고리에 맞는 카드 필터링
-        let filteredCards = cards;
         if (selectedCategory !== '전체') {
-            filteredCards = cards.filter(card => 
+            filteredCards = filteredCards.filter(card => 
                 this.getCardCategory(card, cardType) === selectedCategory
             );
+        }
+        
+        // 검색 결과가 없는 경우 메시지 표시
+        if (filteredCards.length === 0) {
+            if (searchQuery && searchQuery.trim() !== '') {
+                cardListContainer.innerHTML = '<div class="text-center p-4 text-gray-500">검색 결과가 없습니다.</div>';
+            } else {
+                cardListContainer.innerHTML = '<div class="text-center p-4 text-gray-500">이 카테고리에는 카드가 없습니다.</div>';
+            }
+            return;
         }
         
         // 카드 그룹화 및 렌더링

@@ -48,6 +48,15 @@ Object.assign(CashflowGame.prototype, {
             await this.updateDreamCostKrw(value);
         });
 
+        // 카드 검색 입력 이벤트
+        safeAddEventListener('card-search-input', 'input', (e) => {
+            // 현재 선택된 카드 타입을 가져와서 다시 렌더링
+            const cardTypeSelect = document.getElementById('card-type-select');
+            if (cardTypeSelect && cardTypeSelect.value) {
+                this.renderCardList(cardTypeSelect.value);
+            }
+        });
+
         // 카드 선택 버튼에 이벤트 리스너 추가 - 카드목록 페이지로 이동
         safeAddEventListener('smalldeal-btn', 'click', () => this.goToCardListPage('SmallDeals'));
         safeAddEventListener('bigdeal-btn', 'click', () => this.goToCardListPage('BigDeals'));
