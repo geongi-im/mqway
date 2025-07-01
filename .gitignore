@@ -65,3 +65,9 @@ yarn.lock
 # cursor environment
 .cursor/
 *.mdc
+
+# claude settings
+.claude/
+CLAUDE.md
+claude-flow
+.roomodes
