@@ -1400,7 +1400,7 @@ Object.assign(CashflowGame.prototype, {
             bgColor = 'border-l-4 border-l-green-500';
         } else if (cardType === 'BigDeals') {
             bgColor = 'border-l-4 border-l-blue-500';
-        } else if (cardType === 'Doodads') {
+        } else if (cardType === 'Doodads' || cardType === 'Doodad') {
             bgColor = 'border-l-4 border-l-red-500';
         }
         
@@ -1715,8 +1715,8 @@ Object.assign(CashflowGame.prototype, {
                         <label for="stock-shares" class="block text-sm font-medium text-gray-700 mb-2">구매 수량</label>
                         <div class="flex items-center space-x-3 mb-2">
                             <input type="number" id="stock-shares" min="1" value="1" 
-                                   class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-center">
-                            <span class="text-sm text-gray-600">${unit}</span>
+                                   class="flex-1 min-w-0 w-20 max-w-24 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-center">
+                            <span class="text-sm text-gray-600 whitespace-nowrap">${unit}</span>
                         </div>
                         <div class="flex space-x-2 mb-2">
                             <button type="button" class="quick-shares-btn flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-1 px-2 rounded text-xs" data-shares="1">${unitText}</button>
@@ -1763,8 +1763,8 @@ Object.assign(CashflowGame.prototype, {
                     <label for="stock-shares" class="block text-sm font-medium text-gray-700 mb-2">구매 수량</label>
                     <div class="flex items-center space-x-3 mb-2">
                         <input type="number" id="stock-shares" min="1" value="1" 
-                               class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-center">
-                        <span class="text-sm text-gray-600">${unit}</span>
+                               class="flex-1 min-w-0 w-20 max-w-24 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-center">
+                        <span class="text-sm text-gray-600 whitespace-nowrap">${unit}</span>
                     </div>
                     <div class="flex space-x-2 mb-2">
                         <button type="button" class="quick-shares-btn flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-1 px-2 rounded text-xs" data-shares="1">${unitText}</button>
@@ -1931,7 +1931,7 @@ Object.assign(CashflowGame.prototype, {
                 actionBtn.textContent = '확인';
                 actionBtn.className = 'flex-1 bg-gray-600 text-white py-2.5 rounded-lg font-semibold hover:bg-gray-700 text-sm';
             }
-        } else if (card.cardType === 'Doodads') {
+        } else if (card.cardType === 'Doodad' || card.cardType === 'Doodads') {
             actionBtn.textContent = '구매하기';
         } else if (finalIsStock) {
             actionBtn.textContent = '주식 구매';

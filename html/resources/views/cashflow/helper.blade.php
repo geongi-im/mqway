@@ -322,10 +322,19 @@ body.scrolled #start-game-fixed-button {
                         </div>
                     </div>
 
+                    <!-- 월급 받기 섹션 -->
+                    <div class="bg-white p-4 rounded-lg shadow-sm border">
+                        <button id="payday-btn" class="w-full bg-yellow-500 text-white px-4 py-4 rounded-lg font-bold hover:bg-yellow-600 transition-colors text-lg">
+                            💰 월급 받기 (Payday)
+                        </button>
+                    </div>
+
                     <!-- 카드 선택 섹션 -->
                     <div class="bg-white p-4 rounded-lg shadow-sm border">
                         <h3 class="text-lg font-semibold mb-3">사용자 액션</h3>
-                        <div class="grid grid-cols-3 gap-3">
+                        
+                        <!-- 상위 1열: 카드 선택 (3개) -->
+                        <div class="grid grid-cols-3 gap-3 mb-3">
                             <button id="smalldeal-btn" class="bg-green-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors text-sm">
                                 작은 기회<br/>(Small Deal)
                             </button>
@@ -335,15 +344,19 @@ body.scrolled #start-game-fixed-button {
                             <button id="doodad-btn" class="bg-red-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors text-sm">
                                 소비<br/>(Doodad)
                             </button>
-                            <button id="payday-btn" class="bg-yellow-500 text-white px-4 py-3 rounded-lg font-semibold hover:bg-yellow-600 transition-colors text-sm">
-                                월급 받기<br/>(Payday)
-                            </button>
+                        </div>
+                        
+                        <!-- 하위 2열: 기타 액션 (2개씩) -->
+                        <div class="grid grid-cols-2 gap-3 mb-3">
                             <button id="charity-btn" class="bg-purple-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors text-sm">
                                 기부하기<br/>(Charity)
                             </button>
                             <button id="downsized-btn" class="bg-gray-700 text-white px-4 py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors text-sm">
                                 실직<br/>(Downsized)
                             </button>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-3">
                             <button id="have-child-btn" class="bg-blue-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors text-sm">
                                 출산하기<br/>(자녀 0/3)
                             </button>
@@ -639,6 +652,12 @@ document.addEventListener('DOMContentLoaded', function() {
         gameModal.classList.add('flex');
         disableBodyScroll();
         
+        // 플로팅 버튼 숨기기
+        const floatingButton = document.querySelector('.fixed-button');
+        if (floatingButton) {
+            floatingButton.style.display = 'none';
+        }
+        
         // 게임을 항상 새로 초기화 (이전 데이터 무시)
         gameInitialized = false;
         initializeCashflowGame();
@@ -697,6 +716,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // 모달 닫기 버튼 클릭 이벤트
     closeGameBtn.addEventListener('click', function() {
         if(confirm('캐시플로우 도우미를 종료하시겠습니까? 종료하면 초기화 됩니다.')) {
+            // 플로팅 버튼 다시 보이기
+            const floatingButton = document.querySelector('.fixed-button');
+            if (floatingButton) {
+                floatingButton.style.display = 'block';
+            }
+            
             // 페이지 새로고침으로 완전한 초기 상태로 복원
             location.reload();
         }
@@ -704,6 +729,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 게임 초기화 함수 (단순화 - 새로고침 사용)
     function resetGame() {
+        // 플로팅 버튼 다시 보이기
+        const floatingButton = document.querySelector('.fixed-button');
+        if (floatingButton) {
+            floatingButton.style.display = 'block';
+        }
+        
         // 페이지 새로고침으로 완전한 초기화
         location.reload();
     }
