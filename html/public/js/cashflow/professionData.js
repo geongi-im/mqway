@@ -196,14 +196,14 @@ const PROFESSION_DATA = [
         "expenses": {
             "taxes": 600,
             "homeMortgagePayment": 400,
-            "schoolLoanPayment": 0,
+            "schoolLoanPayment": 30,
             "carLoanPayment": 100,
             "creditCardPayment": 90,
             "retailExpenses": 50,
             "otherExpenses": 710,
             "childExpensesPerChild": 170,
             "numberOfChildren": 0,
-            "totalExpenses": 1950
+            "totalExpenses": 1980
         },
         "balanceSheet": {
             "assets": {
@@ -211,15 +211,15 @@ const PROFESSION_DATA = [
             },
             "liabilities": {
                 "homeMortgage": 47000,
-                "schoolLoans": 0,
+                "schoolLoans": 6000,
                 "carLoans": 5000,
                 "creditCardDebt": 3000,
                 "retailDebt": 1000
             }
         },
         "financialSummary": {
-            "monthlyCashFlow": 1150,
-            "payDayAmount": 1150
+            "monthlyCashFlow": 1120,
+            "payDayAmount": 1120
         }
     },
     {
@@ -233,14 +233,14 @@ const PROFESSION_DATA = [
         "expenses": {
             "taxes": 630,
             "homeMortgagePayment": 500,
-            "schoolLoanPayment": 0,
+            "schoolLoanPayment": 60,
             "carLoanPayment": 100,
             "creditCardPayment": 90,
             "retailExpenses": 50,
             "otherExpenses": 760,
             "childExpensesPerChild": 180,
             "numberOfChildren": 0,
-            "totalExpenses": 2130
+            "totalExpenses": 2190
         },
         "balanceSheet": {
             "assets": {
@@ -248,15 +248,15 @@ const PROFESSION_DATA = [
             },
             "liabilities": {
                 "homeMortgage": 50000,
-                "schoolLoans": 0,
+                "schoolLoans": 12000,
                 "carLoans": 5000,
                 "creditCardDebt": 3000,
                 "retailDebt": 1000
             }
         },
         "financialSummary": {
-            "monthlyCashFlow": 1170,
-            "payDayAmount": 1170
+            "monthlyCashFlow": 1110,
+            "payDayAmount": 1110
         }
     },
     {
@@ -270,14 +270,14 @@ const PROFESSION_DATA = [
         "expenses": {
             "taxes": 910,
             "homeMortgagePayment": 700,
-            "schoolLoanPayment": 0,
+            "schoolLoanPayment": 60,
             "carLoanPayment": 120,
             "creditCardPayment": 90,
             "retailExpenses": 50,
             "otherExpenses": 1000,
             "childExpensesPerChild": 240,
             "numberOfChildren": 0,
-            "totalExpenses": 2870
+            "totalExpenses": 2930
         },
         "balanceSheet": {
             "assets": {
@@ -285,15 +285,15 @@ const PROFESSION_DATA = [
             },
             "liabilities": {
                 "homeMortgage": 75000,
-                "schoolLoans": 0,
+                "schoolLoans": 12000,
                 "carLoans": 6000,
                 "creditCardDebt": 3000,
                 "retailDebt": 1000
             }
         },
         "financialSummary": {
-            "monthlyCashFlow": 1730,
-            "payDayAmount": 1730
+            "monthlyCashFlow": 1670,
+            "payDayAmount": 1670
         }
     },
     {
@@ -307,14 +307,14 @@ const PROFESSION_DATA = [
         "expenses": {
             "taxes": 1050,
             "homeMortgagePayment": 700,
-            "schoolLoanPayment": 0,
+            "schoolLoanPayment": 60,
             "carLoanPayment": 140,
             "creditCardPayment": 120,
             "retailExpenses": 50,
             "otherExpenses": 1090,
             "childExpensesPerChild": 250,
             "numberOfChildren": 0,
-            "totalExpenses": 3150
+            "totalExpenses": 3210
         },
         "balanceSheet": {
             "assets": {
@@ -322,15 +322,15 @@ const PROFESSION_DATA = [
             },
             "liabilities": {
                 "homeMortgage": 75000,
-                "schoolLoans": 0,
+                "schoolLoans": 12000,
                 "carLoans": 7000,
                 "creditCardDebt": 4000,
                 "retailDebt": 1000
             }
         },
         "financialSummary": {
-            "monthlyCashFlow": 1750,
-            "payDayAmount": 1750
+            "monthlyCashFlow": 1690,
+            "payDayAmount": 1690
         }
     },
     {
@@ -344,14 +344,14 @@ const PROFESSION_DATA = [
         "expenses": {
             "taxes": 1830,
             "homeMortgagePayment": 1100,
-            "schoolLoanPayment": 0,
+            "schoolLoanPayment": 390,
             "carLoanPayment": 220,
             "creditCardPayment": 180,
             "retailExpenses": 50,
             "otherExpenses": 1650,
             "childExpensesPerChild": 380,
             "numberOfChildren": 0,
-            "totalExpenses": 5030
+            "totalExpenses": 5420
         },
         "balanceSheet": {
             "assets": {
@@ -359,15 +359,15 @@ const PROFESSION_DATA = [
             },
             "liabilities": {
                 "homeMortgage": 115000,
-                "schoolLoans": 0,
+                "schoolLoans": 78000,
                 "carLoans": 11000,
                 "creditCardDebt": 6000,
                 "retailDebt": 1000
             }
         },
         "financialSummary": {
-            "monthlyCashFlow": 2470,
-            "payDayAmount": 2470
+            "monthlyCashFlow": 2080,
+            "payDayAmount": 2080
         }
     },
     {
@@ -418,14 +418,14 @@ const PROFESSION_DATA = [
         "expenses": {
             "taxes": 3420,
             "homeMortgagePayment": 1900,
-            "schoolLoanPayment": 0,
+            "schoolLoanPayment": 750,
             "carLoanPayment": 380,
             "creditCardPayment": 270,
             "retailExpenses": 50,
             "otherExpenses": 2880,
             "childExpensesPerChild": 640,
             "numberOfChildren": 0,
-            "totalExpenses": 8900
+            "totalExpenses": 9650
         },
         "balanceSheet": {
             "assets": {
@@ -433,15 +433,15 @@ const PROFESSION_DATA = [
             },
             "liabilities": {
                 "homeMortgage": 202000,
-                "schoolLoans": 0,
+                "schoolLoans": 150000,
                 "carLoans": 19000,
                 "creditCardDebt": 9000,
                 "retailDebt": 1000
             }
         },
         "financialSummary": {
-            "monthlyCashFlow": 4300,
-            "payDayAmount": 4300
+            "monthlyCashFlow": 3550,
+            "payDayAmount": 3550
         }
     }
 ];
