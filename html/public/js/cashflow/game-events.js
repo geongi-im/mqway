@@ -1034,7 +1034,7 @@ Object.assign(CashflowGame.prototype, {
         const totalCost = card.cost;
         const downPayment = card.downPayment || card.down_payment || 0;
         const monthlyIncome = card.cashFlowChange || card.cash_flow || 0;
-        const mortgageAmount = card.debtIncurred || (totalCost - downPayment);
+        const mortgageAmount = card.debtIncurred || 0;
         
         console.log('=== 부동산 카드 처리 시작 ===');
         console.log('원본 카드 데이터:', {
@@ -1062,14 +1062,37 @@ Object.assign(CashflowGame.prototype, {
             liabilities: player.liabilities?.length || 0
         });
         
-        // 1. 계약금이 0인 경우 (No Money Down Deal)
+        // 1. 계약금이 0인 경우 처리
         if (downPayment === 0) {
-            console.log('→ 계약금 없음 (No Money Down Deal) - 즉시 구매 가능');
-            this.completePurchase(player, propertyName, totalCost, downPayment, monthlyIncome, mortgageAmount);
-            return;
+            // No Money Down Deal 여부 확인 (모기지가 총 비용과 같거나, 제목에 명시된 경우)
+            const isNoMoneyDownDeal = (mortgageAmount >= totalCost) || 
+                                     (card.title && (card.title.includes('No Money Down') || card.title.includes('계약금 없음'))) ||
+                                     (card.description && (card.description.includes('No Money Down') || card.description.includes('계약금 없음')));
+            
+            if (isNoMoneyDownDeal) {
+                console.log('→ No Money Down Deal - 즉시 구매 가능');
+                this.completePurchase(player, propertyName, totalCost, downPayment, monthlyIncome, mortgageAmount);
+                return;
+            } else {
+                // 계약금은 없지만 총 비용을 현금으로 지불해야 하는 경우
+                console.log('→ 계약금 없는 일반 부동산 - 총 비용 현금 지불 필요');
+                if (player.cash < totalCost) {
+                    console.log('→ 총 비용 지불 불가 - 카드 폐기');
+                    this.showModalNotification(
+                        "구매 불가", 
+                        `총 비용을 현금으로 지불할 수 없습니다.\n\n필요 금액: ${GameUtils.formatCurrency(totalCost)}\n보유 현금: ${GameUtils.formatCurrency(player.cash)}\n\n카드가 폐기됩니다.`
+                    );
+                    this.addGameLog(`${propertyName} 구매 실패 - 총 비용 부족으로 카드 폐기`);
+                    return;
+                }
+                // 총 비용을 계약금으로 설정하여 현금에서 차감
+                console.log('→ 총 비용만큼 현금 지불하고 구매 진행');
+                this.completePurchase(player, propertyName, totalCost, totalCost, monthlyIncome, 0); // 모기지 없음
+                return;
+            }
         }
         
-        // 2. 계약금이 있는 경우 - 현금 보유액 확인
+        // 2. 계약금이 있는 경우 - 계약금 보유액 확인
         console.log('=== 현금 확인 단계 ===');
         console.log('플레이어 현금 (typeof):', typeof player.cash, player.cash);
         console.log('필요 계약금 (typeof):', typeof downPayment, downPayment);
@@ -1155,9 +1178,17 @@ Object.assign(CashflowGame.prototype, {
         console.log('재정 재계산 후 monthlyCashFlow:', player.monthlyCashFlow);
         
         // 6. 게임 로그 및 UI 업데이트
-        const logMessage = downPayment > 0 
-            ? `${propertyName}을(를) 계약금 ${GameUtils.formatCurrency(downPayment)}로 구매했습니다.`
-            : `${propertyName}을(를) 계약금 없이 구매했습니다 (No Money Down Deal).`;
+        let logMessage;
+        if (downPayment === totalCost) {
+            // 총 비용을 현금으로 지불한 경우
+            logMessage = `${propertyName}을(를) 현금 ${GameUtils.formatCurrency(downPayment)}로 구매했습니다.`;
+        } else if (downPayment > 0) {
+            // 계약금을 지불한 경우
+            logMessage = `${propertyName}을(를) 계약금 ${GameUtils.formatCurrency(downPayment)}로 구매했습니다.`;
+        } else {
+            // No Money Down Deal
+            logMessage = `${propertyName}을(를) 계약금 없이 구매했습니다 (No Money Down Deal).`;
+        }
         
         this.addGameLog(logMessage);
         
@@ -1174,11 +1205,27 @@ Object.assign(CashflowGame.prototype, {
         this.updateUI();
         
         // 8. 완료 알림
-        const completionMessage = `🏠 ${propertyName} 구매 완료!\n\n` +
-            `구매 가격: ${GameUtils.formatCurrency(totalCost)}\n` +
-            `계약금: ${GameUtils.formatCurrency(downPayment)}\n` +
-            (mortgageAmount > 0 ? `모기지: ${GameUtils.formatCurrency(mortgageAmount)}\n` : '') +
-            `월 현금흐름: ${GameUtils.formatCurrency(monthlyIncome)}`;
+        let completionMessage = `🏠 ${propertyName} 구매 완료!\n\n구매 가격: ${GameUtils.formatCurrency(totalCost)}\n`;
+        
+        if (downPayment === totalCost) {
+            // 총 비용을 현금으로 지불한 경우
+            completionMessage += `지불 금액: ${GameUtils.formatCurrency(downPayment)} (현금 전액 지불)\n`;
+            completionMessage += `모기지: 없음\n`;
+        } else if (downPayment > 0) {
+            // 계약금을 지불한 경우
+            completionMessage += `계약금: ${GameUtils.formatCurrency(downPayment)}\n`;
+            if (mortgageAmount > 0) {
+                completionMessage += `모기지: ${GameUtils.formatCurrency(mortgageAmount)}\n`;
+            }
+        } else {
+            // No Money Down Deal
+            completionMessage += `계약금: ${GameUtils.formatCurrency(downPayment)} (No Money Down Deal)\n`;
+            if (mortgageAmount > 0) {
+                completionMessage += `모기지: ${GameUtils.formatCurrency(mortgageAmount)}\n`;
+            }
+        }
+        
+        completionMessage += `월 현금흐름: ${GameUtils.formatCurrency(monthlyIncome)}`;
             
         this.showModalNotification("구매 완료", completionMessage);
         
