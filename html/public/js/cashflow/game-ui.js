@@ -898,18 +898,22 @@ Object.assign(CashflowGame.prototype, {
         // 1. 일반 자산 (assets 배열) - 주식은 제외
         if (player.assets && player.assets.length > 0) {
             console.log('일반 자산 처리:', player.assets.length, '개');
-            player.assets.forEach(asset => {
+            player.assets.forEach((asset, index) => {
                 // 주식은 제외 (주식은 stocks 객체에서 처리)
                 if (asset.type !== 'Stock' && !asset.name.includes('주식')) {
+                    // 일관된 ID 생성 (이름과 타입 기반)
+                    const consistentId = asset.id || `asset_${asset.name.replace(/[^a-zA-Z0-9가-힣]/g, '_')}_${asset.type || 'Investment'}_${index}`;
+                    
                     allAssets.push({
-                        id: asset.id || `asset_${Date.now()}_${Math.random()}`,
+                        id: consistentId,
                         name: asset.name,
                         type: asset.type || 'Investment',
                         shares: asset.shares,
                         totalValue: asset.totalValue || asset.currentValue || asset.downPayment || 0,
                         monthlyIncome: asset.monthlyIncome || 0,
                         averagePrice: asset.averagePrice,
-                        totalInvested: asset.totalInvested || asset.purchasePrice || asset.totalValue
+                        totalInvested: asset.totalInvested || asset.purchasePrice || asset.totalValue,
+                        originalIndex: index // 원본 배열에서의 인덱스 저장
                     });
                 } else {
                     console.log('일반 자산에서 주식 제외:', asset.name);

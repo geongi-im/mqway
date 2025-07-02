@@ -521,7 +521,25 @@ body.scrolled #start-game-fixed-button {
                 <div id="sell-asset-modal-details" class="text-sm text-gray-700 mb-4">
                     <!-- 판매할 자산 정보 -->
                 </div>
-                <div class="mb-4">
+                <!-- 주식/펀드 판매용 필드 -->
+                <div id="stock-sell-fields" class="hidden mb-4 space-y-3">
+                    <div>
+                        <label for="sell-shares" class="block text-sm font-medium text-gray-700 mb-1">판매 수량</label>
+                        <input type="number" id="sell-shares" name="sell-shares" placeholder="판매할 주식/펀드 수량" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <div id="max-shares-info" class="text-xs text-gray-500 mt-1"></div>
+                    </div>
+                    <div>
+                        <label for="sell-price-per-share" class="block text-sm font-medium text-gray-700 mb-1">주당/좌당 판매 가격 ($)</label>
+                        <input type="number" id="sell-price-per-share" name="sell-price-per-share" placeholder="주당 판매 가격" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div id="total-sell-amount" class="p-3 bg-gray-50 rounded-lg border">
+                        <div class="text-sm text-gray-600">총 판매 금액</div>
+                        <div id="total-sell-amount-value" class="text-lg font-bold text-green-600">$0</div>
+                    </div>
+                </div>
+                
+                <!-- 일반 자산 판매용 필드 -->
+                <div id="general-sell-fields" class="mb-4">
                     <label for="sell-price" class="block text-sm font-medium text-gray-700 mb-1">판매 가격 ($)</label>
                     <input type="number" id="sell-price" name="sell-price" placeholder="판매 가격 입력" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>

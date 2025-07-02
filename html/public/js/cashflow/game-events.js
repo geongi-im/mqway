@@ -96,14 +96,28 @@ Object.assign(CashflowGame.prototype, {
         // 기부 버튼
         safeAddEventListener('charity-btn', 'click', () => {
             const player = this.gameState.player;
-            if (!player || player.cash < 100) {
-                this.showModalNotification("알림", "기부하려면 최소 $100의 현금이 필요합니다.");
+            if (!player) return;
+            
+            // 총수입 계산
+            const salary = player.salary || 0;
+            const passiveIncome = player.passiveIncome || 0;
+            const totalIncome = salary + passiveIncome;
+            const charityAmount = Math.floor(totalIncome * 0.1);
+            
+            if (totalIncome < 1000) {
+                this.showModalNotification("알림", "기부하려면 최소 $1,000의 총수입이 필요합니다.");
                 return;
             }
+            
+            if (player.cash < charityAmount) {
+                this.showModalNotification("알림", `기부할 현금이 부족합니다.\n\n기부 금액: ${GameUtils.formatCurrency(charityAmount)} (총수입의 10%)\n보유 현금: ${GameUtils.formatCurrency(player.cash)}`);
+                return;
+            }
+            
             setTimeout(() => {
                 this.showModalNotification(
                     "기부하기",
-                    "현재 보유 현금의 10%를 기부하시겠습니까?\n\n기부를 하시면 3턴 동안 주사위를 하나 더 굴릴 수 있는 행운이 따를 것입니다.",
+                    `총수입의 10%인 ${GameUtils.formatCurrency(charityAmount)}을 기부하시겠습니까?\n\n총수입: ${GameUtils.formatCurrency(totalIncome)} (급여 ${GameUtils.formatCurrency(salary)} + 자산소득 ${GameUtils.formatCurrency(passiveIncome)})\n\n기부를 하시면 3턴 동안 주사위를 하나 더 굴릴 수 있는 행운이 따를 것입니다.`,
                     () => this.handleCharity(),
                     true // 취소 버튼 표시
                 );
@@ -176,17 +190,54 @@ Object.assign(CashflowGame.prototype, {
 
         // 판매 관련 이벤트
         safeAddEventListener('confirm-sell-asset-btn', 'click', () => {
-            const sellPriceInput = document.getElementById('sell-price');
-            if (!sellPriceInput) return;
+            const asset = this.gameState.currentSellingAsset;
+            const assetType = this.gameState.currentSellingAssetType;
             
-            const sellPrice = parseFloat(sellPriceInput.value);
-            if (isNaN(sellPrice) || sellPrice < 0) {
-                this.showModalNotification("오류", "유효한 판매 가격을 입력하세요.");
+            if (!asset) {
+                this.showModalNotification("오류", "판매할 자산 정보를 찾을 수 없습니다.");
                 return;
             }
-            if (this.gameState.currentSellingAssetId !== null) {
+            
+            if (asset.type === 'Stock' || asset.type === 'Fund') {
+                // 주식/펀드 판매 처리
+                const sellSharesInput = document.getElementById('sell-shares');
+                const sellPricePerShareInput = document.getElementById('sell-price-per-share');
+                
+                if (!sellSharesInput || !sellPricePerShareInput) {
+                    this.showModalNotification("오류", "판매 정보 입력 필드를 찾을 수 없습니다.");
+                    return;
+                }
+                
+                const sellShares = parseInt(sellSharesInput.value);
+                const sellPricePerShare = parseFloat(sellPricePerShareInput.value);
+                
+                if (isNaN(sellShares) || sellShares <= 0 || sellShares > asset.shares) {
+                    this.showModalNotification("오류", `유효한 판매 수량을 입력하세요. (1 ~ ${asset.shares})`);
+                    return;
+                }
+                
+                if (isNaN(sellPricePerShare) || sellPricePerShare < 0) {
+                    const unit = asset.type === 'Fund' ? '좌당' : '주당';
+                    this.showModalNotification("오류", `유효한 ${unit} 판매 가격을 입력하세요.`);
+                    return;
+                }
+                
+                const totalSellAmount = sellShares * sellPricePerShare;
+                this.processSellAsset(this.gameState.currentSellingAssetId, totalSellAmount, sellShares, sellPricePerShare);
+            } else {
+                // 일반 자산 판매 처리
+                const sellPriceInput = document.getElementById('sell-price');
+                if (!sellPriceInput) return;
+                
+                const sellPrice = parseFloat(sellPriceInput.value);
+                if (isNaN(sellPrice) || sellPrice < 0) {
+                    this.showModalNotification("오류", "유효한 판매 가격을 입력하세요.");
+                    return;
+                }
+                
                 this.processSellAsset(this.gameState.currentSellingAssetId, sellPrice);
             }
+            
             this.hideSellAssetModal();
         });
         
@@ -362,10 +413,19 @@ Object.assign(CashflowGame.prototype, {
         if (!player) return;
 
         try {
-            const charityAmount = Math.floor(player.cash * 0.1);
+            // 총수입 계산 (급여 + 패시브 인컴)
+            const salary = player.salary || 0;
+            const passiveIncome = player.passiveIncome || 0;
+            const totalIncome = salary + passiveIncome;
+            const charityAmount = Math.floor(totalIncome * 0.1);
             
             if (charityAmount < 100) {
-                this.showModalNotification("알림", "기부하려면 최소 $1,000의 현금이 필요합니다. (기부 금액은 현금의 10%)");
+                this.showModalNotification("알림", "기부하려면 최소 $1,000의 총수입이 필요합니다. (기부 금액은 총수입의 10%)");
+                return;
+            }
+            
+            if (player.cash < charityAmount) {
+                this.showModalNotification("알림", `기부할 현금이 부족합니다.\n\n기부 금액: ${GameUtils.formatCurrency(charityAmount)} (총수입의 10%)\n보유 현금: ${GameUtils.formatCurrency(player.cash)}`);
                 return;
             }
 
@@ -386,7 +446,7 @@ Object.assign(CashflowGame.prototype, {
             setTimeout(() => {
                 this.showModalNotification(
                     "기부 완료!",
-                    `${GameUtils.formatCurrency(charityAmount)}을 기부했습니다.\n\n기부를 하셨으므로 3턴 동안 주사위를 하나 더 굴릴 수 있는 행운이 따를 것입니다!\n\n현재 현금: ${GameUtils.formatCurrency(player.cash)}`
+                    `총수입의 10%인 ${GameUtils.formatCurrency(charityAmount)}을 기부했습니다.\n\n총수입: ${GameUtils.formatCurrency(totalIncome)} (급여 ${GameUtils.formatCurrency(salary)} + 자산소득 ${GameUtils.formatCurrency(passiveIncome)})\n\n기부를 하셨으므로 3턴 동안 주사위를 하나 더 굴릴 수 있는 행운이 따를 것입니다!\n\n현재 현금: ${GameUtils.formatCurrency(player.cash)}`
                 );
             }, 200);
 
@@ -932,8 +992,9 @@ Object.assign(CashflowGame.prototype, {
 
         player.cash -= card.cost;
 
-        // 자산 추가
+        // 자산 추가 - 고유 ID 생성
         const asset = {
+            id: `asset_${card.title.replace(/[^a-zA-Z0-9가-힣]/g, '_')}_${card.assetDetails?.assetType || 'Investment'}_${Date.now()}`,
             name: card.title,
             type: card.assetDetails?.assetType || 'Investment',
             monthlyIncome: card.cashFlowChange || 0,
@@ -1132,6 +1193,7 @@ Object.assign(CashflowGame.prototype, {
     showSellAssetModal(assetId, assetType) {
         const player = this.gameState.player;
         let asset = null;
+        let isFund = false;
         
         // 자산 유형에 따라 자산 정보 가져오기
         if (assetType === 'Stock') {
@@ -1146,11 +1208,31 @@ Object.assign(CashflowGame.prototype, {
                     totalValue: stockData.shares * stockData.averagePrice,
                     monthlyIncome: stockData.monthlyDividend || 0,
                     averagePrice: stockData.averagePrice,
-                    totalInvested: stockData.totalInvested
+                    totalInvested: stockData.totalInvested,
+                    symbol: stockSymbol
                 };
             }
+        } else if (assetType === 'Fund') {
+            const fundSymbol = assetId.replace('fund_', '');
+            const fundData = player.funds[fundSymbol];
+            if (fundData) {
+                asset = {
+                    id: assetId,
+                    name: `${fundSymbol} 펀드`,
+                    type: 'Fund',
+                    shares: fundData.shares,
+                    totalValue: fundData.shares * fundData.averagePrice,
+                    monthlyIncome: fundData.monthlyDividend || 0,
+                    averagePrice: fundData.averagePrice,
+                    totalInvested: fundData.totalInvested,
+                    symbol: fundSymbol
+                };
+                isFund = true;
+            }
         } else {
-            asset = player.assets.find(a => a.id === assetId);
+            // 일반 자산은 getAllPlayerAssets에서 찾기 (동적 ID 문제 해결)
+            const allAssets = this.getAllPlayerAssets(player);
+            asset = allAssets.find(a => a.id === assetId);
         }
         
         if (!asset) {
@@ -1160,12 +1242,19 @@ Object.assign(CashflowGame.prototype, {
         
         this.gameState.currentSellingAssetId = assetId;
         this.gameState.currentSellingAssetType = assetType;
+        this.gameState.currentSellingAsset = asset;
         
         const modal = document.getElementById('sell-asset-modal');
         const assetDetailsEl = document.getElementById('sell-asset-modal-details');
+        const stockFieldsEl = document.getElementById('stock-sell-fields');
+        const generalFieldsEl = document.getElementById('general-sell-fields');
+        const sellSharesEl = document.getElementById('sell-shares');
+        const sellPricePerShareEl = document.getElementById('sell-price-per-share');
+        const maxSharesInfoEl = document.getElementById('max-shares-info');
+        const totalSellAmountEl = document.getElementById('total-sell-amount-value');
         const sellPriceEl = document.getElementById('sell-price');
         
-        if (!modal || !assetDetailsEl || !sellPriceEl) {
+        if (!modal || !assetDetailsEl) {
             console.error('자산 판매 모달 요소를 찾을 수 없습니다.');
             return;
         }
@@ -1173,23 +1262,75 @@ Object.assign(CashflowGame.prototype, {
         // 자산 정보 표시
         let detailsHTML = `<p><strong>자산명:</strong> ${asset.name}</p>`;
         
-        if (asset.type === 'Stock') {
+        if (asset.type === 'Stock' || asset.type === 'Fund') {
+            const unit = isFund ? '좌' : '주';
+            const unitPrice = isFund ? '좌당' : '주당';
+            const incomeType = isFund ? '월 수익' : '월 배당금';
+            
             detailsHTML += `
-                <p><strong>보유 수량:</strong> ${asset.shares}주</p>
+                <p><strong>보유 수량:</strong> ${asset.shares}${unit}</p>
                 <p><strong>평균 매입가:</strong> ${GameUtils.formatCurrency(asset.averagePrice)}</p>
                 <p><strong>총 투자금액:</strong> ${GameUtils.formatCurrency(asset.totalInvested)}</p>
                 <p><strong>현재 가치:</strong> ${GameUtils.formatCurrency(asset.totalValue)}</p>
-                <p><strong>월 배당금:</strong> ${GameUtils.formatCurrency(asset.monthlyIncome)}</p>
+                <p><strong>${incomeType}:</strong> ${GameUtils.formatCurrency(asset.monthlyIncome)}</p>
             `;
+            
+            // 주식/펀드 판매 필드 표시
+            if (stockFieldsEl && generalFieldsEl) {
+                stockFieldsEl.classList.remove('hidden');
+                generalFieldsEl.classList.add('hidden');
+                
+                // 최대 수량 정보 표시
+                if (maxSharesInfoEl) {
+                    maxSharesInfoEl.textContent = `최대 판매 가능: ${asset.shares}${unit}`;
+                }
+                
+                // 초기값 설정
+                if (sellSharesEl) {
+                    sellSharesEl.value = asset.shares;
+                    sellSharesEl.max = asset.shares;
+                }
+                if (sellPricePerShareEl) {
+                    sellPricePerShareEl.value = asset.averagePrice;
+                }
+                
+                // 총 판매 금액 계산 함수
+                const updateTotalAmount = () => {
+                    const shares = parseInt(sellSharesEl.value) || 0;
+                    const pricePerShare = parseFloat(sellPricePerShareEl.value) || 0;
+                    const totalAmount = shares * pricePerShare;
+                    
+                    if (totalSellAmountEl) {
+                        totalSellAmountEl.textContent = GameUtils.formatCurrency(totalAmount);
+                    }
+                };
+                
+                // 실시간 계산 이벤트 리스너 추가
+                if (sellSharesEl && sellPricePerShareEl) {
+                    sellSharesEl.addEventListener('input', updateTotalAmount);
+                    sellPricePerShareEl.addEventListener('input', updateTotalAmount);
+                }
+                
+                // 초기 총액 계산
+                updateTotalAmount();
+            }
         } else {
+            // 일반 자산 (Collectible, Loan, Investment 등) - 수량 없이 총액만
             detailsHTML += `
+                <p><strong>자산 타입:</strong> ${asset.type || 'Investment'}</p>
                 <p><strong>현재 가치:</strong> ${GameUtils.formatCurrency(asset.totalValue || asset.currentValue || 0)}</p>
                 <p><strong>월 현금흐름:</strong> ${GameUtils.formatCurrency(asset.monthlyIncome || 0)}</p>
             `;
+            
+            // 일반 자산 판매 필드 표시 (총 판매가액만)
+            if (stockFieldsEl && generalFieldsEl && sellPriceEl) {
+                stockFieldsEl.classList.add('hidden');
+                generalFieldsEl.classList.remove('hidden');
+                sellPriceEl.value = asset.totalValue || asset.currentValue || 0;
+            }
         }
         
         assetDetailsEl.innerHTML = detailsHTML;
-        sellPriceEl.value = asset.totalValue || 0;
         
         // 모달 표시
         modal.classList.remove('hidden');
@@ -1211,10 +1352,19 @@ Object.assign(CashflowGame.prototype, {
         }
         this.gameState.currentSellingAssetId = null;
         this.gameState.currentSellingAssetType = null;
+        this.gameState.currentSellingAsset = null;
+        
+        // 이벤트 리스너 정리 (메모리 누수 방지)
+        const sellSharesEl = document.getElementById('sell-shares');
+        const sellPricePerShareEl = document.getElementById('sell-price-per-share');
+        if (sellSharesEl && sellPricePerShareEl) {
+            sellSharesEl.removeEventListener('input', this.updateTotalAmount);
+            sellPricePerShareEl.removeEventListener('input', this.updateTotalAmount);
+        }
     },
 
     // 자산 판매 처리
-    processSellAsset(assetId, sellPrice) {
+    processSellAsset(assetId, sellPrice, sellShares = null, sellPricePerShare = null) {
         const player = this.gameState.player;
         const assetType = this.gameState.currentSellingAssetType;
         
@@ -1228,33 +1378,124 @@ Object.assign(CashflowGame.prototype, {
                 return;
             }
             
-            // 현금 증가
-            player.cash += sellPrice;
-            
-            // 수동 소득에서 배당금 제거
-            if (stockData.monthlyDividend) {
-                player.passiveIncome -= stockData.monthlyDividend;
+            // 부분 판매인지 전체 판매인지 확인
+            if (sellShares && sellShares < stockData.shares) {
+                // 부분 판매 처리
+                const remainingShares = stockData.shares - sellShares;
+                const soldDividend = (stockData.monthlyDividend / stockData.shares) * sellShares;
+                const remainingDividend = stockData.monthlyDividend - soldDividend;
+                const soldInvestment = (stockData.totalInvested / stockData.shares) * sellShares;
+                const remainingInvestment = stockData.totalInvested - soldInvestment;
+                
+                // 현금 증가
+                player.cash += sellPrice;
+                
+                // 주식 데이터 업데이트 (남은 주식으로)
+                stockData.shares = remainingShares;
+                stockData.monthlyDividend = remainingDividend;
+                stockData.totalInvested = remainingInvestment;
+                // 평균 매입가는 동일하게 유지
+                
+                this.addGameLog(`${stockSymbol} 주식 ${sellShares}주를 주당 ${GameUtils.formatCurrency(sellPricePerShare)}에 판매했습니다. (총 ${GameUtils.formatCurrency(sellPrice)})`);
+                this.addGameLog(`남은 보유량: ${remainingShares}주, 남은 월 배당금: ${GameUtils.formatCurrency(remainingDividend)}`);
+            } else {
+                // 전체 판매 처리
+                player.cash += sellPrice;
+                
+                this.addGameLog(`${stockSymbol} 주식 ${stockData.shares}주를 ${GameUtils.formatCurrency(sellPrice)}에 전량 판매했습니다.`);
+                
+                // 주식 삭제
+                delete player.stocks[stockSymbol];
             }
             
-            this.addGameLog(`${stockSymbol} 주식 ${stockData.shares}주를 ${GameUtils.formatCurrency(sellPrice)}에 판매했습니다.`);
+        } else if (assetType === 'Fund') {
+            // 펀드 판매 처리
+            const fundSymbol = assetId.replace('fund_', '');
+            const fundData = player.funds[fundSymbol];
             
-            // 주식 삭제
-            delete player.stocks[stockSymbol];
+            if (!fundData) {
+                this.showModalNotification("오류", "펀드를 찾을 수 없습니다.");
+                return;
+            }
+            
+            // 부분 판매인지 전체 판매인지 확인
+            if (sellShares && sellShares < fundData.shares) {
+                // 부분 판매 처리
+                const remainingShares = fundData.shares - sellShares;
+                const soldDividend = (fundData.monthlyDividend / fundData.shares) * sellShares;
+                const remainingDividend = fundData.monthlyDividend - soldDividend;
+                const soldInvestment = (fundData.totalInvested / fundData.shares) * sellShares;
+                const remainingInvestment = fundData.totalInvested - soldInvestment;
+                
+                // 현금 증가
+                player.cash += sellPrice;
+                
+                // 펀드 데이터 업데이트 (남은 좌수로)
+                fundData.shares = remainingShares;
+                fundData.monthlyDividend = remainingDividend;
+                fundData.totalInvested = remainingInvestment;
+                // 평균 매입가는 동일하게 유지
+                
+                this.addGameLog(`${fundSymbol} 펀드 ${sellShares}좌를 좌당 ${GameUtils.formatCurrency(sellPricePerShare)}에 판매했습니다. (총 ${GameUtils.formatCurrency(sellPrice)})`);
+                this.addGameLog(`남은 보유량: ${remainingShares}좌, 남은 월 수익: ${GameUtils.formatCurrency(remainingDividend)}`);
+            } else {
+                // 전체 판매 처리
+                player.cash += sellPrice;
+                
+                this.addGameLog(`${fundSymbol} 펀드 ${fundData.shares}좌를 ${GameUtils.formatCurrency(sellPrice)}에 전량 판매했습니다.`);
+                
+                // 펀드 삭제
+                delete player.funds[fundSymbol];
+            }
             
         } else {
-            // 일반 자산 판매 처리
-            const assetIndex = player.assets.findIndex(a => a.id === assetId);
-            const asset = player.assets[assetIndex];
+            // 일반 자산 판매 처리 - getAllPlayerAssets에서 자산 정보 확인
+            const allAssets = this.getAllPlayerAssets(player);
+            const assetInfo = allAssets.find(a => a.id === assetId);
             
-            if (!asset) {
+            if (!assetInfo) {
                 this.showModalNotification("오류", "자산을 찾을 수 없습니다.");
                 return;
             }
 
-            player.cash += sellPrice;
-            player.passiveIncome -= (asset.monthlyIncome || 0);
+            // originalIndex가 있으면 직접 사용, 없으면 이름으로 찾기
+            let assetIndex = -1;
+            let originalAsset = null;
             
-            this.addGameLog(`${asset.name}을(를) ${GameUtils.formatCurrency(sellPrice)}에 판매했습니다.`);
+            if (typeof assetInfo.originalIndex === 'number' && assetInfo.originalIndex < player.assets.length) {
+                // originalIndex 사용
+                assetIndex = assetInfo.originalIndex;
+                originalAsset = player.assets[assetIndex];
+                
+                // 추가 검증 (인덱스가 올바른 자산을 가리키는지 확인)
+                if (originalAsset.name !== assetInfo.name) {
+                    // 인덱스가 잘못된 경우 이름으로 찾기
+                    assetIndex = -1;
+                    originalAsset = null;
+                }
+            }
+            
+            if (assetIndex === -1) {
+                // 이름과 타입으로 원본 자산 찾기 (백업 방법)
+                for (let i = 0; i < player.assets.length; i++) {
+                    const asset = player.assets[i];
+                    if (asset.name === assetInfo.name && 
+                        (asset.type === assetInfo.type || (!asset.type && assetInfo.type === 'Investment'))) {
+                        assetIndex = i;
+                        originalAsset = asset;
+                        break;
+                    }
+                }
+            }
+            
+            if (assetIndex === -1 || !originalAsset) {
+                this.showModalNotification("오류", "원본 자산을 찾을 수 없습니다.");
+                return;
+            }
+
+            player.cash += sellPrice;
+            
+            this.addGameLog(`${assetInfo.name}을(를) ${GameUtils.formatCurrency(sellPrice)}에 판매했습니다.`);
             
             // 자산 목록에서 제거
             player.assets.splice(assetIndex, 1);
