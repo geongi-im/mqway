@@ -189,7 +189,7 @@ const CARD_DATA = {
         },
         {
             "cardType": "SmallDeal",
-            "title": "주택 매물(Great Deal) - 3BR/2BA",
+            "title": "주택 매물 - 3BR/2BA",
             "originalTitle": "YOU FIND A GREAT DEAL!",
             "description": "회사가 이전된 매니저의 3/2 주택을 구입했습니다. 현재 세입자가 없습니다. 6개월 동안 시장에 나와 있었고 가격이 방금 인하되었습니다.",
             "originalDescription": "Company bought transferred manager's 3/2 house. No current tenant. It has been on the market 6 months and it has just reduced.",
@@ -212,7 +212,7 @@ const CARD_DATA = {
         },
         {
             "cardType": "SmallDeal",
-            "title": "주택 매물(Great Deal) - 3BR/2BA",
+            "title": "주택 매물 - 3BR/2BA",
             "originalTitle": "YOU FIND A GREAT DEAL!",
             "description": "정부 기관에 의해 회수된 오래된 3/2 주택. 정부 융자와 세입자와 함께 준비되어 있습니다.",
             "originalDescription": "Older 3/2 house, repossessed by government agency. Ready to go with government financing and a tenant.",

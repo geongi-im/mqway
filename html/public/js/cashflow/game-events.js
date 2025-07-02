@@ -115,8 +115,35 @@ Object.assign(CashflowGame.prototype, {
             const player = this.gameState.player;
             if (!player) return;
             
-            const penaltyAmount = player.salary * 2;
-            let message = `실직 상태가 되면 두 달치 급여(${GameUtils.formatCurrency(penaltyAmount)})를 지불해야 하며, 한 턴을 건너뛰게 됩니다.\n\n`;
+            // 총 지출 계산 (실제 handleDownsized와 동일한 로직으로 미리 계산)
+            const expenses = {
+                taxes: player.expenses.taxes || 0,
+                homeMortgage: player.expenses.homePayment || 0,
+                schoolLoan: player.expenses.schoolLoan || 0,
+                carLoan: player.expenses.carLoan || 0,
+                creditCard: player.expenses.creditCard || 0,
+                retail: player.expenses.retail || 0,
+                other: player.expenses.other || 0,
+                children: player.expenses.children || 0
+            };
+            
+            let additionalDebtPayments = 0;
+            if (player.liabilities && player.liabilities.length > 0) {
+                additionalDebtPayments = player.liabilities
+                    .filter(debt => !debt.isInitial)
+                    .reduce((sum, debt) => sum + (debt.monthlyPayment || 0), 0);
+            }
+            
+            let emergencyLoanPayments = 0;
+            if (player.emergencyLoans && player.emergencyLoans.length > 0) {
+                emergencyLoanPayments = player.emergencyLoans.reduce((sum, loan) => sum + (loan.monthlyPayment || 0), 0);
+            }
+            
+            const totalFixedExpenses = Object.values(expenses).reduce((sum, exp) => sum + exp, 0);
+            const totalAdditionalPayments = additionalDebtPayments + emergencyLoanPayments;
+            const penaltyAmount = totalFixedExpenses + totalAdditionalPayments;
+            
+            let message = `실직 상태가 되면 월 지출액(${GameUtils.formatCurrency(penaltyAmount)})을 지불해야 하며, 한 턴을 건너뛰게 됩니다.\n\n`;
             
             if (player.cash < penaltyAmount) {
                 message += "현금이 부족할 경우 대출을 받거나 자산을 매각해야 합니다.\n\n";
@@ -375,7 +402,36 @@ Object.assign(CashflowGame.prototype, {
         if (!player) return;
 
         try {
-            const penaltyAmount = player.salary * 2; // 두 달치 급여
+            // 총 지출 계산 (월급날 처리와 동일한 로직)
+            const expenses = {
+                taxes: player.expenses.taxes || 0,
+                homeMortgage: player.expenses.homePayment || 0,
+                schoolLoan: player.expenses.schoolLoan || 0,
+                carLoan: player.expenses.carLoan || 0,
+                creditCard: player.expenses.creditCard || 0,
+                retail: player.expenses.retail || 0,
+                other: player.expenses.other || 0,
+                children: player.expenses.children || 0
+            };
+
+            // 추가 부채 상환액 계산 (초기 부채 제외, 게임 중 새로 생긴 부채만)
+            let additionalDebtPayments = 0;
+            if (player.liabilities && player.liabilities.length > 0) {
+                additionalDebtPayments = player.liabilities
+                    .filter(debt => !debt.isInitial) // 초기 부채가 아닌 것만
+                    .reduce((sum, debt) => sum + (debt.monthlyPayment || 0), 0);
+            }
+
+            // 긴급 대출 이자 계산
+            let emergencyLoanPayments = 0;
+            if (player.emergencyLoans && player.emergencyLoans.length > 0) {
+                emergencyLoanPayments = player.emergencyLoans.reduce((sum, loan) => sum + (loan.monthlyPayment || 0), 0);
+            }
+
+            // 총 지출 계산 (기본 지출 + 추가 부채 + 긴급 대출)
+            const totalFixedExpenses = Object.values(expenses).reduce((sum, exp) => sum + exp, 0);
+            const totalAdditionalPayments = additionalDebtPayments + emergencyLoanPayments;
+            const penaltyAmount = totalFixedExpenses + totalAdditionalPayments; // 총 지출 1회치
             
             if (player.cash < penaltyAmount) {
                 // 현금이 부족한 경우 자산/부채 탭으로 이동하여 자산 매각 또는 대출 유도
@@ -396,7 +452,7 @@ Object.assign(CashflowGame.prototype, {
             player.cash -= penaltyAmount;
 
             // 게임 로그 추가
-            this.addGameLog(`실직: 두 달치 급여 ${GameUtils.formatCurrency(penaltyAmount)}을 지불했습니다.`, 'event-negative');
+            this.addGameLog(`실직: 월 지출액 ${GameUtils.formatCurrency(penaltyAmount)}을 지불했습니다.`, 'event-negative');
             this.addGameLog("실직으로 인해 한 턴을 건너뛰게 됩니다.", 'info');
 
             // 재무 상태 재계산
@@ -410,7 +466,7 @@ Object.assign(CashflowGame.prototype, {
             setTimeout(() => {
                 this.showModalNotification(
                     "실직 처리 완료",
-                    `두 달치 급여 ${GameUtils.formatCurrency(penaltyAmount)}을 지불했습니다.\n\n실직으로 인해 한 턴을 건너뛰게 됩니다.\n\n현재 현금: ${GameUtils.formatCurrency(player.cash)}`
+                    `월 지출액 ${GameUtils.formatCurrency(penaltyAmount)}을 지불했습니다.\n\n실직으로 인해 한 턴을 건너뛰게 됩니다.\n\n현재 현금: ${GameUtils.formatCurrency(player.cash)}`
                 );
             }, 200);
 
@@ -848,6 +904,11 @@ Object.assign(CashflowGame.prototype, {
         const savedState = StorageManager.loadGameState();
         console.log('저장 후 확인 - saved stocks:', savedState && savedState.player ? savedState.player.stocks : 'null');
         console.log('=== 주식 구매 처리 완료 ===');
+        
+        // 구매 완료 후 자산/부채 탭으로 이동
+        setTimeout(() => {
+            this.showTab('assets');
+        }, 500);
     },
 
     // 투자 구매 처리
@@ -885,6 +946,15 @@ Object.assign(CashflowGame.prototype, {
         
         this.recalculatePlayerFinancials();
         this.addGameLog(`${card.title}에 ${GameUtils.formatCurrency(card.cost)}를 투자했습니다.`);
+        
+        // UI 업데이트 및 저장
+        this.updateUI();
+        StorageManager.saveGameState(this.gameState);
+        
+        // 구매 완료 후 자산/부채 탭으로 이동
+        setTimeout(() => {
+            this.showTab('assets');
+        }, 500);
     },
 
     // 부동산 구매 처리
@@ -1050,6 +1120,11 @@ Object.assign(CashflowGame.prototype, {
             `월 현금흐름: ${GameUtils.formatCurrency(monthlyIncome)}`;
             
         this.showModalNotification("구매 완료", completionMessage);
+        
+        // 구매 완료 후 자산/부채 탭으로 이동
+        setTimeout(() => {
+            this.showTab('assets');
+        }, 1000); // 알림 모달이 표시된 후 이동
     },
 
 
