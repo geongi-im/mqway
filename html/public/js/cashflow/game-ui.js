@@ -2450,16 +2450,49 @@ Object.assign(CashflowGame.prototype, {
         titleElement.textContent = title;
         descriptionElement.textContent = `${cardOptions.length}개의 옵션 중 하나를 선택하세요.`;
 
+        // 카드 옵션을 비용 오름차순으로 정렬
+        const sortedCardOptions = [...cardOptions].sort((a, b) => {
+            // 무조건 cost 기준으로 정렬
+            const costA = a.cost || 0;
+            const costB = b.cost || 0;
+            return costA - costB;
+        });
+
+        // 원래 인덱스를 추적하기 위한 매핑 생성
+        const originalIndexMap = new Map();
+        sortedCardOptions.forEach((sortedCard, sortedIndex) => {
+            const originalIndex = cardOptions.findIndex(card => card === sortedCard);
+            originalIndexMap.set(sortedIndex, originalIndex);
+        });
+
         // 옵션 선택 UI 생성
         let optionsHTML = `
             <div class="mb-4">
                 <label for="card-option-select" class="block text-sm font-medium text-gray-700 mb-2">옵션 선택</label>
                 <select id="card-option-select" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="">옵션을 선택하세요</option>
-                    ${cardOptions.map((card, index) => {
-                        const price = card.cost || card.downPayment || 0;
-                        const priceText = price > 0 ? `- ${GameUtils.formatCurrency(price)}` : '';
-                        return `<option value="${index}">옵션 ${index + 1} ${priceText}</option>`;
+                    ${sortedCardOptions.map((card, sortedIndex) => {
+                        const cost = card.cost || 0;
+                        const downPayment = card.downPayment || 0;
+                        
+                        let priceText = '';
+                        if (cost > 0 && downPayment > 0) {
+                            // 비용과 계약금이 모두 있는 경우
+                            priceText = `비용: ${GameUtils.formatCurrency(cost)}, 계약금: ${GameUtils.formatCurrency(downPayment)}`;
+                        } else if (cost > 0) {
+                            // 비용만 있는 경우
+                            priceText = `비용: ${GameUtils.formatCurrency(cost)}`;
+                        } else if (downPayment > 0) {
+                            // 계약금만 있는 경우
+                            priceText = `계약금: ${GameUtils.formatCurrency(downPayment)}`;
+                        } else {
+                            // 무료인 경우
+                            priceText = '무료';
+                        }
+                        
+                        // option value에는 원래 인덱스를 저장
+                        const originalIndex = originalIndexMap.get(sortedIndex);
+                        return `<option value="${originalIndex}">${priceText}</option>`;
                     }).join('')}
                 </select>
             </div>
