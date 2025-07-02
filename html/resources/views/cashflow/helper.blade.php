@@ -478,23 +478,19 @@ body.scrolled #start-game-fixed-button {
             <!-- 하단 네비게이션 -->
             <nav id="bottom-nav" class="fixed bottom-0 left-0 right-0 w-full max-w-md mx-auto bg-white border-t border-gray-200 hidden">
                 <div class="flex justify-around py-1">
-                    <button class="nav-btn p-2 flex flex-col items-center w-1/5" data-tab="dashboard">
+                    <button class="nav-btn p-2 flex flex-col items-center w-1/4" data-tab="dashboard">
                         <svg class="w-6 h-6 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
                         <span class="text-xs">대시보드</span>
                     </button>
-                    <button class="nav-btn p-2 flex flex-col items-center w-1/5" data-tab="assets">
+                    <button class="nav-btn p-2 flex flex-col items-center w-1/4" data-tab="assets">
                          <svg class="w-6 h-6 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"></path></svg>
                         <span class="text-xs">자산/부채</span>
                     </button>
-                    <button class="nav-btn p-2 flex flex-col items-center w-1/5" data-tab="report">
+                    <button class="nav-btn p-2 flex flex-col items-center w-1/4" data-tab="report">
                         <svg class="w-6 h-6 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                         <span class="text-xs">재무제표</span>
                     </button>
-                    <button class="nav-btn p-2 flex flex-col items-center w-1/5" data-tab="cards">
-                        <svg class="w-6 h-6 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
-                        <span class="text-xs">카드목록</span>
-                    </button>
-                    <button class="nav-btn p-2 flex flex-col items-center w-1/5" data-tab="log">
+                    <button class="nav-btn p-2 flex flex-col items-center w-1/4" data-tab="log">
                         <svg class="w-6 h-6 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7M3 7l9-4 9 4M3 7h18M5 5h14a2 2 0 012 2v3a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"></path></svg>
                         <span class="text-xs">게임로그</span>
                     </button>
