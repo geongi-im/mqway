@@ -1065,6 +1065,17 @@ Object.assign(CashflowGame.prototype, {
                         <p class="text-xs text-gray-600">보유 수량: ${shares}좌 | 평균 매입가: ${GameUtils.formatCurrency(averagePrice)}</p>
                         <p class="text-xs text-gray-600">총 투자금액: ${GameUtils.formatCurrency(totalInvested)} | 월 수익: ${GameUtils.formatCurrency(monthlyIncome)}</p>
                     `;
+                } else if (asset.type === 'RealEstate' || asset.assetType === 'RealEstate') {
+                    // 부동산 자산 특별 표시
+                    const purchasePrice = asset.purchasePrice || asset.totalValue || 0;
+                    const downPayment = asset.downPayment || 0;
+                    const monthlyIncome = asset.monthlyIncome || 0;
+                    
+                    detailsHTML = `
+                        <p class="text-xs text-gray-600">구매가격: ${GameUtils.formatCurrency(purchasePrice)}</p>
+                        <p class="text-xs text-gray-600">월 임대수입: ${GameUtils.formatCurrency(monthlyIncome)}</p>
+                        <p class="text-xs text-gray-500 italic">※ 판매 시 (판매가 - 구매가) 차액을 현금으로 수령</p>
+                    `;
                 } else {
                     detailsHTML = `
                         <p class="text-xs text-gray-600">자산 가치: ${GameUtils.formatCurrency(asset.totalValue || asset.currentValue || 0)} | 월 현금흐름: ${GameUtils.formatCurrency(asset.monthlyIncome || 0)}</p>

@@ -235,6 +235,8 @@ Object.assign(CashflowGame.prototype, {
                     return;
                 }
                 
+                // 부동산은 모기지론을 이용하므로 별도의 손실 확인 없이 차액만 처리
+                
                 this.processSellAsset(this.gameState.currentSellingAssetId, sellPrice);
             }
             
@@ -1034,7 +1036,8 @@ Object.assign(CashflowGame.prototype, {
         const totalCost = card.cost;
         const downPayment = card.downPayment || card.down_payment || 0;
         const monthlyIncome = card.cashFlowChange || card.cash_flow || 0;
-        const mortgageAmount = card.debtIncurred || 0;
+        // debtIncurred가 null이면 모기지 없음 (현금 구매만 가능)
+        const mortgageAmount = card.debtIncurred === null ? 0 : (card.debtIncurred || (totalCost - downPayment));
         
         console.log('=== 부동산 카드 처리 시작 ===');
         console.log('원본 카드 데이터:', {
@@ -1062,7 +1065,25 @@ Object.assign(CashflowGame.prototype, {
             liabilities: player.liabilities?.length || 0
         });
         
-        // 1. 계약금이 0인 경우 처리
+        // 1. debtIncurred가 null인 경우 - 모기지 없음, 현금 구매만 가능
+        if (card.debtIncurred === null) {
+            console.log('→ debtIncurred가 null - 모기지 없음, 현금 구매만 가능');
+            if (player.cash < totalCost) {
+                console.log('→ 총 비용 지불 불가 - 카드 폐기');
+                this.showModalNotification(
+                    "구매 불가", 
+                    `모기지를 이용할 수 없는 카드입니다. 총 비용을 현금으로 지불해야 합니다.\n\n필요 금액: ${GameUtils.formatCurrency(totalCost)}\n보유 현금: ${GameUtils.formatCurrency(player.cash)}\n\n카드가 폐기됩니다.`
+                );
+                this.addGameLog(`${propertyName} 구매 실패 - 모기지 없음, 총 비용 부족으로 카드 폐기`);
+                return;
+            }
+            // 총 비용을 현금으로 지불하고 구매 완료 (모기지 없음)
+            console.log('→ 총 비용 현금 지불하고 구매 진행 (모기지 없음)');
+            this.completePurchase(player, propertyName, totalCost, totalCost, monthlyIncome, 0);
+            return;
+        }
+        
+        // 2. 계약금이 0인 경우 처리
         if (downPayment === 0) {
             // No Money Down Deal 여부 확인 (모기지가 총 비용과 같거나, 제목에 명시된 경우)
             const isNoMoneyDownDeal = (mortgageAmount >= totalCost) || 
@@ -1092,7 +1113,7 @@ Object.assign(CashflowGame.prototype, {
             }
         }
         
-        // 2. 계약금이 있는 경우 - 계약금 보유액 확인
+        // 3. 계약금이 있는 경우 - 계약금 보유액 확인
         console.log('=== 현금 확인 단계 ===');
         console.log('플레이어 현금 (typeof):', typeof player.cash, player.cash);
         console.log('필요 계약금 (typeof):', typeof downPayment, downPayment);
@@ -1116,7 +1137,7 @@ Object.assign(CashflowGame.prototype, {
             return;
         }
         
-        // 3. 계약금 지불하고 구매 완료
+        // 4. 계약금 지불하고 구매 완료
         console.log('→ 계약금 지불하고 구매 진행');
         this.completePurchase(player, propertyName, totalCost, downPayment, monthlyIncome, mortgageAmount);
     },
@@ -1130,14 +1151,16 @@ Object.assign(CashflowGame.prototype, {
         }
         
         // 2. 자산 등록 
+        const propertyId = `real_estate_${Date.now()}`;
         const asset = {
-            id: `real_estate_${Date.now()}`,
+            id: propertyId,
             name: propertyName,
             type: 'RealEstate',
             assetType: 'RealEstate',
             monthlyIncome: monthlyIncome,          // 추가적인 호환성을 위해 유지
             monthlyCashFlow: monthlyIncome,        // FinancialCalculator에서 사용하는 필드명
             totalValue: totalCost,
+            purchasePrice: totalCost,              // 원래 구매가격 저장 (판매 시 차액 계산용)
             downPayment: downPayment,
             purchaseDate: new Date().toISOString()
         };
@@ -1152,22 +1175,31 @@ Object.assign(CashflowGame.prototype, {
         
         // 4. 모기지 부채 등록 (모기지 금액이 있는 경우)
         if (mortgageAmount > 0) {
+            // 모기지 월 상환액 계산 (모기지 금액의 1.5% 기준)
+            const monthlyMortgagePayment = Math.round(mortgageAmount * 0.015);
+            
             const liability = {
                 id: `mortgage_${Date.now()}`,
                 name: `${propertyName} 모기지`,
                 type: 'Mortgage',
                 amount: mortgageAmount,
-                remainingAmount: mortgageAmount, // 부채 잔액 (자산/부채 페이지에서 표시됨)
+                remainingAmount: mortgageAmount, // 부채 잔액
                 totalAmount: mortgageAmount,     // 총 부채 금액
-                monthlyPayment: 0, // 캐시플로우 게임에서는 모기지 상환액이 별도로 없음 (이미 월수입에 반영됨)
-                interestRate: 0,   // 이자율 (캐시플로우 게임에서는 보통 0%)
+                monthlyPayment: monthlyMortgagePayment, // 월 상환액
+                interestRate: 1.5, // 연 18% (월 1.5%)
                 isInitial: false,
-                purchaseDate: new Date().toISOString()
+                purchaseDate: new Date().toISOString(),
+                propertyId: propertyId // 연결된 부동산 ID
             };
             
             if (!player.liabilities) player.liabilities = [];
             player.liabilities.push(liability);
+            
+            // 월 지출에 모기지 상환액 추가
+            player.expenses.other = (player.expenses.other || 0) + monthlyMortgagePayment;
+            
             console.log('모기지 부채 등록 완료:', liability);
+            console.log(`월 모기지 상환액 ${GameUtils.formatCurrency(monthlyMortgagePayment)} 지출에 추가`);
         }
         
         // 5. 재정 상태 재계산
@@ -1197,7 +1229,9 @@ Object.assign(CashflowGame.prototype, {
         }
         
         if (mortgageAmount > 0) {
+            const monthlyMortgagePayment = Math.round(mortgageAmount * 0.015);
             this.addGameLog(`모기지 ${GameUtils.formatCurrency(mortgageAmount)}가 부채로 등록되었습니다.`);
+            this.addGameLog(`월 모기지 상환액 ${GameUtils.formatCurrency(monthlyMortgagePayment)}가 지출에 추가되었습니다.`);
         }
         
         // 7. 저장 및 UI 업데이트
@@ -1215,17 +1249,28 @@ Object.assign(CashflowGame.prototype, {
             // 계약금을 지불한 경우
             completionMessage += `계약금: ${GameUtils.formatCurrency(downPayment)}\n`;
             if (mortgageAmount > 0) {
+                const monthlyMortgagePayment = Math.round(mortgageAmount * 0.015);
                 completionMessage += `모기지: ${GameUtils.formatCurrency(mortgageAmount)}\n`;
+                completionMessage += `월 모기지 상환액: ${GameUtils.formatCurrency(monthlyMortgagePayment)}\n`;
             }
         } else {
             // No Money Down Deal
             completionMessage += `계약금: ${GameUtils.formatCurrency(downPayment)} (No Money Down Deal)\n`;
             if (mortgageAmount > 0) {
+                const monthlyMortgagePayment = Math.round(mortgageAmount * 0.015);
                 completionMessage += `모기지: ${GameUtils.formatCurrency(mortgageAmount)}\n`;
+                completionMessage += `월 모기지 상환액: ${GameUtils.formatCurrency(monthlyMortgagePayment)}\n`;
             }
         }
         
-        completionMessage += `월 현금흐름: ${GameUtils.formatCurrency(monthlyIncome)}`;
+        completionMessage += `월 임대수입: ${GameUtils.formatCurrency(monthlyIncome)}`;
+        
+        // 순 현금흐름 계산 및 표시
+        if (mortgageAmount > 0) {
+            const monthlyMortgagePayment = Math.round(mortgageAmount * 0.015);
+            const netCashFlow = monthlyIncome - monthlyMortgagePayment;
+            completionMessage += `\n순 월 현금흐름: ${GameUtils.formatCurrency(netCashFlow)} (임대수입 - 모기지 상환액)`;
+        }
             
         this.showModalNotification("구매 완료", completionMessage);
         
@@ -1360,6 +1405,30 @@ Object.assign(CashflowGame.prototype, {
                 
                 // 초기 총액 계산
                 updateTotalAmount();
+            }
+        } else if (asset.type === 'RealEstate' || asset.assetType === 'RealEstate') {
+            // 부동산 자산 - 특별 정보 표시
+            const purchasePrice = asset.purchasePrice || asset.totalValue || 0;
+            const downPayment = asset.downPayment || 0;
+            const monthlyIncome = asset.monthlyIncome || 0;
+            
+            detailsHTML += `
+                <p><strong>자산 타입:</strong> 부동산 (RealEstate)</p>
+                <p><strong>구매가격:</strong> ${GameUtils.formatCurrency(purchasePrice)}</p>
+                <p><strong>월 임대수입:</strong> ${GameUtils.formatCurrency(monthlyIncome)}</p>
+                <div class="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p class="text-sm text-yellow-800"><strong>⚠️ 부동산 판매 안내</strong></p>
+                    <p class="text-xs text-yellow-700">판매가격을 입력하면 (판매가 - 구매가) 차액만 현금으로 수령됩니다.</p>
+                    <p class="text-xs text-yellow-700">연결된 모기지가 있다면 자동으로 청산됩니다.</p>
+                </div>
+            `;
+            
+            // 일반 자산 판매 필드 표시 (총 판매가액만)
+            if (stockFieldsEl && generalFieldsEl && sellPriceEl) {
+                stockFieldsEl.classList.add('hidden');
+                generalFieldsEl.classList.remove('hidden');
+                sellPriceEl.value = purchasePrice; // 구매가를 기본값으로 설정
+                sellPriceEl.placeholder = "판매 희망가격 입력";
             }
         } else {
             // 일반 자산 (Collectible, Loan, Investment 등) - 수량 없이 총액만
@@ -1540,9 +1609,86 @@ Object.assign(CashflowGame.prototype, {
                 return;
             }
 
-            player.cash += sellPrice;
-            
-            this.addGameLog(`${assetInfo.name}을(를) ${GameUtils.formatCurrency(sellPrice)}에 판매했습니다.`);
+            // 부동산 판매 특별 처리
+            if (originalAsset.type === 'RealEstate' || originalAsset.assetType === 'RealEstate') {
+                console.log('=== 부동산 판매 처리 시작 ===');
+                console.log('판매할 부동산:', originalAsset);
+                
+                const purchasePrice = originalAsset.purchasePrice || originalAsset.totalValue || 0;
+                const propertyId = originalAsset.id;
+                
+                // 연결된 모기지 찾기
+                let mortgageToRemove = null;
+                let mortgageIndex = -1;
+                
+                if (player.liabilities && player.liabilities.length > 0) {
+                    for (let i = 0; i < player.liabilities.length; i++) {
+                        const liability = player.liabilities[i];
+                        if (liability.type === 'Mortgage' && liability.propertyId === propertyId) {
+                            mortgageToRemove = liability;
+                            mortgageIndex = i;
+                            break;
+                        }
+                    }
+                }
+                
+                console.log('연결된 모기지:', mortgageToRemove);
+                
+                // 모기지가 있는 경우 청산 처리
+                let cashReceived = sellPrice; // 판매가 전체를 먼저 받음
+                
+                if (mortgageToRemove) {
+                    // 판매가에서 모기지 잔액 상환
+                    cashReceived = sellPrice - mortgageToRemove.amount;
+                    
+                    // 판매가 < 모기지 잔액인 경우 현금 부족 확인
+                    if (cashReceived < 0) {
+                        const requiredCash = Math.abs(cashReceived);
+                        if (player.cash < requiredCash) {
+                            // 현금이 부족하면 판매 거부
+                            this.showModalNotification(
+                                "판매 불가", 
+                                `모기지 상환을 위해 추가 현금이 필요합니다.\n\n판매가: ${GameUtils.formatCurrency(sellPrice)}\n모기지 잔액: ${GameUtils.formatCurrency(mortgageToRemove.amount)}\n필요 추가 현금: ${GameUtils.formatCurrency(requiredCash)}\n보유 현금: ${GameUtils.formatCurrency(player.cash)}\n\n판매를 취소합니다.`
+                            );
+                            console.log(`부동산 판매 취소 - 모기지 상환을 위한 현금 부족`);
+                            return;
+                        }
+                    }
+                    
+                    // 월 지출에서 모기지 상환액 제거
+                    player.expenses.other = Math.max(0, (player.expenses.other || 0) - mortgageToRemove.monthlyPayment);
+                    
+                    // 모기지 부채 제거
+                    player.liabilities.splice(mortgageIndex, 1);
+                    
+                    console.log(`모기지 청산: ${GameUtils.formatCurrency(mortgageToRemove.amount)}`);
+                    console.log(`월 상환액 ${GameUtils.formatCurrency(mortgageToRemove.monthlyPayment)} 지출에서 제거`);
+                    
+                    this.addGameLog(`${assetInfo.name} 판매 완료`);
+                    this.addGameLog(`판매가 ${GameUtils.formatCurrency(sellPrice)}에서 모기지 ${GameUtils.formatCurrency(mortgageToRemove.amount)} 상환`);
+                    this.addGameLog(`월 모기지 상환액 ${GameUtils.formatCurrency(mortgageToRemove.monthlyPayment)} 지출에서 제거`);
+                    
+                    // 모기지 상환 후 현금 수령 결과
+                    if (cashReceived > 0) {
+                        this.addGameLog(`모기지 상환 후 현금 ${GameUtils.formatCurrency(cashReceived)} 수령`);
+                    } else if (cashReceived < 0) {
+                        this.addGameLog(`모기지 상환을 위해 추가로 ${GameUtils.formatCurrency(Math.abs(cashReceived))} 현금 지불`);
+                    } else {
+                        this.addGameLog(`모기지 상환으로 판매가 모두 소진`);
+                    }
+                } else {
+                    // 모기지가 없는 경우 - 판매가 전체를 현금으로 수령
+                    this.addGameLog(`${assetInfo.name} 판매: ${GameUtils.formatCurrency(sellPrice)} 현금 수령`);
+                }
+                
+                // 현금 증가 (모기지 상환 후 남은 금액)
+                player.cash += cashReceived;
+                
+            } else {
+                // 일반 자산 판매
+                player.cash += sellPrice;
+                this.addGameLog(`${assetInfo.name}을(를) ${GameUtils.formatCurrency(sellPrice)}에 판매했습니다.`);
+            }
             
             // 자산 목록에서 제거
             player.assets.splice(assetIndex, 1);
