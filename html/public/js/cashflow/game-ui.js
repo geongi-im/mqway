@@ -158,52 +158,92 @@ Object.assign(CashflowGame.prototype, {
 
     // 게임 UI로 전환
     switchToGameUI() {
-        // 직업 선택 화면 완전히 숨기기
+        console.log('=== switchToGameUI 호출됨 ===');
+        
+        // 모든 게임 시작 관련 요소들을 강제로 숨기기
+        const elementsToHide = [
+            'profession-selection',
+            'start-game-fixed-button',
+            'game-intro',
+            'intro-screen'
+        ];
+        
+        elementsToHide.forEach(elementId => {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.style.display = 'none';
+                element.classList.add('hidden');
+                element.style.visibility = 'hidden';
+                console.log(`${elementId} 요소를 숨겼습니다`);
+            }
+        });
+        
+        // 직업 선택 화면 완전히 숨기기 (추가 확인)
         const professionSelection = document.getElementById('profession-selection');
+        console.log('profession-selection 요소:', professionSelection);
         if (professionSelection) {
-            professionSelection.style.display = 'none';
+            professionSelection.style.display = 'none !important';
             professionSelection.classList.add('hidden');
+            professionSelection.style.visibility = 'hidden';
+            professionSelection.setAttribute('hidden', 'true');
+            console.log('직업 선택 화면을 완전히 숨겼습니다');
+        } else {
+            console.warn('profession-selection 요소를 찾을 수 없습니다');
         }
         
-        // 게임 시작 버튼 컨테이너 숨기기
-        const startGameFixedButton = document.getElementById('start-game-fixed-button');
-        if (startGameFixedButton) {
-            startGameFixedButton.style.display = 'none';
-            startGameFixedButton.classList.add('hidden');
-        }
-        
-        // 모든 탭 콘텐츠 숨기기 (혹시 남아있을 수 있는 탭들)
+        // 모든 탭 콘텐츠 숨기기
         const allTabContents = document.querySelectorAll('.tab-content');
-        allTabContents.forEach(tab => {
-            tab.style.display = 'none';
-            tab.classList.add('hidden');
+        console.log('모든 탭 콘텐츠 개수:', allTabContents.length);
+        allTabContents.forEach((tab, index) => {
+            if (tab.id !== 'tab-content-dashboard') {
+                tab.style.display = 'none';
+                tab.classList.add('hidden');
+                console.log(`탭 ${index} 숨김:`, tab.id);
+            }
         });
         
         // 하단 네비게이션 보이기
         const bottomNav = document.getElementById('bottom-nav');
+        console.log('bottom-nav 요소:', bottomNav);
         if (bottomNav) {
             bottomNav.style.display = 'block';
             bottomNav.classList.remove('hidden');
+            bottomNav.style.visibility = 'visible';
+            console.log('하단 네비게이션을 표시했습니다');
+        } else {
+            console.warn('bottom-nav 요소를 찾을 수 없습니다');
         }
         
         // 대시보드 탭만 보이기
         const dashboardTab = document.getElementById('tab-content-dashboard');
+        console.log('tab-content-dashboard 요소:', dashboardTab);
         if (dashboardTab) {
             dashboardTab.style.display = 'block';
             dashboardTab.classList.remove('hidden');
+            dashboardTab.style.visibility = 'visible';
+            console.log('대시보드 탭을 표시했습니다');
+        } else {
+            console.warn('tab-content-dashboard 요소를 찾을 수 없습니다');
         }
         
         // 네비게이션 버튼 상태 초기화 - 대시보드 활성화
         const navButtons = document.querySelectorAll('.nav-btn');
+        console.log('네비게이션 버튼 개수:', navButtons.length);
         navButtons.forEach(btn => {
             btn.classList.remove('text-blue-600', 'bg-blue-50');
         });
         
         const dashboardButton = document.querySelector('[data-tab="dashboard"]');
+        console.log('대시보드 버튼:', dashboardButton);
         if (dashboardButton) {
             dashboardButton.classList.add('text-blue-600', 'bg-blue-50');
+            console.log('대시보드 버튼을 활성화했습니다');
         }
-
+        
+        // DOM이 완전히 업데이트되도록 강제로 리플로우 트리거
+        document.body.offsetHeight;
+        
+        console.log('=== switchToGameUI 완료 ===');
     },
 
     // UI 업데이트
@@ -231,10 +271,28 @@ Object.assign(CashflowGame.prototype, {
         updateElement('player-profession', player.profession);
         updateElement('player-dream', player.dream);
         updateElement('dream-cost-display', GameUtils.formatCurrency(player.dreamCost));
-        updateElement('current-cash', GameUtils.formatCurrency(player.cash));
+        // 현금 표시 (파산 상태 체크)
+        const cashElement = document.getElementById('current-cash');
+        if (cashElement) {
+            if (this.gameState.gameEnded && this.gameState.endReason === 'bankruptcy') {
+                cashElement.innerHTML = `${GameUtils.formatCurrency(player.cash)} <span class="text-red-600 font-bold">(파산)</span>`;
+            } else {
+                cashElement.textContent = GameUtils.formatCurrency(player.cash);
+            }
+        }
+        
         updateElement('total-income', GameUtils.formatCurrency(player.totalIncome));
         updateElement('total-expenses', GameUtils.formatCurrency(player.totalExpenses));
-        updateElement('monthly-cashflow', GameUtils.formatCurrency(player.monthlyCashFlow));
+        
+        // 현금흐름 표시 (파산 상태 체크)
+        const cashflowElement = document.getElementById('monthly-cashflow');
+        if (cashflowElement) {
+            if (this.gameState.gameEnded && this.gameState.endReason === 'bankruptcy') {
+                cashflowElement.innerHTML = `${GameUtils.formatCurrency(player.monthlyCashFlow)} <span class="text-red-600 font-bold">(게임 종료)</span>`;
+            } else {
+                cashflowElement.textContent = GameUtils.formatCurrency(player.monthlyCashFlow);
+            }
+        }
         updateElement('passive-income', GameUtils.formatCurrency(player.passiveIncome));
         updateElement('children-count', player.expenses.childrenCount);
         updateElement('children-expenses', GameUtils.formatCurrency(player.expenses.children || 0));
@@ -1021,8 +1079,21 @@ Object.assign(CashflowGame.prototype, {
 
     // 자산/부채 페이지 업데이트 (기존 스타일 적용)
     updateAssetsPage() {
+        console.log('=== updateAssetsPage 시작 ===');
+        
         const player = this.gameState.player;
-        if (!player) return;
+        if (!player) {
+            console.warn('플레이어 데이터가 없습니다.');
+            return;
+        }
+        
+        // DB에서 최신 데이터가 로드되었는지 확인하고 디버깅 정보 출력
+        console.log('현재 플레이어 자산/부채 상태:', {
+            assets: player.assets ? player.assets.length : 0,
+            liabilities: player.liabilities ? player.liabilities.length : 0,
+            liabilitiesData: player.liabilities,
+            sessionKey: DatabaseManager?.currentSessionKey
+        });
         
         const assetsContainer = document.getElementById('assets-list-container');
         const liabilitiesContainer = document.getElementById('liabilities-list-container');
@@ -1043,13 +1114,13 @@ Object.assign(CashflowGame.prototype, {
                 const item = document.createElement('li');
                 item.className = 'bg-white p-3 rounded-lg shadow border border-gray-200';
                 
-                // 자산 유형별 표시 형식
+                // 자산 유형별 표시 형식 - DB 데이터 우선 사용
                 let detailsHTML = '';
                 if (asset.type === 'Stock') {
                     const shares = asset.shares || 0;
-                    const averagePrice = asset.averagePrice || 0;
-                    const totalInvested = asset.totalInvested || 0;
-                    const monthlyIncome = asset.monthlyIncome || 0;
+                    const averagePrice = asset.averagePrice || asset.average_price || 0;
+                    const totalInvested = asset.totalInvested || asset.total_invested || asset.totalValue || asset.currentValue || 0;
+                    const monthlyIncome = asset.monthlyIncome || asset.monthly_income || asset.monthlyDividend || 0;
                     
                     detailsHTML = `
                         <p class="text-xs text-gray-600">보유 수량: ${shares}주 | 평균 매입가: ${GameUtils.formatCurrency(averagePrice)}</p>
@@ -1057,19 +1128,19 @@ Object.assign(CashflowGame.prototype, {
                     `;
                 } else if (asset.type === 'Fund') {
                     const shares = asset.shares || 0;
-                    const averagePrice = asset.averagePrice || 0;
-                    const totalInvested = asset.totalInvested || 0;
-                    const monthlyIncome = asset.monthlyIncome || 0;
+                    const averagePrice = asset.averagePrice || asset.average_price || 0;
+                    const totalInvested = asset.totalInvested || asset.total_invested || asset.totalValue || asset.currentValue || 0;
+                    const monthlyIncome = asset.monthlyIncome || asset.monthly_income || asset.monthlyDividend || 0;
                     
                     detailsHTML = `
                         <p class="text-xs text-gray-600">보유 수량: ${shares}좌 | 평균 매입가: ${GameUtils.formatCurrency(averagePrice)}</p>
                         <p class="text-xs text-gray-600">총 투자금액: ${GameUtils.formatCurrency(totalInvested)} | 월 수익: ${GameUtils.formatCurrency(monthlyIncome)}</p>
                     `;
                 } else if (asset.type === 'RealEstate' || asset.assetType === 'RealEstate') {
-                    // 부동산 자산 특별 표시
-                    const purchasePrice = asset.purchasePrice || asset.totalValue || 0;
-                    const downPayment = asset.downPayment || 0;
-                    const monthlyIncome = asset.monthlyIncome || 0;
+                    // 부동산 자산 특별 표시 - DB 데이터 우선 사용
+                    const purchasePrice = asset.purchasePrice || asset.purchase_price || asset.totalValue || asset.total_value || asset.currentValue || 0;
+                    const downPayment = asset.downPayment || asset.down_payment || 0;
+                    const monthlyIncome = asset.monthlyIncome || asset.monthly_income || 0;
                     
                     detailsHTML = `
                         <p class="text-xs text-gray-600">구매가격: ${GameUtils.formatCurrency(purchasePrice)}</p>
@@ -1077,8 +1148,12 @@ Object.assign(CashflowGame.prototype, {
                         <p class="text-xs text-gray-500 italic">※ 판매 시 (판매가 - 구매가) 차액을 현금으로 수령</p>
                     `;
                 } else {
+                    // 기타 자산 - DB 데이터 우선 사용
+                    const assetValue = asset.totalValue || asset.total_value || asset.currentValue || asset.current_value || asset.purchasePrice || 0;
+                    const monthlyIncome = asset.monthlyIncome || asset.monthly_income || 0;
+                    
                     detailsHTML = `
-                        <p class="text-xs text-gray-600">자산 가치: ${GameUtils.formatCurrency(asset.totalValue || asset.currentValue || 0)} | 월 현금흐름: ${GameUtils.formatCurrency(asset.monthlyIncome || 0)}</p>
+                        <p class="text-xs text-gray-600">자산 가치: ${GameUtils.formatCurrency(assetValue)} | 월 현금흐름: ${GameUtils.formatCurrency(monthlyIncome)}</p>
                         ${asset.shares ? `<p class="text-xs text-gray-600">보유 수량: ${asset.shares}${asset.unit || '주'}</p>` : ''}
                     `;
                 }
@@ -1118,13 +1193,17 @@ Object.assign(CashflowGame.prototype, {
             // 일반 부채
             if (player.liabilities && player.liabilities.length > 0) {
                 player.liabilities.forEach(lib => {
+                    // DB 데이터 우선 사용 - amount, remainingAmount, totalAmount 순으로 fallback
+                    const debtAmount = lib.remainingAmount || lib.amount || lib.totalAmount || 0;
+                    const monthlyPayment = lib.monthlyPayment || 0;
+                    
                     const item = document.createElement('li');
                     item.className = 'bg-white p-3 rounded-lg shadow border border-gray-200';
                     item.innerHTML = `
                         <div class="flex justify-between items-center">
                             <div>
                                 <h4 class="font-semibold text-red-700">${lib.name} <span class="text-xs text-gray-500">(${lib.type || 'Debt'})</span></h4>
-                                <p class="text-xs text-gray-600">잔액: ${GameUtils.formatCurrency(lib.remainingAmount || 0)} | 월 상환액: ${lib.monthlyPayment > 0 ? GameUtils.formatCurrency(lib.monthlyPayment) : '없음'}</p>
+                                <p class="text-xs text-gray-600">잔액: ${GameUtils.formatCurrency(debtAmount)} | 월 상환액: ${monthlyPayment > 0 ? GameUtils.formatCurrency(monthlyPayment) : '없음'}</p>
                             </div>
                             <button data-debt-id="${lib.id}" class="pay-debt-btn bg-green-500 text-white px-3 py-1 rounded-md text-xs hover:bg-green-600 transition-colors">상환</button>
                         </div>
@@ -1136,13 +1215,17 @@ Object.assign(CashflowGame.prototype, {
             // 긴급 대출
             if (player.emergencyLoans && player.emergencyLoans.length > 0) {
                 player.emergencyLoans.forEach(loan => {
+                    // DB 데이터 우선 사용 - remainingBalance, remainingAmount, amount 순으로 fallback
+                    const loanAmount = loan.remainingBalance || loan.remainingAmount || loan.loanAmount || loan.amount || 0;
+                    const monthlyPayment = loan.monthlyPayment || 0;
+                    
                     const item = document.createElement('li');
                     item.className = 'bg-white p-3 rounded-lg shadow border border-gray-200';
                     item.innerHTML = `
                         <div class="flex justify-between items-center">
                             <div>
                                 <h4 class="font-semibold text-yellow-700">긴급 대출 <span class="text-xs text-gray-500">(Emergency Loan)</span></h4>
-                                <p class="text-xs text-gray-600">잔액: ${GameUtils.formatCurrency(loan.remainingAmount || 0)} | 월 이자: ${GameUtils.formatCurrency(loan.monthlyPayment || 0)}</p>
+                                <p class="text-xs text-gray-600">잔액: ${GameUtils.formatCurrency(loanAmount)} | 월 이자: ${GameUtils.formatCurrency(monthlyPayment)}</p>
                             </div>
                             <button data-debt-id="${loan.id}" class="pay-debt-btn bg-green-500 text-white px-3 py-1 rounded-md text-xs hover:bg-green-600 transition-colors">상환</button>
                         </div>
@@ -2124,10 +2207,10 @@ Object.assign(CashflowGame.prototype, {
             this.processDealCard(card);
         } else {
             this.addGameLog(`${card.title} 카드를 처리했습니다.`);
+            // 기타 카드의 경우에만 UI 업데이트 및 저장
+            this.updateUI();
+            StorageManager.saveGameState(this.gameState);
         }
-
-        this.updateUI();
-        StorageManager.saveGameState(this.gameState);
     },
 
     // Doodad 카드 처리 (지불 방법 선택 지원)
@@ -2204,6 +2287,15 @@ Object.assign(CashflowGame.prototype, {
 
             this.addGameLog(`${card.title}에 ${GameUtils.formatCurrency(card.cost)}를 지출했습니다.`);
         }
+        
+        // UI 업데이트 및 게임 상태 저장
+        this.updateUI();
+        StorageManager.saveGameState(this.gameState);
+        
+        // Doodads 카드 구매 완료 후 대시보드로 이동
+        setTimeout(() => {
+            this.showTab('dashboard');
+        }, 500);
     },
 
     // 카드를 타이틀별로 그룹화

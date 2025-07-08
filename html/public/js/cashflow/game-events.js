@@ -321,6 +321,12 @@ Object.assign(CashflowGame.prototype, {
     handlePayday() {
         const player = this.gameState.player;
         if (!player) return;
+        
+        // 게임 종료 상태 체크
+        if (this.gameState.gameEnded) {
+            this.showModalNotification("게임 종료", "게임이 이미 종료되었습니다.");
+            return;
+        }
 
         try {
             // 급여 계산 (직업 데이터에서 가져오기)
@@ -364,8 +370,8 @@ Object.assign(CashflowGame.prototype, {
             // 순 현금흐름 계산
             const netCashFlow = totalIncome - totalExpenses;
 
-            // 현금에 순 현금흐름 추가
-            player.cash += netCashFlow;
+            // 현금에 순 현금흐름 추가 (숫자 타입 보장)
+            player.cash = parseFloat(player.cash || 0) + netCashFlow;
 
             // 로그 엔트리 생성 - 상세 지출 내역 포함
             const expenseDetails = [];
@@ -384,6 +390,21 @@ Object.assign(CashflowGame.prototype, {
 
             // 재무 상태 재계산
             this.recalculatePlayerFinancials();
+
+            // 파산 체크 - 현금이 마이너스이고 현금흐름도 마이너스인 경우
+            if (player.cash < 0 && netCashFlow < 0) {
+                console.log('파산 위험 상황 감지:', {
+                    cash: player.cash,
+                    netCashFlow: netCashFlow,
+                    totalAssets: this.calculateTotalAssetValue()
+                });
+                
+                const bankruptcyResult = this.handleBankruptcy();
+                if (bankruptcyResult.isBankrupt) {
+                    // 파산 처리됨 - 더 이상 진행하지 않음
+                    return;
+                }
+            }
 
             // UI 업데이트
             this.updateUI();
@@ -413,6 +434,12 @@ Object.assign(CashflowGame.prototype, {
     handleCharity() {
         const player = this.gameState.player;
         if (!player) return;
+        
+        // 게임 종료 상태 체크
+        if (this.gameState.gameEnded) {
+            this.showModalNotification("게임 종료", "게임이 이미 종료되었습니다.");
+            return;
+        }
 
         try {
             // 총수입 계산 (급여 + 패시브 인컴)
@@ -431,8 +458,8 @@ Object.assign(CashflowGame.prototype, {
                 return;
             }
 
-            // 현금에서 기부 금액 차감
-            player.cash -= charityAmount;
+            // 현금에서 기부 금액 차감 (숫자 타입 보장)
+            player.cash = parseFloat(player.cash || 0) - charityAmount;
 
             // 게임 로그 추가
             this.addGameLog(`기부: ${GameUtils.formatCurrency(charityAmount)}을 기부했습니다. 행운이 따를 것입니다!`, 'event-positive');
@@ -442,6 +469,8 @@ Object.assign(CashflowGame.prototype, {
 
             // UI 업데이트
             this.updateUI();
+            
+            // 전체 게임 상태 저장
             StorageManager.saveGameState(this.gameState);
 
             // 완료 메시지
@@ -462,6 +491,12 @@ Object.assign(CashflowGame.prototype, {
     handleDownsized() {
         const player = this.gameState.player;
         if (!player) return;
+        
+        // 게임 종료 상태 체크
+        if (this.gameState.gameEnded) {
+            this.showModalNotification("게임 종료", "게임이 이미 종료되었습니다.");
+            return;
+        }
 
         try {
             // 총 지출 계산 (월급날 처리와 동일한 로직)
@@ -700,8 +735,8 @@ Object.assign(CashflowGame.prototype, {
             }
             player.emergencyLoans.push(emergencyLoan);
             
-            // 현금 추가
-            player.cash += loanAmount;
+            // 현금 추가 (숫자 타입 보장)
+            player.cash = parseFloat(player.cash || 0) + loanAmount;
             
             // 월 지출에 이자 추가
             player.expenses.other += monthlyPayment;
@@ -1503,8 +1538,8 @@ Object.assign(CashflowGame.prototype, {
                 const soldInvestment = (stockData.totalInvested / stockData.shares) * sellShares;
                 const remainingInvestment = stockData.totalInvested - soldInvestment;
                 
-                // 현금 증가
-                player.cash += sellPrice;
+                // 현금 증가 (숫자 타입 보장)
+                player.cash = parseFloat(player.cash || 0) + sellPrice;
                 
                 // 주식 데이터 업데이트 (남은 주식으로)
                 stockData.shares = remainingShares;
@@ -1543,8 +1578,8 @@ Object.assign(CashflowGame.prototype, {
                 const soldInvestment = (fundData.totalInvested / fundData.shares) * sellShares;
                 const remainingInvestment = fundData.totalInvested - soldInvestment;
                 
-                // 현금 증가
-                player.cash += sellPrice;
+                // 현금 증가 (숫자 타입 보장)
+                player.cash = parseFloat(player.cash || 0) + sellPrice;
                 
                 // 펀드 데이터 업데이트 (남은 좌수로)
                 fundData.shares = remainingShares;
@@ -1681,12 +1716,12 @@ Object.assign(CashflowGame.prototype, {
                     this.addGameLog(`${assetInfo.name} 판매: ${GameUtils.formatCurrency(sellPrice)} 현금 수령`);
                 }
                 
-                // 현금 증가 (모기지 상환 후 남은 금액)
-                player.cash += cashReceived;
+                // 현금 증가 (모기지 상환 후 남은 금액, 숫자 타입 보장)
+                player.cash = parseFloat(player.cash || 0) + cashReceived;
                 
             } else {
-                // 일반 자산 판매
-                player.cash += sellPrice;
+                // 일반 자산 판매 (숫자 타입 보장)
+                player.cash = parseFloat(player.cash || 0) + sellPrice;
                 this.addGameLog(`${assetInfo.name}을(를) ${GameUtils.formatCurrency(sellPrice)}에 판매했습니다.`);
             }
             

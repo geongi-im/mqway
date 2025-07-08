@@ -24,6 +24,7 @@ use App\Http\Controllers\BoardPortfolioController;
 use App\Http\Controllers\EconomyTermGameController;
 use App\Http\Controllers\FinancialQuizController;
 use App\Http\Controllers\RetirementCalculatorController;
+use App\Http\Controllers\Api\CashflowApiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -217,4 +218,13 @@ Route::prefix('tools')->group(function () {
     Route::get('/economy-term-game/ranking', [EconomyTermGameController::class, 'getRanking'])->name('tools.economy-term-game.ranking');
     Route::get('/financial-quiz', [FinancialQuizController::class, 'index'])->name('tools.financial-quiz');
     Route::get('/retirement-calculator', [RetirementCalculatorController::class, 'index'])->name('tools.retirement-calculator');
+});
+
+// 캐시플로우 게임 API 라우트 (web에서 세션 기반 인증 사용)
+Route::prefix('api/cashflow')->middleware('auth')->group(function () {
+    Route::post('/test', [CashflowApiController::class, 'test']);
+    Route::post('/save', [CashflowApiController::class, 'saveGameState']);
+    Route::post('/load', [CashflowApiController::class, 'loadGameState']);
+    Route::post('/games', [CashflowApiController::class, 'getUserGames']);
+    Route::delete('/game', [CashflowApiController::class, 'deleteGame']);
 });

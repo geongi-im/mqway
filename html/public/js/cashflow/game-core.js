@@ -1,6 +1,6 @@
 // 캐시플로우 게임 핵심 로직
 class CashflowGame {
-    constructor() {
+    constructor(skipAutoLoad = false) {
         this.gameState = {
             player: null,
             gameStarted: false,
@@ -9,6 +9,7 @@ class CashflowGame {
         };
         
         this.cashflowChart = null; // 차트 인스턴스 변수 추가
+        this.skipAutoLoad = skipAutoLoad; // 자동 로드 스킵 플래그
         
         // 자녀 관련 카드 목록 (중복 제거를 위한 상수)
         this.CHILD_RELATED_CARDS = [
@@ -61,21 +62,61 @@ class CashflowGame {
         assignIds(CARD_DATA.Doodads);
     }
 
-    init() {
+    async init() {
+        console.log('=== 게임 초기화 시작, skipAutoLoad:', this.skipAutoLoad, '===');
+        
         this.renderProfessionsList();
         this.bindEvents();
         this.bindNavigationEvents();
         this.setupScrollHandler(); // 스크롤 핸들러 설정 추가
         
-        // 항상 직업 선택 화면부터 시작 (저장된 게임 자동 로드 제거)
-        // 저장된 데이터가 있어도 무시하고 새 게임으로 시작
-        StorageManager.clearGameState();
+        // skipAutoLoad가 true이면 UI 관련 작업은 수행하지 않음
+        if (this.skipAutoLoad) {
+            console.log('자동 로드 스킵됨 - Continue 모드 또는 수동 초기화');
+            return;
+        }
         
-        // 게임 시작 버튼 컨테이너 항상 표시
+        // 대기 중인 동기화 확인
+        try {
+            await DatabaseManager.checkPendingSync();
+        } catch (error) {
+            console.warn('동기화 확인 실패:', error);
+        }
+        
+        // 저장된 게임 상태 확인
+        try {
+            const savedGameState = await StorageManager.loadGameState();
+            if (savedGameState && savedGameState.gameStarted) {
+                // 저장된 게임이 있으면 사용자에게 선택권 제공
+                this.showGameRestoreOption(savedGameState);
+                return;
+            }
+        } catch (error) {
+            console.warn('저장된 게임 로드 실패:', error);
+        }
+        
+        // 저장된 게임이 없으면 새 게임 시작 화면 표시
+        this.showNewGameScreen();
+    }
+    
+    // 게임 복원 옵션 표시 (confirm 제거 - 항상 새 게임 시작)
+    showGameRestoreOption(savedGameState) {
+        // confirm 로직 제거 - 항상 새 게임 시작
+        // 최근 기록은 helper.blade.php에서 처리됨
+        this.showNewGameScreen();
+    }
+    
+    // 새 게임 시작 화면 표시
+    showNewGameScreen() {
+        console.log('=== showNewGameScreen 호출됨 ===');
+        console.trace('showNewGameScreen 호출 스택:');
+        
+        // 게임 시작 버튼 컨테이너 표시
         const startBtn = document.getElementById('start-game-fixed-button');
         if (startBtn) {
             startBtn.style.display = 'block';
             startBtn.classList.remove('hidden');
+            console.log('게임 시작 버튼을 표시했습니다');
         }
         
         // 모든 탭 콘텐츠 숨기기 (직업 선택 화면만 표시)
@@ -84,13 +125,17 @@ class CashflowGame {
             tab.style.display = 'none';
             tab.classList.add('hidden');
         });
+        console.log('모든 탭 콘텐츠를 숨겼습니다');
         
         // 하단 네비게이션 숨기기
         const bottomNav = document.getElementById('bottom-nav');
         if (bottomNav) {
             bottomNav.style.display = 'none';
             bottomNav.classList.add('hidden');
+            console.log('하단 네비게이션을 숨겼습니다');
         }
+        
+        console.log('=== showNewGameScreen 완료 ===');
     }
 
     // 게임 시작
@@ -383,6 +428,7 @@ class CashflowGame {
                 id: `liability_${id++}`,
                 name: "주택 대출",
                 type: "Mortgage",
+                amount: liabilityData.homeMortgage, // 서버 호환성을 위한 필드
                 totalAmount: liabilityData.homeMortgage,
                 remainingAmount: liabilityData.homeMortgage,
                 monthlyPayment: expenseData.homeMortgagePayment || 0,
@@ -396,7 +442,8 @@ class CashflowGame {
             liabilities.push({
                 id: `liability_${id++}`,
                 name: "학자금 대출",
-                type: "StudentLoan",
+                type: "SchoolLoan",
+                amount: liabilityData.schoolLoans, // 서버 호환성을 위한 필드
                 totalAmount: liabilityData.schoolLoans,
                 remainingAmount: liabilityData.schoolLoans,
                 monthlyPayment: expenseData.schoolLoanPayment || 0,
@@ -411,6 +458,7 @@ class CashflowGame {
                 id: `liability_${id++}`,
                 name: "자동차 대출",
                 type: "CarLoan",
+                amount: liabilityData.carLoans, // 서버 호환성을 위한 필드
                 totalAmount: liabilityData.carLoans,
                 remainingAmount: liabilityData.carLoans,
                 monthlyPayment: expenseData.carLoanPayment || 0,
@@ -425,6 +473,7 @@ class CashflowGame {
                 id: `liability_${id++}`,
                 name: "신용카드 부채",
                 type: "CreditCard",
+                amount: liabilityData.creditCardDebt, // 서버 호환성을 위한 필드
                 totalAmount: liabilityData.creditCardDebt,
                 remainingAmount: liabilityData.creditCardDebt,
                 monthlyPayment: expenseData.creditCardPayment || 0,
@@ -439,6 +488,7 @@ class CashflowGame {
                 id: `liability_${id++}`,
                 name: "소매 부채",
                 type: "Retail",
+                amount: liabilityData.retailDebt, // 서버 호환성을 위한 필드
                 totalAmount: liabilityData.retailDebt,
                 remainingAmount: liabilityData.retailDebt,
                 monthlyPayment: expenseData.retailExpenses || 0,
@@ -468,6 +518,72 @@ class CashflowGame {
         
         // 대시보드 로그 UI 업데이트
         this.updateGameLogUI();
+        
+        // 실시간 로그 저장 비활성화 (중복 저장 방지)
+        // 전체 게임 상태 저장 시에만 로그가 저장되도록 변경
+        // this.saveLogToDatabase(logEntry);
+    }
+    
+    // 개별 로그를 즉시 데이터베이스에 저장 (강화된 디바운싱 적용)
+    async saveLogToDatabase(logEntry) {
+        try {
+            // DatabaseManager가 정의되어 있는지 확인
+            if (typeof DatabaseManager === 'undefined') {
+                console.warn('DatabaseManager가 정의되지 않아 로그 실시간 저장을 건너뜁니다.');
+                return;
+            }
+            
+            // 강화된 디바운싱 - 1초 이내 연속 호출 방지
+            const currentTime = Date.now();
+            if (this._lastLogSaveTime && (currentTime - this._lastLogSaveTime) < 1000) {
+                console.log('로그 저장 스킵: 1초 이내 연속 호출');
+                
+                // 마지막 로그 저장을 지연시킴
+                if (this._logSaveTimeout) {
+                    clearTimeout(this._logSaveTimeout);
+                }
+                
+                this._logSaveTimeout = setTimeout(() => {
+                    this._executeDelayedLogSave(logEntry);
+                }, 1000);
+                return;
+            }
+            
+            this._lastLogSaveTime = currentTime;
+            
+            console.log('실시간 로그 저장 시도:', logEntry.message);
+            
+            const success = await DatabaseManager.saveGameLogOnly(this.gameState);
+            
+            if (success) {
+                console.log('실시간 로그 저장 성공:', logEntry.message);
+            } else {
+                console.warn('실시간 로그 저장 실패:', logEntry.message);
+            }
+            
+        } catch (error) {
+            console.error('실시간 로그 저장 오류:', error);
+            // 실시간 저장 실패해도 게임 진행에는 영향 없도록 에러를 삼킴
+        }
+    }
+    
+    // 지연된 로그 저장 실행
+    async _executeDelayedLogSave(logEntry) {
+        try {
+            this._lastLogSaveTime = Date.now();
+            
+            console.log('지연된 실시간 로그 저장 시도:', logEntry.message);
+            
+            const success = await DatabaseManager.saveGameLogOnly(this.gameState);
+            
+            if (success) {
+                console.log('지연된 실시간 로그 저장 성공:', logEntry.message);
+            } else {
+                console.warn('지연된 실시간 로그 저장 실패:', logEntry.message);
+            }
+        } catch (error) {
+            console.error('지연된 실시간 로그 저장 오류:', error);
+        }
     }
 
     // 긴급 대출 상환
@@ -579,12 +695,29 @@ class CashflowGame {
         player.monthlyCashFlow = player.totalIncome - player.totalExpenses;
     }
 
-    // 잘못 저장된 주식 데이터 정리
+    // 잘못 저장된 주식 데이터 정리 (중복 호출 안전)
     cleanupMisplacedStocks() {
         const player = this.gameState.player;
-        if (!player || !player.assets) return;
+        if (!player) {
+            console.log('주식 정리: 플레이어 데이터 없음');
+            return;
+        }
+        
+        // 이미 정리가 완료된 경우 스킵 (중복 호출 방지)
+        if (player._stocksCleanedUp) {
+            console.log('주식 데이터 정리 스킵: 이미 정리 완료됨');
+            return;
+        }
         
         console.log('주식 데이터 정리 시작');
+        console.log('현재 stocks 객체:', player.stocks);
+        console.log('현재 assets 배열 길이:', player.assets ? player.assets.length : 0);
+        
+        if (!player.assets) {
+            console.log('주식 정리: assets 배열 없음');
+            player._stocksCleanedUp = true; // 정리 완료 플래그 설정
+            return;
+        }
         
         // assets 배열에서 주식 찾기
         const stockAssets = [];
@@ -598,15 +731,18 @@ class CashflowGame {
             }
         });
         
+        console.log('assets 배열에서 발견된 주식:', stockAssets.length, '개');
+        console.log('stocks 객체 키 개수:', player.stocks ? Object.keys(player.stocks).length : 0, '개');
+        
         if (stockAssets.length > 0) {
-            console.log('잘못 저장된 주식 발견:', stockAssets.length, '개');
+            console.log('잘못 저장된 주식 발견:', stockAssets);
             
             // stocks 객체가 없으면 생성
             if (!player.stocks) {
                 player.stocks = {};
             }
             
-            // 주식들을 stocks 객체로 이동 (같은 종목 합치기)
+            // 주식들을 stocks 객체로 이동 (중복 방지를 위해 기존 데이터 보존)
             stockAssets.forEach(stockAsset => {
                 // 주식 심볼 추출
                 let symbol = this.getStockSymbolFromTitle(stockAsset.name);
@@ -618,7 +754,7 @@ class CashflowGame {
                 const cost = stockAsset.totalValue || stockAsset.totalInvested || 0;
                 const monthlyIncome = stockAsset.monthlyIncome || 0;
                 
-                // stocks 객체에 추가 또는 기존 것과 합치기
+                // stocks 객체에 기존 데이터가 없는 경우에만 추가
                 if (!player.stocks[symbol]) {
                     player.stocks[symbol] = {
                         shares: 1, // 임시로 1주로 설정
@@ -626,25 +762,21 @@ class CashflowGame {
                         averagePrice: cost,
                         monthlyDividend: monthlyIncome
                     };
+                    console.log(`주식 ${symbol} 새로 추가:`, player.stocks[symbol]);
                 } else {
-                    // 기존 종목과 합치기
-                    const existing = player.stocks[symbol];
-                    existing.totalInvested += cost;
-                    existing.shares += 1; // 임시로 1주씩 추가
-                    existing.averagePrice = existing.totalInvested / existing.shares;
-                    existing.monthlyDividend += monthlyIncome;
+                    // 기존 종목이 있는 경우 수량 증가하지 않고 로그만 출력
+                    console.log(`주식 ${symbol} 이미 존재함, 수량 유지:`, player.stocks[symbol]);
                 }
-                
-                console.log(`주식 ${symbol} 이동/합치기 완료:`, player.stocks[symbol]);
             });
             
             // assets 배열에서 주식 제거
             player.assets = nonStockAssets;
             
-            // 게임 상태 저장
-            StorageManager.saveGameState(this.gameState);
             console.log('주식 데이터 정리 완료');
         }
+        
+        // 정리 완료 플래그 설정 (중복 호출 방지)
+        player._stocksCleanedUp = true;
     }
 
     // 주식 분할 처리
@@ -760,5 +892,230 @@ class CashflowGame {
         if (assetName.includes('MYT4U')) return 'MYT4U';
         if (assetName.includes('ON2U')) return 'ON2U';
         return null;
+    }
+
+    // =================================================================
+    // 파산 처리 시스템
+    // =================================================================
+
+    // 총 자산 가치 계산
+    calculateTotalAssetValue() {
+        const player = this.gameState.player;
+        let totalValue = 0;
+
+        // 부동산 자산
+        if (player.assets && player.assets.length > 0) {
+            totalValue += player.assets.reduce((sum, asset) => {
+                const currentValue = asset.currentValue || asset.totalInvested || asset.totalValue || 0;
+                return sum + parseFloat(currentValue);
+            }, 0);
+        }
+
+        // 주식 자산
+        if (player.stocks) {
+            Object.values(player.stocks).forEach(stock => {
+                const shares = parseFloat(stock.shares || 0);
+                const currentPrice = parseFloat(stock.averagePrice || 0);
+                totalValue += shares * currentPrice;
+            });
+        }
+
+        // 펀드 자산
+        if (player.funds) {
+            Object.values(player.funds).forEach(fund => {
+                const shares = parseFloat(fund.shares || 0);
+                const currentPrice = parseFloat(fund.averagePrice || 0);
+                totalValue += shares * currentPrice;
+            });
+        }
+
+        // 기타 투자 자산 (금, 은 등)
+        if (player.investments) {
+            totalValue += Object.values(player.investments).reduce((sum, investment) => {
+                return sum + parseFloat(investment.currentValue || investment.totalInvested || 0);
+            }, 0);
+        }
+
+        return totalValue;
+    }
+
+    // 파산 처리 메인 로직
+    handleBankruptcy() {
+        const player = this.gameState.player;
+        const totalAssetValue = this.calculateTotalAssetValue();
+        const currentCash = parseFloat(player.cash || 0);
+        const shortfall = Math.abs(currentCash); // 부족한 현금 (양수)
+
+        console.log('파산 처리 시작:', {
+            currentCash: currentCash,
+            shortfall: shortfall,
+            totalAssetValue: totalAssetValue
+        });
+
+        // 자산이 있으면 강제 판매 시도
+        if (totalAssetValue > 0) {
+            const saleResult = this.forceAssetSale(shortfall);
+            
+            if (saleResult.success) {
+                // 자산 판매로 위기 극복
+                this.addGameLog(`긴급 상황: 자산을 판매하여 ${GameUtils.formatCurrency(saleResult.totalSold)}를 확보했습니다.`, 'warning');
+                
+                setTimeout(() => {
+                    this.showModalNotification(
+                        "긴급 자산 판매!",
+                        `현금 부족으로 인해 자산을 강제로 판매했습니다.\n\n판매 금액: ${GameUtils.formatCurrency(saleResult.totalSold)}\n현재 현금: ${GameUtils.formatCurrency(player.cash)}\n\n⚠️ 앞으로 재정 관리에 더욱 주의하세요!`
+                    );
+                }, 500);
+                
+                return { isBankrupt: false, forced: true };
+            }
+        }
+
+        // 자산도 없거나 판매해도 부족한 경우 → 파산
+        return this.declareBankruptcy();
+    }
+
+    // 자산 강제 판매
+    forceAssetSale(targetAmount) {
+        const player = this.gameState.player;
+        let totalSold = 0;
+        const soldAssets = [];
+
+        // 1. 주식부터 판매 (가장 유동성이 높음)
+        if (player.stocks && totalSold < targetAmount) {
+            const stockEntries = Object.entries(player.stocks);
+            for (const [symbol, stock] of stockEntries) {
+                if (totalSold >= targetAmount) break;
+                
+                const shares = parseFloat(stock.shares || 0);
+                const price = parseFloat(stock.averagePrice || 0);
+                const value = shares * price;
+                
+                if (value > 0) {
+                    totalSold += value;
+                    soldAssets.push(`${symbol} 주식 ${shares}주`);
+                    delete player.stocks[symbol];
+                    
+                    this.addGameLog(`강제 판매: ${symbol} 주식 ${shares}주를 ${GameUtils.formatCurrency(value)}에 판매했습니다.`, 'warning');
+                }
+            }
+        }
+
+        // 2. 펀드 판매
+        if (player.funds && totalSold < targetAmount) {
+            const fundEntries = Object.entries(player.funds);
+            for (const [symbol, fund] of fundEntries) {
+                if (totalSold >= targetAmount) break;
+                
+                const shares = parseFloat(fund.shares || 0);
+                const price = parseFloat(fund.averagePrice || 0);
+                const value = shares * price;
+                
+                if (value > 0) {
+                    totalSold += value;
+                    soldAssets.push(`${symbol} 펀드 ${shares}주`);
+                    delete player.funds[symbol];
+                    
+                    this.addGameLog(`강제 판매: ${symbol} 펀드 ${shares}주를 ${GameUtils.formatCurrency(value)}에 판매했습니다.`, 'warning');
+                }
+            }
+        }
+
+        // 3. 부동산 자산 판매
+        if (player.assets && player.assets.length > 0 && totalSold < targetAmount) {
+            const assetsToSell = [...player.assets]; // 복사본 생성
+            
+            for (let i = assetsToSell.length - 1; i >= 0; i--) {
+                if (totalSold >= targetAmount) break;
+                
+                const asset = assetsToSell[i];
+                const value = parseFloat(asset.currentValue || asset.totalInvested || asset.totalValue || 0);
+                
+                if (value > 0) {
+                    totalSold += value;
+                    soldAssets.push(asset.name || '부동산');
+                    player.assets.splice(i, 1);
+                    
+                    this.addGameLog(`강제 판매: ${asset.name || '부동산'}을 ${GameUtils.formatCurrency(value)}에 판매했습니다.`, 'warning');
+                }
+            }
+        }
+
+        // 4. 기타 투자 자산 판매
+        if (player.investments && totalSold < targetAmount) {
+            const investmentEntries = Object.entries(player.investments);
+            for (const [name, investment] of investmentEntries) {
+                if (totalSold >= targetAmount) break;
+                
+                const value = parseFloat(investment.currentValue || investment.totalInvested || 0);
+                
+                if (value > 0) {
+                    totalSold += value;
+                    soldAssets.push(name);
+                    delete player.investments[name];
+                    
+                    this.addGameLog(`강제 판매: ${name}을 ${GameUtils.formatCurrency(value)}에 판매했습니다.`, 'warning');
+                }
+            }
+        }
+
+        // 현금에 판매 금액 추가
+        player.cash = parseFloat(player.cash || 0) + totalSold;
+
+        // 재정 상태 재계산
+        this.recalculatePlayerFinancials();
+
+        return {
+            success: totalSold >= targetAmount,
+            totalSold: totalSold,
+            soldAssets: soldAssets,
+            stillShort: Math.max(0, targetAmount - totalSold)
+        };
+    }
+
+    // 파산 선언 및 게임 종료
+    declareBankruptcy() {
+        const player = this.gameState.player;
+        
+        // 파산 상태 설정
+        this.gameState.gameEnded = true;
+        this.gameState.endReason = 'bankruptcy';
+        this.gameState.endDate = new Date().toISOString();
+        
+        // 파산 로그 추가
+        this.addGameLog("파산: 현금과 자산이 모두 부족하여 게임이 종료되었습니다.", 'error');
+        
+        // 게임 상태 저장
+        this.updateUI();
+        StorageManager.saveGameState(this.gameState);
+        
+        // 파산 알림 표시
+        setTimeout(() => {
+            this.showModalNotification(
+                "🚨 파산 선언",
+                `게임이 종료되었습니다.\n\n현금: ${GameUtils.formatCurrency(player.cash)}\n총 자산 가치: ${GameUtils.formatCurrency(this.calculateTotalAssetValue())}\n\n현금흐름이 마이너스이고 현금과 자산이 모두 부족하여 더 이상 게임을 계속할 수 없습니다.\n\n💡 다시 도전해보세요!`,
+                () => {
+                    // 게임 재시작 옵션 제공
+                    this.showRestartOptions();
+                }
+            );
+        }, 500);
+        
+        return { isBankrupt: true };
+    }
+
+    // 게임 재시작 옵션 표시
+    showRestartOptions() {
+        setTimeout(() => {
+            this.showModalNotification(
+                "게임 재시작",
+                "새 게임을 시작하시겠습니까?",
+                () => {
+                    // 게임 재시작
+                    window.location.reload();
+                },
+                true // 취소 버튼 표시
+            );
+        }, 1000);
     }
 }

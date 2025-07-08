@@ -160,6 +160,14 @@ body.scrolled #start-game-fixed-button {
                 <button id="startGameBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-4 px-8 rounded-full transition-all duration-300 text-lg transform hover:scale-105 hover:shadow-lg">
                     도우미 시작하기
                 </button>
+                
+                <!-- 최근 기록 섹션 -->
+                <div id="recentGamesSection" class="mt-8 hidden">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-4">최근 게임 기록</h3>
+                    <div id="recentGamesList" class="space-y-3 max-w-2xl mx-auto">
+                        <!-- 최근 기록들이 여기에 동적으로 추가됩니다 -->
+                    </div>
+                </div>
             </div>
             
             <!-- 게임 소개 섹션 -->
@@ -656,6 +664,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // 게임 초기화 플래그
     let gameInitialized = false;
     
+    // 페이지 로드 시 최근 기록 불러오기
+    loadRecentGames();
+    
     // 게임 시작 버튼 클릭 이벤트
     startGameBtn.addEventListener('click', function() {
         // 모달 열기 전에 localStorage 완전 초기화
@@ -707,7 +718,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 try {
                     console.log('모든 DOM 요소가 준비되었습니다. 게임을 초기화합니다.');
                     if (typeof CashflowGame !== 'undefined') {
-                        window.cashflowGameInstance = new CashflowGame();
+                        window.cashflowGameInstance = new CashflowGame(true); // skipAutoLoad = true
                         console.log('캐시플로우 게임이 성공적으로 초기화되었습니다.');
                     }
                 } catch (error) {
@@ -729,7 +740,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 모달 닫기 버튼 클릭 이벤트
     closeGameBtn.addEventListener('click', function() {
-        if(confirm('캐시플로우 도우미를 종료하시겠습니까? 종료하면 초기화 됩니다.')) {
+        if(confirm('캐시플로우 도우미를 종료하시겠습니까?')) {
             // 플로팅 버튼 다시 보이기
             const floatingButton = document.querySelector('.fixed-button');
             if (floatingButton) {
@@ -752,6 +763,280 @@ document.addEventListener('DOMContentLoaded', function() {
         // 페이지 새로고침으로 완전한 초기화
         location.reload();
     }
+    
+    // 최근 게임 기록 불러오기
+    async function loadRecentGames() {
+        try {
+            const response = await fetch('/api/cashflow/games', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success && data.games && data.games.length > 0) {
+                displayRecentGames(data.games.slice(0, 5)); // 최근 5개만 표시
+            }
+        } catch (error) {
+            console.error('최근 게임 기록 불러오기 실패:', error);
+        }
+    }
+    
+    // 최근 게임 기록 표시
+    function displayRecentGames(games) {
+        const recentGamesSection = document.getElementById('recentGamesSection');
+        const recentGamesList = document.getElementById('recentGamesList');
+        
+        if (games.length === 0) {
+            recentGamesSection.classList.add('hidden');
+            return;
+        }
+        
+        recentGamesList.innerHTML = '';
+        
+        games.forEach(game => {
+            const gameCard = document.createElement('div');
+            gameCard.className = 'bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer';
+            
+            const formattedDate = new Date(game.updatedAt).toLocaleDateString('ko-KR', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            gameCard.innerHTML = `
+                <div class="flex justify-between items-center">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-3">
+                            <div class="text-lg font-semibold text-gray-800">${game.playerName}</div>
+                            <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">${game.profession}</span>
+                        </div>
+                        <div class="text-sm text-gray-600 mt-1">
+                            현금: ${formatCurrency(game.cash)} | 월 현금흐름: ${formatCurrency(game.monthlyCashFlow)}
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">
+                            꿈: ${game.dream || '미설정'} | 최종 업데이트: ${formattedDate}
+                        </div>
+                    </div>
+                    <button 
+                        onclick="continueGame('${game.sessionKey}')" 
+                        class="ml-4 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                    >
+                        Continue
+                    </button>
+                </div>
+            `;
+            
+            recentGamesList.appendChild(gameCard);
+        });
+        
+        recentGamesSection.classList.remove('hidden');
+    }
+    
+    // 저장된 게임 계속하기
+    async function continueGame(sessionKey) {
+        try {
+            const response = await fetch('/api/cashflow/load', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ sessionKey: sessionKey })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success && data.gameState) {
+                console.log('게임 상태 로드 성공:', data.gameState);
+                
+                // DatabaseManager의 currentSessionKey 설정 (중요!)
+                if (typeof DatabaseManager !== 'undefined') {
+                    DatabaseManager.currentSessionKey = sessionKey;
+                    console.log('DatabaseManager.currentSessionKey 설정:', sessionKey);
+                    
+                    // 로컬 스토리지에도 sessionKey 저장
+                    localStorage.setItem('cashflowSessionKey', sessionKey);
+                    console.log('localStorage에 sessionKey 저장:', sessionKey);
+                } else {
+                    console.warn('DatabaseManager가 정의되지 않았습니다');
+                }
+                
+                // Continue 모드에서는 localStorage를 삭제하지 않음
+                // localStorage.removeItem('cashflowGameState');
+                // localStorage.removeItem('cashflow_player_stats');
+                
+                // 저장된 게임 상태로 게임 시작
+                gameModal.classList.remove('hidden');
+                gameModal.classList.add('flex');
+                disableBodyScroll();
+                
+                // 플로팅 버튼 숨기기
+                const floatingButton = document.querySelector('.fixed-button');
+                if (floatingButton) {
+                    floatingButton.style.display = 'none';
+                }
+                
+                // DOM이 완전히 렌더링될 때까지 잠시 대기
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
+                // 저장된 게임 상태로 초기화
+                console.log('게임 초기화 시작 (Continue 모드)');
+                gameInitialized = false;
+                await initializeCashflowGameWithData(data.gameState, sessionKey);
+                gameInitialized = true;
+                console.log('게임 초기화 완료 (Continue 모드)');
+            } else {
+                alert('게임 불러오기에 실패했습니다.');
+            }
+        } catch (error) {
+            console.error('게임 불러오기 실패:', error);
+            alert('게임 불러오기에 실패했습니다.');
+        }
+    }
+    
+    // 저장된 데이터로 게임 초기화
+    async function initializeCashflowGameWithData(gameState, sessionKey) {
+        console.log('저장된 게임 상태 복원 시작:', gameState);
+        
+        // DOM 요소들이 준비될 때까지 대기
+        let attempts = 0;
+        const maxAttempts = 50;
+        
+        const waitForElements = () => {
+            attempts++;
+            
+            // 필요한 DOM 요소들이 모두 존재하는지 확인
+            const requiredElements = [
+                'cashflow-app',
+                'tab-content-dashboard', 
+                'bottom-nav',
+                'profession-selection'
+            ];
+            
+            const allElementsExist = requiredElements.every(id => document.getElementById(id));
+            
+            if (typeof CashflowGame !== 'undefined' && allElementsExist) {
+                try {
+                    // 게임 인스턴스 생성 (Continue용이므로 자동 로드 스킵)
+                    if (!window.cashflowGame) {
+                        window.cashflowGame = new CashflowGame(true); // skipAutoLoad = true
+                    }
+                    
+                    // 기존 게임 인스턴스가 있다면 초기화
+                    if (window.cashflowGame) {
+                        // 게임 상태가 시작된 상태인지 확인
+                        if (!gameState.gameStarted) {
+                            console.warn('게임이 시작되지 않은 상태입니다. gameStarted를 true로 설정합니다.');
+                            gameState.gameStarted = true;
+                        }
+                        
+                        // 저장된 상태로 게임 복원
+                        window.cashflowGame.gameState = gameState;
+                        
+                        // 게임 상태에 sessionKey 설정 (저장 시 사용)
+                        if (DatabaseManager && DatabaseManager.currentSessionKey) {
+                            window.cashflowGame.gameState.sessionKey = DatabaseManager.currentSessionKey;
+                            console.log('게임 상태에 sessionKey 설정:', DatabaseManager.currentSessionKey);
+                        }
+                        
+                        // gameState 자체에도 sessionKey 추가 (백업)
+                        gameState.sessionKey = sessionKey;
+                        
+                        // 주식 데이터 정리 (안전한 중복 호출 방지 로직 적용)
+                        console.log('Continue 로드 후 주식 데이터 정리 시작');
+                        console.log('로드된 주식 데이터:', gameState.player.stocks);
+                        console.log('로드된 자산 데이터:', gameState.player.assets);
+                        
+                        if (window.cashflowGame.cleanupMisplacedStocks) {
+                            window.cashflowGame.cleanupMisplacedStocks();
+                        }
+                        
+                        console.log('정리 후 주식 데이터:', window.cashflowGame.gameState.player.stocks);
+                        
+                        console.log('게임 상태 복원:', gameState);
+                        console.log('플레이어 정보:', gameState.player);
+                        
+                        // UI 전환 - 직업 선택 화면 숨기고 게임 UI 표시
+                        window.cashflowGame.switchToGameUI();
+                        
+                        // UI 업데이트 (약간의 지연 후)
+                        setTimeout(() => {
+                            window.cashflowGame.updateUI();
+                            console.log('저장된 게임 복원 완료:', window.cashflowGame.gameState);
+                            
+                            // 게임 시작 상태 강제 확인
+                            if (window.cashflowGame.gameState.gameStarted) {
+                                console.log('게임이 시작된 상태로 복원되었습니다.');
+                            } else {
+                                console.warn('게임 시작 상태가 아닙니다. 강제로 시작 상태로 설정합니다.');
+                                window.cashflowGame.gameState.gameStarted = true;
+                                window.cashflowGame.updateUI();
+                            }
+                            
+                            // 추가 확인: UI가 제대로 전환되었는지 확인하고 강제로 다시 전환
+                            setTimeout(() => {
+                                console.log('UI 상태 재확인 및 강제 전환');
+                                window.cashflowGame.switchToGameUI();
+                                window.cashflowGame.updateUI();
+                                
+                                // 직업 선택 화면이 여전히 보이는지 확인
+                                const professionSelection = document.getElementById('profession-selection');
+                                if (professionSelection && professionSelection.style.display !== 'none') {
+                                    console.warn('직업 선택 화면이 여전히 보입니다. 강제로 숨깁니다.');
+                                    professionSelection.style.display = 'none';
+                                    professionSelection.style.visibility = 'hidden';
+                                    professionSelection.classList.add('hidden');
+                                }
+                                
+                                // 대시보드가 보이는지 확인
+                                const dashboardTab = document.getElementById('tab-content-dashboard');
+                                if (dashboardTab && dashboardTab.style.display === 'none') {
+                                    console.warn('대시보드가 숨겨져 있습니다. 강제로 표시합니다.');
+                                    dashboardTab.style.display = 'block';
+                                    dashboardTab.style.visibility = 'visible';
+                                    dashboardTab.classList.remove('hidden');
+                                }
+                            }, 500);
+                        }, 300);
+                    }
+                    
+                } catch (error) {
+                    console.error('게임 상태 복원 중 오류:', error);
+                }
+            } else if (attempts < maxAttempts) {
+                setTimeout(waitForElements, 100);
+            } else {
+                console.error('게임 초기화 실패: 필요한 요소들을 찾을 수 없습니다.');
+                console.log('CashflowGame 존재:', typeof CashflowGame !== 'undefined');
+                
+                // 각 필수 요소의 존재 여부 확인
+                requiredElements.forEach(id => {
+                    const element = document.getElementById(id);
+                    console.log(`${id} 존재:`, !!element);
+                    if (element) {
+                        console.log(`${id} 가시성:`, element.style.display !== 'none');
+                    }
+                });
+            }
+        };
+        
+        waitForElements();
+    }
+    
+    // 통화 포맷팅 함수
+    function formatCurrency(amount) {
+        if (amount === null || amount === undefined) return '$0';
+        return '$' + parseFloat(amount).toLocaleString();
+    }
+    
+    // 전역 함수로 continueGame 노출
+    window.continueGame = continueGame;
 });
 </script>
 
