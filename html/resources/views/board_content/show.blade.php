@@ -41,6 +41,7 @@
             @if($post->mq_image)
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
                     @foreach($post->mq_image as $index => $image)
+                        @if(strpos($image, 'no_image') === false)
                         <a href="{{ asset($image) }}" 
                            target="_blank"
                            class="block aspect-square hover:opacity-90 transition-opacity">
@@ -48,6 +49,7 @@
                                  alt="{{ $post->mq_original_image[$index] ?? '게시글 이미지' }}"
                                  class="w-full h-full object-contain bg-gray-50 rounded-lg shadow-md cursor-pointer p-2">
                         </a>
+                        @endif
                     @endforeach
                 </div>
             @endif
