@@ -22,7 +22,7 @@ trait BoardCategoryColorTrait
     // 고정된 카테고리 목록 정의
     protected $fixedCategories = [
         'board_content' => ['투자명언', '경제용어', '어린이뉴스','기타'],
-        'board_research' => ['거래량', '순매수대금', 'RS랭킹', '증권사리포트', '기관순매수', '52주신고가','기타'],
+        'board_research' => ['거래량', '순매수대금', 'RS랭킹', '증권사리포트', '기관순매수', '52주신고가', '섹터분석', '기타'],
         'board_video' => ['경제기초', '경제뉴스', '기타'],
         'board_portfolio' => ['포트폴리오', '기타']
     ];
