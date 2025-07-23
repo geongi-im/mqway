@@ -65,7 +65,7 @@
 
                 <!-- 내용 미리보기 -->
                 <p class="text-gray-600 mb-4">
-                    {{ Str::limit($item->mq_content, 200) }}
+                    {{ Str::limit(html_entity_decode($item->mq_content), 200) }}
                 </p>
             </div>
         </article>

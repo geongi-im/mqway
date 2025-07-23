@@ -639,7 +639,7 @@ use Illuminate\Support\Facades\Auth;
                 </a>
             </h3>
             <p class="text-gray-600 line-clamp-2">
-                {{ Str::limit($news->mq_content, 100) }}
+                {{ Str::limit(html_entity_decode($news->mq_content), 100) }}
             </p>
         </div>
         @endforeach
