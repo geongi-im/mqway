@@ -69,5 +69,4 @@ yarn.lock
 # claude settings
 .claude/
 CLAUDE.md
-claude-flow
-.roomodes
+.commit_message.txt
