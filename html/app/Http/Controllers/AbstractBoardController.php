@@ -524,10 +524,18 @@ abstract class AbstractBoardController extends Controller
     public function deleteThumbnail($idx)
     {
         try {
+            // 인증 사용자 확인
+            if (!Auth::check()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => '로그인이 필요합니다.'
+                ], 401);
+            }
+
             $model = app($this->modelClass);
             $board = $model::findOrFail($idx);
 
-            // 작성자 체크
+            // 작성자 체크 (추가 보안 강화)
             if (!$this->canEdit($board)) {
                 return response()->json([
                     'success' => false,
@@ -592,29 +600,24 @@ abstract class AbstractBoardController extends Controller
     protected function processListImages(&$posts)
     {
         foreach ($posts as $post) {
-            // 썸네일이 있으면 우선 사용
-            if (is_array($post->mq_thumbnail_image) && !empty($post->mq_thumbnail_image)) {
-                $filename = $post->mq_thumbnail_image[0];
-                $post->mq_image = !filter_var($filename, FILTER_VALIDATE_URL)
-                    ? asset('storage/' . $this->uploadPath . '/' . $filename)
-                    : $filename;
-            } else if (is_array($post->mq_image) && !empty($post->mq_image)) {
-                // 썸네일이 없으면 첨부 이미지 사용
-                $filename = $post->mq_image[0];
-                $post->mq_image = !filter_var($filename, FILTER_VALIDATE_URL)
-                    ? asset('storage/' . $this->uploadPath . '/' . $filename)
-                    : $filename;
-            } else {
-                // 본문에서 이미지 추출
-                $firstImageSrc = extractFirstImageSrc($post->mq_content);
-                if ($firstImageSrc) {
-                    $post->mq_image = $firstImageSrc;
-                } else {
-                    // 이미지가 없으면 기본 이미지 설정
-                    $post->mq_image = asset('images/content/no_image.jpeg');
-                }
-            }
+            $post->mq_image = $this->getThumbnailUrl($post);
         }
+    }
+
+    /**
+     * 게시글의 썸네일 URL 반환 (폴백 없음)
+     */
+    protected function getThumbnailUrl($post)
+    {
+        if (!is_array($post->mq_thumbnail_image) || empty($post->mq_thumbnail_image)) {
+            return null;
+        }
+
+        $filename = $post->mq_thumbnail_image[0];
+
+        return filter_var($filename, FILTER_VALIDATE_URL)
+            ? $filename
+            : asset('storage/' . $this->uploadPath . '/' . $filename);
     }
     
     /**

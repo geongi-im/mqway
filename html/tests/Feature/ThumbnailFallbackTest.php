@@ -21,9 +21,9 @@ class ThumbnailFallbackTest extends TestCase
     }
 
     /**
-     * Test thumbnail fallback to first attachment image
+     * Test no fallback to attachment image (NEW BEHAVIOR)
      */
-    public function test_thumbnail_fallback_to_first_attachment()
+    public function test_no_fallback_to_attachment_image()
     {
         $user = factory(User::class)->create();
 
@@ -47,16 +47,14 @@ class ThumbnailFallbackTest extends TestCase
 
         $this->assertNotNull($targetPost);
 
-        // Should fallback to first attachment as thumbnail in list view
-        if (is_string($targetPost->mq_image)) {
-            $this->assertStringContains('attachment1.jpg', $targetPost->mq_image);
-        }
+        // Should NOT fallback to attachment - mq_image should be null
+        $this->assertNull($targetPost->mq_image);
     }
 
     /**
-     * Test thumbnail fallback to content image extraction
+     * Test no fallback to content images (NEW BEHAVIOR)
      */
-    public function test_thumbnail_fallback_to_content_images()
+    public function test_no_fallback_to_content_images()
     {
         $user = factory(User::class)->create();
 
@@ -82,17 +80,14 @@ class ThumbnailFallbackTest extends TestCase
 
         $this->assertNotNull($targetPost);
 
-        // The processListImages should extract first image from content
-        // This depends on the extractFirstImageSrc helper function
-        if (function_exists('extractFirstImageSrc')) {
-            $this->assertStringContains('content-image.jpg', $targetPost->mq_image);
-        }
+        // Should NOT extract images from content - mq_image should be null
+        $this->assertNull($targetPost->mq_image);
     }
 
     /**
-     * Test thumbnail fallback to default image
+     * Test no thumbnail shows null (NEW BEHAVIOR)
      */
-    public function test_thumbnail_fallback_to_default_image()
+    public function test_no_thumbnail_shows_null()
     {
         $user = factory(User::class)->create();
 
@@ -116,18 +111,18 @@ class ThumbnailFallbackTest extends TestCase
 
         $this->assertNotNull($targetPost);
 
-        // Should fallback to default no_image.jpeg
-        $this->assertStringContains('no_image.jpeg', $targetPost->mq_image);
+        // Should NOT fallback to default image - mq_image should be null
+        $this->assertNull($targetPost->mq_image);
     }
 
     /**
-     * Test thumbnail priority order: thumbnail > attachment > content > default
+     * Test thumbnail priority: thumbnail only, no fallback (NEW BEHAVIOR)
      */
-    public function test_thumbnail_priority_order()
+    public function test_thumbnail_only_priority()
     {
         $user = factory(User::class)->create();
 
-        // Test 1: Post with thumbnail (highest priority)
+        // Test 1: Post with thumbnail (only thumbnail should be used)
         $postWithThumbnail = factory(BoardContent::class)->create([
             'mq_user_id' => $user->mq_user_id,
             'mq_title' => 'Post with Thumbnail Priority',
@@ -138,7 +133,7 @@ class ThumbnailFallbackTest extends TestCase
             'mq_original_image' => ['attachment.jpg']
         ]);
 
-        // Test 2: Post with attachment but no thumbnail
+        // Test 2: Post with attachment but no thumbnail (should show null)
         $postWithAttachment = factory(BoardContent::class)->create([
             'mq_user_id' => $user->mq_user_id,
             'mq_title' => 'Post with Attachment Priority',
@@ -149,7 +144,7 @@ class ThumbnailFallbackTest extends TestCase
             'mq_original_image' => ['attachment.jpg']
         ]);
 
-        // Test 3: Post with content image only
+        // Test 3: Post with content image only (should show null)
         $postWithContentImage = factory(BoardContent::class)->create([
             'mq_user_id' => $user->mq_user_id,
             'mq_title' => 'Post with Content Priority',
@@ -165,25 +160,19 @@ class ThumbnailFallbackTest extends TestCase
 
         $posts = $response->viewData('posts');
 
-        // Verify priority order
+        // Verify new priority logic
         $thumbnailPost = $posts->firstWhere('mq_title', 'Post with Thumbnail Priority');
         $attachmentPost = $posts->firstWhere('mq_title', 'Post with Attachment Priority');
         $contentPost = $posts->firstWhere('mq_title', 'Post with Content Priority');
 
         // Post with thumbnail should use thumbnail
-        if (is_array($thumbnailPost->mq_thumbnail_image) && !empty($thumbnailPost->mq_thumbnail_image)) {
-            $this->assertStringContains('thumbnail.jpg', $thumbnailPost->mq_thumbnail_image[0]);
-        }
+        $this->assertStringContains('thumbnail.jpg', $thumbnailPost->mq_image);
 
-        // Post with attachment should use attachment
-        if (is_string($attachmentPost->mq_image)) {
-            $this->assertStringContains('attachment.jpg', $attachmentPost->mq_image);
-        }
+        // Post with attachment but no thumbnail should show null
+        $this->assertNull($attachmentPost->mq_image);
 
-        // Post with content image should extract from content
-        if (function_exists('extractFirstImageSrc')) {
-            $this->assertStringContains('content.jpg', $contentPost->mq_image);
-        }
+        // Post with content image but no thumbnail should show null
+        $this->assertNull($contentPost->mq_image);
     }
 
     /**

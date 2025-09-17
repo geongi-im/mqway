@@ -99,6 +99,7 @@ Route::prefix('board-content')->group(function () {
     Route::post('/{idx}/like', [BoardContentController::class, 'like'])->name('board-content.like')->middleware('auth');
     Route::post('/upload-image', [BoardContentController::class, 'uploadImage'])->name('board-content.upload.image')->middleware('auth');
     Route::post('/delete-image/{idx}/{filename}', [BoardContentController::class, 'deleteImage'])->name('board-content.delete-image')->middleware('auth');
+    Route::delete('/{idx}/thumbnail', [BoardContentController::class, 'deleteThumbnail'])->name('board-content.thumbnail.delete')->middleware('auth');
     Route::get('/{idx}', [BoardContentController::class, 'show'])->name('board-content.show');
 });
 
