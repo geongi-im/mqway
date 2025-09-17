@@ -143,9 +143,9 @@
                                                  alt="현재 이미지"
                                                  class="w-full h-full object-cover rounded-lg shadow-lg cursor-pointer">
                                         </a>
-                                        <button type="button" 
-                                                onclick="confirmDeleteImage(this, '{{ $filename }}')" 
-                                                class="absolute -right-3 -top-3 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors text-sm">×</button>
+                                        <button type="button"
+                                                onclick="confirmDeleteImage(this, '{{ $filename }}')"
+                                                class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors text-sm">×</button>
                                     </div>
                                     <div class="relative">
                                         <input type="file" 
