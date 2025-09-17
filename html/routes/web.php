@@ -115,6 +115,7 @@ Route::prefix('board-research')->middleware('auth')->group(function () {
     Route::post('/{idx}/like', [BoardResearchController::class, 'like'])->name('board-research.like');
     Route::post('/upload-image', [BoardResearchController::class, 'uploadImage'])->name('board-research.upload.image');
     Route::post('/delete-image/{idx}/{filename}', [BoardResearchController::class, 'deleteImage'])->name('board-research.delete-image');
+    Route::post('/delete-thumbnail/{idx}', [BoardResearchController::class, 'deleteThumbnail'])->name('board-research.delete-thumbnail');
     Route::get('/{idx}', [BoardResearchController::class, 'show'])->name('board-research.show');
 });
 

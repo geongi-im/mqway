@@ -43,6 +43,46 @@
                     @enderror
                 </div>
 
+                <!-- 썸네일 이미지 업로드 -->
+                <div class="space-y-2">
+                    <label for="mq_thumbnail_image" class="block text-sm font-medium text-gray-700">썸네일 이미지</label>
+                    <p class="text-sm text-gray-500 mb-3">게시글 목록에서 표시될 대표 이미지를 선택하세요 (선택사항)</p>
+
+                    <div class="thumbnail-upload-container">
+                        <div class="relative">
+                            <input type="file"
+                                   name="mq_thumbnail_image"
+                                   id="mq_thumbnail_image"
+                                   accept="image/*"
+                                   class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                   onchange="previewThumbnail(this)">
+                            <div class="w-full h-12 px-4 border border-gray-300 rounded-xl bg-white flex items-center justify-between cursor-pointer hover:border-yellow-500 transition-all @error('mq_thumbnail_image') border-red-500 @enderror">
+                                <span class="thumbnail-label text-text-dark">썸네일 이미지를 선택하세요</span>
+                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <!-- 썸네일 미리보기 -->
+                        <div id="thumbnailPreview" class="hidden mt-3">
+                            <div class="relative inline-block">
+                                <img id="thumbnailPreviewImage" src="" alt="썸네일 미리보기" class="w-32 h-24 object-cover rounded-lg border border-gray-300">
+                                <button type="button"
+                                        onclick="removeThumbnailPreview()"
+                                        class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors text-sm">
+                                    ×
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="text-sm text-gray-500">권장 크기: 800x600px, 최대 2MB</p>
+                    @error('mq_thumbnail_image')
+                        <p class="text-sm text-red-500">{{ $message }}</p>
+                    @enderror
+                </div>
+
                 <!-- 내용 (CKEditor) -->
                 <div class="space-y-2">
                     <label for="editor" class="block text-sm font-medium text-gray-700">내용</label>
@@ -211,6 +251,55 @@
     function updateFileLabel(input) {
         const label = input.parentElement.querySelector('.file-label');
         label.textContent = input.files[0] ? input.files[0].name : '이미지를 선택하세요';
+    }
+
+    // 썸네일 미리보기
+    function previewThumbnail(input) {
+        const label = document.querySelector('.thumbnail-label');
+        const preview = document.getElementById('thumbnailPreview');
+        const previewImage = document.getElementById('thumbnailPreviewImage');
+
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+
+            // 파일 크기 체크 (2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                alert('파일 크기는 2MB 이하로 선택해주세요.');
+                input.value = '';
+                label.textContent = '썸네일 이미지를 선택하세요';
+                return;
+            }
+
+            // 이미지 파일 체크
+            if (!file.type.match('image.*')) {
+                alert('이미지 파일만 선택할 수 있습니다.');
+                input.value = '';
+                label.textContent = '썸네일 이미지를 선택하세요';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.src = e.target.result;
+                preview.classList.remove('hidden');
+                label.textContent = file.name;
+            };
+            reader.readAsDataURL(file);
+        } else {
+            label.textContent = '썸네일 이미지를 선택하세요';
+            preview.classList.add('hidden');
+        }
+    }
+
+    // 썸네일 미리보기 제거
+    function removeThumbnailPreview() {
+        const input = document.getElementById('mq_thumbnail_image');
+        const label = document.querySelector('.thumbnail-label');
+        const preview = document.getElementById('thumbnailPreview');
+
+        input.value = '';
+        label.textContent = '썸네일 이미지를 선택하세요';
+        preview.classList.add('hidden');
     }
 </script>
 <style>
