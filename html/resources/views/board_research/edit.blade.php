@@ -125,6 +125,16 @@
                         @if($post->mq_image)
                             @foreach($post->mq_image as $index => $filename)
                                 <div class="file-input-group relative mb-3">
+                                    <!-- 첨부 이미지 미리보기 컨테이너 -->
+                                    <div class="attachment-preview hidden mb-2">
+                                        <div class="relative inline-block">
+                                            <img src="" alt="첨부 이미지 미리보기" class="w-24 h-24 object-cover rounded-lg border border-gray-200 shadow-sm">
+                                            <button type="button" onclick="removeAttachmentPreview(this)"
+                                                    class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-sm hover:bg-red-600 transition-colors">
+                                                ×
+                                            </button>
+                                        </div>
+                                    </div>
                                     <div class="mb-2 relative">
                                         <a href="{{ asset('storage/uploads/board_research/' . $filename) }}" 
                                            target="_blank" 
@@ -150,20 +160,20 @@
                                             </svg>
                                         </div>
                                     </div>
-                                    <!-- 첨부 이미지 미리보기 컨테이너 -->
-                                    <div class="attachment-preview hidden mt-2">
-                                        <div class="relative inline-block">
-                                            <img src="" alt="첨부 이미지 미리보기" class="w-24 h-24 object-cover rounded-lg border border-gray-200 shadow-sm">
-                                            <button type="button" onclick="removeAttachmentPreview(this)"
-                                                    class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-sm hover:bg-red-600 transition-colors">
-                                                ×
-                                            </button>
-                                        </div>
-                                    </div>
                                 </div>
                             @endforeach
                         @else
                             <div class="file-input-group relative mb-3" data-index="0">
+                                <!-- 첨부 이미지 미리보기 컨테이너 -->
+                                <div class="attachment-preview hidden mb-2" data-index="0">
+                                    <div class="relative inline-block">
+                                        <img src="" alt="첨부 이미지 미리보기" class="w-24 h-24 object-cover rounded-lg border border-gray-200 shadow-sm">
+                                        <button type="button" onclick="removeAttachmentPreview(this)"
+                                                class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-sm hover:bg-red-600 transition-colors">
+                                            ×
+                                        </button>
+                                    </div>
+                                </div>
                                 <div class="relative">
                                     <input type="file" 
                                            name="mq_image[]" 
@@ -175,16 +185,6 @@
                                         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                         </svg>
-                                    </div>
-                                </div>
-                                <!-- 첨부 이미지 미리보기 컨테이너 -->
-                                <div class="attachment-preview hidden mt-2" data-index="0">
-                                    <div class="relative inline-block">
-                                        <img src="" alt="첨부 이미지 미리보기" class="w-24 h-24 object-cover rounded-lg border border-gray-200 shadow-sm">
-                                        <button type="button" onclick="removeAttachmentPreview(this)"
-                                                class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-sm hover:bg-red-600 transition-colors">
-                                            ×
-                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -570,7 +570,7 @@ function confirmDeleteThumbnail(button) {
 
 // 기존 썸네일 삭제 AJAX 요청
 function deleteThumbnail(button) {
-    fetch(`/board-content/{{ $post->idx }}/thumbnail`, {
+    fetch(`/board-research/{{ $post->idx }}/thumbnail`, {
         method: 'DELETE',
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
