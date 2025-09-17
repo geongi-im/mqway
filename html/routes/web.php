@@ -113,9 +113,9 @@ Route::prefix('board-research')->middleware('auth')->group(function () {
     Route::put('/{idx}', [BoardResearchController::class, 'update'])->name('board-research.update');
     Route::delete('/{idx}', [BoardResearchController::class, 'destroy'])->name('board-research.destroy');
     Route::post('/{idx}/like', [BoardResearchController::class, 'like'])->name('board-research.like');
-    Route::post('/upload-image', [BoardResearchController::class, 'uploadImage'])->name('board-research.upload.image');
-    Route::post('/delete-image/{idx}/{filename}', [BoardResearchController::class, 'deleteImage'])->name('board-research.delete-image');
-    Route::post('/delete-thumbnail/{idx}', [BoardResearchController::class, 'deleteThumbnail'])->name('board-research.delete-thumbnail');
+    Route::post('/upload-image', [BoardResearchController::class, 'uploadImage'])->name('board-research.upload.image')->middleware('auth');
+    Route::post('/delete-image/{idx}/{filename}', [BoardResearchController::class, 'deleteImage'])->name('board-research.delete-image')->middleware('auth');
+    Route::delete('/{idx}/thumbnail', [BoardResearchController::class, 'deleteThumbnail'])->name('board-research.thumbnail.delete')->middleware('auth');
     Route::get('/{idx}', [BoardResearchController::class, 'show'])->name('board-research.show');
 });
 

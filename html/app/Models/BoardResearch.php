@@ -19,6 +19,8 @@ class BoardResearch extends Model
         'mq_user_id',
         'mq_image',
         'mq_original_image',
+        'mq_thumbnail_image',
+        'mq_thumbnail_original',
         'mq_view_cnt',
         'mq_like_cnt',
         'mq_status',
