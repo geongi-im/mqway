@@ -128,7 +128,7 @@
                                     <!-- 첨부 이미지 미리보기 컨테이너 -->
                                     <div class="attachment-preview hidden mb-2">
                                         <div class="relative inline-block">
-                                            <img src="" alt="첨부 이미지 미리보기" class="w-32 h-32 object-cover rounded-lg border border-gray-200 shadow-sm">
+                                            <img src="" alt="첨부 이미지 미리보기" class="w-32 h-24 object-cover rounded-lg border border-gray-200 shadow-sm">
                                             <button type="button" onclick="removeAttachmentPreview(this)"
                                                     class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-sm hover:bg-red-600 transition-colors">
                                                 ×
@@ -138,7 +138,7 @@
                                     <div class="mb-2 relative">
                                         <a href="{{ asset('storage/uploads/board_research/' . $filename) }}" 
                                            target="_blank" 
-                                           class="block hover:opacity-90 transition-opacity w-32 h-32">
+                                           class="block hover:opacity-90 transition-opacity w-32 h-24">
                                             <img src="{{ asset('storage/uploads/board_research/' . $filename) }}" 
                                                  alt="현재 이미지"
                                                  class="w-full h-full object-cover rounded-lg shadow-lg cursor-pointer">
