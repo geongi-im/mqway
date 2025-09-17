@@ -135,17 +135,19 @@
                                             </button>
                                         </div>
                                     </div>
-                                    <div class="mb-2 relative">
-                                        <a href="{{ asset('storage/uploads/board_content/' . $filename) }}" 
-                                           target="_blank" 
-                                           class="block hover:opacity-90 transition-opacity w-32 h-24">
-                                            <img src="{{ asset('storage/uploads/board_content/' . $filename) }}" 
-                                                 alt="현재 이미지"
-                                                 class="w-full h-full object-cover rounded-lg shadow-lg cursor-pointer">
-                                        </a>
-                                        <button type="button"
-                                                onclick="confirmDeleteImage(this, '{{ $filename }}')"
-                                                class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors text-sm">×</button>
+                                    <div class="mb-2">
+                                        <div class="relative inline-block">
+                                            <a href="{{ asset('storage/uploads/board_content/' . $filename) }}"
+                                               target="_blank"
+                                               class="block hover:opacity-90 transition-opacity">
+                                                <img src="{{ asset('storage/uploads/board_content/' . $filename) }}"
+                                                     alt="현재 이미지"
+                                                     class="w-32 h-24 object-cover rounded-lg shadow-lg cursor-pointer">
+                                            </a>
+                                            <button type="button"
+                                                    onclick="confirmDeleteImage(this, '{{ $filename }}')"
+                                                    class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors text-sm">×</button>
+                                        </div>
                                     </div>
                                     <div class="relative">
                                         <input type="file"
