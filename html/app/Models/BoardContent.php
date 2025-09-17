@@ -19,6 +19,8 @@ class BoardContent extends Model
         'mq_user_id',
         'mq_image',
         'mq_original_image',
+        'mq_thumbnail_image',
+        'mq_thumbnail_original',
         'mq_view_cnt',
         'mq_like_cnt',
         'mq_status',
@@ -48,9 +50,51 @@ class BoardContent extends Model
      */
     protected $casts = [
         'mq_image' => 'array',
-        'mq_original_image' => 'array'
+        'mq_original_image' => 'array',
+        'mq_thumbnail_image' => 'array',
+        'mq_thumbnail_original' => 'array'
     ];
     
+    /**
+     * 썸네일 이미지가 있는지 확인
+     */
+    public function hasThumbnail()
+    {
+        return !empty($this->mq_thumbnail_image) && is_array($this->mq_thumbnail_image);
+    }
+
+    /**
+     * 첫 번째 썸네일 이미지 URL 반환
+     */
+    public function getThumbnailUrl()
+    {
+        if ($this->hasThumbnail()) {
+            $filename = $this->mq_thumbnail_image[0];
+            return !filter_var($filename, FILTER_VALIDATE_URL)
+                ? asset('storage/uploads/board_content/' . $filename)
+                : $filename;
+        }
+        return null;
+    }
+
+    /**
+     * 썸네일 이미지 파일명 반환
+     */
+    public function getThumbnailFilename()
+    {
+        return $this->hasThumbnail() ? $this->mq_thumbnail_image[0] : null;
+    }
+
+    /**
+     * 썸네일 원본 파일명 반환
+     */
+    public function getThumbnailOriginalName()
+    {
+        return !empty($this->mq_thumbnail_original) && is_array($this->mq_thumbnail_original)
+            ? $this->mq_thumbnail_original[0]
+            : null;
+    }
+
     /**
      * 사용자와의 관계 정의
      */

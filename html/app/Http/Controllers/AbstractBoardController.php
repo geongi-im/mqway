@@ -106,15 +106,29 @@ abstract class AbstractBoardController extends Controller
         try {
             $imagePaths = [];
             $originalNames = [];
+            $thumbnailPaths = [];
+            $thumbnailOriginalNames = [];
 
-            // 이미지 처리
+            // 썸네일 이미지 처리
+            if ($request->hasFile('mq_thumbnail_image')) {
+                $file = $request->file('mq_thumbnail_image');
+                $originalName = $file->getClientOriginalName();
+                $extension = $file->getClientOriginalExtension();
+                $randomName = Str::random(32).'.'.$extension;
+                $file->storeAs($this->uploadPath, $randomName, 'public');
+
+                $thumbnailPaths[] = $randomName;
+                $thumbnailOriginalNames[] = $originalName;
+            }
+
+            // 이미지 처리 (첨부파일)
             if ($request->hasFile('mq_image')) {
                 foreach ($request->file('mq_image') as $file) {
                     $originalName = $file->getClientOriginalName();
                     $extension = $file->getClientOriginalExtension();
                     $randomName = Str::random(32).'.'.$extension;
                     $file->storeAs($this->uploadPath, $randomName, 'public');
-                    
+
                     $imagePaths[] = $randomName;
                     $originalNames[] = $originalName;
                 }
@@ -133,6 +147,11 @@ abstract class AbstractBoardController extends Controller
             if (!empty($imagePaths)) {
                 $board->mq_image = $imagePaths;
                 $board->mq_original_image = $originalNames;
+            }
+
+            if (!empty($thumbnailPaths)) {
+                $board->mq_thumbnail_image = $thumbnailPaths;
+                $board->mq_thumbnail_original = $thumbnailOriginalNames;
             }
 
             $board->mq_reg_date = now();
@@ -239,10 +258,24 @@ abstract class AbstractBoardController extends Controller
             $board->mq_content = $request->mq_content;
             $board->mq_category = $request->mq_category;
             
-            // 이미지 처리
+            // 썸네일 이미지 처리
+            if ($request->hasFile('mq_thumbnail_image')) {
+                $file = $request->file('mq_thumbnail_image');
+                if ($file->isValid()) {
+                    $originalName = $file->getClientOriginalName();
+                    $extension = $file->getClientOriginalExtension();
+                    $randomName = Str::random(32).'.'.$extension;
+                    $file->storeAs($this->uploadPath, $randomName, 'public');
+
+                    $board->mq_thumbnail_image = [$randomName];
+                    $board->mq_thumbnail_original = [$originalName];
+                }
+            }
+
+            // 이미지 처리 (첨부파일)
             $imagePaths = is_array($board->mq_image) ? $board->mq_image : [];
             $originalNames = is_array($board->mq_original_image) ? $board->mq_original_image : [];
-            
+
             if ($request->hasFile('mq_image')) {
                 foreach ($request->file('mq_image') as $file) {
                     if ($file->isValid()) {
@@ -250,12 +283,12 @@ abstract class AbstractBoardController extends Controller
                         $extension = $file->getClientOriginalExtension();
                         $randomName = Str::random(32).'.'.$extension;
                         $file->storeAs($this->uploadPath, $randomName, 'public');
-                        
+
                         $imagePaths[] = $randomName;
                         $originalNames[] = $originalName;
                     }
                 }
-                
+
                 $board->mq_image = $imagePaths;
                 $board->mq_original_image = $originalNames;
             }
@@ -294,9 +327,19 @@ abstract class AbstractBoardController extends Controller
         
         try {
             // 이미지 파일 삭제 (하드 삭제 시)
-            if ($this->useHardDelete() && is_array($board->mq_image)) {
-                foreach ($board->mq_image as $image) {
-                    Storage::disk('public')->delete($this->uploadPath . '/' . $image);
+            if ($this->useHardDelete()) {
+                // 첨부 이미지 삭제
+                if (is_array($board->mq_image)) {
+                    foreach ($board->mq_image as $image) {
+                        Storage::disk('public')->delete($this->uploadPath . '/' . $image);
+                    }
+                }
+
+                // 썸네일 이미지 삭제
+                if (is_array($board->mq_thumbnail_image)) {
+                    foreach ($board->mq_thumbnail_image as $thumbnail) {
+                        Storage::disk('public')->delete($this->uploadPath . '/' . $thumbnail);
+                    }
                 }
             }
 
@@ -428,7 +471,7 @@ abstract class AbstractBoardController extends Controller
         try {
             $model = app($this->modelClass);
             $board = $model::findOrFail($idx);
-            
+
             // 작성자 체크
             if (!$this->canEdit($board)) {
                 return response()->json([
@@ -443,34 +486,82 @@ abstract class AbstractBoardController extends Controller
                 if ($index !== false) {
                     // 실제 파일 삭제
                     Storage::disk('public')->delete($this->uploadPath . '/' . $filename);
-                    
+
                     // 배열에서 제거
                     $images = $board->mq_image;
                     $originalNames = $board->mq_original_image;
                     unset($images[$index]);
                     unset($originalNames[$index]);
-                    
+
                     // 배열 재정렬
                     $board->mq_image = array_values($images);
                     $board->mq_original_image = array_values($originalNames);
                     $board->save();
-                    
+
                     return response()->json([
                         'success' => true,
                         'message' => '이미지가 삭제되었습니다.'
                     ]);
                 }
             }
-            
+
             return response()->json([
                 'success' => false,
                 'message' => '이미지를 찾을 수 없습니다.'
             ], 404);
-            
+
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => '이미지 삭제 중 오류가 발생했습니다.'
+            ], 500);
+        }
+    }
+
+    /**
+     * 썸네일 삭제 API
+     */
+    public function deleteThumbnail($idx)
+    {
+        try {
+            $model = app($this->modelClass);
+            $board = $model::findOrFail($idx);
+
+            // 작성자 체크
+            if (!$this->canEdit($board)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => '삭제 권한이 없습니다.'
+                ], 403);
+            }
+
+            // 썸네일이 있는지 확인
+            if (is_array($board->mq_thumbnail_image) && !empty($board->mq_thumbnail_image)) {
+                $thumbnailFilename = $board->mq_thumbnail_image[0];
+
+                // 실제 파일 삭제
+                Storage::disk('public')->delete($this->uploadPath . '/' . $thumbnailFilename);
+
+                // 데이터베이스에서 썸네일 정보 제거
+                $board->mq_thumbnail_image = null;
+                $board->mq_thumbnail_original = null;
+                $board->save();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => '썸네일이 삭제되었습니다.'
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => '썸네일을 찾을 수 없습니다.'
+            ], 404);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => '썸네일 삭제 중 오류가 발생했습니다.'
             ], 500);
         }
     }
@@ -501,9 +592,16 @@ abstract class AbstractBoardController extends Controller
     protected function processListImages(&$posts)
     {
         foreach ($posts as $post) {
-            if (is_array($post->mq_image) && !empty($post->mq_image)) {
+            // 썸네일이 있으면 우선 사용
+            if (is_array($post->mq_thumbnail_image) && !empty($post->mq_thumbnail_image)) {
+                $filename = $post->mq_thumbnail_image[0];
+                $post->mq_image = !filter_var($filename, FILTER_VALIDATE_URL)
+                    ? asset('storage/' . $this->uploadPath . '/' . $filename)
+                    : $filename;
+            } else if (is_array($post->mq_image) && !empty($post->mq_image)) {
+                // 썸네일이 없으면 첨부 이미지 사용
                 $filename = $post->mq_image[0];
-                $post->mq_image = !filter_var($filename, FILTER_VALIDATE_URL) 
+                $post->mq_image = !filter_var($filename, FILTER_VALIDATE_URL)
                     ? asset('storage/' . $this->uploadPath . '/' . $filename)
                     : $filename;
             } else {
@@ -550,7 +648,8 @@ abstract class AbstractBoardController extends Controller
             'mq_title' => 'required|max:255',
             'mq_content' => 'required',
             'mq_category' => 'required|in:' . implode(',', $validCategories),
-            'mq_image.*' => 'nullable|image|max:2048'
+            'mq_image.*' => 'nullable|image|max:2048',
+            'mq_thumbnail_image' => 'nullable|image|max:2048'
         ]);
     }
     
