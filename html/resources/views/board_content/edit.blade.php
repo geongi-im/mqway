@@ -125,16 +125,6 @@
                         @if($post->mq_image)
                             @foreach($post->mq_image as $index => $filename)
                                 <div class="file-input-group relative mb-3">
-                                    <!-- 첨부 이미지 미리보기 컨테이너 -->
-                                    <div class="attachment-preview hidden mb-2">
-                                        <div class="relative inline-block">
-                                            <img src="" alt="첨부 이미지 미리보기" class="w-32 h-24 object-cover rounded-lg border border-gray-200 shadow-sm">
-                                            <button type="button" onclick="removeAttachmentPreview(this)"
-                                                    class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-sm hover:bg-red-600 transition-colors">
-                                                ×
-                                            </button>
-                                        </div>
-                                    </div>
                                     <div class="mb-2">
                                         <div class="relative inline-block">
                                             <a href="{{ asset('storage/uploads/board_content/' . $filename) }}"
@@ -166,16 +156,6 @@
                             @endforeach
                         @else
                             <div class="file-input-group relative mb-3" data-index="0">
-                                <!-- 첨부 이미지 미리보기 컨테이너 -->
-                                <div class="attachment-preview hidden mb-2" data-index="0">
-                                    <div class="relative inline-block">
-                                        <img src="" alt="첨부 이미지 미리보기" class="w-24 h-24 object-cover rounded-lg border border-gray-200 shadow-sm">
-                                        <button type="button" onclick="removeAttachmentPreview(this)"
-                                                class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-sm hover:bg-red-600 transition-colors">
-                                            ×
-                                        </button>
-                                    </div>
-                                </div>
                                 <div class="relative">
                                     <input type="file"
                                            name="mq_image[]"
@@ -348,7 +328,7 @@ function addFileInput() {
 
     const newInput = inputs[0].cloneNode(true);
     // 이미지 미리보기 div가 있다면 제거
-    const previewDiv = newInput.querySelector('div.mb-2');
+    const previewDiv = newInput.querySelector('.attachment-preview');
     if (previewDiv) {
         previewDiv.remove();
     }
@@ -498,8 +478,7 @@ function removeThumbnailPreview() {
 function previewAttachment(input) {
     const group = input.closest('.file-input-group');
     const label = group.querySelector('.file-label');
-    const preview = group.querySelector('.attachment-preview');
-    const previewImage = preview.querySelector('img');
+    let preview = group.querySelector('.attachment-preview');
 
     if (input.files && input.files[0]) {
         const file = input.files[0];
@@ -508,20 +487,40 @@ function previewAttachment(input) {
         if (!validateImageFile(file)) {
             input.value = '';
             label.textContent = '이미지를 선택하세요';
-            preview.classList.add('hidden');
+            if (preview) {
+                preview.remove();
+            }
             return;
         }
 
+        // 미리보기 컨테이너가 없으면 동적으로 생성
+        if (!preview) {
+            preview = document.createElement('div');
+            preview.className = 'attachment-preview mb-2';
+            preview.innerHTML = `
+                <div class="relative inline-block">
+                    <img src="" alt="첨부 이미지 미리보기" class="w-32 h-24 object-cover rounded-lg border border-gray-200 shadow-sm">
+                    <button type="button" onclick="removeAttachmentPreview(this)"
+                            class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-sm hover:bg-red-600 transition-colors">
+                        ×
+                    </button>
+                </div>
+            `;
+            group.insertBefore(preview, group.querySelector('.relative'));
+        }
+
+        const previewImage = preview.querySelector('img');
         const reader = new FileReader();
         reader.onload = function(e) {
             previewImage.src = e.target.result;
-            preview.classList.remove('hidden');
             label.textContent = file.name;
         };
         reader.readAsDataURL(file);
     } else {
         label.textContent = '이미지를 선택하세요';
-        preview.classList.add('hidden');
+        if (preview) {
+            preview.remove();
+        }
     }
 }
 
@@ -532,15 +531,18 @@ function removeAttachmentPreview(button) {
     const label = group.querySelector('.file-label');
     const preview = group.querySelector('.attachment-preview');
 
-    // 메모리 정리
-    const img = preview.querySelector('img');
-    if (img.src.startsWith('blob:')) {
-        URL.revokeObjectURL(img.src);
+    if (preview) {
+        // 메모리 정리
+        const img = preview.querySelector('img');
+        if (img && img.src.startsWith('blob:')) {
+            URL.revokeObjectURL(img.src);
+        }
+
+        preview.remove();
     }
 
     input.value = '';
     label.textContent = '이미지를 선택하세요';
-    preview.classList.add('hidden');
 }
 
 // 파일 유효성 검사
