@@ -140,19 +140,6 @@
                                         </div>
                                         <p class="text-sm text-gray-600 mt-1 current-image-name">현재 이미지: {{ $post->getImageOriginalName($index) }}</p>
                                     </div>
-                                    <div class="relative">
-                                        <input type="file"
-                                               name="mq_image[]"
-                                               accept="image/*"
-                                               class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                               onchange="previewAttachment(this)">
-                                        <div class="w-full h-12 px-4 border border-gray-300 rounded-xl bg-white flex items-center justify-between cursor-pointer hover:border-yellow-500 transition-all">
-                                            <span class="file-label text-text-dark">이미지 변경하기</span>
-                                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                            </svg>
-                                        </div>
-                                    </div>
                                 </div>
                             @endforeach
                         @else
@@ -377,22 +364,9 @@ function deleteImage(button, filename) {
     .then(data => {
         if (data.success) {
             const fileInputGroup = button.closest('.file-input-group');
-            const input = fileInputGroup.querySelector('input[type="file"]');
-            const previewDiv = button.closest('.mb-2');
-            
-            if (previewDiv) {
-                previewDiv.remove();
-            }
-            
-            // file input 초기화
-            input.value = '';
-            const label = fileInputGroup.querySelector('.file-label');
-            label.textContent = '이미지를 선택하세요';
-            
-            // 첫 번째 이미지가 아닌 경우에만 전체 그룹 삭제
-            if (!fileInputGroup.isEqualNode(fileInputGroup.parentElement.firstElementChild)) {
-                fileInputGroup.remove();
-            }
+
+            // 전체 이미지 그룹 제거
+            fileInputGroup.remove();
         } else {
             alert('이미지 삭제 중 오류가 발생했습니다.');
         }
@@ -403,26 +377,6 @@ function deleteImage(button, filename) {
     });
 }
 
-// 기존 removeImage 함수는 새로 추가된 이미지용으로만 사용
-function removeImage(button) {
-    const fileInputGroup = button.parentElement;
-    const input = fileInputGroup.querySelector('input[type="file"]');
-    const previewDiv = fileInputGroup.querySelector('div.mb-2');
-
-    if (previewDiv) {
-        previewDiv.remove();
-    }
-
-    // file input 초기화
-    input.value = '';
-    const label = fileInputGroup.querySelector('.file-label');
-    label.textContent = '이미지를 선택하세요';
-
-    // 첫 번째 이미지가 아닌 경우에만 전체 그룹 삭제
-    if (!fileInputGroup.isEqualNode(fileInputGroup.parentElement.firstElementChild)) {
-        fileInputGroup.remove();
-    }
-}
 
 // 썸네일 미리보기
 function previewThumbnail(input) {
@@ -475,7 +429,7 @@ function removeThumbnailPreview() {
     preview.classList.add('hidden');
 }
 
-// 첨부 이미지 미리보기
+// 첨부 이미지 미리보기 (새 이미지 업로드용)
 function previewAttachment(input) {
     const group = input.closest('.file-input-group');
     const label = group.querySelector('.file-label');
@@ -492,13 +446,6 @@ function previewAttachment(input) {
                 preview.remove();
             }
             return;
-        }
-
-        // 기존 이미지가 있는 경우 숨기기
-        const existingImageDiv = group.querySelector('.mb-2:not(.attachment-preview)');
-        if (existingImageDiv) {
-            existingImageDiv.style.display = 'none';
-            existingImageDiv.setAttribute('data-hidden-by-preview', 'true');
         }
 
         // 미리보기 컨테이너가 없으면 동적으로 생성
@@ -537,13 +484,6 @@ function previewAttachment(input) {
         if (preview) {
             preview.remove();
         }
-
-        // 기존 이미지 미리보기 다시 표시
-        const existingImageDiv = group.querySelector('.mb-2[data-hidden-by-preview="true"]');
-        if (existingImageDiv) {
-            existingImageDiv.style.display = 'block';
-            existingImageDiv.removeAttribute('data-hidden-by-preview');
-        }
     }
 }
 
@@ -566,13 +506,6 @@ function removeAttachmentPreview(button) {
 
     input.value = '';
     label.textContent = '이미지를 선택하세요';
-
-    // 기존 이미지 미리보기 다시 표시
-    const existingImageDiv = group.querySelector('.mb-2[data-hidden-by-preview="true"]');
-    if (existingImageDiv) {
-        existingImageDiv.style.display = 'block';
-        existingImageDiv.removeAttribute('data-hidden-by-preview');
-    }
 }
 
 // 파일 유효성 검사
