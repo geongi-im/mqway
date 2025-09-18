@@ -80,7 +80,7 @@ class IndexController extends Controller
                     if ($firstImageSrc) {
                         $post->mq_image = $firstImageSrc;
                     } else {
-                        $post->mq_image = asset('images/content/no_image.jpeg');
+                        $post->mq_image = null;
                     }
                 }
             }
@@ -99,7 +99,7 @@ class IndexController extends Controller
                 if ($firstImageSrc) {
                     $post->mq_image = $firstImageSrc;
                 } else {
-                    $post->mq_image = asset('images/content/no_image.jpeg');
+                    $post->mq_image = null;
                 }
             }
         }
@@ -123,8 +123,8 @@ class IndexController extends Controller
                     if ($firstImageSrc) {
                         $post->mq_image = $firstImageSrc;
                     } else {
-                        // 이미지가 없으면 기본 이미지 설정
-                        $post->mq_image = asset('images/content/no_image.jpeg');
+                        // 이미지가 없으면 null 설정
+                        $post->mq_image = null;
                     }
                 }
             } else {
@@ -133,8 +133,8 @@ class IndexController extends Controller
                 if ($firstImageSrc) {
                     $post->mq_image = $firstImageSrc;
                 } else {
-                    // 이미지가 없으면 기본 이미지 설정
-                    $post->mq_image = asset('images/content/no_image.jpeg');
+                    // 이미지가 없으면 null 설정
+                    $post->mq_image = null;
                 }
             }
         }
