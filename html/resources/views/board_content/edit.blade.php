@@ -68,6 +68,7 @@
                             </div>
                         @endif
 
+                        @if(!$post->hasThumbnail())
                         <div class="relative">
                             <input type="file"
                                    name="mq_thumbnail_image"
@@ -76,19 +77,15 @@
                                    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                    onchange="previewThumbnail(this)">
                             <div class="w-full h-12 px-4 border border-gray-300 rounded-xl bg-white flex items-center justify-between cursor-pointer hover:border-yellow-500 transition-all @error('mq_thumbnail_image') border-red-500 @enderror">
-                                <span class="thumbnail-label text-text-dark">
-                                    @if($post->hasThumbnail())
-                                        썸네일 이미지 변경하기
-                                    @else
-                                        썸네일 이미지를 선택하세요
-                                    @endif
-                                </span>
+                                <span class="thumbnail-label text-text-dark">썸네일 이미지를 선택하세요</span>
                                 <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                 </svg>
                             </div>
                         </div>
+                        @endif
 
+                        @if(!$post->hasThumbnail())
                         <!-- 새 썸네일 미리보기 -->
                         <div id="thumbnailPreview" class="hidden mt-3">
                             <div class="relative inline-block">
@@ -100,6 +97,7 @@
                                 </button>
                             </div>
                         </div>
+                        @endif
                     </div>
 
                     <p class="text-sm text-gray-500">권장 크기: 800x600px, 최대 2MB</p>
@@ -558,13 +556,47 @@ function deleteThumbnail(button) {
     .then(data => {
         if (data.success) {
             const existingThumbnail = document.querySelector('.existing-thumbnail');
-            const label = document.querySelector('.thumbnail-label');
+            const thumbnailContainer = document.querySelector('.thumbnail-upload-container');
 
             if (existingThumbnail) {
                 existingThumbnail.remove();
             }
 
-            label.textContent = '썸네일 이미지를 선택하세요';
+            // 새로운 썸네일 입력 추가
+            const newThumbnailInput = document.createElement('div');
+            newThumbnailInput.className = 'relative';
+            newThumbnailInput.innerHTML = `
+                <input type="file"
+                       name="mq_thumbnail_image"
+                       id="mq_thumbnail_image"
+                       accept="image/*"
+                       class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                       onchange="previewThumbnail(this)">
+                <div class="w-full h-12 px-4 border border-gray-300 rounded-xl bg-white flex items-center justify-between cursor-pointer hover:border-yellow-500 transition-all">
+                    <span class="thumbnail-label text-text-dark">썸네일 이미지를 선택하세요</span>
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+            `;
+
+            // 새 썸네일 미리보기도 추가
+            const newThumbnailPreview = document.createElement('div');
+            newThumbnailPreview.id = 'thumbnailPreview';
+            newThumbnailPreview.className = 'hidden mt-3';
+            newThumbnailPreview.innerHTML = `
+                <div class="relative inline-block">
+                    <img id="thumbnailPreviewImage" src="" alt="새 썸네일 미리보기" class="w-32 h-24 object-cover rounded-lg border border-gray-300">
+                    <button type="button"
+                            onclick="removeThumbnailPreview()"
+                            class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors text-sm">
+                        ×
+                    </button>
+                </div>
+            `;
+
+            thumbnailContainer.appendChild(newThumbnailInput);
+            thumbnailContainer.appendChild(newThumbnailPreview);
         } else {
             alert('썸네일 삭제 중 오류가 발생했습니다.');
         }
