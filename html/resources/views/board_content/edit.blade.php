@@ -308,22 +308,31 @@ function showLoadingManager() {
 function addFileInput() {
     const container = document.getElementById('fileUploadContainer');
     const inputs = container.getElementsByClassName('file-input-group');
-    
+
     if(inputs.length >= 5) {
         alert('최대 5개까지 업로드 가능합니다.');
         return;
     }
 
-    const newInput = inputs[0].cloneNode(true);
-    // 이미지 미리보기 div가 있다면 제거
-    const previewDiv = newInput.querySelector('.attachment-preview');
-    if (previewDiv) {
-        previewDiv.remove();
-    }
-    
-    newInput.querySelector('input').value = '';
-    newInput.querySelector('.file-label').textContent = '이미지를 선택하세요';
-    
+    // 새로운 파일 입력 그룹 생성
+    const newInput = document.createElement('div');
+    newInput.className = 'file-input-group relative mb-3';
+    newInput.innerHTML = `
+        <div class="relative">
+            <input type="file"
+                   name="mq_image[]"
+                   accept="image/*"
+                   class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                   onchange="previewAttachment(this)">
+            <div class="w-full h-12 px-4 border border-gray-300 rounded-xl bg-white flex items-center justify-between cursor-pointer hover:border-yellow-500 transition-all">
+                <span class="file-label text-text-dark">이미지를 선택하세요</span>
+                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 002 2z"></path>
+                </svg>
+            </div>
+        </div>
+    `;
+
     // 삭제 버튼 추가
     const deleteButton = document.createElement('button');
     deleteButton.type = 'button';
@@ -332,7 +341,7 @@ function addFileInput() {
     deleteButton.onclick = function() {
         this.parentElement.remove();
     };
-    
+
     newInput.appendChild(deleteButton);
     container.appendChild(newInput);
 }
