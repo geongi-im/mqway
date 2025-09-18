@@ -513,7 +513,21 @@ function previewAttachment(input) {
                     </button>
                 </div>
             `;
-            group.insertBefore(preview, group.querySelector('.relative'));
+
+            // 기존 이미지가 있는 경우와 없는 경우에 따라 삽입 위치 결정
+            const existingImageDiv = group.querySelector('.mb-2');
+            const inputDiv = group.querySelector('.relative');
+
+            if (existingImageDiv) {
+                // 기존 이미지가 있는 경우: 기존 이미지 다음에 삽입
+                existingImageDiv.insertAdjacentElement('afterend', preview);
+            } else if (inputDiv) {
+                // 기존 이미지가 없는 경우: input div 앞에 삽입
+                group.insertBefore(preview, inputDiv);
+            } else {
+                // fallback: 그룹의 첫 번째 자식으로 삽입
+                group.insertAdjacentElement('afterbegin', preview);
+            }
         }
 
         const previewImage = preview.querySelector('img');
