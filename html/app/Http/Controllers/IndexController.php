@@ -96,14 +96,42 @@ class IndexController extends Controller
         
         // 이미지 경로 처리 - 쉽게 보는 경제
         foreach ($videoContents as $post) {
-            // 썸네일 이미지가 있으면 사용, 없으면 null
+            // 썸네일 이미지가 있으면 우선 사용
             if (is_array($post->mq_thumbnail_image) && !empty($post->mq_thumbnail_image)) {
                 $filename = $post->mq_thumbnail_image[0];
                 $post->mq_image = !filter_var($filename, FILTER_VALIDATE_URL)
                     ? asset('storage/uploads/board_video/' . $filename)
                     : $filename;
+            } else if (is_array($post->mq_image) && !empty($post->mq_image)) {
+                // 업로드된 이미지가 있으면 그걸 사용
+                $filename = $post->mq_image[0];
+                $post->mq_image = !filter_var($filename, FILTER_VALIDATE_URL)
+                    ? asset('storage/uploads/board_video/' . $filename)
+                    : $filename;
+            } else if (isset($post->mq_video_url) && !empty($post->mq_video_url)) {
+                // 비디오 URL이 있으면 YouTube 썸네일 추출
+                $thumbnailUrl = $this->getVideoThumbnail($post->mq_video_url);
+                if ($thumbnailUrl) {
+                    $post->mq_image = $thumbnailUrl;
+                } else {
+                    // 본문에서 이미지 추출
+                    $firstImageSrc = extractFirstImageSrc($post->mq_original_content);
+                    if ($firstImageSrc) {
+                        $post->mq_image = $firstImageSrc;
+                    } else {
+                        // 이미지가 없으면 null 설정
+                        $post->mq_image = null;
+                    }
+                }
             } else {
-                $post->mq_image = null;
+                // 본문에서 이미지 추출
+                $firstImageSrc = extractFirstImageSrc($post->mq_original_content);
+                if ($firstImageSrc) {
+                    $post->mq_image = $firstImageSrc;
+                } else {
+                    // 이미지가 없으면 null 설정
+                    $post->mq_image = null;
+                }
             }
         }
         
