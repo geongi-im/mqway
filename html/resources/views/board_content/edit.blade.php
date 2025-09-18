@@ -494,15 +494,11 @@ function previewAttachment(input) {
             return;
         }
 
-        // 기존 이미지 미리보기와 파일명 숨기기
-        const currentImageName = group.querySelector('.current-image-name');
-        if (currentImageName) {
-            currentImageName.style.display = 'none';
-        }
-
+        // 기존 이미지가 있는 경우 숨기기
         const existingImageDiv = group.querySelector('.mb-2:not(.attachment-preview)');
         if (existingImageDiv) {
             existingImageDiv.style.display = 'none';
+            existingImageDiv.setAttribute('data-hidden-by-preview', 'true');
         }
 
         // 미리보기 컨테이너가 없으면 동적으로 생성
@@ -519,15 +515,9 @@ function previewAttachment(input) {
                 </div>
             `;
 
-            // 기존 이미지가 있는 경우와 없는 경우에 따라 삽입 위치 결정
-            const existingImageDiv = group.querySelector('.mb-2');
+            // input div 앞에 삽입
             const inputDiv = group.querySelector('.relative');
-
-            if (existingImageDiv) {
-                // 기존 이미지가 있는 경우: 기존 이미지 다음에 삽입
-                existingImageDiv.insertAdjacentElement('afterend', preview);
-            } else if (inputDiv) {
-                // 기존 이미지가 없는 경우: input div 앞에 삽입
+            if (inputDiv) {
                 group.insertBefore(preview, inputDiv);
             } else {
                 // fallback: 그룹의 첫 번째 자식으로 삽입
@@ -548,15 +538,11 @@ function previewAttachment(input) {
             preview.remove();
         }
 
-        // 기존 이미지 미리보기와 파일명 다시 표시
-        const currentImageName = group.querySelector('.current-image-name');
-        if (currentImageName) {
-            currentImageName.style.display = 'block';
-        }
-
-        const existingImageDiv = group.querySelector('.mb-2:not(.attachment-preview)');
+        // 기존 이미지 미리보기 다시 표시
+        const existingImageDiv = group.querySelector('.mb-2[data-hidden-by-preview="true"]');
         if (existingImageDiv) {
             existingImageDiv.style.display = 'block';
+            existingImageDiv.removeAttribute('data-hidden-by-preview');
         }
     }
 }
@@ -581,15 +567,11 @@ function removeAttachmentPreview(button) {
     input.value = '';
     label.textContent = '이미지를 선택하세요';
 
-    // 기존 이미지 미리보기와 파일명 다시 표시
-    const currentImageName = group.querySelector('.current-image-name');
-    if (currentImageName) {
-        currentImageName.style.display = 'block';
-    }
-
-    const existingImageDiv = group.querySelector('.mb-2:not(.attachment-preview)');
+    // 기존 이미지 미리보기 다시 표시
+    const existingImageDiv = group.querySelector('.mb-2[data-hidden-by-preview="true"]');
     if (existingImageDiv) {
         existingImageDiv.style.display = 'block';
+        existingImageDiv.removeAttribute('data-hidden-by-preview');
     }
 }
 
