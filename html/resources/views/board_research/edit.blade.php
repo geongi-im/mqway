@@ -68,6 +68,7 @@
                             </div>
                         @endif
 
+                        @if(!$post->hasThumbnail())
                         <div class="relative">
                             <input type="file"
                                    name="mq_thumbnail_image"
@@ -76,19 +77,15 @@
                                    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                    onchange="previewThumbnail(this)">
                             <div class="w-full h-12 px-4 border border-gray-300 rounded-xl bg-white flex items-center justify-between cursor-pointer hover:border-yellow-500 transition-all @error('mq_thumbnail_image') border-red-500 @enderror">
-                                <span class="thumbnail-label text-text-dark">
-                                    @if($post->hasThumbnail())
-                                        썸네일 이미지 변경하기
-                                    @else
-                                        썸네일 이미지를 선택하세요
-                                    @endif
-                                </span>
+                                <span class="thumbnail-label text-text-dark">썸네일 이미지를 선택하세요</span>
                                 <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                 </svg>
                             </div>
                         </div>
+                        @endif
 
+                        @if(!$post->hasThumbnail())
                         <!-- 새 썸네일 미리보기 -->
                         <div id="thumbnailPreview" class="hidden mt-3">
                             <div class="relative inline-block">
@@ -100,6 +97,7 @@
                                 </button>
                             </div>
                         </div>
+                        @endif
                     </div>
 
                     <p class="text-sm text-gray-500">권장 크기: 800x600px, 최대 2MB</p>
@@ -125,16 +123,6 @@
                         @if($post->mq_image)
                             @foreach($post->mq_image as $index => $filename)
                                 <div class="file-input-group relative mb-3">
-                                    <!-- 첨부 이미지 미리보기 컨테이너 -->
-                                    <div class="attachment-preview hidden mb-2">
-                                        <div class="relative inline-block">
-                                            <img src="" alt="첨부 이미지 미리보기" class="w-32 h-24 object-cover rounded-lg border border-gray-200 shadow-sm">
-                                            <button type="button" onclick="removeAttachmentPreview(this)"
-                                                    class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-sm hover:bg-red-600 transition-colors">
-                                                ×
-                                            </button>
-                                        </div>
-                                    </div>
                                     <div class="mb-2">
                                         <div class="relative inline-block">
                                             <a href="{{ asset('storage/uploads/board_research/' . $filename) }}"
@@ -148,37 +136,15 @@
                                                     onclick="confirmDeleteImage(this, '{{ $filename }}')"
                                                     class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors text-sm">×</button>
                                         </div>
-                                    </div>
-                                    <div class="relative">
-                                        <input type="file" 
-                                               name="mq_image[]" 
-                                               accept="image/*"
-                                               class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                               onchange="previewAttachment(this)">
-                                        <div class="w-full h-12 px-4 border border-gray-300 rounded-xl bg-white flex items-center justify-between cursor-pointer hover:border-yellow-500 transition-all">
-                                            <span class="file-label text-text-dark">이미지 변경하기</span>
-                                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                            </svg>
-                                        </div>
+                                        <p class="text-sm text-gray-600 mt-1 current-image-name">현재 이미지: {{ $post->getImageOriginalName($index) }}</p>
                                     </div>
                                 </div>
                             @endforeach
                         @else
                             <div class="file-input-group relative mb-3" data-index="0">
-                                <!-- 첨부 이미지 미리보기 컨테이너 -->
-                                <div class="attachment-preview hidden mb-2" data-index="0">
-                                    <div class="relative inline-block">
-                                        <img src="" alt="첨부 이미지 미리보기" class="w-24 h-24 object-cover rounded-lg border border-gray-200 shadow-sm">
-                                        <button type="button" onclick="removeAttachmentPreview(this)"
-                                                class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-sm hover:bg-red-600 transition-colors">
-                                            ×
-                                        </button>
-                                    </div>
-                                </div>
                                 <div class="relative">
-                                    <input type="file" 
-                                           name="mq_image[]" 
+                                    <input type="file"
+                                           name="mq_image[]"
                                            accept="image/*"
                                            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                            onchange="previewAttachment(this)">
@@ -340,22 +306,31 @@ function showLoadingManager() {
 function addFileInput() {
     const container = document.getElementById('fileUploadContainer');
     const inputs = container.getElementsByClassName('file-input-group');
-    
+
     if(inputs.length >= 5) {
         alert('최대 5개까지 업로드 가능합니다.');
         return;
     }
 
-    const newInput = inputs[0].cloneNode(true);
-    // 이미지 미리보기 div가 있다면 제거
-    const previewDiv = newInput.querySelector('div.mb-2');
-    if (previewDiv) {
-        previewDiv.remove();
-    }
-    
-    newInput.querySelector('input').value = '';
-    newInput.querySelector('.file-label').textContent = '이미지를 선택하세요';
-    
+    // 새로운 파일 입력 그룹 생성
+    const newInput = document.createElement('div');
+    newInput.className = 'file-input-group relative mb-3';
+    newInput.innerHTML = `
+        <div class="relative">
+            <input type="file"
+                   name="mq_image[]"
+                   accept="image/*"
+                   class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                   onchange="previewAttachment(this)">
+            <div class="w-full h-12 px-4 border border-gray-300 rounded-xl bg-white flex items-center justify-between cursor-pointer hover:border-yellow-500 transition-all">
+                <span class="file-label text-text-dark">이미지를 선택하세요</span>
+                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 002 2z"></path>
+                </svg>
+            </div>
+        </div>
+    `;
+
     // 삭제 버튼 추가
     const deleteButton = document.createElement('button');
     deleteButton.type = 'button';
@@ -364,7 +339,7 @@ function addFileInput() {
     deleteButton.onclick = function() {
         this.parentElement.remove();
     };
-    
+
     newInput.appendChild(deleteButton);
     container.appendChild(newInput);
 }
@@ -396,22 +371,9 @@ function deleteImage(button, filename) {
     .then(data => {
         if (data.success) {
             const fileInputGroup = button.closest('.file-input-group');
-            const input = fileInputGroup.querySelector('input[type="file"]');
-            const previewDiv = button.closest('.mb-2');
-            
-            if (previewDiv) {
-                previewDiv.remove();
-            }
-            
-            // file input 초기화
-            input.value = '';
-            const label = fileInputGroup.querySelector('.file-label');
-            label.textContent = '이미지를 선택하세요';
-            
-            // 첫 번째 이미지가 아닌 경우에만 전체 그룹 삭제
-            if (!fileInputGroup.isEqualNode(fileInputGroup.parentElement.firstElementChild)) {
-                fileInputGroup.remove();
-            }
+
+            // 전체 이미지 그룹 제거
+            fileInputGroup.remove();
         } else {
             alert('이미지 삭제 중 오류가 발생했습니다.');
         }
@@ -422,26 +384,6 @@ function deleteImage(button, filename) {
     });
 }
 
-// 기존 removeImage 함수는 새로 추가된 이미지용으로만 사용
-function removeImage(button) {
-    const fileInputGroup = button.parentElement;
-    const input = fileInputGroup.querySelector('input[type="file"]');
-    const previewDiv = fileInputGroup.querySelector('div.mb-2');
-
-    if (previewDiv) {
-        previewDiv.remove();
-    }
-
-    // file input 초기화
-    input.value = '';
-    const label = fileInputGroup.querySelector('.file-label');
-    label.textContent = '이미지를 선택하세요';
-
-    // 첫 번째 이미지가 아닌 경우에만 전체 그룹 삭제
-    if (!fileInputGroup.isEqualNode(fileInputGroup.parentElement.firstElementChild)) {
-        fileInputGroup.remove();
-    }
-}
 
 // 썸네일 미리보기
 function previewThumbnail(input) {
@@ -494,12 +436,11 @@ function removeThumbnailPreview() {
     preview.classList.add('hidden');
 }
 
-// 첨부 이미지 미리보기
+// 첨부 이미지 미리보기 (새 이미지 업로드용)
 function previewAttachment(input) {
     const group = input.closest('.file-input-group');
     const label = group.querySelector('.file-label');
-    const preview = group.querySelector('.attachment-preview');
-    const previewImage = preview.querySelector('img');
+    let preview = group.querySelector('.attachment-preview');
 
     if (input.files && input.files[0]) {
         const file = input.files[0];
@@ -508,20 +449,48 @@ function previewAttachment(input) {
         if (!validateImageFile(file)) {
             input.value = '';
             label.textContent = '이미지를 선택하세요';
-            preview.classList.add('hidden');
+            if (preview) {
+                preview.remove();
+            }
             return;
         }
 
+        // 미리보기 컨테이너가 없으면 동적으로 생성
+        if (!preview) {
+            preview = document.createElement('div');
+            preview.className = 'attachment-preview mb-2';
+            preview.innerHTML = `
+                <div class="relative inline-block">
+                    <img src="" alt="첨부 이미지 미리보기" class="w-32 h-24 object-cover rounded-lg border border-gray-200 shadow-sm">
+                    <button type="button" onclick="removeAttachmentPreview(this)"
+                            class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-sm hover:bg-red-600 transition-colors">
+                        ×
+                    </button>
+                </div>
+            `;
+
+            // input div 앞에 삽입
+            const inputDiv = group.querySelector('.relative');
+            if (inputDiv) {
+                group.insertBefore(preview, inputDiv);
+            } else {
+                // fallback: 그룹의 첫 번째 자식으로 삽입
+                group.insertAdjacentElement('afterbegin', preview);
+            }
+        }
+
+        const previewImage = preview.querySelector('img');
         const reader = new FileReader();
         reader.onload = function(e) {
             previewImage.src = e.target.result;
-            preview.classList.remove('hidden');
             label.textContent = file.name;
         };
         reader.readAsDataURL(file);
     } else {
         label.textContent = '이미지를 선택하세요';
-        preview.classList.add('hidden');
+        if (preview) {
+            preview.remove();
+        }
     }
 }
 
@@ -532,15 +501,18 @@ function removeAttachmentPreview(button) {
     const label = group.querySelector('.file-label');
     const preview = group.querySelector('.attachment-preview');
 
-    // 메모리 정리
-    const img = preview.querySelector('img');
-    if (img.src.startsWith('blob:')) {
-        URL.revokeObjectURL(img.src);
+    if (preview) {
+        // 메모리 정리
+        const img = preview.querySelector('img');
+        if (img && img.src.startsWith('blob:')) {
+            URL.revokeObjectURL(img.src);
+        }
+
+        preview.remove();
     }
 
     input.value = '';
     label.textContent = '이미지를 선택하세요';
-    preview.classList.add('hidden');
 }
 
 // 파일 유효성 검사
@@ -584,13 +556,47 @@ function deleteThumbnail(button) {
     .then(data => {
         if (data.success) {
             const existingThumbnail = document.querySelector('.existing-thumbnail');
-            const label = document.querySelector('.thumbnail-label');
+            const thumbnailContainer = document.querySelector('.thumbnail-upload-container');
 
             if (existingThumbnail) {
                 existingThumbnail.remove();
             }
 
-            label.textContent = '썸네일 이미지를 선택하세요';
+            // 새로운 썸네일 입력 추가
+            const newThumbnailInput = document.createElement('div');
+            newThumbnailInput.className = 'relative';
+            newThumbnailInput.innerHTML = `
+                <input type="file"
+                       name="mq_thumbnail_image"
+                       id="mq_thumbnail_image"
+                       accept="image/*"
+                       class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                       onchange="previewThumbnail(this)">
+                <div class="w-full h-12 px-4 border border-gray-300 rounded-xl bg-white flex items-center justify-between cursor-pointer hover:border-yellow-500 transition-all">
+                    <span class="thumbnail-label text-text-dark">썸네일 이미지를 선택하세요</span>
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+            `;
+
+            // 새 썸네일 미리보기도 추가
+            const newThumbnailPreview = document.createElement('div');
+            newThumbnailPreview.id = 'thumbnailPreview';
+            newThumbnailPreview.className = 'hidden mt-3';
+            newThumbnailPreview.innerHTML = `
+                <div class="relative inline-block">
+                    <img id="thumbnailPreviewImage" src="" alt="새 썸네일 미리보기" class="w-32 h-24 object-cover rounded-lg border border-gray-300">
+                    <button type="button"
+                            onclick="removeThumbnailPreview()"
+                            class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors text-sm">
+                        ×
+                    </button>
+                </div>
+            `;
+
+            thumbnailContainer.appendChild(newThumbnailInput);
+            thumbnailContainer.appendChild(newThumbnailPreview);
         } else {
             alert('썸네일 삭제 중 오류가 발생했습니다.');
         }
