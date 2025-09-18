@@ -494,10 +494,15 @@ function previewAttachment(input) {
             return;
         }
 
-        // 기존 이미지 파일명 숨기기
+        // 기존 이미지 미리보기와 파일명 숨기기
         const currentImageName = group.querySelector('.current-image-name');
         if (currentImageName) {
             currentImageName.style.display = 'none';
+        }
+
+        const existingImageDiv = group.querySelector('.mb-2:not(.attachment-preview)');
+        if (existingImageDiv) {
+            existingImageDiv.style.display = 'none';
         }
 
         // 미리보기 컨테이너가 없으면 동적으로 생성
@@ -543,10 +548,15 @@ function previewAttachment(input) {
             preview.remove();
         }
 
-        // 기존 이미지 파일명 다시 표시
+        // 기존 이미지 미리보기와 파일명 다시 표시
         const currentImageName = group.querySelector('.current-image-name');
         if (currentImageName) {
             currentImageName.style.display = 'block';
+        }
+
+        const existingImageDiv = group.querySelector('.mb-2:not(.attachment-preview)');
+        if (existingImageDiv) {
+            existingImageDiv.style.display = 'block';
         }
     }
 }
@@ -571,10 +581,15 @@ function removeAttachmentPreview(button) {
     input.value = '';
     label.textContent = '이미지를 선택하세요';
 
-    // 기존 이미지 파일명 다시 표시
+    // 기존 이미지 미리보기와 파일명 다시 표시
     const currentImageName = group.querySelector('.current-image-name');
     if (currentImageName) {
         currentImageName.style.display = 'block';
+    }
+
+    const existingImageDiv = group.querySelector('.mb-2:not(.attachment-preview)');
+    if (existingImageDiv) {
+        existingImageDiv.style.display = 'block';
     }
 }
 
