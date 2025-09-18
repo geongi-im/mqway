@@ -96,6 +96,16 @@ class BoardContent extends Model
     }
 
     /**
+     * 첨부 이미지 원본 파일명 반환
+     */
+    public function getImageOriginalName($index)
+    {
+        return !empty($this->mq_original_image) && is_array($this->mq_original_image) && isset($this->mq_original_image[$index])
+            ? $this->mq_original_image[$index]
+            : null;
+    }
+
+    /**
      * 사용자와의 관계 정의
      */
     public function user()

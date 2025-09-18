@@ -138,7 +138,7 @@
                                                     onclick="confirmDeleteImage(this, '{{ $filename }}')"
                                                     class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors text-sm">×</button>
                                         </div>
-                                        <p class="text-sm text-gray-600 mt-1">현재 이미지: {{ $filename }}</p>
+                                        <p class="text-sm text-gray-600 mt-1">현재 이미지: {{ $post->getImageOriginalName($index) ?: $filename }}</p>
                                     </div>
                                     <div class="relative">
                                         <input type="file"
