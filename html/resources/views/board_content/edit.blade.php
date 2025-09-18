@@ -138,7 +138,7 @@
                                                     onclick="confirmDeleteImage(this, '{{ $filename }}')"
                                                     class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors text-sm">×</button>
                                         </div>
-                                        <p class="text-sm text-gray-600 mt-1">현재 이미지: {{ $post->getImageOriginalName($index) ?: $filename }}</p>
+                                        <p class="text-sm text-gray-600 mt-1 current-image-name">현재 이미지: {{ $post->getImageOriginalName($index) }}</p>
                                     </div>
                                     <div class="relative">
                                         <input type="file"
@@ -494,6 +494,12 @@ function previewAttachment(input) {
             return;
         }
 
+        // 기존 이미지 파일명 숨기기
+        const currentImageName = group.querySelector('.current-image-name');
+        if (currentImageName) {
+            currentImageName.style.display = 'none';
+        }
+
         // 미리보기 컨테이너가 없으면 동적으로 생성
         if (!preview) {
             preview = document.createElement('div');
@@ -522,6 +528,12 @@ function previewAttachment(input) {
         if (preview) {
             preview.remove();
         }
+
+        // 기존 이미지 파일명 다시 표시
+        const currentImageName = group.querySelector('.current-image-name');
+        if (currentImageName) {
+            currentImageName.style.display = 'block';
+        }
     }
 }
 
@@ -544,6 +556,12 @@ function removeAttachmentPreview(button) {
 
     input.value = '';
     label.textContent = '이미지를 선택하세요';
+
+    // 기존 이미지 파일명 다시 표시
+    const currentImageName = group.querySelector('.current-image-name');
+    if (currentImageName) {
+        currentImageName.style.display = 'block';
+    }
 }
 
 // 파일 유효성 검사
