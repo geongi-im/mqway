@@ -69,9 +69,15 @@ class IndexController extends Controller
                 
             // 이미지 경로 처리 - 투자 리서치
             foreach ($researchContents as $post) {
-                if (is_array($post->mq_image) && !empty($post->mq_image)) {
+                // 썸네일 이미지가 있으면 우선 사용
+                if (is_array($post->mq_thumbnail_image) && !empty($post->mq_thumbnail_image)) {
+                    $filename = $post->mq_thumbnail_image[0];
+                    $post->mq_image = !filter_var($filename, FILTER_VALIDATE_URL)
+                        ? asset('storage/uploads/board_research/' . $filename)
+                        : $filename;
+                } else if (is_array($post->mq_image) && !empty($post->mq_image)) {
                     $filename = $post->mq_image[0];
-                    $post->mq_image = !filter_var($filename, FILTER_VALIDATE_URL) 
+                    $post->mq_image = !filter_var($filename, FILTER_VALIDATE_URL)
                         ? asset('storage/uploads/board_research/' . $filename)
                         : $filename;
                 } else {
@@ -88,9 +94,15 @@ class IndexController extends Controller
 
         // 이미지 경로 처리 - 추천 콘텐츠
         foreach ($recommendedContents as $post) {
-            if (is_array($post->mq_image) && !empty($post->mq_image)) {
+            // 썸네일 이미지가 있으면 우선 사용
+            if (is_array($post->mq_thumbnail_image) && !empty($post->mq_thumbnail_image)) {
+                $filename = $post->mq_thumbnail_image[0];
+                $post->mq_image = !filter_var($filename, FILTER_VALIDATE_URL)
+                    ? asset('storage/uploads/board_content/' . $filename)
+                    : $filename;
+            } else if (is_array($post->mq_image) && !empty($post->mq_image)) {
                 $filename = $post->mq_image[0];
-                $post->mq_image = !filter_var($filename, FILTER_VALIDATE_URL) 
+                $post->mq_image = !filter_var($filename, FILTER_VALIDATE_URL)
                     ? asset('storage/uploads/board_content/' . $filename)
                     : $filename;
             } else {
@@ -106,10 +118,16 @@ class IndexController extends Controller
         
         // 이미지 경로 처리 - 쉽게 보는 경제
         foreach ($videoContents as $post) {
-            if (is_array($post->mq_image) && !empty($post->mq_image)) {
+            // 썸네일 이미지가 있으면 우선 사용
+            if (is_array($post->mq_thumbnail_image) && !empty($post->mq_thumbnail_image)) {
+                $filename = $post->mq_thumbnail_image[0];
+                $post->mq_image = !filter_var($filename, FILTER_VALIDATE_URL)
+                    ? asset('storage/uploads/board_video/' . $filename)
+                    : $filename;
+            } else if (is_array($post->mq_image) && !empty($post->mq_image)) {
                 // 업로드된 이미지가 있으면 그걸 사용
                 $filename = $post->mq_image[0];
-                $post->mq_image = !filter_var($filename, FILTER_VALIDATE_URL) 
+                $post->mq_image = !filter_var($filename, FILTER_VALIDATE_URL)
                     ? asset('storage/uploads/board_video/' . $filename)
                     : $filename;
             } else if (isset($post->mq_video_url) && !empty($post->mq_video_url)) {
