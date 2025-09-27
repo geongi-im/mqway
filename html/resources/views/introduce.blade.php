@@ -43,7 +43,7 @@
         <div class="space-y-8 text-gray-700 text-base sm:text-lg leading-relaxed">
             <p>우리는 MQ입니다.</p>
             <p>MQ는 Money Quotient, 즉 '돈을 다루는 지능'이라는 뜻처럼, 돈을 목적이 아니라 삶을 설계하는 도구로 바라봅니다.</p>
-            <p>우리의 미션은 청소년과 그 부모가 함께, 돈을 통해 스스로를 이해하고 성장하는 여정을 만드는 것입니다.</p>
+            <p>우리의 미션은 아이들과 그 부모가 함께, 돈을 통해 스스로를 이해하고 성장하는 여정을 만드는 것입니다.</p>
 
             <div class="mt-12 md:mt-16 pt-8">
                 <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-8 pb-3 border-b-2 border-point">
@@ -86,7 +86,7 @@
                         </h3>
                         <div class="space-y-3 pl-8 sm:pl-12">
                             <p>MQ는 국내 교육에만 머무르지 않습니다.</p>
-                            <p>청소년들이 직접 해외의 유명 대학과 혁신적 교육기관을 탐방하며, 스스로 더 넓은 시야와 진로에 대한 동기를 얻을 수 있도록 <strong class="font-bold text-point">'MQ 그랜드투어 프로그램'</strong>을 운영하고 있습니다.</p>
+                            <p>아이들이 직접 해외의 유명 대학과 혁신적 교육기관을 탐방하며, 스스로 더 넓은 시야와 진로에 대한 동기를 얻을 수 있도록 <strong class="font-bold text-point">'MQ 그랜드투어 프로그램'</strong>을 운영하고 있습니다.</p>
                             <p>단순한 여행이 아닌, 진짜 배움과 성장의 여정입니다.</p>
                         </div>
                     </div>
