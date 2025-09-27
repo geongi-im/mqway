@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="description" content="MQWAY는 청소년과 부모를 위한 경제 지능·자기주도력 통합 교육 플랫폼입니다. 돈을 통해 삶의 지혜를 배우는 독창적인 MQ Way 방식으로, 아이가 스스로 미래를 설계하는 힘을 길러줍니다.">
+    <meta name="description" content="MQWAY는 아이들과 부모를 위한 경제 지능·자기주도력 통합 교육 플랫폼입니다. 돈을 통해 삶의 지혜를 배우는 독창적인 MQ Way 방식으로, 아이가 스스로 미래를 설계하는 힘을 길러줍니다.">
 
     <meta property="og:image" content="{{ asset('/images/logo/mqway_og_image.png') }}">
     <meta property="og:title" content="{{ config('app.name', 'MQWAY') }}">
@@ -32,10 +32,13 @@
                 extend: {
                     colors: {
                         primary: '#f6f6f6',
-                        secondary: '#FFFFFF',
-                        cdark: '#2b2b2b',
+                        secondary: '#626262',
+                        cdark: '#FFFFFF',
                         cgray: '#f5f5f5',
-                        point: '#fecc41'
+                        point: '#444444', //background gray
+                        point1:'#eba568', //orange
+                        point2:'#626262', //light gray
+                        point3:'#fe4337' //red
                     }
                 }
             }

@@ -75,7 +75,7 @@ use Illuminate\Support\Facades\Auth;
 /* CTA 버튼 추가 */
 .mainBanner .banner-content .cta-button {
     display: inline-block;
-    background-color: #ffd100; /* 포인트 색상 */
+    background-color: #eba568; /* 포인트 색상 */
     color: #333;
     font-weight: 600;
     padding: 0.75rem 2rem;

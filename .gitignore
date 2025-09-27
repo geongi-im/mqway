@@ -70,7 +70,7 @@ yarn.lock
 .claude/
 CLAUDE.md
 .commit_message.txt
-
+task.md
 # spec-kit settings
 .specify/
 specs/
