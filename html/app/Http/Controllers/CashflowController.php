@@ -9,9 +9,9 @@ class CashflowController extends Controller
     /**
      * Cashflow 소개 페이지
      */
-    public function introduction()
+    public function intro()
     {
-        return view('cashflow.introduction');
+        return view('cashflow.intro');
     }
 
     /**
@@ -19,7 +19,7 @@ class CashflowController extends Controller
      */
     public function process()
     {
-        return redirect()->route('cashflow.introduction')->with('alert', '준비중입니다.');
+        return redirect()->route('cashflow.intro')->with('alert', '준비중입니다.');
     }
 
     /**
