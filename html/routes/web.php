@@ -17,6 +17,7 @@ use App\Http\Controllers\GeminiBotController;
 use App\Http\Controllers\MqtestController;
 use App\Http\Controllers\Api\ServerCheckController;
 use App\Http\Controllers\CashflowController;
+use App\Http\Controllers\CourseL1Controller;
 use App\Http\Controllers\BoardContentController;
 use App\Http\Controllers\BoardResearchController;
 use App\Http\Controllers\BoardVideoController;
@@ -208,9 +209,15 @@ Route::get('/api/server-check', [ServerCheckController::class, 'serverCheck'])->
 
 // Cashflow 라우트
 Route::prefix('cashflow')->group(function () {
-    Route::get('/introduction', [CashflowController::class, 'introduction'])->name('cashflow.introduction');
+    Route::get('/intro', [CashflowController::class, 'intro'])->name('cashflow.intro');
     Route::get('/process', [CashflowController::class, 'process'])->name('cashflow.process');
     Route::get('/helper', [CashflowController::class, 'helper'])->name('cashflow.helper')->middleware('auth');
+});
+
+// Cashflow 라우트
+Route::prefix('course-l1')->group(function () {
+    Route::get('/intro', [CourseL1Controller::class, 'intro'])->name('course-l1.intro');
+Route::get('/life-map', [CourseL1Controller::class, 'lifeMap'])->name('course-l1.life-map');
 });
 
 // Tools 라우트
