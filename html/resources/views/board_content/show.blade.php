@@ -43,9 +43,9 @@
                     @foreach($post->mq_image as $index => $image)
                         @if(strpos($image, 'no_image') === false)
                         <a href="{{ asset($image) }}"
-                           data-pswp-width="1200"
-                           data-pswp-height="800"
-                           class="block aspect-square hover:opacity-90 transition-opacity">
+                           data-pswp-width=""
+                           data-pswp-height=""
+                           class="block aspect-square hover:opacity-90 transition-opacity gallery-item">
                             <img src="{{ asset($image) }}"
                                  alt="{{ $post->mq_original_image[$index] ?? '게시글 이미지' }}"
                                  class="w-full h-full object-contain bg-gray-50 rounded-lg shadow-md cursor-pointer p-2">
@@ -154,29 +154,63 @@ async function likePost(event, idx) {
 }
 
 // PhotoSwipe 초기화
-document.addEventListener('DOMContentLoaded', function() {
-    // 메인 갤러리 (첨부 이미지)
+document.addEventListener('DOMContentLoaded', async function() {
+    // 메인 갤러리 (첨부 이미지) 크기 설정
     const mainGallery = document.getElementById('gallery-main');
     if (mainGallery) {
+        // 첨부 이미지들의 실제 크기 설정
+        const galleryItems = mainGallery.querySelectorAll('.gallery-item');
+        for (const item of galleryItems) {
+            const img = item.querySelector('img');
+            if (img) {
+                const dimensions = await getImageDimensions(img);
+                item.setAttribute('data-pswp-width', dimensions.width.toString());
+                item.setAttribute('data-pswp-height', dimensions.height.toString());
+            }
+        }
+
         const lightbox = new PhotoSwipeLightbox({
             gallery: '#gallery-main',
             children: 'a',
             pswpModule: PhotoSwipe,
             bgOpacity: 0.9,
-            showHideOpacity: true
+            showHideOpacity: true,
+            // 애니메이션 개선
+            easing: 'cubic-bezier(0.4, 0, 0.22, 1)',
+            // 초기 줌 레벨 최적화
+            initialZoomLevel: 'fit',
+            secondaryZoomLevel: 1.5,
+            maxZoomLevel: 3
         });
         lightbox.init();
     }
 
+    // 이미지 실제 크기 가져오기
+    function getImageDimensions(img) {
+        return new Promise((resolve) => {
+            if (img.naturalWidth && img.naturalHeight) {
+                resolve({ width: img.naturalWidth, height: img.naturalHeight });
+            } else {
+                const tempImg = new Image();
+                tempImg.onload = function() {
+                    resolve({ width: this.width, height: this.height });
+                };
+                tempImg.src = img.src;
+            }
+        });
+    }
+
     // 본문 내 이미지 처리
-    function initContentImages() {
+    async function initContentImages() {
         const contentDiv = document.querySelector('.prose');
         if (!contentDiv) return;
 
         const images = contentDiv.querySelectorAll('img');
-        const galleryItems = [];
 
-        images.forEach((img, index) => {
+        for (const img of images) {
+            // 이미지 실제 크기 가져오기
+            const dimensions = await getImageDimensions(img);
+
             // 이미지를 감싸는 링크가 없다면 새로 생성
             let link = img.parentElement;
             if (link.tagName !== 'A') {
@@ -189,9 +223,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 link.href = img.src;
             }
 
-            // PhotoSwipe 속성 추가
-            link.setAttribute('data-pswp-width', '1200');
-            link.setAttribute('data-pswp-height', '800');
+            // PhotoSwipe 속성 추가 (실제 이미지 크기 사용)
+            link.setAttribute('data-pswp-width', dimensions.width.toString());
+            link.setAttribute('data-pswp-height', dimensions.height.toString());
             link.setAttribute('data-gallery', 'content-gallery');
 
             // 클릭 이벤트 추가
@@ -201,8 +235,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 // 갤러리 아이템 배열 생성
                 const galleryItems = Array.from(contentDiv.querySelectorAll('a[data-gallery="content-gallery"]')).map(link => ({
                     src: link.href,
-                    width: parseInt(link.getAttribute('data-pswp-width')) || 1200,
-                    height: parseInt(link.getAttribute('data-pswp-height')) || 800,
+                    width: parseInt(link.getAttribute('data-pswp-width')),
+                    height: parseInt(link.getAttribute('data-pswp-height')),
                     alt: link.querySelector('img')?.alt || ''
                 }));
 
@@ -214,7 +248,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     dataSource: galleryItems,
                     index: clickedIndex,
                     bgOpacity: 0.9,
-                    showHideOpacity: true
+                    showHideOpacity: true,
+                    // 애니메이션 개선
+                    easing: 'cubic-bezier(0.4, 0, 0.22, 1)',
+                    // 초기 줌 레벨 최적화
+                    initialZoomLevel: 'fit',
+                    secondaryZoomLevel: 1.5,
+                    maxZoomLevel: 3
                 });
                 pswp.init();
             });
@@ -226,6 +266,9 @@ document.addEventListener('DOMContentLoaded', function() {
             img.style.borderRadius = '8px';
             img.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
             img.style.transition = 'opacity 0.3s ease';
+            // 잔상 방지를 위한 스타일
+            img.style.willChange = 'auto';
+            img.style.backfaceVisibility = 'hidden';
 
             // 호버 효과
             img.addEventListener('mouseenter', function() {
@@ -234,7 +277,7 @@ document.addEventListener('DOMContentLoaded', function() {
             img.addEventListener('mouseleave', function() {
                 this.style.opacity = '1';
             });
-        });
+        }
     }
 
     // 본문 이미지 초기화

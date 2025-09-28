@@ -28,11 +28,11 @@
     <script src="{{ asset('js/common.js') }}"></script>
 
     <!-- PhotoSwipe CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@5.4.2/dist/photoswipe.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/5.4.4/photoswipe.min.css">
 
     <!-- PhotoSwipe JS -->
-    <script src="https://cdn.jsdelivr.net/npm/photoswipe@5.4.2/dist/photoswipe.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/photoswipe@5.4.2/dist/photoswipe-lightbox.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/5.4.4/umd/photoswipe.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/5.4.4/umd/photoswipe-lightbox.umd.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
