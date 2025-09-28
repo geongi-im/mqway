@@ -39,13 +39,14 @@
 
             <!-- 이미지 -->
             @if($post->mq_image)
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                <div class="gallery grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8" id="gallery-main">
                     @foreach($post->mq_image as $index => $image)
                         @if(strpos($image, 'no_image') === false)
-                        <a href="{{ asset($image) }}" 
-                           target="_blank"
-                           class="block aspect-square hover:opacity-90 transition-opacity">
-                            <img src="{{ asset($image) }}" 
+                        <a href="{{ asset($image) }}"
+                           data-pswp-width=""
+                           data-pswp-height=""
+                           class="block aspect-square hover:opacity-90 transition-opacity gallery-item">
+                            <img src="{{ asset($image) }}"
                                  alt="{{ $post->mq_original_image[$index] ?? '게시글 이미지' }}"
                                  class="w-full h-full object-contain bg-gray-50 rounded-lg shadow-md cursor-pointer p-2">
                         </a>
@@ -107,12 +108,12 @@ function confirmDelete() {
 
 async function likePost(event, idx) {
     event.preventDefault();
-    
+
     @guest
         alert('로그인이 필요한 기능입니다.');
         return;
     @endguest
-    
+
     try {
         const button = event.currentTarget;
         const response = await fetch(`/board-research/${idx}/like`, {
@@ -130,13 +131,13 @@ async function likePost(event, idx) {
             alert(data.message);
             return;
         }
-        
+
         // 좋아요 수 업데이트
         const likeCountElements = document.querySelectorAll('button[onclick^="likePost"] span');
         likeCountElements.forEach(element => {
             element.textContent = new Intl.NumberFormat().format(data.likes);
         });
-        
+
         // 버튼 스타일 변경 (좋아요 상태에 따라)
         if (data.isLiked) {
             button.classList.remove('bg-gray-100', 'text-gray-600');
@@ -145,12 +146,143 @@ async function likePost(event, idx) {
             button.classList.remove('bg-yellow-100', 'text-yellow-800');
             button.classList.add('bg-gray-100', 'text-gray-600');
         }
-        
+
     } catch (error) {
         console.error('Error:', error);
         alert('좋아요 처리 중 오류가 발생했습니다.');
     }
 }
+
+// PhotoSwipe 초기화
+document.addEventListener('DOMContentLoaded', async function() {
+    // 이미지 실제 크기 가져오기
+    function getImageDimensions(img) {
+        return new Promise((resolve) => {
+            if (img.naturalWidth && img.naturalHeight) {
+                resolve({ width: img.naturalWidth, height: img.naturalHeight });
+            } else {
+                const tempImg = new Image();
+                tempImg.onload = function() {
+                    resolve({ width: this.width, height: this.height });
+                };
+                tempImg.src = img.src;
+            }
+        });
+    }
+
+    // 메인 갤러리 (첨부 이미지) 크기 설정
+    const mainGallery = document.getElementById('gallery-main');
+    if (mainGallery) {
+        // 첨부 이미지들의 실제 크기 설정
+        const galleryItems = mainGallery.querySelectorAll('.gallery-item');
+        for (const item of galleryItems) {
+            const img = item.querySelector('img');
+            if (img) {
+                const dimensions = await getImageDimensions(img);
+                item.setAttribute('data-pswp-width', dimensions.width.toString());
+                item.setAttribute('data-pswp-height', dimensions.height.toString());
+            }
+        }
+
+        const lightbox = new PhotoSwipeLightbox({
+            gallery: '#gallery-main',
+            children: 'a',
+            pswpModule: PhotoSwipe,
+            bgOpacity: 0.9,
+            showHideOpacity: true,
+            // 애니메이션 개선
+            easing: 'cubic-bezier(0.4, 0, 0.22, 1)',
+            // 초기 줌 레벨 최적화
+            initialZoomLevel: 'fit',
+            secondaryZoomLevel: 1.5,
+            maxZoomLevel: 3
+        });
+        lightbox.init();
+    }
+
+    // 본문 내 이미지 처리
+    async function initContentImages() {
+        const contentDiv = document.querySelector('.prose');
+        if (!contentDiv) return;
+
+        const images = contentDiv.querySelectorAll('img');
+
+        for (const img of images) {
+            // 이미지 실제 크기 가져오기
+            const dimensions = await getImageDimensions(img);
+
+            // 이미지를 감싸는 링크가 없다면 새로 생성
+            let link = img.parentElement;
+            if (link.tagName !== 'A') {
+                link = document.createElement('a');
+                link.href = img.src;
+                img.parentNode.insertBefore(link, img);
+                link.appendChild(img);
+            } else {
+                // 기존 링크가 있다면 href를 이미지 src로 업데이트
+                link.href = img.src;
+            }
+
+            // PhotoSwipe 속성 추가 (실제 이미지 크기 사용)
+            link.setAttribute('data-pswp-width', dimensions.width.toString());
+            link.setAttribute('data-pswp-height', dimensions.height.toString());
+            link.setAttribute('data-gallery', 'content-gallery');
+
+            // 클릭 이벤트 추가
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                // 갤러리 아이템 배열 생성
+                const galleryItems = Array.from(contentDiv.querySelectorAll('a[data-gallery="content-gallery"]')).map(link => ({
+                    src: link.href,
+                    width: parseInt(link.getAttribute('data-pswp-width')),
+                    height: parseInt(link.getAttribute('data-pswp-height')),
+                    alt: link.querySelector('img')?.alt || ''
+                }));
+
+                // 클릭된 이미지의 인덱스 찾기
+                const clickedIndex = Array.from(contentDiv.querySelectorAll('a[data-gallery="content-gallery"]')).indexOf(this);
+
+                // PhotoSwipe 인스턴스 생성 및 열기
+                const pswp = new PhotoSwipe({
+                    dataSource: galleryItems,
+                    index: clickedIndex,
+                    bgOpacity: 0.9,
+                    showHideOpacity: true,
+                    // 애니메이션 개선
+                    easing: 'cubic-bezier(0.4, 0, 0.22, 1)',
+                    // 초기 줌 레벨 최적화
+                    initialZoomLevel: 'fit',
+                    secondaryZoomLevel: 1.5,
+                    maxZoomLevel: 3
+                });
+                pswp.init();
+            });
+
+            // 이미지 스타일 개선
+            img.style.cursor = 'pointer';
+            img.style.maxWidth = '100%';
+            img.style.height = 'auto';
+            img.style.borderRadius = '8px';
+            img.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+            img.style.transition = 'opacity 0.3s ease';
+            // 잔상 방지를 위한 스타일
+            img.style.willChange = 'auto';
+            img.style.backfaceVisibility = 'hidden';
+
+            // 호버 효과
+            img.addEventListener('mouseenter', function() {
+                this.style.opacity = '0.9';
+            });
+            img.addEventListener('mouseleave', function() {
+                this.style.opacity = '1';
+            });
+        }
+    }
+
+    // 본문 이미지 초기화
+    initContentImages();
+});
 </script>
 @endpush
 @endsection 
