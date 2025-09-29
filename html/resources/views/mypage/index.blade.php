@@ -113,7 +113,8 @@
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-lg font-semibold text-point">MQ Mapping</h3>
+                        <h3 class="text-lg font-semibold text-point">MQ 매핑</h3>
+                        <p class="text-sm text-secondary">나의 꿈의 지도를 만들어보세요</p>
                     </div>
                 </div>
             </div>

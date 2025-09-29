@@ -194,7 +194,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/mypage/profile', [App\Http\Controllers\MyPageController::class, 'updateProfile'])->name('mypage.profile.update');
     Route::delete('/mypage/profile/image', [App\Http\Controllers\MyPageController::class, 'deleteProfileImage'])->name('mypage.profile.image.delete');
     Route::get('/mypage/news-scrap', [App\Http\Controllers\MyPageController::class, 'newsScrap'])->name('mypage.news-scrap');
-    Route::get('/mypage/bucket-list', [App\Http\Controllers\MyPageController::class, 'bucketList'])->name('mypage.bucket-list');
+    Route::get('/mypage/mapping', [App\Http\Controllers\MyPageController::class, 'mapping'])->name('mypage.mapping');
 });
 
 // 개인정보처리방침

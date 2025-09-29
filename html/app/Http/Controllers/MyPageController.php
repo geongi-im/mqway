@@ -48,53 +48,6 @@ class MyPageController extends Controller
             ]
         ];
 
-        // 임시 버킷리스트 데이터
-        $bucketList = [
-            [
-                'id' => 1,
-                'title' => '용돈 10만원 모으기',
-                'category' => '저축',
-                'target_amount' => 100000,
-                'current_amount' => 65000,
-                'progress' => 65,
-                'deadline' => '2024-06-30',
-                'status' => 'in_progress',
-                'created_date' => '2024-01-15'
-            ],
-            [
-                'id' => 2,
-                'title' => '캐시플로우 게임 고수 되기',
-                'category' => '학습',
-                'target_amount' => null,
-                'current_amount' => null,
-                'progress' => 80,
-                'deadline' => '2024-05-31',
-                'status' => 'in_progress',
-                'created_date' => '2024-02-01'
-            ],
-            [
-                'id' => 3,
-                'title' => '경제 상식 퀴즈 100점 달성',
-                'category' => '학습',
-                'target_amount' => null,
-                'current_amount' => null,
-                'progress' => 100,
-                'deadline' => '2024-03-31',
-                'status' => 'completed',
-                'created_date' => '2024-02-15'
-            ],
-            [
-                'id' => 4,
-                'title' => '부모님께 경제 용어 10개 설명하기',
-                'category' => '실습',
-                'target_amount' => null,
-                'current_amount' => null,
-                'progress' => 30,
-                'deadline' => '2024-07-15',
-                'status' => 'in_progress',
-                'created_date' => '2024-03-01'
-            ]
-        ];
 
         // 좋아요한 콘텐츠 (기존 데이터 활용)
         $likedContent = [];
@@ -106,7 +59,7 @@ class MyPageController extends Controller
                 ->groupBy('mq_board_name');
         }
 
-        return view('mypage.index', compact('user', 'newsScrap', 'bucketList', 'likedContent'));
+        return view('mypage.index', compact('user', 'newsScrap', 'likedContent'));
     }
 
     public function profile()
@@ -121,6 +74,7 @@ class MyPageController extends Controller
             'mq_user_name' => 'required|string|max:255',
             'mq_user_email' => 'required|email|max:255',
             'mq_profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'mq_birthday' => 'nullable|date',
         ]);
 
         $user = Auth::user();
@@ -128,6 +82,7 @@ class MyPageController extends Controller
         $updateData = [
             'mq_user_name' => $request->mq_user_name,
             'mq_user_email' => $request->mq_user_email,
+            'mq_birthday' => $request->mq_birthday,
         ];
 
         // 프로필 이미지 처리
@@ -166,6 +121,62 @@ class MyPageController extends Controller
         $user->update(['mq_profile_image' => null]);
 
         return redirect()->route('mypage.index')->with('success', '프로필 이미지가 삭제되었습니다.');
+    }
+
+    public function mapping()
+    {
+        $user = Auth::user();
+
+        // 임시 MQ 매핑 데이터 - 통일된 이미지와 텍스트 사용
+        $mappingItems = [
+            // 직업 카테고리
+            ['id' => 1, 'category' => 'career', 'image' => 'https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?w=300&h=300&fit=crop', 'description' => '나의 꿈을 향한 첫걸음'],
+            ['id' => 2, 'category' => 'career', 'image' => 'https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?w=300&h=300&fit=crop', 'description' => '나의 꿈을 향한 첫걸음'],
+            ['id' => 3, 'category' => 'career', 'image' => 'https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?w=300&h=300&fit=crop', 'description' => '나의 꿈을 향한 첫걸음'],
+            ['id' => 4, 'category' => 'career', 'image' => 'https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?w=300&h=300&fit=crop', 'description' => '나의 꿈을 향한 첫걸음'],
+            ['id' => 5, 'category' => 'career', 'image' => 'https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?w=300&h=300&fit=crop', 'description' => '나의 꿈을 향한 첫걸음'],
+            
+            // 취미 카테고리
+            ['id' => 6, 'category' => 'hobby', 'image' => 'https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?w=300&h=300&fit=crop', 'description' => '나의 꿈을 향한 첫걸음'],
+            ['id' => 7, 'category' => 'hobby', 'image' => 'https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?w=300&h=300&fit=crop', 'description' => '나의 꿈을 향한 첫걸음'],
+            ['id' => 8, 'category' => 'hobby', 'image' => 'https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?w=300&h=300&fit=crop', 'description' => '나의 꿈을 향한 첫걸음'],
+            ['id' => 9, 'category' => 'hobby', 'image' => 'https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?w=300&h=300&fit=crop', 'description' => '나의 꿈을 향한 첫걸음'],
+            ['id' => 10, 'category' => 'hobby', 'image' => 'https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?w=300&h=300&fit=crop', 'description' => '나의 꿈을 향한 첫걸음'],
+
+            // 라이프스타일 카테고리
+            ['id' => 11, 'category' => 'lifestyle', 'image' => 'https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?w=300&h=300&fit=crop', 'description' => '나의 꿈을 향한 첫걸음'],
+            ['id' => 12, 'category' => 'lifestyle', 'image' => 'https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?w=300&h=300&fit=crop', 'description' => '나의 꿈을 향한 첫걸음'],
+            ['id' => 13, 'category' => 'lifestyle', 'image' => 'https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?w=300&h=300&fit=crop', 'description' => '나의 꿈을 향한 첫걸음'],
+            ['id' => 14, 'category' => 'lifestyle', 'image' => 'https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?w=300&h=300&fit=crop', 'description' => '나의 꿈을 향한 첫걸음'],
+
+            // 교육 카테고리
+            ['id' => 15, 'category' => 'education', 'image' => 'https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?w=300&h=300&fit=crop', 'description' => '나의 꿈을 향한 첫걸음'],
+            ['id' => 16, 'category' => 'education', 'image' => 'https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?w=300&h=300&fit=crop', 'description' => '나의 꿈을 향한 첫걸음'],
+            ['id' => 17, 'category' => 'education', 'image' => 'https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?w=300&h=300&fit=crop', 'description' => '나의 꿈을 향한 첫걸음'],
+
+            // 금융 카테고리
+            ['id' => 18, 'category' => 'financial', 'image' => 'https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?w=300&h=300&fit=crop', 'description' => '나의 꿈을 향한 첫걸음'],
+            ['id' => 19, 'category' => 'financial', 'image' => 'https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?w=300&h=300&fit=crop', 'description' => '나의 꿈을 향한 첫걸음'],
+            ['id' => 20, 'category' => 'financial', 'image' => 'https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?w=300&h=300&fit=crop', 'description' => '나의 꿈을 향한 첫걸음'],
+
+            // 여행 카테고리  
+            ['id' => 21, 'category' => 'travel', 'image' => 'https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?w=300&h=300&fit=crop', 'description' => '나의 꿈을 향한 첫걸음'],
+            ['id' => 22, 'category' => 'travel', 'image' => 'https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?w=300&h=300&fit=crop', 'description' => '나의 꿈을 향한 첫걸음'],
+            ['id' => 23, 'category' => 'travel', 'image' => 'https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?w=300&h=300&fit=crop', 'description' => '나의 꿈을 향한 첫걸음']
+        ];
+
+        // 카테고리 목록
+        $categories = [
+            'all' => '전체',
+            'career' => '직업',
+            'hobby' => '취미', 
+            'lifestyle' => '라이프스타일',
+            'education' => '교육',
+            'financial' => '금융',
+            'travel' => '여행'
+        ];
+
+        return view('mypage.mapping', compact('user', 'mappingItems', 'categories'));
     }
 
     public function newsScrap()
@@ -219,69 +230,4 @@ class MyPageController extends Controller
         return view('mypage.news-scrap', compact('user', 'newsScrap'));
     }
 
-    public function bucketList()
-    {
-        $user = Auth::user();
-
-        // 임시 버킷리스트 데이터
-        $bucketList = [
-            [
-                'id' => 1,
-                'title' => '용돈 10만원 모으기',
-                'category' => '저축',
-                'target_amount' => 100000,
-                'current_amount' => 65000,
-                'progress' => 65,
-                'deadline' => '2024-06-30',
-                'status' => 'in_progress',
-                'created_date' => '2024-01-15'
-            ],
-            [
-                'id' => 2,
-                'title' => '캐시플로우 게임 고수 되기',
-                'category' => '학습',
-                'target_amount' => null,
-                'current_amount' => null,
-                'progress' => 80,
-                'deadline' => '2024-05-31',
-                'status' => 'in_progress',
-                'created_date' => '2024-02-01'
-            ],
-            [
-                'id' => 3,
-                'title' => '경제 상식 퀴즈 100점 달성',
-                'category' => '학습',
-                'target_amount' => null,
-                'current_amount' => null,
-                'progress' => 100,
-                'deadline' => '2024-03-31',
-                'status' => 'completed',
-                'created_date' => '2024-02-15'
-            ],
-            [
-                'id' => 4,
-                'title' => '부모님께 경제 용어 10개 설명하기',
-                'category' => '실습',
-                'target_amount' => null,
-                'current_amount' => null,
-                'progress' => 30,
-                'deadline' => '2024-07-15',
-                'status' => 'in_progress',
-                'created_date' => '2024-03-01'
-            ],
-            [
-                'id' => 5,
-                'title' => '첫 번째 주식 투자하기',
-                'category' => '투자',
-                'target_amount' => 50000,
-                'current_amount' => 20000,
-                'progress' => 40,
-                'deadline' => '2024-08-31',
-                'status' => 'in_progress',
-                'created_date' => '2024-03-10'
-            ]
-        ];
-
-        return view('mypage.bucket-list', compact('user', 'bucketList'));
-    }
 }
