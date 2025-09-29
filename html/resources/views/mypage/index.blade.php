@@ -66,6 +66,14 @@
                         <input type="email" id="mq_user_email" name="mq_user_email" value="{{ $user->mq_user_email }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-point1 focus:border-point1">
                     </div>
                     <div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <label for="mq_birthday" class="text-sm font-medium text-secondary">생일</label>
+                            <span id="age-display" class="text-sm text-blue-600 font-medium {{ !$user->mq_birthday ? 'hidden' : '' }}">(만 <span id="calculated-age">{{ $user->mq_birthday ? \Carbon\Carbon::parse($user->mq_birthday)->age : '0' }}</span>세)</span>
+                        </div>
+                        <input type="date" id="mq_birthday" name="mq_birthday" value="{{ $user->mq_birthday ? $user->mq_birthday->format('Y-m-d') : '' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-point1 focus:border-point1">
+                        <p id="birthday-help-text" class="text-xs text-gray-500 mt-1 {{ $user->mq_birthday ? 'hidden' : '' }}">생일을 입력해주세요.</p>
+                    </div>
+                    <div>
                         <label for="mq_level" class="block text-sm font-medium text-secondary mb-2">레벨</label>
                         <input type="text" id="mq_level" value="Level {{ $user->mq_level ?? '1' }}" disabled class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500">
                     </div>
@@ -96,8 +104,8 @@
                 </div>
             </div>
 
-            <!-- 버킷리스트 카드 -->
-            <div class="bg-white rounded-lg shadow-sm p-6 cursor-pointer hover:shadow-md transition-shadow" onclick="location.href='{{ route('mypage.bucket-list') }}'">
+            <!-- MQ매핑 카드 -->
+            <div class="bg-white rounded-lg shadow-sm p-6 cursor-pointer hover:shadow-md transition-shadow" onclick="location.href='{{ route('mypage.mapping') }}'">
                 <div class="flex items-center mb-4">
                     <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mr-4">
                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -105,9 +113,7 @@
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-lg font-semibold text-point">버킷리스트</h3>
-                        <p class="text-sm text-secondary">나의 경제 목표와 계획</p>
-                        <span class="text-xs text-green-600 font-medium">{{ collect($bucketList)->where('status', 'completed')->count() }}/{{ count($bucketList) }} 완료</span>
+                        <h3 class="text-lg font-semibold text-point">MQ Mapping</h3>
                     </div>
                 </div>
             </div>
@@ -195,6 +201,49 @@ function toggleSection(sectionId) {
     }
 }
 
+// 만 나이 계산 함수
+function calculateAge(birthday) {
+    if (!birthday) return null;
+    
+    const today = new Date();
+    const birthDate = new Date(birthday);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    
+    // 생일이 아직 지나지 않았으면 나이에서 1을 뺌
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+    }
+    
+    return age;
+}
+
+// 나이 표시 및 안내 메시지 업데이트 함수
+function updateAgeDisplay(birthday) {
+    const ageDisplay = document.getElementById('age-display');
+    const calculatedAge = document.getElementById('calculated-age');
+    const helpText = document.getElementById('birthday-help-text');
+    
+    if (!birthday) {
+        // 생일이 없으면: 나이 숨김 + 안내 메시지 표시
+        ageDisplay.classList.add('hidden');
+        helpText.classList.remove('hidden');
+        return;
+    }
+    
+    const age = calculateAge(birthday);
+    if (age >= 0) {
+        // 유효한 생일: 나이 표시 + 안내 메시지 숨김
+        calculatedAge.textContent = age;
+        ageDisplay.classList.remove('hidden');
+        helpText.classList.add('hidden');
+    } else {
+        // 유효하지 않은 생일: 나이 숨김 + 안내 메시지 표시
+        ageDisplay.classList.add('hidden');
+        helpText.classList.remove('hidden');
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
 
     // 프로필 이미지 미리보기
@@ -209,6 +258,27 @@ document.addEventListener('DOMContentLoaded', function() {
                     profileImageContainer.innerHTML = `<img src="${e.target.result}" alt="프로필 이미지 미리보기" class="w-full h-full object-cover">`;
                 };
                 reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    // 생일 입력 필드 이벤트 리스너
+    const birthdayInput = document.getElementById('mq_birthday');
+    if (birthdayInput) {
+        // 페이지 로드 시 생일 상태에 따른 표시 설정
+        updateAgeDisplay(birthdayInput.value);
+        
+        // 생일 변경 시 나이 재계산
+        birthdayInput.addEventListener('change', function(event) {
+            updateAgeDisplay(event.target.value);
+        });
+        
+        // 실시간 입력 시에도 나이 계산 (input 이벤트)
+        birthdayInput.addEventListener('input', function(event) {
+            if (event.target.value.length === 10) { // YYYY-MM-DD 형식이 완성되면
+                updateAgeDisplay(event.target.value);
+            } else if (event.target.value.length === 0) { // 값이 지워지면
+                updateAgeDisplay('');
             }
         });
     }
