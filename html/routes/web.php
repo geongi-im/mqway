@@ -17,7 +17,7 @@ use App\Http\Controllers\GeminiBotController;
 use App\Http\Controllers\MqtestController;
 use App\Http\Controllers\Api\ServerCheckController;
 use App\Http\Controllers\CashflowController;
-use App\Http\Controllers\CourseL1Controller;
+use App\Http\Controllers\CourseController;
 use App\Http\Controllers\BoardContentController;
 use App\Http\Controllers\BoardResearchController;
 use App\Http\Controllers\BoardVideoController;
@@ -187,6 +187,16 @@ Route::prefix('guidebook/reality-check')->group(function () {
 // 로드맵
 Route::get('/guidebook/roadmap', [RoadmapController::class, 'index'])->name('guidebook.roadmap');
 
+// 마이페이지
+Route::middleware('auth')->group(function () {
+    Route::get('/mypage', [App\Http\Controllers\MyPageController::class, 'index'])->name('mypage.index');
+    Route::get('/mypage/profile', [App\Http\Controllers\MyPageController::class, 'profile'])->name('mypage.profile');
+    Route::post('/mypage/profile', [App\Http\Controllers\MyPageController::class, 'updateProfile'])->name('mypage.profile.update');
+    Route::delete('/mypage/profile/image', [App\Http\Controllers\MyPageController::class, 'deleteProfileImage'])->name('mypage.profile.image.delete');
+    Route::get('/mypage/news-scrap', [App\Http\Controllers\MyPageController::class, 'newsScrap'])->name('mypage.news-scrap');
+    Route::get('/mypage/bucket-list', [App\Http\Controllers\MyPageController::class, 'bucketList'])->name('mypage.bucket-list');
+});
+
 // 개인정보처리방침
 Route::get('/privacy', function () {
     return view('privacy');
@@ -214,10 +224,10 @@ Route::prefix('cashflow')->group(function () {
     Route::get('/helper', [CashflowController::class, 'helper'])->name('cashflow.helper')->middleware('auth');
 });
 
-// Cashflow 라우트
-Route::prefix('course-l1')->group(function () {
-    Route::get('/intro', [CourseL1Controller::class, 'intro'])->name('course-l1.intro');
-Route::get('/life-map', [CourseL1Controller::class, 'lifeMap'])->name('course-l1.life-map');
+// 코스 소개 라우트
+Route::prefix('course')->group(function () {
+    Route::get('/l1/intro', [CourseController::class, 'l1Intro'])->name('course.l1.intro');
+    Route::get('/l2/intro', [CourseController::class, 'l2Intro'])->name('course.l2.intro');
 });
 
 // Tools 라우트

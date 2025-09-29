@@ -21,6 +21,7 @@ class Member extends Authenticatable
         'mq_provider_id',
         'mq_last_login_date',
         'mq_status',
-        'mq_level'
+        'mq_level',
+        'mq_profile_image'
     ];
 } 
