@@ -39,7 +39,9 @@
                     </form>
                     @endif
                 </div>
+                @if(!$user->mq_profile_image)
                 <p class="text-sm text-gray-600 mt-4">프로필 이미지를 업로드해보세요</p>
+                @endif
             </div>
 
             <form method="POST" action="{{ route('mypage.profile.update') }}" class="space-y-6" enctype="multipart/form-data">
