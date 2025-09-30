@@ -250,17 +250,44 @@ document.addEventListener('DOMContentLoaded', function() {
     // 프로필 이미지 미리보기
     const profileImageInput = document.getElementById('mq_profile_image');
     if (profileImageInput) {
+        // 파일 입력 필드 클릭 시 로딩 표시
+        profileImageInput.addEventListener('click', function() {
+            LoadingManager.show();
+            // 파일 선택 다이얼로그가 열릴 때까지 약간의 딜레이 후 로딩 숨김
+            setTimeout(() => {
+                LoadingManager.hide();
+            }, 300);
+        });
+        
+        // 파일 선택 완료 시 로딩 표시 및 미리보기
         profileImageInput.addEventListener('change', function(event) {
+            LoadingManager.show();
+            
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const profileImageContainer = document.querySelector('.w-32.h-32.rounded-full');
                     profileImageContainer.innerHTML = `<img src="${e.target.result}" alt="프로필 이미지 미리보기" class="w-full h-full object-cover">`;
+                    // 이미지 로드 완료 후 로딩 숨김
+                    LoadingManager.hide();
                 };
                 reader.readAsDataURL(file);
+            } else {
+                // 파일이 선택되지 않은 경우 로딩 숨김
+                LoadingManager.hide();
             }
         });
+        
+        // 파일 선택 다이얼로그 취소 시 로딩 숨김
+        window.addEventListener('focus', function() {
+            // 포커스가 돌아왔을 때 파일이 선택되지 않았으면 로딩 숨김
+            setTimeout(() => {
+                if (!profileImageInput.files.length) {
+                    LoadingManager.hide();
+                }
+            }, 100);
+        }, { once: true });
     }
 
     // 생일 입력 필드 이벤트 리스너
