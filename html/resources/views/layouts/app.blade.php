@@ -6,7 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="description" content="MQWAY는 아이들과 부모를 위한 경제 지능·자기주도력 통합 교육 플랫폼입니다. 돈을 통해 삶의 지혜를 배우는 독창적인 MQ Way 방식으로, 아이가 스스로 미래를 설계하는 힘을 길러줍니다.">
 
-    <meta property="og:image" content="{{ asset('/images/logo/mqway_logo_og_image.png') }}">
+    <meta property="og:image" content="{{ asset('/images/logo/mqway_logo_og_image.jpg') }}">
     <meta property="og:title" content="{{ config('app.name', 'MQWAY') }}">
     <meta property="og:description" content="경제 지능을 깨우고 스스로 미래를 설계하는 힘을 키워주는 교육 플랫폼">
     <meta property="og:type" content="website">
