@@ -122,7 +122,7 @@
             </div>
 
             <!-- 좋아요 콘텐츠 카드 -->
-            <div class="bg-white rounded-lg shadow-sm p-6 cursor-pointer hover:shadow-md transition-shadow" onclick="toggleSection('liked-content')">
+            <div class="bg-white rounded-lg shadow-sm p-6 cursor-pointer hover:shadow-md transition-shadow" onclick="location.href='{{ route('mypage.liked-content') }}'">
                 <div class="flex items-center mb-4">
                     <div class="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center mr-4">
                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -137,72 +137,10 @@
                 </div>
             </div>
         </div>
-
-        <!-- 좋아요 콘텐츠 섹션 (토글) -->
-        <div id="liked-content" class="section-content hidden">
-            <div class="bg-white rounded-lg shadow-sm p-6">
-                <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-xl font-semibold text-point">좋아요한 콘텐츠</h2>
-                    <button onclick="toggleSection('liked-content')" class="text-gray-500 hover:text-gray-700">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-
-                @if($likedContent->isEmpty())
-                <div class="text-center py-12">
-                    <p class="text-gray-500">아직 좋아요한 콘텐츠가 없습니다.</p>
-                    <p class="text-sm text-gray-400 mt-2">관심있는 콘텐츠에 좋아요를 눌러보세요!</p>
-                </div>
-                @else
-                @foreach($likedContent as $boardName => $items)
-                <div class="mb-8">
-                    <h3 class="text-lg font-medium text-point mb-4 border-b border-gray-200 pb-2">
-                        {{ $boardName === 'mq_board_content' ? '콘텐츠 게시판' :
-                           ($boardName === 'mq_board_research' ? '리서치 게시판' :
-                           ($boardName === 'mq_board_portfolio' ? '포트폴리오 게시판' : $boardName)) }}
-                        <span class="text-sm text-gray-500 ml-2">({{ count($items) }}개)</span>
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        @foreach($items as $item)
-                        <div class="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow">
-                            <div class="flex justify-between items-start mb-2">
-                                <span class="text-sm font-medium text-point">{{ $item->mq_board_idx }}번 게시글</span>
-                                <span class="text-xs text-gray-500">{{ \Carbon\Carbon::parse($item->mq_reg_date)->format('Y-m-d') }}</span>
-                            </div>
-                            <div class="flex justify-end">
-                                <button class="text-point3 text-sm hover:underline">좋아요 취소</button>
-                            </div>
-                        </div>
-                        @endforeach
-                    </div>
-                </div>
-                @endforeach
-                @endif
-            </div>
-        </div>
     </div>
 </div>
 
 <script>
-// 섹션 토글 기능
-function toggleSection(sectionId) {
-    const section = document.getElementById(sectionId);
-    const allSections = document.querySelectorAll('.section-content');
-
-    if (section) {
-        if (section.classList.contains('hidden')) {
-            // 모든 섹션 숨기기
-            allSections.forEach(s => s.classList.add('hidden'));
-            // 선택된 섹션 보이기
-            section.classList.remove('hidden');
-        } else {
-            // 이미 열려있는 섹션이면 닫기
-            section.classList.add('hidden');
-        }
-    }
-}
 
 // 만 나이 계산 함수
 function calculateAge(birthday) {
