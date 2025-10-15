@@ -195,6 +195,10 @@ Route::middleware('auth')->group(function () {
     Route::delete('/mypage/profile/image', [App\Http\Controllers\MyPageController::class, 'deleteProfileImage'])->name('mypage.profile.image.delete');
     Route::get('/mypage/news-scrap', [App\Http\Controllers\MyPageController::class, 'newsScrap'])->name('mypage.news-scrap');
     Route::get('/mypage/mapping', [App\Http\Controllers\MyPageController::class, 'mapping'])->name('mypage.mapping');
+    Route::get('/mypage/mapping/items', [App\Http\Controllers\MyPageController::class, 'getMappingItems'])->name('mypage.mapping.items');
+    Route::post('/mypage/mapping/save', [App\Http\Controllers\MyPageController::class, 'saveMapping'])->name('mypage.mapping.save');
+    Route::get('/mypage/liked-content', [App\Http\Controllers\MyPageController::class, 'likedContent'])->name('mypage.liked-content');
+    Route::post('/mypage/liked-content/unlike', [App\Http\Controllers\MyPageController::class, 'unlikeContent'])->name('mypage.liked-content.unlike');
 });
 
 // 개인정보처리방침
