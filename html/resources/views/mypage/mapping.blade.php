@@ -274,6 +274,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const customGoalYear = document.getElementById('custom-goal-year');
     const customGoalSubmitBtn = document.getElementById('custom-goal-submit-btn');
     const deleteCustomGoalFromModalBtn = document.getElementById('delete-custom-goal-from-modal-btn');
+    const customGoalDeleteContainer = deleteCustomGoalFromModalBtn.parentElement; // 삭제 버튼 컨테이너
     let customModalMode = 'add'; // 'add' 또는 'edit'
     let customModalEditingId = null; // 편집 중인 목표 ID
 
@@ -540,7 +541,30 @@ document.addEventListener('DOMContentLoaded', function() {
     function handleItemClick(e) {
         if (!e.target.classList.contains('mapping-checkbox') &&
             !e.target.classList.contains('target-year-select')) {
-            const checkbox = e.currentTarget.querySelector('.mapping-checkbox');
+            const item = e.currentTarget;
+            const itemId = item.getAttribute('data-id');
+            const category = item.getAttribute('data-category');
+
+            // selectedItems에서 카테고리 확인
+            const selectedItem = selectedItems.get(itemId);
+            const isCustomGoal = category === 'custom' || (selectedItem && selectedItem.category === 'custom');
+
+            // 커스텀 목표이면서 이미 선택된 경우 수정 모달 열기
+            if (isCustomGoal && selectedItem) {
+                const checkbox = item.querySelector('.mapping-checkbox');
+                if (checkbox && checkbox.checked) {
+                    openCustomModal('edit', {
+                        id: itemId,
+                        description: selectedItem.description,
+                        targetYear: selectedItem.targetYear,
+                        imageSrc: selectedItem.imageSrc
+                    });
+                    return;
+                }
+            }
+
+            // 그 외의 경우 체크박스 토글
+            const checkbox = item.querySelector('.mapping-checkbox');
             checkbox.checked = !checkbox.checked;
             checkbox.dispatchEvent(new Event('change'));
         }
