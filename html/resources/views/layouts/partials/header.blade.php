@@ -35,9 +35,8 @@
                         </a>
                     </li>
                     <li class="relative">
-                        <a href="{{ route('course.l2.intro') }}" 
-                           class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6 
-                           {{ request()->routeIs('course.l2.intro') ? 'font-bold text-point1 bg-dark/10' : '' }}">
+                        <a href="#" onclick="event.preventDefault(); alert('코스 준비중입니다.');"
+                           class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6">
                             L2 코스
                             <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-0 bg-secondary transition-all duration-200"></span>
                         </a>
@@ -370,7 +369,7 @@
                     <a href="{{ route('course.l1.intro') }}" class="block px-4 py-3 {{ request()->routeIs('course.l1.intro') ? 'font-bold text-point1' : 'text-white' }}">
                          L1 코스
                     </a>
-                    <a href="{{ route('course.l2.intro') }}" class="block px-4 py-3 {{ request()->routeIs('course.l2.intro') ? 'font-bold text-point1' : 'text-white' }}">
+                    <a href="#" onclick="event.preventDefault(); alert('코스 준비중입니다.');" class="block px-4 py-3 text-white">
                         L2 코스
                     </a>
                 </div>

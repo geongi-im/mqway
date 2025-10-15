@@ -19,6 +19,6 @@ class CourseController extends Controller
      */
     public function l2Intro()
     {
-        return view('course.l1.intro');
+        return redirect()->back()->with('error', '코스 준비중입니다.');
     }
 }
