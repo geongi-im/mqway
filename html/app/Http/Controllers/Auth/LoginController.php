@@ -43,6 +43,61 @@ class LoginController extends Controller
     }
 
     /**
+     * Get the login username to be used by the controller.
+     *
+     * @return string
+     */
+    public function username()
+    {
+        return 'mq_user_id';
+    }
+
+    /**
+     * Validate the user login request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return void
+     */
+    protected function validateLogin(Request $request)
+    {
+        $request->validate([
+            $this->username() => 'required|string',
+            'mq_user_password' => 'required|string',
+        ], [
+            'mq_user_id.required' => '아이디를 입력해주세요.',
+            'mq_user_password.required' => '비밀번호를 입력해주세요.',
+        ]);
+    }
+
+    /**
+     * Get the needed authorization credentials from the request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array
+     */
+    protected function credentials(Request $request)
+    {
+        return [
+            'mq_user_id' => $request->get('mq_user_id'),
+            'password' => $request->get('mq_user_password'),
+            'mq_status' => 1, // 활성 계정만 로그인 가능
+        ];
+    }
+
+    /**
+     * The user has been authenticated.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  mixed  $user
+     * @return mixed
+     */
+    protected function authenticated(Request $request, $user)
+    {
+        // 마지막 로그인 시간 업데이트
+        $user->update(['mq_last_login_date' => now()]);
+    }
+
+    /**
      * Google OAuth 리다이렉트
      */
     public function redirectToGoogle()

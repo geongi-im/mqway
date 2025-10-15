@@ -54,11 +54,20 @@ Route::get('/login', function () {
     return view('auth.login');
 })->name('login')->middleware('guest');
 
+// 일반 로그인 처리
+Route::post('/login', [LoginController::class, 'login'])->middleware('guest');
+
 // 로그아웃
 Route::post('/logout', function () {
     Auth::logout();
     return redirect('/');
 });
+
+// 회원가입
+Route::get('/register', [App\Http\Controllers\Auth\RegisterController::class, 'showRegistrationForm'])->name('register')->middleware('guest');
+Route::post('/register', [App\Http\Controllers\Auth\RegisterController::class, 'register'])->middleware('guest');
+Route::post('/register/check-userid', [App\Http\Controllers\Auth\RegisterController::class, 'checkUserId'])->name('register.check-userid')->middleware('guest');
+Route::post('/register/check-email', [App\Http\Controllers\Auth\RegisterController::class, 'checkEmail'])->name('register.check-email')->middleware('guest');
 
 // Google 로그인
 Route::get('/auth/google', [LoginController::class, 'redirectToGoogle'])->name('login.google');
