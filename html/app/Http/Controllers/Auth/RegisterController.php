@@ -74,7 +74,7 @@ class RegisterController extends Controller
                 'string',
                 'min:8',
                 'max:50',
-                'regex:/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]+$/',
+                'regex:/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d\W_]{8,50}$/',
                 'confirmed'
             ],
             'mq_user_name' => ['required', 'string', 'max:255'],
@@ -90,7 +90,7 @@ class RegisterController extends Controller
             'mq_user_password.required' => '비밀번호를 입력해주세요.',
             'mq_user_password.min' => '비밀번호는 최소 8자 이상이어야 합니다.',
             'mq_user_password.max' => '비밀번호는 최대 50자까지 가능합니다.',
-            'mq_user_password.regex' => '비밀번호는 영문과 숫자를 포함해야 합니다.',
+            'mq_user_password.regex' => '비밀번호는 영문과 숫자를 필수로 포함해야 합니다.',
             'mq_user_password.confirmed' => '비밀번호가 일치하지 않습니다.',
             'mq_user_name.required' => '이름을 입력해주세요.',
             'mq_user_email.required' => '이메일을 입력해주세요.',

@@ -95,7 +95,7 @@
                                    required
                                    maxlength="50"
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-point1 focus:border-point1 @error('mq_user_password') border-red-500 @enderror">
-                            <p class="text-xs text-gray-500 mt-1">영문, 숫자 조합 8~50자</p>
+                            <p class="text-xs text-gray-500 mt-1">영문, 숫자 필수 포함, 특수문자 사용 가능 8~50자</p>
                             @error('mq_user_password')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
@@ -136,20 +136,12 @@
                             <label for="mq_user_email" class="block text-sm font-medium text-secondary mb-2">
                                 이메일 <span class="text-red-500">*</span>
                             </label>
-                            <div class="flex gap-2">
-                                <input type="email"
-                                       id="mq_user_email"
-                                       name="mq_user_email"
-                                       value="{{ old('mq_user_email') }}"
-                                       required
-                                       class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-point1 focus:border-point1 @error('mq_user_email') border-red-500 @enderror">
-                                <button type="button"
-                                        id="check_email_btn"
-                                        onclick="checkEmail()"
-                                        class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors whitespace-nowrap">
-                                    중복확인
-                                </button>
-                            </div>
+                            <input type="email"
+                                   id="mq_user_email"
+                                   name="mq_user_email"
+                                   value="{{ old('mq_user_email') }}"
+                                   required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-point1 focus:border-point1 @error('mq_user_email') border-red-500 @enderror">
                             <p id="email_check_message" class="text-xs mt-1 hidden"></p>
                             @error('mq_user_email')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -225,6 +217,15 @@ document.getElementById('mq_user_id').addEventListener('input', function() {
         const messageEl = document.getElementById('userid_check_message');
         messageEl.classList.add('hidden');
         messageEl.classList.remove('text-green-600', 'text-red-500');
+    }
+});
+
+// 이메일 입력 필드 blur 이벤트 리스너 (자동 중복 체크)
+document.getElementById('mq_user_email').addEventListener('blur', function() {
+    const currentValue = this.value.trim();
+    // 값이 있고 변경된 경우에만 체크
+    if (currentValue && currentValue !== checkedEmail) {
+        checkEmail();
     }
 });
 
@@ -309,7 +310,6 @@ async function checkEmail() {
     const emailInput = document.getElementById('mq_user_email');
     const email = emailInput.value.trim();
     const messageEl = document.getElementById('email_check_message');
-    const btnEl = document.getElementById('check_email_btn');
 
     // 기본 유효성 검사
     if (!email) {
@@ -323,10 +323,6 @@ async function checkEmail() {
         showMessage(messageEl, '올바른 이메일 형식이 아닙니다.', 'error');
         return;
     }
-
-    // 로딩 상태
-    btnEl.disabled = true;
-    btnEl.textContent = '확인중...';
 
     try {
         const response = await fetch('{{ route("register.check-email") }}', {
@@ -353,9 +349,6 @@ async function checkEmail() {
         showMessage(messageEl, '중복 확인 중 오류가 발생했습니다.', 'error');
         emailChecked = false;
         checkedEmail = '';
-    } finally {
-        btnEl.disabled = false;
-        btnEl.textContent = '중복확인';
     }
 }
 
@@ -376,9 +369,9 @@ document.querySelector('form').addEventListener('submit', function(e) {
 
     // 비밀번호 검증
     const password = document.getElementById('mq_user_password').value;
-    const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,50}$/;
+    const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d\W_]{8,50}$/;
     if (!passwordPattern.test(password)) {
-        errors.push('비밀번호는 영문과 숫자를 포함한 8~50자여야 합니다.');
+        errors.push('비밀번호는 영문과 숫자를 필수로 포함해야 합니다.');
     }
 
     // 비밀번호 확인
