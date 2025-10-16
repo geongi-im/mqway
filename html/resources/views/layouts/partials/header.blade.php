@@ -495,6 +495,7 @@
                             <div class="px-4 py-2 border-b border-gray-100">
                                 <p class="text-sm font-medium text-gray-900">{{ auth()->user()->mq_user_name ?? auth()->user()->name }}</p>
                                 <p class="text-xs text-gray-500">{{ auth()->user()->mq_user_email ?? auth()->user()->email }}</p>
+                                <p class="text-xs text-blue-600 font-medium mt-1">Level {{ auth()->user()->mq_level ?? '1' }}</p>
                             </div>
                             <a href="{{ route('mypage.index') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                                 <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
