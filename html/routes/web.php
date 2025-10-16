@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\Auth\FindInfoController;
 use App\Http\Controllers\IndexController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\BoardController;
@@ -72,6 +73,11 @@ Route::post('/register/check-email', [App\Http\Controllers\Auth\RegisterControll
 // Google 로그인
 Route::get('/auth/google', [LoginController::class, 'redirectToGoogle'])->name('login.google');
 Route::get('/auth/google/callback', [LoginController::class, 'handleGoogleCallback']);
+
+// 회원정보 찾기
+Route::get('/findinfo', [FindInfoController::class, 'showFindInfoForm'])->name('findinfo')->middleware('guest');
+Route::post('/findinfo/find-id', [FindInfoController::class, 'findUserId'])->name('findinfo.find-id')->middleware('guest');
+Route::post('/findinfo/reset-password', [FindInfoController::class, 'resetPassword'])->name('findinfo.reset-password')->middleware('guest');
 
 // 뉴스
 // Route::get('/news', [NewsController::class, 'index']);

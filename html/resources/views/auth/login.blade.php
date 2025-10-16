@@ -48,7 +48,11 @@
             <!-- 회원가입 링크 -->
             <div class="text-center">
                 <a href="{{ route('register') }}" class="text-sm text-point1 hover:underline">
-                    아직 회원이 아니신가요? 회원가입
+                    회원가입
+                </a>
+                <span class="text-gray-400 mx-2">|</span>
+                <a href="{{ route('findinfo') }}" class="text-sm text-gray-600 hover:underline">
+                    회원정보 찾기
                 </a>
             </div>
         </form>
