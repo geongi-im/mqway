@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Member;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use App\Traits\BoardCategoryColorTrait;
 
@@ -73,14 +74,24 @@ class MyPageController extends Controller
 
     public function updateProfile(Request $request)
     {
+        $user = Auth::user();
+
         $request->validate([
             'mq_user_name' => 'required|string|max:255',
-            'mq_user_email' => 'required|email|max:255',
+            'mq_user_email' => [
+                'required',
+                'email',
+                'max:255',
+                'unique:mq_member,mq_user_email,' . $user->idx . ',idx'
+            ],
             'mq_profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'mq_birthday' => 'nullable|date',
+        ], [
+            'mq_user_email.unique' => '이미 사용 중인 이메일입니다.',
+            'mq_user_email.required' => '이메일을 입력해주세요.',
+            'mq_user_email.email' => '올바른 이메일 형식이 아닙니다.',
+            'mq_user_name.required' => '이름을 입력해주세요.',
         ]);
-
-        $user = Auth::user();
 
         $updateData = [
             'mq_user_name' => $request->mq_user_name,
@@ -542,6 +553,150 @@ class MyPageController extends Controller
         ];
 
         return $mapping[$boardName] ?? $boardName;
+    }
+
+    /**
+     * 이메일 중복 체크 (마이페이지용)
+     * 현재 사용자의 이메일은 중복으로 간주하지 않음
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function checkEmail(Request $request)
+    {
+        $user = Auth::user();
+        $email = $request->input('mq_user_email');
+
+        // 기본 유효성 검사
+        if (empty($email)) {
+            return response()->json([
+                'available' => false,
+                'message' => '이메일을 입력해주세요.'
+            ]);
+        }
+
+        // 이메일 형식 검증
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return response()->json([
+                'available' => false,
+                'message' => '올바른 이메일 형식이 아닙니다.'
+            ]);
+        }
+
+        // 현재 사용자의 이메일과 동일하면 사용 가능으로 처리
+        if ($user && $user->mq_user_email === $email) {
+            return response()->json([
+                'available' => true,
+                'message' => '현재 사용 중인 이메일입니다.'
+            ]);
+        }
+
+        // 다른 사용자가 사용 중인지 확인
+        $exists = Member::where('mq_user_email', $email)->exists();
+
+        if ($exists) {
+            return response()->json([
+                'available' => false,
+                'message' => '이미 사용 중인 이메일입니다.'
+            ]);
+        }
+
+        return response()->json([
+            'available' => true,
+            'message' => '사용 가능한 이메일입니다.'
+        ]);
+    }
+
+    /**
+     * 현재 비밀번호 확인 (AJAX)
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function checkCurrentPassword(Request $request)
+    {
+        $user = Auth::user();
+
+        // SNS 계정 체크
+        if ($user->mq_provider) {
+            return response()->json([
+                'valid' => false,
+                'message' => 'SNS 로그인 계정은 비밀번호를 변경할 수 없습니다.'
+            ]);
+        }
+
+        $currentPassword = $request->input('current_password');
+
+        // 기본 유효성 검사
+        if (empty($currentPassword)) {
+            return response()->json([
+                'valid' => false,
+                'message' => '현재 비밀번호를 입력해주세요.'
+            ]);
+        }
+
+        // 현재 비밀번호 확인
+        if (!Hash::check($currentPassword, $user->mq_user_password)) {
+            return response()->json([
+                'valid' => false,
+                'message' => '현재 비밀번호가 일치하지 않습니다.'
+            ]);
+        }
+
+        return response()->json([
+            'valid' => true,
+            'message' => '현재 비밀번호가 확인되었습니다.'
+        ]);
+    }
+
+    /**
+     * 비밀번호 변경
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function changePassword(Request $request)
+    {
+        $user = Auth::user();
+
+        // SNS 계정 체크
+        if ($user->mq_provider) {
+            return back()->with('error', 'SNS 로그인 계정은 비밀번호를 변경할 수 없습니다.');
+        }
+
+        // Validation
+        $request->validate([
+            'current_password' => 'required|string',
+            'new_password' => [
+                'required',
+                'string',
+                'min:8',
+                'max:50',
+                'regex:/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d\W_]{8,50}$/',
+                'confirmed',
+                'different:current_password'
+            ],
+        ], [
+            'current_password.required' => '현재 비밀번호를 입력해주세요.',
+            'new_password.required' => '새 비밀번호를 입력해주세요.',
+            'new_password.min' => '비밀번호는 최소 8자 이상이어야 합니다.',
+            'new_password.max' => '비밀번호는 최대 50자까지 가능합니다.',
+            'new_password.regex' => '비밀번호는 영문과 숫자를 필수로 포함해야 합니다.',
+            'new_password.confirmed' => '비밀번호 확인이 일치하지 않습니다.',
+            'new_password.different' => '새 비밀번호는 현재 비밀번호와 달라야 합니다.',
+        ]);
+
+        // 현재 비밀번호 확인
+        if (!Hash::check($request->current_password, $user->mq_user_password)) {
+            return back()->with('error', '현재 비밀번호가 일치하지 않습니다.');
+        }
+
+        // 비밀번호 업데이트 (Mutator가 자동으로 해시화)
+        $user->update([
+            'mq_user_password' => $request->new_password
+        ]);
+
+        return back()->with('success', '비밀번호가 성공적으로 변경되었습니다.');
     }
 
 }

@@ -208,6 +208,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/mypage/profile', [App\Http\Controllers\MyPageController::class, 'profile'])->name('mypage.profile');
     Route::post('/mypage/profile', [App\Http\Controllers\MyPageController::class, 'updateProfile'])->name('mypage.profile.update');
     Route::delete('/mypage/profile/image', [App\Http\Controllers\MyPageController::class, 'deleteProfileImage'])->name('mypage.profile.image.delete');
+    Route::post('/mypage/check-email', [App\Http\Controllers\MyPageController::class, 'checkEmail'])->name('mypage.check-email');
+    Route::post('/mypage/check-current-password', [App\Http\Controllers\MyPageController::class, 'checkCurrentPassword'])->name('mypage.check-current-password');
+    Route::post('/mypage/change-password', [App\Http\Controllers\MyPageController::class, 'changePassword'])->name('mypage.change-password');
     Route::get('/mypage/news-scrap', [App\Http\Controllers\MyPageController::class, 'newsScrap'])->name('mypage.news-scrap');
     Route::get('/mypage/mapping', [App\Http\Controllers\MyPageController::class, 'mapping'])->name('mypage.mapping');
     Route::get('/mypage/mapping/items', [App\Http\Controllers\MyPageController::class, 'getMappingItems'])->name('mypage.mapping.items');

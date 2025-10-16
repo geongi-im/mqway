@@ -8,6 +8,17 @@
             <h1 class="text-3xl font-bold text-point">마이페이지</h1>
         </div>
 
+        @if(session('error'))
+        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6" role="alert">
+            <div class="flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                </svg>
+                <span>{{ session('error') }}</span>
+            </div>
+        </div>
+        @endif
+
         <!-- 프로필 관리 (항상 노출) -->
         <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
             <h2 class="text-xl font-semibold text-point mb-6">프로필 관리</h2>
@@ -66,6 +77,7 @@
                     <div>
                         <label for="mq_user_email" class="block text-sm font-medium text-secondary mb-2">이메일</label>
                         <input type="email" id="mq_user_email" name="mq_user_email" value="{{ $user->mq_user_email }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-point1 focus:border-point1">
+                        <p id="email_check_message" class="text-xs mt-1 hidden"></p>
                     </div>
                     <div>
                         <div class="flex items-center gap-2 mb-2">
@@ -75,10 +87,6 @@
                         <input type="date" id="mq_birthday" name="mq_birthday" value="{{ $user->mq_birthday ? $user->mq_birthday->format('Y-m-d') : '' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-point1 focus:border-point1">
                         <p id="birthday-help-text" class="text-xs text-gray-500 mt-1 {{ $user->mq_birthday ? 'hidden' : '' }}">생일을 입력해주세요.</p>
                     </div>
-                    <div>
-                        <label for="mq_level" class="block text-sm font-medium text-secondary mb-2">레벨</label>
-                        <input type="text" id="mq_level" value="Level {{ $user->mq_level ?? '1' }}" disabled class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500">
-                    </div>
                 </div>
                 <div class="flex justify-end">
                     <button type="submit" class="bg-point1 text-white px-6 py-2 rounded-md hover:bg-opacity-90 transition-colors">
@@ -87,6 +95,81 @@
                 </div>
             </form>
         </div>
+
+        <!-- 비밀번호 변경 (일반 계정만) -->
+        @if(!$user->mq_provider)
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+            <h2 class="text-xl font-semibold text-point mb-6">비밀번호 변경</h2>
+
+            <form method="POST" action="{{ route('mypage.change-password') }}" class="space-y-4">
+                @csrf
+
+                <div>
+                    <label for="current_password" class="block text-sm font-medium text-secondary mb-2">
+                        현재 비밀번호 <span class="text-red-500">*</span>
+                    </label>
+                    <input type="password"
+                           id="current_password"
+                           name="current_password"
+                           required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-point1 focus:border-point1 @error('current_password') border-red-500 @enderror">
+                    <p id="current_password_check_message" class="text-xs mt-1 hidden"></p>
+                    @error('current_password')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="new_password" class="block text-sm font-medium text-secondary mb-2">
+                            새 비밀번호 <span class="text-red-500">*</span>
+                        </label>
+                        <input type="password"
+                               id="new_password"
+                               name="new_password"
+                               required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-point1 focus:border-point1 @error('new_password') border-red-500 @enderror">
+                        <p class="text-xs text-gray-500 mt-1">영문, 숫자 필수 포함, 특수문자 사용 가능 8~50자</p>
+                        @error('new_password')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="new_password_confirmation" class="block text-sm font-medium text-secondary mb-2">
+                            새 비밀번호 확인 <span class="text-red-500">*</span>
+                        </label>
+                        <input type="password"
+                               id="new_password_confirmation"
+                               name="new_password_confirmation"
+                               required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-point1 focus:border-point1 @error('new_password_confirmation') border-red-500 @enderror">
+                        @error('new_password_confirmation')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </div>
+
+                <div class="flex justify-end">
+                    <button type="submit"
+                            class="bg-point1 text-white px-6 py-2 rounded-md hover:bg-opacity-90 transition-colors">
+                        비밀번호 변경
+                    </button>
+                </div>
+            </form>
+        </div>
+        @else
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
+            <div class="flex items-center">
+                <svg class="w-5 h-5 text-blue-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                </svg>
+                <p class="text-sm text-blue-700">
+                    {{ ucfirst($user->mq_provider) }} 로그인 계정은 비밀번호 변경이 불가능합니다.
+                </p>
+            </div>
+        </div>
+        @endif
 
         <!-- 메뉴 카드 (PC: 2열, 모바일: 1열) -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -185,7 +268,110 @@ function updateAgeDisplay(birthday) {
     }
 }
 
+// 이메일 중복 확인 상태
+let emailChecked = false;
+let checkedEmail = '{{ $user->mq_user_email }}'; // 초기 이메일 저장
+
+// 이메일 중복 확인 함수
+async function checkEmail() {
+    const emailInput = document.getElementById('mq_user_email');
+    const email = emailInput.value.trim();
+    const messageEl = document.getElementById('email_check_message');
+    const submitBtn = document.querySelector('button[type="submit"]');
+
+    // 기본 유효성 검사
+    if (!email) {
+        showEmailMessage(messageEl, '이메일을 입력해주세요.', 'error');
+        emailChecked = false;
+        return;
+    }
+
+    // 이메일 형식 검증
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email)) {
+        showEmailMessage(messageEl, '올바른 이메일 형식이 아닙니다.', 'error');
+        emailChecked = false;
+        return;
+    }
+
+    try {
+        const response = await fetch('{{ route("mypage.check-email") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ mq_user_email: email })
+        });
+
+        const data = await response.json();
+
+        if (data.available) {
+            showEmailMessage(messageEl, data.message, 'success');
+            emailChecked = true;
+            checkedEmail = email;
+            if (submitBtn) {
+                submitBtn.disabled = false;
+            }
+        } else {
+            showEmailMessage(messageEl, data.message, 'error');
+            emailChecked = false;
+            if (submitBtn) {
+                submitBtn.disabled = true;
+            }
+        }
+    } catch (error) {
+        showEmailMessage(messageEl, '중복 확인 중 오류가 발생했습니다.', 'error');
+        emailChecked = false;
+        if (submitBtn) {
+            submitBtn.disabled = true;
+        }
+    }
+}
+
+// 메시지 표시 함수
+function showEmailMessage(element, message, type) {
+    element.textContent = message;
+    element.classList.remove('hidden', 'text-green-600', 'text-red-500');
+    if (type === 'success') {
+        element.classList.add('text-green-600');
+    } else {
+        element.classList.add('text-red-500');
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+
+    // 이메일 입력 필드 blur 이벤트 리스너 (자동 중복 체크)
+    const emailInput = document.getElementById('mq_user_email');
+    if (emailInput) {
+        emailInput.addEventListener('blur', function() {
+            const currentValue = this.value.trim();
+            // 값이 변경된 경우에만 체크
+            if (currentValue && currentValue !== checkedEmail) {
+                checkEmail();
+            } else if (currentValue === checkedEmail) {
+                // 기존 이메일과 동일하면 메시지 숨김
+                const messageEl = document.getElementById('email_check_message');
+                messageEl.classList.add('hidden');
+                emailChecked = true;
+                const submitBtn = document.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                }
+            }
+        });
+
+        // 이메일 입력 필드 변경 시 상태 초기화
+        emailInput.addEventListener('input', function() {
+            const currentValue = this.value.trim();
+            if (currentValue !== checkedEmail) {
+                emailChecked = false;
+                const messageEl = document.getElementById('email_check_message');
+                messageEl.classList.add('hidden');
+            }
+        });
+    }
 
     // 프로필 이미지 미리보기
     const profileImageInput = document.getElementById('mq_profile_image');
@@ -235,12 +421,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (birthdayInput) {
         // 페이지 로드 시 생일 상태에 따른 표시 설정
         updateAgeDisplay(birthdayInput.value);
-        
+
         // 생일 변경 시 나이 재계산
         birthdayInput.addEventListener('change', function(event) {
             updateAgeDisplay(event.target.value);
         });
-        
+
         // 실시간 입력 시에도 나이 계산 (input 이벤트)
         birthdayInput.addEventListener('input', function(event) {
             if (event.target.value.length === 10) { // YYYY-MM-DD 형식이 완성되면
@@ -248,6 +434,208 @@ document.addEventListener('DOMContentLoaded', function() {
             } else if (event.target.value.length === 0) { // 값이 지워지면
                 updateAgeDisplay('');
             }
+        });
+    }
+
+    // 비밀번호 변경 폼 유효성 검사
+    const passwordForm = document.querySelector('form[action="{{ route('mypage.change-password') }}"]');
+    if (passwordForm) {
+        const currentPasswordInput = document.getElementById('current_password');
+        const newPasswordInput = document.getElementById('new_password');
+        const confirmPasswordInput = document.getElementById('new_password_confirmation');
+        const passwordSubmitBtn = passwordForm.querySelector('button[type="submit"]');
+
+        // 현재 비밀번호 확인 상태
+        let currentPasswordValid = false;
+
+        // 현재 비밀번호 AJAX 확인 함수
+        async function checkCurrentPassword() {
+            const password = currentPasswordInput.value.trim();
+            const messageEl = document.getElementById('current_password_check_message');
+
+            if (!password) {
+                messageEl.classList.add('hidden');
+                currentPasswordValid = false;
+                if (passwordSubmitBtn) {
+                    passwordSubmitBtn.disabled = true;
+                }
+                return;
+            }
+
+            try {
+                const response = await fetch('{{ route("mypage.check-current-password") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ current_password: password })
+                });
+
+                const data = await response.json();
+
+                if (data.valid) {
+                    messageEl.textContent = data.message;
+                    messageEl.classList.remove('hidden', 'text-red-500');
+                    messageEl.classList.add('text-green-600');
+                    currentPasswordValid = true;
+                    if (passwordSubmitBtn) {
+                        passwordSubmitBtn.disabled = false;
+                    }
+                } else {
+                    messageEl.textContent = data.message;
+                    messageEl.classList.remove('hidden', 'text-green-600');
+                    messageEl.classList.add('text-red-500');
+                    currentPasswordValid = false;
+                    if (passwordSubmitBtn) {
+                        passwordSubmitBtn.disabled = true;
+                    }
+                }
+            } catch (error) {
+                messageEl.textContent = '비밀번호 확인 중 오류가 발생했습니다.';
+                messageEl.classList.remove('hidden', 'text-green-600');
+                messageEl.classList.add('text-red-500');
+                currentPasswordValid = false;
+                if (passwordSubmitBtn) {
+                    passwordSubmitBtn.disabled = true;
+                }
+            }
+        }
+
+        // 현재 비밀번호 blur 이벤트
+        if (currentPasswordInput) {
+            currentPasswordInput.addEventListener('blur', function() {
+                checkCurrentPassword();
+            });
+
+            // 현재 비밀번호 입력 시 상태 초기화
+            currentPasswordInput.addEventListener('input', function() {
+                const messageEl = document.getElementById('current_password_check_message');
+                messageEl.classList.add('hidden');
+                currentPasswordValid = false;
+                if (passwordSubmitBtn) {
+                    passwordSubmitBtn.disabled = true;
+                }
+            });
+        }
+
+        // 비밀번호 형식 검증 함수
+        function validatePasswordFormat(password) {
+            // 영문+숫자 필수, 특수문자 선택, 8~50자
+            const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d\W_]{8,50}$/;
+            return passwordPattern.test(password);
+        }
+
+        // 실시간 새 비밀번호 형식 검증
+        if (newPasswordInput) {
+            newPasswordInput.addEventListener('input', function() {
+                const password = this.value;
+                if (password.length > 0) {
+                    if (password.length < 8) {
+                        this.setCustomValidity('비밀번호는 최소 8자 이상이어야 합니다.');
+                    } else if (password.length > 50) {
+                        this.setCustomValidity('비밀번호는 최대 50자까지 가능합니다.');
+                    } else if (!validatePasswordFormat(password)) {
+                        this.setCustomValidity('비밀번호는 영문과 숫자를 필수로 포함해야 합니다.');
+                    } else {
+                        this.setCustomValidity('');
+                    }
+                } else {
+                    this.setCustomValidity('');
+                }
+            });
+        }
+
+        // 실시간 비밀번호 확인 매칭 검증
+        if (confirmPasswordInput && newPasswordInput) {
+            confirmPasswordInput.addEventListener('input', function() {
+                if (this.value && newPasswordInput.value !== this.value) {
+                    this.setCustomValidity('비밀번호가 일치하지 않습니다.');
+                } else {
+                    this.setCustomValidity('');
+                }
+            });
+
+            // 새 비밀번호 변경 시에도 확인 필드 재검증
+            newPasswordInput.addEventListener('input', function() {
+                if (confirmPasswordInput.value && this.value !== confirmPasswordInput.value) {
+                    confirmPasswordInput.setCustomValidity('비밀번호가 일치하지 않습니다.');
+                } else {
+                    confirmPasswordInput.setCustomValidity('');
+                }
+            });
+        }
+
+        // 폼 제출 시 최종 검증
+        passwordForm.addEventListener('submit', function(e) {
+            const currentPassword = currentPasswordInput.value.trim();
+            const newPassword = newPasswordInput.value.trim();
+            const confirmPassword = confirmPasswordInput.value.trim();
+
+            // 현재 비밀번호 확인
+            if (!currentPassword) {
+                e.preventDefault();
+                alert('현재 비밀번호를 입력해주세요.');
+                currentPasswordInput.focus();
+                return false;
+            }
+
+            // 현재 비밀번호 검증 상태 확인
+            if (!currentPasswordValid) {
+                e.preventDefault();
+                alert('현재 비밀번호를 확인해주세요.');
+                currentPasswordInput.focus();
+                return false;
+            }
+
+            // 새 비밀번호 확인
+            if (!newPassword) {
+                e.preventDefault();
+                alert('새 비밀번호를 입력해주세요.');
+                newPasswordInput.focus();
+                return false;
+            }
+
+            // 새 비밀번호 형식 검증
+            if (newPassword.length < 8) {
+                e.preventDefault();
+                alert('비밀번호는 최소 8자 이상이어야 합니다.');
+                newPasswordInput.focus();
+                return false;
+            }
+
+            if (newPassword.length > 50) {
+                e.preventDefault();
+                alert('비밀번호는 최대 50자까지 가능합니다.');
+                newPasswordInput.focus();
+                return false;
+            }
+
+            if (!validatePasswordFormat(newPassword)) {
+                e.preventDefault();
+                alert('비밀번호는 영문과 숫자를 필수로 포함해야 합니다.');
+                newPasswordInput.focus();
+                return false;
+            }
+
+            // 비밀번호 확인 매칭
+            if (newPassword !== confirmPassword) {
+                e.preventDefault();
+                alert('비밀번호 확인이 일치하지 않습니다.');
+                confirmPasswordInput.focus();
+                return false;
+            }
+
+            // 현재 비밀번호와 새 비밀번호 동일 여부
+            if (currentPassword === newPassword) {
+                e.preventDefault();
+                alert('새 비밀번호는 현재 비밀번호와 달라야 합니다.');
+                newPasswordInput.focus();
+                return false;
+            }
+
+            // 모든 검증 통과
+            return true;
         });
     }
 });

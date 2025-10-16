@@ -47,7 +47,7 @@
 
             <!-- 회원가입 링크 -->
             <div class="text-center">
-                <a href="{{ route('register') }}" class="text-sm text-point1 hover:underline">
+                <a href="{{ route('register') }}" class="text-sm text-point hover:underline">
                     회원가입
                 </a>
                 <span class="text-gray-400 mx-2">|</span>
