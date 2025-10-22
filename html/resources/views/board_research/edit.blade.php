@@ -178,7 +178,7 @@
                         취소
                     </a>
                     <button type="submit" 
-                            class="inline-flex items-center justify-center px-6 h-12 bg-point text-cdark rounded-xl hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-dark focus:ring-offset-2 transition-all">
+                            class="inline-flex items-center justify-center px-6 h-12 bg-point1 text-cdark rounded-xl hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-dark focus:ring-offset-2 transition-all">
                         수정하기
                     </button>
                 </div>

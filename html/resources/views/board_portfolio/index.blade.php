@@ -17,13 +17,13 @@
                            value="{{ request('search') }}"
                            class="w-full h-12 px-4 rounded-xl border-0 focus:ring-2 focus:ring-yellow-500" 
                            placeholder="검색어를 입력하세요">
-                    <button type="submit" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-cdark hover:text-cgray transition-colors">
+                    <button type="submit" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-dark hover:bg-opacity-90 transition-colors">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
                     </button>
                 </div>
-                <a href="{{ route('board-portfolio.index') }}" class="inline-flex items-center justify-center h-12 px-5 bg-white text-cdark rounded-xl hover:bg-gray-50 transition-all">
+                <a href="{{ route('board-portfolio.index') }}" class="inline-flex items-center justify-center h-12 px-5 bg-point text-cdark rounded-xl hover:bg-opacity-90 transition-all">
                     <svg class="w-5 h-5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                     </svg>
@@ -63,7 +63,7 @@
         <div class="flex items-center gap-2">
             @auth
                 <a href="{{ route('board-portfolio.create') }}" 
-                   class="inline-flex items-center justify-center h-10 px-4 bg-point text-cdark rounded-lg hover:bg-opacity-90 transition-all text-sm whitespace-nowrap">
+                   class="inline-flex items-center justify-center h-10 px-4 bg-point1 text-cdark rounded-lg hover:bg-opacity-90 transition-all text-sm whitespace-nowrap">
                     <svg class="w-5 h-5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </svg>

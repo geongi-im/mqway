@@ -174,7 +174,7 @@
         <!-- 메뉴 카드 (PC: 2열, 모바일: 1열) -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <!-- 뉴스 스크랩 카드 -->
-            <div class="bg-white rounded-lg shadow-sm p-6 cursor-pointer hover:shadow-md transition-shadow" onclick="location.href='{{ route('mypage.news-scrap') }}'">
+            <div class="bg-white rounded-lg shadow-sm p-6 cursor-pointer hover:shadow-md transition-shadow" onclick="location.href='{{ route('mypage.news-scrap.index') }}'">
                 <div class="flex items-center mb-4">
                     <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mr-4">
                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -184,7 +184,6 @@
                     <div>
                         <h3 class="text-lg font-semibold text-point">뉴스 스크랩</h3>
                         <p class="text-sm text-secondary">관심있는 경제 뉴스 모음</p>
-                        <span class="text-xs text-blue-600 font-medium">{{ count($newsScrap) }}개 저장됨</span>
                     </div>
                 </div>
             </div>
