@@ -24,35 +24,6 @@ class MyPageController extends Controller
     {
         $user = Auth::user();
 
-        // 임시 뉴스 스크랩 데이터
-        $newsScrap = [
-            [
-                'id' => 1,
-                'title' => '어린이를 위한 용돈 관리법',
-                'summary' => '올바른 용돈 관리 습관을 기르는 방법에 대해 알아보세요.',
-                'image' => '/images/news/sample1.jpg',
-                'scraped_date' => '2024-03-15',
-                'source' => '경제교육뉴스'
-            ],
-            [
-                'id' => 2,
-                'title' => '투자의 기초: 주식이란 무엇인가?',
-                'summary' => '어린이도 이해할 수 있는 쉬운 주식 투자 설명',
-                'image' => '/images/news/sample2.jpg',
-                'scraped_date' => '2024-03-12',
-                'source' => 'MQ경제뉴스'
-            ],
-            [
-                'id' => 3,
-                'title' => '저축의 힘: 복리의 마법',
-                'summary' => '시간이 지날수록 커지는 돈의 비밀을 알아보세요.',
-                'image' => '/images/news/sample3.jpg',
-                'scraped_date' => '2024-03-10',
-                'source' => '어린이경제신문'
-            ]
-        ];
-
-
         // 좋아요한 콘텐츠 (기존 데이터 활용)
         $likedContent = [];
         if ($user) {
@@ -63,7 +34,7 @@ class MyPageController extends Controller
                 ->groupBy('mq_board_name');
         }
 
-        return view('mypage.index', compact('user', 'newsScrap', 'likedContent'));
+        return view('mypage.index', compact('user', 'likedContent'));
     }
 
     public function profile()
@@ -383,57 +354,6 @@ class MyPageController extends Controller
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
-    }
-
-    public function newsScrap()
-    {
-        $user = Auth::user();
-
-        // 임시 뉴스 스크랩 데이터
-        $newsScrap = [
-            [
-                'id' => 1,
-                'title' => '어린이를 위한 용돈 관리법',
-                'summary' => '올바른 용돈 관리 습관을 기르는 방법에 대해 알아보세요.',
-                'image' => '/images/news/sample1.jpg',
-                'scraped_date' => '2024-03-15',
-                'source' => '경제교육뉴스'
-            ],
-            [
-                'id' => 2,
-                'title' => '투자의 기초: 주식이란 무엇인가?',
-                'summary' => '어린이도 이해할 수 있는 쉬운 주식 투자 설명',
-                'image' => '/images/news/sample2.jpg',
-                'scraped_date' => '2024-03-12',
-                'source' => 'MQ경제뉴스'
-            ],
-            [
-                'id' => 3,
-                'title' => '저축의 힘: 복리의 마법',
-                'summary' => '시간이 지날수록 커지는 돈의 비밀을 알아보세요.',
-                'image' => '/images/news/sample3.jpg',
-                'scraped_date' => '2024-03-10',
-                'source' => '어린이경제신문'
-            ],
-            [
-                'id' => 4,
-                'title' => '경제 뉴스 읽는 방법',
-                'summary' => '복잡한 경제 뉴스를 쉽게 이해하는 팁',
-                'image' => null,
-                'scraped_date' => '2024-03-08',
-                'source' => '경제교육뉴스'
-            ],
-            [
-                'id' => 5,
-                'title' => '청소년을 위한 첫 투자',
-                'summary' => '안전한 투자로 시작하는 재테크 첫걸음',
-                'image' => '/images/news/sample5.jpg',
-                'scraped_date' => '2024-03-05',
-                'source' => '청소년경제'
-            ]
-        ];
-
-        return view('mypage.news-scrap', compact('user', 'newsScrap'));
     }
 
     public function likedContent()

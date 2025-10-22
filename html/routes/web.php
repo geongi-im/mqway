@@ -27,6 +27,7 @@ use App\Http\Controllers\EconomyTermGameController;
 use App\Http\Controllers\FinancialQuizController;
 use App\Http\Controllers\RetirementCalculatorController;
 use App\Http\Controllers\Api\CashflowApiController;
+use App\Http\Controllers\NewsScrapController;
 
 /*
 |--------------------------------------------------------------------------
@@ -211,12 +212,24 @@ Route::middleware('auth')->group(function () {
     Route::post('/mypage/check-email', [App\Http\Controllers\MyPageController::class, 'checkEmail'])->name('mypage.check-email');
     Route::post('/mypage/check-current-password', [App\Http\Controllers\MyPageController::class, 'checkCurrentPassword'])->name('mypage.check-current-password');
     Route::post('/mypage/change-password', [App\Http\Controllers\MyPageController::class, 'changePassword'])->name('mypage.change-password');
-    Route::get('/mypage/news-scrap', [App\Http\Controllers\MyPageController::class, 'newsScrap'])->name('mypage.news-scrap');
     Route::get('/mypage/mapping', [App\Http\Controllers\MyPageController::class, 'mapping'])->name('mypage.mapping');
     Route::get('/mypage/mapping/items', [App\Http\Controllers\MyPageController::class, 'getMappingItems'])->name('mypage.mapping.items');
     Route::post('/mypage/mapping/save', [App\Http\Controllers\MyPageController::class, 'saveMapping'])->name('mypage.mapping.save');
     Route::get('/mypage/liked-content', [App\Http\Controllers\MyPageController::class, 'likedContent'])->name('mypage.liked-content');
     Route::post('/mypage/liked-content/unlike', [App\Http\Controllers\MyPageController::class, 'unlikeContent'])->name('mypage.liked-content.unlike');
+});
+
+// 뉴스 스크랩 (회원 전용)
+Route::prefix('mypage/news-scrap')->middleware('auth')->group(function () {
+    Route::get('/', [NewsScrapController::class, 'index'])->name('mypage.news-scrap.index');
+    Route::get('/create', [NewsScrapController::class, 'create'])->name('mypage.news-scrap.create');
+    Route::post('/', [NewsScrapController::class, 'store'])->name('mypage.news-scrap.store');
+    Route::get('/{idx}', [NewsScrapController::class, 'show'])->name('mypage.news-scrap.show');
+    Route::get('/{idx}/edit', [NewsScrapController::class, 'edit'])->name('mypage.news-scrap.edit');
+    Route::put('/{idx}', [NewsScrapController::class, 'update'])->name('mypage.news-scrap.update');
+    Route::delete('/{idx}', [NewsScrapController::class, 'destroy'])->name('mypage.news-scrap.destroy');
+    Route::post('/upload-image', [NewsScrapController::class, 'uploadImage'])->name('mypage.news-scrap.upload-image');
+    Route::post('/fetch-meta', [NewsScrapController::class, 'fetchMetaImage'])->name('mypage.news-scrap.fetch-meta');
 });
 
 // 개인정보처리방침
