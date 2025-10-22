@@ -86,6 +86,7 @@ Route::post('/findinfo/reset-password', [FindInfoController::class, 'resetPasswo
 // 뉴스 게시판
 Route::prefix('board-news')->group(function () {
     Route::get('/', [NewsController::class, 'index'])->name('board-news.index');
+    Route::get('/top-news/{date}', [NewsController::class, 'getTopNewsByDate'])->name('board-news.top-news');
 });
 
 // 게시판 (비회원 접근 가능)
@@ -230,6 +231,7 @@ Route::prefix('mypage/news-scrap')->middleware('auth')->group(function () {
     Route::delete('/{idx}', [NewsScrapController::class, 'destroy'])->name('mypage.news-scrap.destroy');
     Route::post('/upload-image', [NewsScrapController::class, 'uploadImage'])->name('mypage.news-scrap.upload-image');
     Route::post('/fetch-meta', [NewsScrapController::class, 'fetchMetaImage'])->name('mypage.news-scrap.fetch-meta');
+    Route::post('/check-duplicate', [NewsScrapController::class, 'checkDuplicate'])->name('mypage.news-scrap.check-duplicate');
 });
 
 // 개인정보처리방침

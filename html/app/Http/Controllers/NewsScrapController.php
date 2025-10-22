@@ -464,4 +464,47 @@ class NewsScrapController extends Controller
             return null;
         }
     }
+
+    /**
+     * 뉴스 URL 중복 체크 (스크랩 버튼용)
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function checkDuplicate(Request $request)
+    {
+        // 로그인 체크
+        if (!Auth::check()) {
+            return response()->json([
+                'success' => false,
+                'exists' => false,
+                'requireLogin' => true,
+                'message' => '로그인이 필요합니다.'
+            ], 401);
+        }
+
+        $url = $request->input('url');
+        $userId = Auth::user()->mq_user_id;
+
+        // URL 유효성 검사
+        if (!$url || !filter_var($url, FILTER_VALIDATE_URL)) {
+            return response()->json([
+                'success' => false,
+                'exists' => false,
+                'message' => '유효하지 않은 URL입니다.'
+            ], 400);
+        }
+
+        // 중복 체크: 현재 사용자가 해당 URL을 이미 스크랩했는지 확인
+        $exists = NewsScrap::where('mq_user_id', $userId)
+                          ->where('mq_url', $url)
+                          ->where('mq_status', 1)
+                          ->exists();
+
+        return response()->json([
+            'success' => true,
+            'exists' => $exists,
+            'message' => $exists ? '이미 스크랩된 뉴스입니다.' : '스크랩 가능합니다.'
+        ]);
+    }
 }

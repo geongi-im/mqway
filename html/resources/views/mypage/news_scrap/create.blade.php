@@ -137,6 +137,19 @@
         };
     }
 
+    // URL 파라미터에서 제목과 URL 가져오기 (스크랩 버튼에서 전달)
+    const urlParams = new URLSearchParams(window.location.search);
+    const titleFromParam = urlParams.get('title');
+    const urlFromParam = urlParams.get('url');
+
+    // 파라미터가 있으면 입력 필드에 자동 입력
+    if (titleFromParam) {
+        document.getElementById('mq_title').value = titleFromParam;
+    }
+    if (urlFromParam) {
+        document.getElementById('mq_url').value = urlFromParam;
+    }
+
     ClassicEditor
         .create(document.querySelector('#editor'), {
             extraPlugins: [MyCustomUploadAdapterPlugin],

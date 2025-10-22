@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\News;
+use App\Models\NewsTop;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -44,10 +45,26 @@ class NewsController extends Controller
         $categories = ['전체'];
         $categories = array_merge($categories, News::distinct()->pluck('mq_category')->toArray());
 
+        // 오늘의 뉴스 1면 조회
+        $topNews = NewsTop::byDate(today())
+                          ->active()
+                          ->orderBy('idx', 'asc')
+                          ->get()
+                          ->map(function($news) {
+                              return [
+                                  'idx' => $news->idx,
+                                  'company' => $news->mq_company,
+                                  'company_logo' => $news->getCompanyLogo(),
+                                  'title' => $news->mq_title,
+                                  'source_url' => $news->mq_source_url
+                              ];
+                          });
+
         return view('news.index', [
             'news' => $news,
             'categories' => $categories,
-            'categoryColors' => $this->categoryColors
+            'categoryColors' => $this->categoryColors,
+            'topNews' => $topNews
         ]);
     }
 
@@ -123,6 +140,51 @@ class NewsController extends Controller
                 ], 500);
             }
             return back()->with('error', '뉴스 저장 중 오류가 발생했습니다.')->withInput();
+        }
+    }
+
+    /**
+     * 특정 날짜의 1면 뉴스 조회 (AJAX용)
+     *
+     * @param string $date
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getTopNewsByDate($date)
+    {
+        try {
+            $newsDate = Carbon::parse($date);
+
+            $topNews = NewsTop::byDate($newsDate)
+                              ->active()
+                              ->orderBy('idx', 'asc')
+                              ->get()
+                              ->map(function($news) {
+                                  return [
+                                      'idx' => $news->idx,
+                                      'company' => $news->mq_company,
+                                      'company_logo' => $news->getCompanyLogo(),
+                                      'title' => $news->mq_title,
+                                      'source_url' => $news->mq_source_url
+                                  ];
+                              });
+
+            // 요일 계산 (한글)
+            $days = ['일', '월', '화', '수', '목', '금', '토'];
+            $dayOfWeek = $days[$newsDate->dayOfWeek];
+
+            return response()->json([
+                'success' => true,
+                'date' => $newsDate->format('Y-m-d'),
+                'dayOfWeek' => $dayOfWeek,
+                'news' => $topNews
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => '뉴스 조회 중 오류가 발생했습니다.',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 } 
