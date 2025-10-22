@@ -74,3 +74,5 @@ task.md
 # spec-kit settings
 .specify/
 specs/
+
+*.Identifier
