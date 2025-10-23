@@ -37,6 +37,7 @@ class NewsTop extends Model
         '한국경제' => '/images/logo/hankyung.png',
         '매일경제' => '/images/logo/mk.png',
         '헤럴드경제' => '/images/logo/heraldbiz.png',
+        '서울경제' => '/images/logo/sedaily.png',
     ];
 
     /**
