@@ -28,8 +28,19 @@
                     </svg>
                 </button>
 
-                <div id="currentDate" class="text-lg font-semibold text-gray-800 min-w-[160px] text-center">
-                    <!-- JavaScript로 업데이트 -->
+                <div class="flex items-center gap-2 relative">
+                    <div id="currentDate" class="text-lg font-semibold text-gray-800 min-w-[160px] text-center">
+                        <!-- JavaScript로 업데이트 -->
+                    </div>
+                    <button type="button" id="calendarButton" class="text-gray-600 hover:text-blue-600 transition-colors p-1" title="날짜 선택">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                    </button>
+                    <input type="date"
+                           id="datePickerInput"
+                           class="absolute left-0 top-0 w-full h-full opacity-0 cursor-pointer"
+                           style="z-index: -1;">
                 </div>
 
                 <button id="nextDate"
@@ -156,6 +167,7 @@ const maxFutureDate = new Date();
 // 페이지 로드 시 초기화
 document.addEventListener('DOMContentLoaded', function() {
     initTopNews();
+    initDatePicker();
 
     // 이벤트 리스너
     document.getElementById('prevDate').addEventListener('click', () => changeDate(-1));
@@ -168,6 +180,69 @@ document.addEventListener('DOMContentLoaded', function() {
 function initTopNews() {
     updateDateDisplay();
     loadTopNewsByDate(selectedDate);
+}
+
+/**
+ * 날짜 선택기 초기화
+ */
+function initDatePicker() {
+    const dateInput = document.getElementById('datePickerInput');
+    const calendarBtn = document.getElementById('calendarButton');
+
+    // 초기 설정
+    updateDateInputValue();
+
+    // 캘린더 버튼 클릭 시 date picker 열기
+    calendarBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // 값 업데이트
+        updateDateInputValue();
+
+        // date picker 열기
+        try {
+            if (dateInput.showPicker) {
+                dateInput.showPicker();
+            } else {
+                // showPicker 미지원 브라우저
+                dateInput.focus();
+                dateInput.click();
+            }
+        } catch (error) {
+            console.log('Date picker error:', error);
+            dateInput.focus();
+            dateInput.click();
+        }
+    });
+
+    // 날짜 선택 시
+    dateInput.addEventListener('change', function() {
+        if (this.value) {
+            selectedDate = new Date(this.value + 'T00:00:00');
+            updateDateDisplay();
+            loadTopNewsByDate(selectedDate);
+        }
+    });
+}
+
+/**
+ * date input 값 업데이트
+ */
+function updateDateInputValue() {
+    const dateInput = document.getElementById('datePickerInput');
+
+    // 현재 선택된 날짜로 설정
+    const year = selectedDate.getFullYear();
+    const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+    const day = String(selectedDate.getDate()).padStart(2, '0');
+    dateInput.value = `${year}-${month}-${day}`;
+
+    // 최대 날짜 설정 (오늘)
+    const maxYear = maxFutureDate.getFullYear();
+    const maxMonth = String(maxFutureDate.getMonth() + 1).padStart(2, '0');
+    const maxDay = String(maxFutureDate.getDate()).padStart(2, '0');
+    dateInput.max = `${maxYear}-${maxMonth}-${maxDay}`;
 }
 
 /**
