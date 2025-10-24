@@ -52,36 +52,36 @@
 @endpush
 
 @section('content')
-<div class="min-h-screen">
+<div class="min-h-screen bg-gray-50 py-12">
     <!-- 메인 화면 -->
-    <div id="mainScreen" class="container mx-auto px-4 py-8">
+    <div id="mainScreen" class="container mx-auto px-4">
         <div class="text-center">
-            <h1 class="text-3xl md:text-3xl font-bold text-purple-800 mb-4">
-                🎯 알쏭달쏭 경제용어, 짝꿍을 찾아라! 💰
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+                알쏭달쏭 경제용어, 짝꿍을 찾아라!
             </h1>
-            <p class="text-xl text-gray-700 mb-8">
+            <p class="text-lg text-gray-600 mb-8">
                 재미있는 카드 게임으로 경제 용어를 배워보세요!
             </p>
-            
-            <div class="max-w-2xl mx-auto bg-white rounded-2xl p-8 shadow-lg mb-8">
-                <h2 class="text-2xl font-bold text-blue-700 mb-4">🎮 게임 방법</h2>
+
+            <div class="max-w-2xl mx-auto bg-white rounded-lg p-8 shadow-md mb-8">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">게임 방법</h2>
                 <div class="text-left space-y-3">
-                    <p class="text-lg">📚 1. 경제 용어 카드와 설명 카드 중 알맞은 짝을 찾으세요.</p>
-                    <p class="text-lg">💡 2. 정답을 맞히면 점수를 얻고, 다음 문제로 넘어갑니다.</p>
-                    <p class="text-lg">⏱️ 3. 모든 문제를 풀면 게임이 종료되고, 점수와 시간이 기록됩니다.</p>
-                    <p class="text-lg">🏆 4. 가장 높은 점수와 빠른 시간으로 랭킹에 도전하세요!</p>
+                    <p class="text-gray-600">1. 경제 용어 카드와 설명 카드 중 알맞은 짝을 찾으세요.</p>
+                    <p class="text-gray-600">2. 정답을 맞히면 점수를 얻고, 다음 문제로 넘어갑니다.</p>
+                    <p class="text-gray-600">3. 모든 문제를 풀면 게임이 종료되고, 점수와 시간이 기록됩니다.</p>
+                    <p class="text-gray-600">4. 가장 높은 점수와 빠른 시간으로 랭킹에 도전하세요!</p>
                 </div>
             </div>
 
             <div class="space-y-4 mb-8">
-                <button id="startBtn" class="bg-gradient-to-r from-purple-500 to-blue-500 text-white font-bold text-2xl px-12 py-4 rounded-2xl shadow-lg hover:from-purple-600 hover:to-blue-600 transition-all duration-300 transform hover:scale-105">
-                    🎯 게임 시작하기
+                <button id="startBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-4 px-8 rounded-full transition-all duration-300 text-lg transform hover:scale-105 hover:shadow-lg">
+                    게임 시작하기
                 </button>
             </div>
 
             <!-- 랭킹 표시 -->
-            <div id="rankingDisplay" class="max-w-md mx-auto bg-white rounded-2xl p-6 shadow-lg">
-                <h3 class="text-xl font-bold text-orange-600 mb-4">🏆 베스트 랭킹</h3>
+            <div id="rankingDisplay" class="max-w-md mx-auto bg-white rounded-lg p-6 shadow-md">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">베스트 랭킹</h3>
                 <div id="rankingList" class="space-y-2">
                     <!-- 랭킹 데이터가 여기에 표시됩니다 -->
                 </div>
@@ -93,28 +93,28 @@
     <div id="gameScreen" class="container mx-auto px-4 py-8 hidden">
         <!-- 게임 헤더 -->
         <div class="flex justify-between items-center mb-6">
-            <div class="text-2xl font-bold text-purple-800">
+            <div class="text-2xl font-bold text-gray-800">
                 문제 <span id="currentQuestion">1</span> / <span id="totalQuestions">15</span>
             </div>
-            <div class="timer text-2xl text-blue-700 bg-white px-4 py-2 rounded-lg shadow">
-                ⏱️ <span id="gameTimer">00:00</span>
+            <div class="timer text-2xl text-blue-600 bg-white px-4 py-2 rounded-lg shadow-md">
+                <span id="gameTimer">00:00</span>
             </div>
         </div>
 
         <!-- 현재 문제 카드 (카드 덱 및 화살표 제거, 중앙 정렬) -->
         <div class="flex justify-center items-center mb-8">
             <div class="text-center">
-                <div class="text-lg font-bold mb-2">🎯 현재 문제</div>
-                <div id="currentCard" class="w-48 h-72 bg-gradient-to-br from-yellow-200 to-orange-200 rounded-xl shadow-lg flex items-center justify-center border-4 border-orange-300">
-                    <div id="currentTerm" class="text-3xl font-bold text-orange-800"></div>
+                <div class="text-lg font-semibold text-gray-700 mb-2">현재 문제</div>
+                <div id="currentCard" class="w-48 h-72 bg-blue-100 rounded-xl shadow-lg flex items-center justify-center border-2 border-blue-200">
+                    <div id="currentTerm" class="text-3xl font-bold text-blue-700"></div>
                 </div>
             </div>
         </div>
 
         <!-- 선택지들 -->
         <div class="max-w-4xl mx-auto">
-            <h3 class="text-xl font-bold text-center text-blue-700 mb-4">
-                위 용어에 맞는 설명을 골라주세요! 🤔
+            <h3 class="text-xl font-semibold text-center text-gray-800 mb-4">
+                위 용어에 맞는 설명을 골라주세요!
             </h3>
             <div id="optionsContainer" class="grid md:grid-cols-2 gap-4 mb-6">
                 <!-- 선택지들이 여기에 생성됩니다 -->
@@ -122,11 +122,11 @@
 
             <!-- PASS 버튼 및 메인으로 버튼 -->
             <div class="text-center space-x-4">
-                <button id="passBtn" class="bg-gray-500 text-white font-bold text-xl px-8 py-3 rounded-xl shadow-lg hover:bg-gray-600 transition-all duration-300" style="display: none;">
-                    ⏭️ PASS (건너뛰기)
+                <button id="passBtn" class="bg-gray-500 text-white font-semibold text-lg px-8 py-3 rounded-full shadow-md hover:bg-gray-600 transition-all duration-300" style="display: none;">
+                    PASS (건너뛰기)
                 </button>
-                <button id="goToMainFromGameBtn" class="bg-red-500 text-white font-bold text-xl px-8 py-3 rounded-xl shadow-lg hover:bg-red-600 transition-all duration-300">
-                    ❌ 포기하기
+                <button id="goToMainFromGameBtn" class="bg-red-500 text-white font-semibold text-lg px-8 py-3 rounded-full shadow-md hover:bg-red-600 transition-all duration-300">
+                    포기하기
                 </button>
             </div>
         </div>
@@ -135,37 +135,36 @@
     <!-- 결과 화면 -->
     <div id="resultScreen" class="container mx-auto px-4 py-8 hidden">
         <div class="text-center max-w-2xl mx-auto">
-            <h2 class="text-4xl font-bold text-purple-800 mb-6">🎉 게임 완료!</h2>
-            
-            <div class="bg-white rounded-2xl p-8 shadow-lg mb-6">
-                <div class="text-6xl mb-4">🏆</div>
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">게임 완료!</h2>
+
+            <div class="bg-white rounded-lg p-8 shadow-md mb-6">
                 <div class="space-y-4">
                     <div class="text-2xl">
-                        <span class="font-bold text-green-600">정답:</span> 
-                        <span id="finalScore" class="text-3xl font-bold">0</span>점
+                        <span class="font-semibold text-gray-700">정답:</span>
+                        <span id="finalScore" class="text-3xl font-bold text-blue-600">0</span>점
                     </div>
                     <div class="text-2xl">
-                        <span class="font-bold text-blue-600">시간:</span> 
-                        <span id="finalTime" class="text-3xl font-bold timer">00:00</span>
+                        <span class="font-semibold text-gray-700">시간:</span>
+                        <span id="finalTime" class="text-3xl font-bold timer text-blue-600">00:00</span>
                     </div>
-                    <div id="rankMessage" class="text-xl font-bold text-orange-600"></div>
+                    <div id="rankMessage" class="text-lg font-semibold text-gray-600"></div>
                 </div>
             </div>
 
             <!-- 업데이트된 랭킹 -->
-            <div class="bg-white rounded-2xl p-6 shadow-lg mb-6">
-                <h3 class="text-xl font-bold text-orange-600 mb-4">🏆 최고 랭킹</h3>
+            <div class="bg-white rounded-lg p-6 shadow-md mb-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">최고 랭킹</h3>
                 <div id="finalRanking" class="space-y-2">
                     <!-- 업데이트된 랭킹이 표시됩니다 -->
                 </div>
             </div>
 
             <div class="space-x-4">
-                <button id="playAgainBtn" class="bg-gradient-to-r from-purple-500 to-blue-500 text-white font-bold text-xl px-8 py-3 rounded-xl shadow-lg hover:from-purple-600 hover:to-blue-600 transition-all duration-300">
-                    🔄 다시 플레이
+                <button id="playAgainBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold text-lg px-8 py-3 rounded-full shadow-md transition-all duration-300 transform hover:scale-105">
+                    다시 플레이
                 </button>
-                <button id="backToMainBtn" class="bg-gradient-to-r from-green-500 to-teal-500 text-white font-bold text-xl px-8 py-3 rounded-xl shadow-lg hover:from-green-600 hover:to-teal-600 transition-all duration-300">
-                    🏠 메인으로
+                <button id="backToMainBtn" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold text-lg px-8 py-3 rounded-full shadow-md transition-all duration-300 transform hover:scale-105">
+                    메인으로
                 </button>
             </div>
         </div>
@@ -277,9 +276,9 @@
             
             options.forEach((option) => {
                 const button = document.createElement('button');
-                button.className = 'bg-white hover:bg-blue-50 border-2 border-blue-200 text-gray-800 font-medium text-lg px-6 py-4 rounded-xl shadow-md transition-all duration-300 hover:shadow-lg hover:scale-105 text-left';
+                button.className = 'bg-white hover:bg-blue-50 border-2 border-gray-200 text-gray-700 font-medium text-base px-6 py-4 rounded-full shadow-sm transition-all duration-200 hover:border-blue-500 text-left';
                 button.textContent = option;
-                
+
                 button.addEventListener('click', () => {
                     this.selectAnswer(option, question.description, button);
                 });
