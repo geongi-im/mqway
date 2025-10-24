@@ -6,29 +6,25 @@
     <button id="closeMenu" class="absolute top-4 right-4 text-cdark hover:text-cgray text-3xl">&times;</button>
     <nav class="pt-16 px-8">
         <ul class="space-y-6 text-2xl">
-            <!--
-            <li>
-                <a href="{{ url('/') }}" class="text-cdark hover:text-cgray block py-2 {{ request()->is('/') ? 'font-bold text-point1 border-l-4 border-secondary pl-4 -ml-4' : '' }}">
-                    Home
-                </a>
-            </li>
-            -->
+            <!-- MQWAY 소개 -->
             <li>
                 <a href="{{ route('introduce') }}" class="text-cdark hover:text-cgray block py-2 {{ request()->routeIs('introduce') ? 'font-bold text-point1 border-l-4 border-secondary pl-4 -ml-4' : '' }}">
-                    Introduce
+                    MQWAY 소개
                 </a>
             </li>
+
+            <!-- 코스 소개 -->
             <li class="relative">
                 <a href="#" class="text-cdark hover:text-cgray toggle-menu flex items-center justify-between py-2 {{ request()->is('course*') ? 'font-bold text-point1 border-l-4 border-secondary pl-4 -ml-4' : '' }}" data-target="course">
-                    <span>Course</span>
+                    <span>코스 소개</span>
                     <svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </a>
                 <ul class="submenu hidden space-y-1 ml-4 border-l-2 border-secondary/20" data-submenu="course">
                     <li class="relative">
-                        <a href="{{ route('course.l1.intro') }}" 
-                           class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6 
+                        <a href="{{ route('course.l1.intro') }}"
+                           class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6
                            {{ request()->routeIs('course.l1.intro') ? 'font-bold text-point1 bg-dark/10' : '' }}">
                             L1 코스
                             <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-0 bg-secondary transition-all duration-200"></span>
@@ -43,6 +39,9 @@
                     </li>
                 </ul>
             </li>
+
+            <!-- Guidebook (숨김) -->
+            <!--
             <li class="relative">
                 <a href="#" class="text-cdark hover:text-cgray toggle-menu flex items-center justify-between py-2 {{ request()->is('guidebook*') ? 'font-bold text-point1 border-l-4 border-secondary pl-4 -ml-4' : '' }}" data-target="guidebook">
                     <span>Guidebook</span>
@@ -52,15 +51,15 @@
                 </a>
                 <ul class="submenu hidden space-y-1 ml-4 border-l-2 border-secondary/20" data-submenu="guidebook">
                     <li class="relative">
-                        <a href="{{ route('guidebook.life-search') }}" 
-                           class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6 
+                        <a href="{{ route('guidebook.life-search') }}"
+                           class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6
                            {{ request()->routeIs('guidebook.life-search') ? 'font-bold text-point1 bg-dark/10' : '' }}">
                             원하는 삶 찾기
                             <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-0 bg-secondary transition-all duration-200"></span>
                         </a>
                     </li>
                     <li class="relative">
-                        <a href="{{ route('guidebook.reality-check') }}" 
+                        <a href="{{ route('guidebook.reality-check') }}"
                            class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6
                            {{ request()->routeIs('guidebook.reality-check') ? 'font-bold text-point1 bg-dark/10' : '' }}">
                             현실 점검하기
@@ -68,7 +67,7 @@
                         </a>
                     </li>
                     <li class="relative">
-                        <a href="{{ route('guidebook.roadmap') }}" 
+                        <a href="{{ route('guidebook.roadmap') }}"
                            class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6
                            {{ request()->routeIs('guidebook.roadmap') ? 'font-bold text-point1 bg-dark/10' : '' }}">
                             로드맵 작성하기
@@ -77,6 +76,10 @@
                     </li>
                 </ul>
             </li>
+            -->
+
+            <!-- Cashflow (숨김) -->
+            <!--
             <li class="relative">
                 <a href="#" class="text-cdark hover:text-cgray toggle-menu flex items-center justify-between py-2 {{ request()->is('cashflow*') ? 'font-bold text-point1 border-l-4 border-secondary pl-4 -ml-4' : '' }}" data-target="cashflow">
                     <span>Cashflow</span>
@@ -86,15 +89,15 @@
                 </a>
                 <ul class="submenu hidden space-y-1 ml-4 border-l-2 border-secondary/20" data-submenu="cashflow">
                     <li class="relative">
-                        <a href="{{ route('cashflow.intro') }}" 
-                           class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6 
+                        <a href="{{ route('cashflow.intro') }}"
+                           class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6
                            {{ request()->routeIs('cashflow.intro') ? 'font-bold text-point1 bg-dark/10' : '' }}">
                             Cashflow 소개
                             <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-0 bg-secondary transition-all duration-200"></span>
                         </a>
                     </li>
                     <li class="relative">
-                        <a href="{{ route('cashflow.helper') }}" 
+                        <a href="{{ route('cashflow.helper') }}"
                            class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6
                            {{ request()->routeIs('cashflow.helper') ? 'font-bold text-point1 bg-dark/10' : '' }}">
                             Cashflow 도우미
@@ -103,34 +106,36 @@
                     </li>
                 </ul>
             </li>
+            -->
 
+            <!-- 학습 도구 -->
             <li class="relative">
                 <a href="#" class="text-cdark hover:text-cgray toggle-menu flex items-center justify-between py-2 {{ request()->is('tools*') ? 'font-bold text-point1 border-l-4 border-secondary pl-4 -ml-4' : '' }}" data-target="tools">
-                    <span>Tools</span>
+                    <span>학습 도구</span>
                     <svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </a>
                 <ul class="submenu hidden space-y-1 ml-4 border-l-2 border-secondary/20" data-submenu="tools">
                     <li class="relative">
-                        <a href="{{ route('tools.economy-term-game') }}" 
-                           class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6 
+                        <a href="{{ route('tools.economy-term-game') }}"
+                           class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6
                            {{ request()->routeIs('tools.economy-term-game') ? 'font-bold text-point1 bg-dark/10' : '' }}">
                             경제 용어 카드 맞추기
                             <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-0 bg-secondary transition-all duration-200"></span>
                         </a>
                     </li>
                     <li class="relative">
-                        <a href="{{ route('tools.financial-quiz') }}" 
-                           class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6 
+                        <a href="{{ route('tools.financial-quiz') }}"
+                           class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6
                            {{ request()->routeIs('tools.financial-quiz') ? 'font-bold text-point1 bg-dark/10' : '' }}">
                             경제 상식 퀴즈
                             <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-0 bg-secondary transition-all duration-200"></span>
                         </a>
                     </li>
                     <li class="relative">
-                        <a href="{{ route('tools.retirement-calculator') }}" 
-                           class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6 
+                        <a href="{{ route('tools.retirement-calculator') }}"
+                           class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6
                            {{ request()->routeIs('tools.retirement-calculator') ? 'font-bold text-point1 bg-dark/10' : '' }}">
                             노후 자금 계산기
                             <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-0 bg-secondary transition-all duration-200"></span>
@@ -139,36 +144,45 @@
                 </ul>
             </li>
 
-            <!--
-            <li>
-                <a href="{{ url('/pick') }}" class="text-point hover:text-secondary/80 block py-2 {{ request()->is('pick*') ? 'font-bold border-l-4 border-secondary pl-4 -ml-4' : '' }}">
-                    Pick
-                </a>
-            </li>
-            <li>
-                <a href="{{ url('/beecube') }}" class="text-point hover:text-secondary/80 block py-2 {{ request()->is('beecube*') ? 'font-bold border-l-4 border-secondary pl-4 -ml-4' : '' }}">
-                    Beecube
-                </a>
-            </li>
-            -->
+            <!-- 학습 자료 -->
             <li class="relative">
-                <a href="#" class="text-cdark hover:text-cgray toggle-menu flex items-center justify-between py-2 {{ request()->is('board*') ? 'font-bold text-point1 border-l-4 border-secondary pl-4 -ml-4' : '' }}" data-target="board">
-                    <span>Board</span>
+                <a href="#" class="text-cdark hover:text-cgray toggle-menu flex items-center justify-between py-2 {{ request()->is('board-content*') || request()->is('board-video*') ? 'font-bold text-point1 border-l-4 border-secondary pl-4 -ml-4' : '' }}" data-target="learning">
+                    <span>학습 자료</span>
                     <svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </a>
-                <ul class="submenu hidden space-y-1 ml-4 border-l-2 border-secondary/20" data-submenu="board">
+                <ul class="submenu hidden space-y-1 ml-4 border-l-2 border-secondary/20" data-submenu="learning">
                     <li class="relative">
-                        <a href="{{ route('board-content.index') }}" 
-                           class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6 
+                        <a href="{{ route('board-content.index') }}"
+                           class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6
                            {{ request()->routeIs('board-content.index') ? 'font-bold text-point1 bg-dark/10' : '' }}">
                             추천 콘텐츠
                             <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-0 bg-secondary transition-all duration-200"></span>
                         </a>
                     </li>
                     <li class="relative">
-                        <a href="{{ route('board-research.index') }}" 
+                        <a href="{{ route('board-video.index') }}"
+                           class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6
+                           {{ request()->routeIs('board-video.index') ? 'font-bold text-point1 bg-dark/10' : '' }}">
+                            쉽게 보는 경제
+                            <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-0 bg-secondary transition-all duration-200"></span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+            <!-- 투자 정보 -->
+            <li class="relative">
+                <a href="#" class="text-cdark hover:text-cgray toggle-menu flex items-center justify-between py-2 {{ request()->is('board-research*') || request()->is('board-news*') || request()->is('board-portfolio*') ? 'font-bold text-point1 border-l-4 border-secondary pl-4 -ml-4' : '' }}" data-target="investment">
+                    <span>투자 정보</span>
+                    <svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </a>
+                <ul class="submenu hidden space-y-1 ml-4 border-l-2 border-secondary/20" data-submenu="investment">
+                    <li class="relative">
+                        <a href="{{ route('board-research.index') }}"
                            class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6
                            {{ request()->routeIs('board-research.index') ? 'font-bold text-point1 bg-dark/10' : '' }}">
                             투자 리서치
@@ -176,26 +190,18 @@
                         </a>
                     </li>
                     <li class="relative">
-                        <a href="{{ route('board-video.index') }}" 
-                           class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6
-                           {{ request()->routeIs('board-video.index') ? 'font-bold text-point1 bg-dark/10' : '' }}">
-                            쉽게 보는 경제
-                            <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-0 bg-secondary transition-all duration-200"></span>
-                        </a>
-                    </li>
-                    <li class="relative">
-                        <a href="{{ route('board-news.index') }}" 
-                           class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6
-                           {{ request()->routeIs('board-news.index') ? 'font-bold text-point1 bg-dark/10' : '' }}">
-                            뉴스 게시판
-                            <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-0 bg-secondary transition-all duration-200"></span>
-                        </a>
-                    </li>
-                    <li class="relative">
-                        <a href="{{ route('board-portfolio.index') }}" 
+                        <a href="{{ route('board-portfolio.index') }}"
                            class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6
                            {{ request()->routeIs('board-portfolio.index') ? 'font-bold text-point1 bg-dark/10' : '' }}">
                             투자대가의 포트폴리오
+                            <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-0 bg-secondary transition-all duration-200"></span>
+                        </a>
+                    </li>
+                    <li class="relative">
+                        <a href="{{ route('board-news.index') }}"
+                           class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6
+                           {{ request()->routeIs('board-news.index') ? 'font-bold text-point1 bg-dark/10' : '' }}">
+                            뉴스 게시판
                             <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-0 bg-secondary transition-all duration-200"></span>
                         </a>
                     </li>
@@ -337,7 +343,7 @@
         <!-- 모바일 햄버거 메뉴 (좌측에 고정) -->
         <button id="menuButton" class="mobile-menu-button text-cdark hover:text-cgray lg:hidden">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
             </svg>
         </button>
 
@@ -348,19 +354,15 @@
         
         <!-- PC용 메뉴 (1024px 이상에서만 표시) -->
         <div class="desktop-menu hidden items-center space-x-2">
-            <!--
-            <a href="{{ url('/') }}" class="px-3 py-2 font-medium {{ request()->is('/') ? 'font-bold text-point1' : 'text-white' }}">
-                Home
-            </a>
-            -->
+            <!-- MQWAY 소개 -->
             <a href="{{ route('introduce') }}" class="px-3 py-2 font-medium {{ request()->routeIs('introduce') ? 'font-bold text-point1' : 'text-white' }}">
-                Introduce
+                MQWAY 소개
             </a>
 
-            <!-- Course 드롭다운 -->
+            <!-- 코스 소개 드롭다운 -->
             <div class="relative group">
                 <a href="{{ route('course.l1.intro') }}" class="px-3 py-2 font-medium flex items-center {{ request()->is('course*') ? 'font-bold text-point1' : 'text-white' }}">
-                    Course
+                    코스 소개
                     <svg class="w-4 h-4 ml-1 transform group-hover:rotate-180 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
@@ -374,8 +376,9 @@
                     </a>
                 </div>
             </div>
-            
-            <!-- Guidebook 드롭다운 -->
+
+            <!-- Guidebook 드롭다운 (숨김) -->
+            <!--
             <div class="relative group">
                 <a href="{{ route('guidebook.life-search') }}" class="px-3 py-2 font-medium flex items-center {{ request()->is('guidebook*') ? 'font-bold text-point1' : 'text-white' }}">
                     Guidebook
@@ -395,8 +398,10 @@
                     </a>
                 </div>
             </div>
-            
-            <!-- Cashflow 드롭다운 -->
+            -->
+
+            <!-- Cashflow 드롭다운 (숨김) -->
+            <!--
             <div class="relative group">
                 <a href="{{ route('cashflow.intro') }}" class="px-3 py-2 font-medium flex items-center {{ request()->is('cashflow*') ? 'font-bold text-point1' : 'text-white' }}">
                     Cashflow
@@ -413,11 +418,12 @@
                     </a>
                 </div>
             </div>
-            
-            <!-- Tools 드롭다운 -->
+            -->
+
+            <!-- 학습 도구 드롭다운 -->
             <div class="relative group">
                 <a href="{{ route('tools.economy-term-game') }}" class="px-3 py-2 font-medium flex items-center {{ request()->is('tools*') ? 'font-bold text-point1' : 'text-white' }}">
-                    Tools
+                    학습 도구
                     <svg class="w-4 h-4 ml-1 transform group-hover:rotate-180 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
@@ -434,11 +440,11 @@
                     </a>
                 </div>
             </div>
-            
-            <!-- Board 드롭다운 -->
+
+            <!-- 학습 자료 드롭다운 (Board 분리 1) -->
             <div class="relative group">
-                <a href="{{ route('board-content.index') }}" class="px-3 py-2 font-medium flex items-center {{ request()->is('board*') ? 'font-bold text-point1' : 'text-white' }}">
-                    Board
+                <a href="{{ route('board-content.index') }}" class="px-3 py-2 font-medium flex items-center {{ request()->is('board-content*') || request()->is('board-video*') ? 'font-bold text-point1' : 'text-white' }}">
+                    학습 자료
                     <svg class="w-4 h-4 ml-1 transform group-hover:rotate-180 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
@@ -447,17 +453,29 @@
                     <a href="{{ route('board-content.index') }}" class="block px-4 py-3 {{ request()->routeIs('board-content.*') ? 'font-bold text-point1' : 'text-white' }}">
                         추천 콘텐츠
                     </a>
-                    <a href="{{ route('board-research.index') }}" class="block px-4 py-3 {{ request()->routeIs('board-research.*') ? 'font-bold text-point1' : 'text-white' }}">
-                        투자 리서치
-                    </a>
                     <a href="{{ route('board-video.index') }}" class="block px-4 py-3 {{ request()->routeIs('board-video.*') ? 'font-bold text-point1' : 'text-white' }}">
                         쉽게 보는 경제
                     </a>
-                    <a href="{{ route('board-news.index') }}" class="block px-4 py-3 {{ request()->routeIs('board-news.*') ? 'font-bold text-point1' : 'text-white' }}">
-                        뉴스 게시판
+                </div>
+            </div>
+
+            <!-- 투자 정보 드롭다운 (Board 분리 2) -->
+            <div class="relative group">
+                <a href="{{ route('board-research.index') }}" class="px-3 py-2 font-medium flex items-center {{ request()->is('board-research*') || request()->is('board-news*') || request()->is('board-portfolio*') ? 'font-bold text-point1' : 'text-white' }}">
+                    투자 정보
+                    <svg class="w-4 h-4 ml-1 transform group-hover:rotate-180 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </a>
+                <div class="absolute top-full left-0 mt-4 w-56 bg-point2 shadow-lg rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                    <a href="{{ route('board-research.index') }}" class="block px-4 py-3 {{ request()->routeIs('board-research.*') ? 'font-bold text-point1' : 'text-white' }}">
+                        투자 리서치
                     </a>
                     <a href="{{ route('board-portfolio.index') }}" class="block px-4 py-3 {{ request()->routeIs('board-portfolio.*') ? 'font-bold text-point1' : 'text-white' }}">
                         투자대가의 포트폴리오
+                    </a>
+                    <a href="{{ route('board-news.index') }}" class="block px-4 py-3 {{ request()->routeIs('board-news.*') ? 'font-bold text-point1' : 'text-white' }}">
+                        뉴스 게시판
                     </a>
                 </div>
             </div>
@@ -543,11 +561,13 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 각 메뉴 활성화 체크 (모바일 햄버거 메뉴용)
     const menuItems = [
-        { path: '/guidebook', target: 'guidebook' },
-        { path: '/cashflow', target: 'cashflow' },
+        { path: '/course', target: 'course' },
         { path: '/tools', target: 'tools' },
-        { path: '/board', target: 'board' },
-        { path: '/course', target: 'course' }
+        { path: '/board-content', target: 'learning' },
+        { path: '/board-video', target: 'learning' },
+        { path: '/board-research', target: 'investment' },
+        { path: '/board-news', target: 'investment' },
+        { path: '/board-portfolio', target: 'investment' }
     ];
 
     menuItems.forEach(item => {

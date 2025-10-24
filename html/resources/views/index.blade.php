@@ -343,7 +343,7 @@ use Illuminate\Support\Facades\Auth;
 </style>
 
 <!-- 메인 배너 슬라이더 -->
-<div class="swiper mainBanner mb-12">
+<div class="swiper mainBanner mb-0">
     <div class="swiper-wrapper">
         <div class="swiper-slide">
             <div class="banner-image">
@@ -396,6 +396,65 @@ use Illuminate\Support\Facades\Auth;
     <!-- 페이지네이션 -->
     <div class="swiper-pagination"></div>
 </div>
+
+<!-- Hero Section -->
+<section class="bg-primary py-12 md:py-16">
+    <div class="container mx-auto px-4">
+        <!-- 타이틀 -->
+        <div class="text-center mb-10 md:mb-12">
+            <h2 class="text-2xl md:text-4xl font-bold text-gray-800 mb-4">
+                자녀와 함께하는<br class="md:hidden">
+                선진국형 금융교육 커뮤니티
+            </h2>
+            <p class="text-gray-600 text-base md:text-lg max-w-2xl mx-auto">
+                자녀의 금융 습관을 만들고, 부모님은 재테크를 배우는<br class="hidden md:block">
+                온/오프라인 통합 커뮤니티입니다.
+            </p>
+        </div>
+
+        <!-- 3개 핵심 가치 카드 -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-8 md:mb-10">
+            <!-- 카드 1: 함께 -->
+            <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow text-center">
+                <div class="text-4xl md:text-5xl mb-4">👨‍👩‍👧‍👦</div>
+                <h3 class="font-bold text-lg md:text-xl mb-2">학부모와 자녀가 함께</h3>
+                <p class="text-gray-600 text-sm">
+                    부모와 아이가 함께 배우고 성장하는 가족 단위 교육
+                </p>
+            </div>
+
+            <!-- 카드 2: 체계적 -->
+            <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow text-center">
+                <div class="text-4xl md:text-5xl mb-4">📚</div>
+                <h3 class="font-bold text-lg md:text-xl mb-2">체계적인 교육 프로그램</h3>
+                <p class="text-gray-600 text-sm">
+                    레벨별 맞춤 커리큘럼과 실전형 미션 활동
+                </p>
+            </div>
+
+            <!-- 카드 3: 성장 -->
+            <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow text-center">
+                <div class="text-4xl md:text-5xl mb-4">🌱</div>
+                <h3 class="font-bold text-lg md:text-xl mb-2">실천하며 성장</h3>
+                <p class="text-gray-600 text-sm">
+                    온라인 학습 + 오프라인 활동으로 실제 습관 형성
+                </p>
+            </div>
+        </div>
+
+        <!-- CTA 버튼 -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="{{ route('course.l1.intro') }}"
+               class="bg-point1 hover:bg-point1/90 text-white px-6 md:px-8 py-3 rounded-lg font-semibold text-center transition transform hover:scale-105">
+                프로그램 시작하기 →
+            </a>
+            <a href="{{ route('introduce') }}"
+               class="bg-white hover:bg-gray-50 text-gray-800 px-6 md:px-8 py-3 rounded-lg font-semibold border-2 border-gray-200 text-center transition transform hover:scale-105">
+                MQWAY 자세히 보기 →
+            </a>
+        </div>
+    </div>
+</section>
 
 <!-- 주요 경제지표 차트 -->
 <div class="container mx-auto px-4 mb-12">
