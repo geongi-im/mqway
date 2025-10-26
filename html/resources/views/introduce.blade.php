@@ -116,7 +116,25 @@
                 </div>
             </div>
 
-            <div class="mt-12 md:mt-16 pt-8 sm:pt-12 border-t-2 border-gray-200 text-center space-y-6">
+            <!-- 명언 섹션 -->
+            <div class="mt-12 md:mt-16 pt-8 sm:pt-12 border-t-2 border-gray-200">
+                <div class="grid md:grid-cols-2 gap-6 mb-12 md:mb-16">
+                    <div class="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 sm:p-8 rounded-lg border-l-4 border-point shadow-sm hover:shadow-md transition-shadow">
+                        <p class="text-gray-700 italic mb-4 leading-relaxed">
+                            "10대와 20대는 부자가 되는 기질이 형성되는 시기다. 부모라면 자녀가 돈과 친하게 지낼 수 있게 해줘야 한다. 자녀에게 돈을 다루는 법을 가르쳐줘라."
+                        </p>
+                        <p class="text-sm text-gray-600 font-semibold">— 부자의 기술</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-green-50 to-teal-50 p-6 sm:p-8 rounded-lg border-l-4 border-point shadow-sm hover:shadow-md transition-shadow">
+                        <p class="text-gray-700 italic mb-4 leading-relaxed">
+                            "투자의 성과는 '우리가 무엇을 사고파는가'에서 나오는 것이 아니라 '우리가 무엇을 보유하고 있는가'에서 나온다"
+                        </p>
+                        <p class="text-sm text-gray-600 font-semibold">— 하워드 막스</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center space-y-6">
                  <p class="text-lg sm:text-xl font-semibold text-gray-800">
                     당신의 자녀가 숫자에 휘둘리지 않고, <br />숫자를 삶의 도구로 쓰는 사람으로 자라길 바란다면.
                 </p>
