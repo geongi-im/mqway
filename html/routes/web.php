@@ -265,6 +265,10 @@ Route::prefix('cashflow')->group(function () {
 Route::prefix('course')->group(function () {
     Route::get('/l1/intro', [CourseController::class, 'l1Intro'])->name('course.l1.intro');
     Route::get('/l2/intro', [CourseController::class, 'l2Intro'])->name('course.l2.intro');
+
+    // 코스 진행 상태 API
+    Route::get('/progress/{courseCode}', [CourseController::class, 'getProgress'])->name('course.progress.get');
+    Route::post('/progress/toggle', [CourseController::class, 'toggleProgress'])->name('course.progress.toggle');
 });
 
 // Tools 라우트
