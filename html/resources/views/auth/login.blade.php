@@ -67,12 +67,27 @@
             </div>
         </div>
 
-        <!-- Google 로그인 버튼 -->
-        <div class="flex justify-center">
+        <!-- 소셜 로그인 버튼 -->
+        <div class="space-y-3">
+            <!-- Google 로그인 버튼 -->
             <button onclick="openGoogleLogin()"
                     class="flex items-center justify-center gap-2 w-full px-3 sm:px-6 py-3 text-sm sm:text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all whitespace-nowrap">
-                <img src="https://www.google.com/favicon.ico" alt="Google" class="w-5 h-5">
+                <img src="/images/logo/login_google_logo.png" alt="Google" class="w-5 h-5">
                 <span class="truncate">Google 계정으로 로그인</span>
+            </button>
+
+            <!-- Kakao 로그인 버튼 -->
+            <button onclick="openKakaoLogin()"
+                    class="flex items-center justify-center gap-2 w-full px-3 sm:px-6 py-3 text-sm sm:text-base font-medium text-gray-700 bg-[#FEE500] border border-[#FEE500] rounded-lg hover:bg-[#FDD835] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FEE500] transition-all whitespace-nowrap">
+                <img src="/images/logo/login_kakao_logo.png" alt="Kakao" class="w-5 h-5">
+                <span class="truncate">카카오 계정으로 로그인</span>
+            </button>
+
+            <!-- Naver 로그인 버튼 -->
+            <button onclick="openNaverLogin()"
+                    class="flex items-center justify-center gap-2 w-full px-3 sm:px-6 py-3 text-sm sm:text-base font-medium text-white bg-[#03C75A] border border-[#03C75A] rounded-lg hover:bg-[#02B350] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#03C75A] transition-all whitespace-nowrap">
+                <img src="/images/logo/login_naver_logo.png" alt="Naver" class="w-5 h-5">
+                <span class="truncate">네이버 계정으로 로그인</span>
             </button>
         </div>
     </div>
@@ -91,6 +106,36 @@ function openGoogleLogin() {
     const popup = window.open(
         '{{ route('login.google') }}',
         'GoogleLogin',
+        `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no,location=no,status=no`
+    );
+}
+
+function openKakaoLogin() {
+    // 팝업 창 크기와 위치 계산
+    const width = 500;
+    const height = 600;
+    const left = (window.screen.width / 2) - (width / 2);
+    const top = (window.screen.height / 2) - (height / 2);
+
+    // 팝업 창 열기
+    const popup = window.open(
+        '{{ route('login.kakao') }}',
+        'KakaoLogin',
+        `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no,location=no,status=no`
+    );
+}
+
+function openNaverLogin() {
+    // 팝업 창 크기와 위치 계산
+    const width = 500;
+    const height = 600;
+    const left = (window.screen.width / 2) - (width / 2);
+    const top = (window.screen.height / 2) - (height / 2);
+
+    // 팝업 창 열기
+    const popup = window.open(
+        '{{ route('login.naver') }}',
+        'NaverLogin',
         `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no,location=no,status=no`
     );
 }

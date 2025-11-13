@@ -75,6 +75,14 @@ Route::post('/register/check-email', [App\Http\Controllers\Auth\RegisterControll
 Route::get('/auth/google', [LoginController::class, 'redirectToGoogle'])->name('login.google');
 Route::get('/auth/google/callback', [LoginController::class, 'handleGoogleCallback']);
 
+// Kakao 로그인
+Route::get('/auth/kakao', [LoginController::class, 'redirectToKakao'])->name('login.kakao');
+Route::get('/auth/kakao/callback', [LoginController::class, 'handleKakaoCallback']);
+
+// Naver 로그인
+Route::get('/auth/naver', [LoginController::class, 'redirectToNaver'])->name('login.naver');
+Route::get('/auth/naver/callback', [LoginController::class, 'handleNaverCallback']);
+
 // 회원정보 찾기
 Route::get('/findinfo', [FindInfoController::class, 'showFindInfoForm'])->name('findinfo')->middleware('guest');
 Route::post('/findinfo/find-id', [FindInfoController::class, 'findUserId'])->name('findinfo.find-id')->middleware('guest');
