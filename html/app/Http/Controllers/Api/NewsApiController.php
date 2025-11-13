@@ -110,7 +110,7 @@ class NewsApiController extends Controller
                 'success' => true,
                 'message' => '뉴스가 저장되었습니다.',
                 'data' => $newsTop
-            ], 201);
+            ], 200);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
