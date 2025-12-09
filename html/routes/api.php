@@ -35,6 +35,8 @@ Route::post('/board-portfolio', [BoardApiController::class, 'storePortfolio']);
 Route::prefix('news')->group(function () {
     Route::get('/rss', [NewsApiController::class, 'rssList']);
     Route::get('/check', [NewsApiController::class, 'checkDuplicate']);
+    Route::post('/check-duplicate-batch', [NewsApiController::class, 'checkDuplicateBatch']);
+
     Route::post('/', [NewsApiController::class, 'store']);
 
     // 오늘의 뉴스 1면 API (외부 프로그램용)

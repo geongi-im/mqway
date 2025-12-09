@@ -58,6 +58,36 @@ class NewsApiController extends Controller
             'exists' => $exists
         ]);
     }
+    
+    /**
+     * 여러 뉴스 URL의 중복 여부를 일괄 체크합니다.
+     */
+    public function checkDuplicateBatch(Request $request)
+    {
+        $request->validate([
+            'urls' => 'required|array',
+            'urls.*' => 'required|url'
+        ]);
+
+        $urls = $request->urls;
+        
+        // DB에서 중복된 URL들을 한번에 조회
+        $existingUrls = News::whereIn('mq_source_url', $urls)
+            ->pluck('mq_source_url')
+            ->toArray();
+        
+        // 각 URL의 중복 여부를 매핑
+        $results = [];
+        foreach ($urls as $url) {
+            $results[$url] = in_array($url, $existingUrls);
+        }
+        
+        return response()->json([
+            'results' => $results,
+            'total_checked' => count($urls),
+            'duplicates_found' => count($existingUrls)
+        ]);
+    }
 
     /**
      * 새로운 뉴스를 저장합니다.
