@@ -42,5 +42,3 @@ Route::prefix('news')->group(function () {
     // 오늘의 뉴스 1면 API (외부 프로그램용)
     Route::post('/top', [NewsApiController::class, 'storeTopNews']);
 });
-
-// 캐시플로우 게임 API 라우트는 web.php로 이동됨 (세션 기반 인증 사용)
