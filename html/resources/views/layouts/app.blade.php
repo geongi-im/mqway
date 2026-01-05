@@ -9,7 +9,7 @@
 
     <meta property="og:image" content="{{ asset('/images/logo/mqway_logo_og_image.jpg') }}">
     <meta property="og:title" content="{{ config('app.name', 'MQWAY') }}">
-    <meta property="og:description" content="경제 지능을 깨우고 스스로 미래를 설계하는 힘을 키워주는 교육 플랫폼">
+    <meta property="og:description" content="우리 아이 경제 지능을 키우는 MQWAY. 자기주도 학습과 올바른 경제 관념 형성을 위한 실전 경제교육 플랫폼입니다.">
     <meta property="og:type" content="website">
     
     <meta name="naver-site-verification" content="a3b7b869fb45b3421b38b4773bb8c172ecf12861" />
