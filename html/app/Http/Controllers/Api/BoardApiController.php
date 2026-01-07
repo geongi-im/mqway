@@ -109,14 +109,22 @@ class BoardApiController extends Controller
     {
         try {
             // 요청 데이터 검증
-            $request->validate([
+            $validationRules = [
                 'title' => 'required|string|max:255',
                 'content' => 'required|string',
                 'category' => 'required|string|max:50',
                 'writer' => 'required|string|max:50',
-                'image.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
                 'thumbnail_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
-            ]);
+            ];
+
+            if ($type === 'cartoon') {
+                $validationRules['image'] = 'required|array|min:1';
+                $validationRules['image.*'] = 'required|image|mimes:jpeg,png,jpg,gif|max:2048';
+            } else {
+                $validationRules['image.*'] = 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048';
+            }
+
+            $request->validate($validationRules);
 
             // 게시판 타입에 따른 업로드 경로와 모델 설정
             $uploadPath = 'uploads/board';
@@ -167,6 +175,10 @@ class BoardApiController extends Controller
 
                 // DB에는 파일명만 저장
                 $thumbnailPath = $randomName;
+            }
+            elseif ($type === 'cartoon' && !empty($imagePaths)) {
+                $thumbnailPath = $imagePaths[0];
+                $thumbnailOriginalName = $originalImageNames[0];
             }
 
             // 게시글 생성 데이터 준비
