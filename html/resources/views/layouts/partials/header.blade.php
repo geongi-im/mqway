@@ -146,7 +146,7 @@
 
             <!-- 학습 자료 -->
             <li class="relative">
-                <a href="#" class="text-cdark hover:text-cgray toggle-menu flex items-center justify-between py-2 {{ request()->is('board-content*') || request()->is('board-video*') ? 'font-bold text-point1 border-l-4 border-secondary pl-4 -ml-4' : '' }}" data-target="learning">
+                <a href="#" class="text-cdark hover:text-cgray toggle-menu flex items-center justify-between py-2 {{ request()->is('board-content*') || request()->is('board-video*') || request()->is('board-cartoon*') ? 'font-bold text-point1 border-l-4 border-secondary pl-4 -ml-4' : '' }}" data-target="learning">
                     <span>학습 자료</span>
                     <svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -166,6 +166,14 @@
                            class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6
                            {{ request()->routeIs('board-video.index') ? 'font-bold text-point1 bg-dark/10' : '' }}">
                             쉽게 보는 경제
+                            <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-0 bg-secondary transition-all duration-200"></span>
+                        </a>
+                    </li>
+                    <li class="relative">
+                        <a href="{{ route('board-cartoon.index') }}"
+                           class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6
+                           {{ request()->routeIs('board-cartoon.index') ? 'font-bold text-point1 bg-dark/10' : '' }}">
+                            인사이트 만화
                             <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-0 bg-secondary transition-all duration-200"></span>
                         </a>
                     </li>
@@ -443,7 +451,7 @@
 
             <!-- 학습 자료 드롭다운 (Board 분리 1) -->
             <div class="relative group">
-                <a href="{{ route('board-content.index') }}" class="px-3 py-2 font-medium flex items-center {{ request()->is('board-content*') || request()->is('board-video*') ? 'font-bold text-point1' : 'text-white' }}">
+                <a href="{{ route('board-content.index') }}" class="px-3 py-2 font-medium flex items-center {{ request()->is('board-content*') || request()->is('board-video*') || request()->is('board-cartoon*') ? 'font-bold text-point1' : 'text-white' }}">
                     학습 자료
                     <svg class="w-4 h-4 ml-1 transform group-hover:rotate-180 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -455,6 +463,9 @@
                     </a>
                     <a href="{{ route('board-video.index') }}" class="block px-4 py-3 {{ request()->routeIs('board-video.*') ? 'font-bold text-point1' : 'text-white' }}">
                         쉽게 보는 경제
+                    </a>
+                    <a href="{{ route('board-cartoon.index') }}" class="block px-4 py-3 {{ request()->routeIs('board-cartoon.*') ? 'font-bold text-point1' : 'text-white' }}">
+                        인사이트 만화
                     </a>
                 </div>
             </div>
@@ -565,6 +576,7 @@ document.addEventListener('DOMContentLoaded', function() {
         { path: '/tools', target: 'tools' },
         { path: '/board-content', target: 'learning' },
         { path: '/board-video', target: 'learning' },
+        { path: '/board-cartoon', target: 'learning' },
         { path: '/board-research', target: 'investment' },
         { path: '/board-news', target: 'investment' },
         { path: '/board-portfolio', target: 'investment' }

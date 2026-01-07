@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\ServerCheckController;
 use App\Http\Controllers\CashflowController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\BoardContentController;
+use App\Http\Controllers\BoardCartoonController;
 use App\Http\Controllers\BoardResearchController;
 use App\Http\Controllers\BoardVideoController;
 use App\Http\Controllers\BoardPortfolioController;
@@ -127,6 +128,22 @@ Route::prefix('board-content')->group(function () {
     Route::post('/delete-image/{idx}/{filename}', [BoardContentController::class, 'deleteImage'])->name('board-content.delete-image')->middleware('auth');
     Route::delete('/{idx}/thumbnail', [BoardContentController::class, 'deleteThumbnail'])->name('board-content.thumbnail.delete')->middleware('auth');
     Route::get('/{idx}', [BoardContentController::class, 'show'])->name('board-content.show');
+});
+
+// 인사이트 만화 게시판 (비회원도 볼 수 있음, 글쓰기는 회원만)
+Route::prefix('board-cartoon')->group(function () {
+    // 비회원도 접근 가능한 라우트
+    Route::get('/', [BoardCartoonController::class, 'index'])->name('board-cartoon.index');
+    Route::get('/create', [BoardCartoonController::class, 'create'])->name('board-cartoon.create')->middleware('auth');
+    Route::post('/', [BoardCartoonController::class, 'store'])->name('board-cartoon.store')->middleware('auth');
+    Route::get('/{idx}/edit', [BoardCartoonController::class, 'edit'])->name('board-cartoon.edit')->middleware('auth');
+    Route::put('/{idx}', [BoardCartoonController::class, 'update'])->name('board-cartoon.update')->middleware('auth');
+    Route::delete('/{idx}', [BoardCartoonController::class, 'destroy'])->name('board-cartoon.destroy')->middleware('auth');
+    Route::post('/{idx}/like', [BoardCartoonController::class, 'like'])->name('board-cartoon.like')->middleware('auth');
+    Route::post('/upload-image', [BoardCartoonController::class, 'uploadImage'])->name('board-cartoon.upload.image')->middleware('auth');
+    Route::post('/delete-image/{idx}/{filename}', [BoardCartoonController::class, 'deleteImage'])->name('board-cartoon.delete-image')->middleware('auth');
+    Route::delete('/{idx}/thumbnail', [BoardCartoonController::class, 'deleteThumbnail'])->name('board-cartoon.thumbnail.delete')->middleware('auth');
+    Route::get('/{idx}', [BoardCartoonController::class, 'show'])->name('board-cartoon.show');
 });
 
 // 투자 리서치 게시판 (회원 전용)

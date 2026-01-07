@@ -31,6 +31,9 @@ Route::post('/board-research', [BoardApiController::class, 'storeResearch']);
 // 포트폴리오 게시판 API 라우트
 Route::post('/board-portfolio', [BoardApiController::class, 'storePortfolio']);
 
+// 인사이트 만화 게시판 API 라우트
+Route::post('/board-cartoon', [BoardApiController::class, 'storeCartoon']);
+
 // 뉴스 API 라우트
 Route::prefix('news')->group(function () {
     Route::get('/rss', [NewsApiController::class, 'rssList']);

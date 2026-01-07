@@ -7,6 +7,7 @@ use App\Models\Board;
 use App\Models\BoardContent;
 use App\Models\BoardResearch;
 use App\Models\BoardPortfolio;
+use App\Models\BoardCartoon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -36,6 +37,14 @@ class BoardApiController extends Controller
     public function storeResearch(Request $request)
     {
         return $this->processStore($request, 'research');
+    }
+
+    /**
+     * 인사이트 만화 게시판에 게시글 저장
+     */
+    public function storeCartoon(Request $request)
+    {
+        return $this->processStore($request, 'cartoon');
     }
 
     /**
@@ -119,6 +128,9 @@ class BoardApiController extends Controller
             } elseif ($type === 'research') {
                 $uploadPath = 'uploads/board_research';
                 $model = BoardResearch::class;
+            } elseif ($type === 'cartoon') {
+                $uploadPath = 'uploads/board_cartoon';
+                $model = BoardCartoon::class;
             }
 
             // 이미지 처리

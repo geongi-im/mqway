@@ -679,19 +679,21 @@ abstract class AbstractBoardController extends Controller
     {
         if ($boardType === 'board_content') {
             return $this->getBoardContentCategories();
+        } else if ($boardType === 'board_cartoon') {
+            return $this->getBoardCartoonCategories();
         } else if ($boardType === 'board_research') {
             return $this->getBoardResearchCategories();
         }
-        
-        // 기본 동작 (이전 코드)
-        $model = app($this->modelClass);
-        return $model::select('mq_category')
+
+        $modelClass = $this->modelClass;
+
+        return $modelClass::select('mq_category')
             ->distinct()
             ->orderBy('mq_category')
             ->pluck('mq_category')
             ->toArray();
     }
-    
+
     /**
      * 모델 클래스명으로부터 게시판 타입 결정
      */
@@ -699,6 +701,8 @@ abstract class AbstractBoardController extends Controller
     {
         if (strpos($this->modelClass, 'BoardContent') !== false) {
             return 'board_content';
+        } else if (strpos($this->modelClass, 'BoardCartoon') !== false) {
+            return 'board_cartoon';
         } else if (strpos($this->modelClass, 'BoardResearch') !== false) {
             return 'board_research';
         } else if (strpos($this->modelClass, 'BoardVideo') !== false) {
@@ -706,8 +710,7 @@ abstract class AbstractBoardController extends Controller
         } else if (strpos($this->modelClass, 'BoardPortfolio') !== false) {
             return 'board_portfolio';
         }
-        
-        // 기본값
+
         return null;
     }
-} 
+}
