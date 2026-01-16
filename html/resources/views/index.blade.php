@@ -138,7 +138,7 @@ use Illuminate\Support\Facades\Auth;
 }
 
 /* 콘텐츠 슬라이더 스타일 */
-.contentSlider, .researchSlider, .videoSlider {
+.contentSlider, .researchSlider, .videoSlider, .cartoonSlider {
     position: relative;
     padding-bottom: 50px; /* 페이지네이션을 위한 하단 여백 */
 }
@@ -148,7 +148,9 @@ use Illuminate\Support\Facades\Auth;
 .researchSlider .swiper-button-next,
 .researchSlider .swiper-button-prev,
 .videoSlider .swiper-button-next,
-.videoSlider .swiper-button-prev {
+.videoSlider .swiper-button-prev,
+.cartoonSlider .swiper-button-next,
+.cartoonSlider .swiper-button-prev {
     color: #34383d;
     background: #fff;
     width: 40px;
@@ -160,13 +162,15 @@ use Illuminate\Support\Facades\Auth;
 
 .contentSlider .swiper-button-next,
 .researchSlider .swiper-button-next,
-.videoSlider .swiper-button-next {
+.videoSlider .swiper-button-next,
+.cartoonSlider .swiper-button-next {
     right: -5px;
 }
 
 .contentSlider .swiper-button-prev,
 .researchSlider .swiper-button-prev,
-.videoSlider .swiper-button-prev {
+.videoSlider .swiper-button-prev,
+.cartoonSlider .swiper-button-prev {
     left: -5px;
 }
 
@@ -175,7 +179,9 @@ use Illuminate\Support\Facades\Auth;
 .researchSlider .swiper-button-next:hover,
 .researchSlider .swiper-button-prev:hover,
 .videoSlider .swiper-button-next:hover,
-.videoSlider .swiper-button-prev:hover {
+.videoSlider .swiper-button-prev:hover,
+.cartoonSlider .swiper-button-next:hover,
+.cartoonSlider .swiper-button-prev:hover {
     background: #f8f8f8;
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
@@ -185,20 +191,24 @@ use Illuminate\Support\Facades\Auth;
 .researchSlider .swiper-button-next:after,
 .researchSlider .swiper-button-prev:after,
 .videoSlider .swiper-button-next:after,
-.videoSlider .swiper-button-prev:after {
+.videoSlider .swiper-button-prev:after,
+.cartoonSlider .swiper-button-next:after,
+.cartoonSlider .swiper-button-prev:after {
     font-size: 18px;
 }
 
 .contentSlider .swiper-pagination,
 .researchSlider .swiper-pagination,
-.videoSlider .swiper-pagination {
+.videoSlider .swiper-pagination,
+.cartoonSlider .swiper-pagination {
     bottom: 0 !important;
     position: absolute;
 }
 
 .contentSlider .swiper-pagination-bullet,
 .researchSlider .swiper-pagination-bullet,
-.videoSlider .swiper-pagination-bullet {
+.videoSlider .swiper-pagination-bullet,
+.cartoonSlider .swiper-pagination-bullet {
     width: 8px;
     height: 8px;
     background: rgba(0, 0, 0, 0.2);
@@ -207,7 +217,8 @@ use Illuminate\Support\Facades\Auth;
 
 .contentSlider .swiper-pagination-bullet-active,
 .researchSlider .swiper-pagination-bullet-active,
-.videoSlider .swiper-pagination-bullet-active {
+.videoSlider .swiper-pagination-bullet-active,
+.cartoonSlider .swiper-pagination-bullet-active {
     background: #34383d;
     transform: scale(1.2);
 }
@@ -281,7 +292,7 @@ use Illuminate\Support\Facades\Auth;
         margin: 0 4px !important;
     }
 
-    .contentSlider, .researchSlider, .videoSlider {
+    .contentSlider, .researchSlider, .videoSlider, .cartoonSlider {
         padding: 0 15px 40px 15px;
     }
 
@@ -290,7 +301,9 @@ use Illuminate\Support\Facades\Auth;
     .researchSlider .swiper-button-next,
     .researchSlider .swiper-button-prev,
     .videoSlider .swiper-button-next,
-    .videoSlider .swiper-button-prev {
+    .videoSlider .swiper-button-prev,
+    .cartoonSlider .swiper-button-next,
+    .cartoonSlider .swiper-button-prev {
         display: none;
     }
 }
@@ -501,6 +514,78 @@ use Illuminate\Support\Facades\Auth;
                     <div class="p-4 flex-1 flex flex-col">
                         <div class="mb-2">
                             <span class="inline-block px-2 py-1 {{ $boardContentColors[$post->mq_category] }} text-xs font-medium rounded-md">
+                                {{ $post->mq_category }}
+                            </span>
+                        </div>
+                        <h3 class="font-bold text-lg mb-2">{{ $post->mq_title }}</h3>
+                        <div class="mt-auto flex items-center justify-between text-sm text-text-dark">
+                            <span>{{ $post->mq_reg_date ? $post->mq_reg_date->format('Y-m-d') : '' }}</span>
+                            <div class="flex items-center gap-4">
+                                <span class="flex items-center gap-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                    {{ $post->mq_view_cnt }}
+                                </span>
+                                <span class="flex items-center gap-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                    </svg>
+                                    {{ $post->mq_like_cnt }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </a>
+            </div>
+            @endforeach
+        </div>
+        <!-- 네비게이션 버튼 -->
+        <div class="swiper-button-next"></div>
+        <div class="swiper-button-prev"></div>
+        <!-- 페이지네이션 -->
+        <div class="swiper-pagination"></div>
+    </div>
+</div>
+
+<!-- 인사이트 만화 슬라이더 -->
+<div class="container mx-auto px-4 mb-16">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold mb-6">인사이트 만화</h2>
+        <a href="{{ url('/board-cartoon') }}" class="text-dark hover:text-dark/80 transition-colors flex items-center">
+            더보기
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+        </a>
+    </div>
+    <div class="swiper cartoonSlider">
+        <div class="swiper-wrapper">
+            @foreach($cartoonContents as $post)
+            <div class="swiper-slide">
+                <a href="{{ route('board-cartoon.show', $post->idx) }}" class="block h-full">
+                <div class="bg-white rounded-lg overflow-hidden shadow-lg h-full flex flex-col">
+                    <div class="bg-gray-50 flex items-center justify-center" style="height: 240px;">
+                        @if($post->mq_image)
+                            <img src="{{ asset($post->mq_image) }}"
+                                 alt="만화 이미지"
+                                 class="w-full h-full object-contain p-2">
+                        @else
+                            <!-- 썸네일 없음 플레이스홀더 -->
+                            <div class="flex flex-col items-center justify-center text-gray-400">
+                                <svg class="w-16 h-16 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                <span class="text-sm">이미지 없음</span>
+                            </div>
+                        @endif
+                    </div>
+                    <div class="p-4 flex-1 flex flex-col">
+                        <div class="mb-2">
+                            <span class="inline-block px-2 py-1 {{ $boardCartoonColors[$post->mq_category] ?? 'bg-gray-100 text-gray-800' }} text-xs font-medium rounded-md">
                                 {{ $post->mq_category }}
                             </span>
                         </div>
@@ -774,6 +859,31 @@ use Illuminate\Support\Facades\Auth;
         },
     });
     
+    // 인사이트 만화 슬라이더
+    const cartoonSlider = new Swiper('.cartoonSlider', {
+        slidesPerView: 1,
+        spaceBetween: 20,
+        navigation: {
+            nextEl: '.cartoonSlider .swiper-button-next',
+            prevEl: '.cartoonSlider .swiper-button-prev',
+        },
+        pagination: {
+            el: '.cartoonSlider .swiper-pagination',
+            clickable: true,
+        },
+        breakpoints: {
+            640: {
+                slidesPerView: 2,
+            },
+            768: {
+                slidesPerView: 3,
+            },
+            1024: {
+                slidesPerView: 4,
+            },
+        },
+    });
+
     // 쉽게 보는 경제 슬라이더
     const videoSlider = new Swiper('.videoSlider', {
         slidesPerView: 1,
