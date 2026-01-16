@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BoardCartoon;
 use App\Models\BoardContent;
 use App\Models\BoardResearch;
 use App\Models\BoardVideo;
@@ -30,6 +31,19 @@ class IndexController extends Controller
         $recommendedContents = BoardContent::where('mq_status', 1)
             ->orderBy('mq_reg_date', 'desc')
             ->take(10)
+            ->get()
+            ->map(function ($post) {
+                // 원본 콘텐츠 보존
+                $post->mq_original_content = $post->mq_content;
+                // 표시용 콘텐츠만 제한
+                $post->mq_content = Str::limit(strip_tags($post->mq_content), 50);
+                return $post;
+            });
+
+        // 인사이트 만화 콘텐츠 가져오기
+        $cartoonContents = BoardCartoon::where('mq_status', 1)
+            ->orderBy('mq_reg_date', 'desc')
+            ->take(8)
             ->get()
             ->map(function ($post) {
                 // 원본 콘텐츠 보존
@@ -93,6 +107,19 @@ class IndexController extends Controller
                 $post->mq_image = null;
             }
         }
+
+        // 이미지 경로 처리 - 인사이트 만화
+        foreach ($cartoonContents as $post) {
+            // 썸네일 이미지가 있으면 사용, 없으면 null
+            if (is_array($post->mq_thumbnail_image) && !empty($post->mq_thumbnail_image)) {
+                $filename = $post->mq_thumbnail_image[0];
+                $post->mq_image = !filter_var($filename, FILTER_VALIDATE_URL)
+                    ? asset('storage/uploads/board_cartoon/' . $filename)
+                    : $filename;
+            } else {
+                $post->mq_image = null;
+            }
+        }
         
         // 이미지 경로 처리 - 쉽게 보는 경제
         foreach ($videoContents as $post) {
@@ -141,17 +168,20 @@ class IndexController extends Controller
 
         // 각 게시판별 카테고리 색상 설정
         $boardContentColors = $this->getCategoryColors('board_content');
+        $boardCartoonColors = $this->getCategoryColors('board_cartoon');
         $boardResearchColors = $this->getCategoryColors('board_research');
         $boardVideoColors = $this->getCategoryColors('board_video');
 
         return view('index', [
             'recommendedContents' => $recommendedContents,
+            'cartoonContents' => $cartoonContents,
             'videoContents' => $videoContents,
             'researchContents' => $researchContents,
             'latestNews' => $latestNews,
             'isLoggedIn' => $isLoggedIn,
             'newsCategoryColors' => $this->newsCategoryColors,
             'boardContentColors' => $boardContentColors,
+            'boardCartoonColors' => $boardCartoonColors,
             'boardResearchColors' => $boardResearchColors,
             'boardVideoColors' => $boardVideoColors,
         ]);
