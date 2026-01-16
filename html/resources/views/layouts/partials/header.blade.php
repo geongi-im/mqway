@@ -202,11 +202,6 @@
                            class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6
                            {{ request()->routeIs('board-insights.*') ? 'font-bold text-point1 bg-dark/10' : '' }}">
                             투자 인사이트
-                            @guest
-                                <svg class="w-3 h-3 inline-block ml-1" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
-                                </svg>
-                            @endguest
                             <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-0 bg-secondary transition-all duration-200"></span>
                         </a>
                     </li>
@@ -495,9 +490,7 @@
                     <a href="{{ route('board-research.index') }}" class="block px-4 py-3 {{ request()->routeIs('board-research.*') ? 'font-bold text-point1' : 'text-white' }}">
                         투자 리서치
                     </a>
-                    <a href="{{ route('board-insights.index') }}" class="block px-4 py-3 {{ request()->routeIs('board-insights.*') ? 'font-bold text-point1' : 'text-white' }}">
-                        투자 인사이트 @guest<svg class="w-3 h-3 inline-block ml-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/></svg>@endguest
-                    </a>
+                    <a href="{{ route('board-insights.index') }}" class="block px-4 py-3 {{ request()->routeIs('board-insights.*') ? 'font-bold text-point1' : 'text-white' }}">투자 인사이트</a>
                     <a href="{{ route('board-portfolio.index') }}" class="block px-4 py-3 {{ request()->routeIs('board-portfolio.*') ? 'font-bold text-point1' : 'text-white' }}">
                         투자대가의 포트폴리오
                     </a>
