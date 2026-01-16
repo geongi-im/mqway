@@ -367,6 +367,7 @@ class MyPageController extends Controller
             'board_portfolio' => '투자대가의 포트폴리오',
             'board_video' => '경제 비디오',
             'board_cartoon' => '인사이트 만화',
+            'board_insights' => '투자 인사이트',
         ];
 
         // 좋아요한 콘텐츠 가져오기
@@ -417,6 +418,12 @@ class MyPageController extends Controller
                                 ->where('idx', $item->mq_board_idx)
                                 ->first();
                             $boardUrl = route('board-cartoon.show', $item->mq_board_idx);
+                            break;
+                        case 'board_insights':
+                            $post = DB::table('mq_board_insights')
+                                ->where('idx', $item->mq_board_idx)
+                                ->first();
+                            $boardUrl = route('board-insights.show', $item->mq_board_idx);
                             break;
                     }
 

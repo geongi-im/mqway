@@ -709,6 +709,8 @@ abstract class AbstractBoardController extends Controller
             return 'board_video';
         } else if (strpos($this->modelClass, 'BoardPortfolio') !== false) {
             return 'board_portfolio';
+        } else if (strpos($this->modelClass, 'BoardInsights') !== false) {
+            return 'board_insights';
         }
 
         return null;

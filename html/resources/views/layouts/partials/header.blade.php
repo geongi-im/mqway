@@ -182,7 +182,7 @@
 
             <!-- 투자 정보 -->
             <li class="relative">
-                <a href="#" class="text-cdark hover:text-cgray toggle-menu flex items-center justify-between py-2 {{ request()->is('board-research*') || request()->is('board-news*') || request()->is('board-portfolio*') ? 'font-bold text-point1 border-l-4 border-secondary pl-4 -ml-4' : '' }}" data-target="investment">
+                <a href="#" class="text-cdark hover:text-cgray toggle-menu flex items-center justify-between py-2 {{ request()->is('board-research*') || request()->is('board-news*') || request()->is('board-portfolio*') || request()->is('board-insights*') ? 'font-bold text-point1 border-l-4 border-secondary pl-4 -ml-4' : '' }}" data-target="investment">
                     <span>투자 정보</span>
                     <svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -194,6 +194,19 @@
                            class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6
                            {{ request()->routeIs('board-research.index') ? 'font-bold text-point1 bg-dark/10' : '' }}">
                             투자 리서치
+                            <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-0 bg-secondary transition-all duration-200"></span>
+                        </a>
+                    </li>
+                    <li class="relative">
+                        <a href="{{ route('board-insights.index') }}"
+                           class="submenu-item block py-2 pl-4 text-base text-cdark hover:text-cgray transition-all duration-200 hover:pl-6
+                           {{ request()->routeIs('board-insights.*') ? 'font-bold text-point1 bg-dark/10' : '' }}">
+                            투자 인사이트
+                            @guest
+                                <svg class="w-3 h-3 inline-block ml-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+                                </svg>
+                            @endguest
                             <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-0 bg-secondary transition-all duration-200"></span>
                         </a>
                     </li>
@@ -472,7 +485,7 @@
 
             <!-- 투자 정보 드롭다운 (Board 분리 2) -->
             <div class="relative group">
-                <a href="{{ route('board-research.index') }}" class="px-3 py-2 font-medium flex items-center {{ request()->is('board-research*') || request()->is('board-news*') || request()->is('board-portfolio*') ? 'font-bold text-point1' : 'text-white' }}">
+                <a href="{{ route('board-research.index') }}" class="px-3 py-2 font-medium flex items-center {{ request()->is('board-research*') || request()->is('board-news*') || request()->is('board-portfolio*') || request()->is('board-insights*') ? 'font-bold text-point1' : 'text-white' }}">
                     투자 정보
                     <svg class="w-4 h-4 ml-1 transform group-hover:rotate-180 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -481,6 +494,9 @@
                 <div class="absolute top-full left-0 mt-4 w-56 bg-point2 shadow-lg rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                     <a href="{{ route('board-research.index') }}" class="block px-4 py-3 {{ request()->routeIs('board-research.*') ? 'font-bold text-point1' : 'text-white' }}">
                         투자 리서치
+                    </a>
+                    <a href="{{ route('board-insights.index') }}" class="block px-4 py-3 {{ request()->routeIs('board-insights.*') ? 'font-bold text-point1' : 'text-white' }}">
+                        투자 인사이트 @guest<svg class="w-3 h-3 inline-block ml-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/></svg>@endguest
                     </a>
                     <a href="{{ route('board-portfolio.index') }}" class="block px-4 py-3 {{ request()->routeIs('board-portfolio.*') ? 'font-bold text-point1' : 'text-white' }}">
                         투자대가의 포트폴리오
@@ -578,6 +594,7 @@ document.addEventListener('DOMContentLoaded', function() {
         { path: '/board-video', target: 'learning' },
         { path: '/board-cartoon', target: 'learning' },
         { path: '/board-research', target: 'investment' },
+        { path: '/board-insights', target: 'investment' },
         { path: '/board-news', target: 'investment' },
         { path: '/board-portfolio', target: 'investment' }
     ];

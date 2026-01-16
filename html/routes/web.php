@@ -24,6 +24,7 @@ use App\Http\Controllers\BoardCartoonController;
 use App\Http\Controllers\BoardResearchController;
 use App\Http\Controllers\BoardVideoController;
 use App\Http\Controllers\BoardPortfolioController;
+use App\Http\Controllers\BoardInsightsController;
 use App\Http\Controllers\EconomyTermGameController;
 use App\Http\Controllers\FinancialQuizController;
 use App\Http\Controllers\RetirementCalculatorController;
@@ -175,6 +176,21 @@ Route::prefix('board-video')->group(function () {
     Route::post('/upload-image', [BoardVideoController::class, 'uploadImage'])->name('board-video.upload.image')->middleware('auth');
     Route::post('/delete-image/{idx}/{filename}', [BoardVideoController::class, 'deleteImage'])->name('board-video.delete-image')->middleware('auth');
     Route::get('/{idx}', [BoardVideoController::class, 'show'])->name('board-video.show');
+});
+
+// 투자 인사이트 게시판 (회원 전용)
+Route::prefix('board-insights')->middleware('auth')->group(function () {
+    Route::get('/', [BoardInsightsController::class, 'index'])->name('board-insights.index');
+    Route::get('/create', [BoardInsightsController::class, 'create'])->name('board-insights.create');
+    Route::post('/', [BoardInsightsController::class, 'store'])->name('board-insights.store');
+    Route::post('/upload-image', [BoardInsightsController::class, 'uploadImage'])->name('board-insights.upload.image');
+    Route::get('/{idx}/edit', [BoardInsightsController::class, 'edit'])->name('board-insights.edit');
+    Route::put('/{idx}', [BoardInsightsController::class, 'update'])->name('board-insights.update');
+    Route::delete('/{idx}', [BoardInsightsController::class, 'destroy'])->name('board-insights.destroy');
+    Route::post('/{idx}/like', [BoardInsightsController::class, 'like'])->name('board-insights.like');
+    Route::post('/delete-image/{idx}/{filename}', [BoardInsightsController::class, 'deleteImage'])->name('board-insights.delete-image');
+    Route::delete('/{idx}/thumbnail', [BoardInsightsController::class, 'deleteThumbnail'])->name('board-insights.delete-thumbnail');
+    Route::get('/{idx}', [BoardInsightsController::class, 'show'])->name('board-insights.show');
 });
 
 // 투자대가의 포트폴리오 게시판 (비회원도 볼 수 있음, 글쓰기는 회원만)

@@ -25,7 +25,8 @@ trait BoardCategoryColorTrait
         'board_cartoon' => ['자녀에게설명하기', '어원탐정'],
         'board_research' => ['거래량', '순매수대금', 'RS랭킹', '증권사리포트', '기관순매수', '52주신고가', '섹터분석', '스포트라이트', '기타'],
         'board_video' => ['경제기초', '경제뉴스', '기타'],
-        'board_portfolio' => ['포트폴리오', '기타']
+        'board_portfolio' => ['포트폴리오', '기타'],
+        'board_insights' => ['ETF', '주식', '기타']
     ];
 
     protected function getCategoryColors($board = null)
@@ -82,5 +83,10 @@ trait BoardCategoryColorTrait
     protected function getBoardPortfolioCategories()
     {
         return $this->fixedCategories['board_portfolio'];
+    }
+    
+    protected function getBoardInsightsCategories()
+    {
+        return $this->fixedCategories['board_insights'];
     }
 } 
