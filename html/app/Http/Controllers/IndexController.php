@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\BoardCartoon;
 use App\Models\BoardContent;
 use App\Models\BoardResearch;
-use App\Models\BoardVideo;
 use App\Models\News;
 use App\Traits\BoardCategoryColorTrait;
 use Illuminate\Support\Facades\Auth;
@@ -53,18 +52,6 @@ class IndexController extends Controller
                 return $post;
             });
 
-        // 쉽게 보는 경제 콘텐츠 가져오기
-        $videoContents = BoardVideo::where('mq_status', 1)
-            ->orderBy('mq_reg_date', 'desc')
-            ->take(8)
-            ->get()
-            ->map(function ($post) {
-                // 원본 콘텐츠 보존
-                $post->mq_original_content = $post->mq_content;
-                // 표시용 콘텐츠만 제한
-                $post->mq_content = Str::limit(strip_tags($post->mq_content), 50);
-                return $post;
-            });
 
         // 투자 리서치 콘텐츠 (로그인 한 사용자만)
         $researchContents = collect([]);
@@ -121,46 +108,7 @@ class IndexController extends Controller
             }
         }
         
-        // 이미지 경로 처리 - 쉽게 보는 경제
-        foreach ($videoContents as $post) {
-            // 썸네일 이미지가 있으면 우선 사용
-            if (is_array($post->mq_thumbnail_image) && !empty($post->mq_thumbnail_image)) {
-                $filename = $post->mq_thumbnail_image[0];
-                $post->mq_image = !filter_var($filename, FILTER_VALIDATE_URL)
-                    ? asset('storage/uploads/board_video/' . $filename)
-                    : $filename;
-            } else if (is_array($post->mq_image) && !empty($post->mq_image)) {
-                // 업로드된 이미지가 있으면 그걸 사용
-                $filename = $post->mq_image[0];
-                $post->mq_image = !filter_var($filename, FILTER_VALIDATE_URL)
-                    ? asset('storage/uploads/board_video/' . $filename)
-                    : $filename;
-            } else if (isset($post->mq_video_url) && !empty($post->mq_video_url)) {
-                // 비디오 URL이 있으면 YouTube 썸네일 추출
-                $thumbnailUrl = $this->getVideoThumbnail($post->mq_video_url);
-                if ($thumbnailUrl) {
-                    $post->mq_image = $thumbnailUrl;
-                } else {
-                    // 본문에서 이미지 추출
-                    $firstImageSrc = extractFirstImageSrc($post->mq_original_content);
-                    if ($firstImageSrc) {
-                        $post->mq_image = $firstImageSrc;
-                    } else {
-                        // 이미지가 없으면 null 설정
-                        $post->mq_image = null;
-                    }
-                }
-            } else {
-                // 본문에서 이미지 추출
-                $firstImageSrc = extractFirstImageSrc($post->mq_original_content);
-                if ($firstImageSrc) {
-                    $post->mq_image = $firstImageSrc;
-                } else {
-                    // 이미지가 없으면 null 설정
-                    $post->mq_image = null;
-                }
-            }
-        }
+
         
         $latestNews = News::orderBy('mq_published_date', 'desc')
                          ->take(4)
@@ -170,12 +118,20 @@ class IndexController extends Controller
         $boardContentColors = $this->getCategoryColors('board_content');
         $boardCartoonColors = $this->getCategoryColors('board_cartoon');
         $boardResearchColors = $this->getCategoryColors('board_research');
-        $boardVideoColors = $this->getCategoryColors('board_video');
+
+        // Features 데이터
+        $features = [
+            ['emoji' => '🎓', 'title' => '레벨별 맞춤 학습', 'desc' => '돈의 개념, 소비와 저축, 자산과 가치까지 단계별로 차근차근 배워요'],
+            ['emoji' => '🎮', 'title' => '게임으로 배우는 경제', 'desc' => '경제 보드게임, 상식 퀴즈 등 참여형 콘텐츠로 흥미와 자기주도 학습을 이끌어요'],
+            ['emoji' => '📖', 'title' => '만화로 보는 경제 이야기', 'desc' => '어려운 경제 개념도 재미있는 만화로 쉽게 이해할 수 있어요'],
+            ['emoji' => '📰', 'title' => '매일 어린이 경제뉴스', 'desc' => '세상 돌아가는 이야기를 아이 눈높이에서 매일 전해드려요'],
+            ['emoji' => '✅', 'title' => '실천 미션', 'desc' => '배운 내용을 실생활에서 직접 실천하며 습관으로 만들어요'],
+            ['emoji' => '👨‍👩‍👧', 'title' => '부모님과 함께', 'desc' => '아이와 부모가 함께 배우고 대화하며 성장하는 가족 교육'],
+        ];
 
         return view('index', [
             'recommendedContents' => $recommendedContents,
             'cartoonContents' => $cartoonContents,
-            'videoContents' => $videoContents,
             'researchContents' => $researchContents,
             'latestNews' => $latestNews,
             'isLoggedIn' => $isLoggedIn,
@@ -183,7 +139,7 @@ class IndexController extends Controller
             'boardContentColors' => $boardContentColors,
             'boardCartoonColors' => $boardCartoonColors,
             'boardResearchColors' => $boardResearchColors,
-            'boardVideoColors' => $boardVideoColors,
+            'features' => $features,
         ]);
     }
     

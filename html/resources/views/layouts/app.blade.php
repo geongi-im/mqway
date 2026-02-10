@@ -26,6 +26,9 @@
     </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Noto+Sans+KR:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
     <script src="{{ asset('js/common.js') }}"></script>
 
     <!-- PhotoSwipe CSS -->
@@ -39,14 +42,26 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: '#f6f6f6',
-                        secondary: '#626262',
+                        primary: '#F8F9FA',
+                        secondary: '#3D4148',
                         cdark: '#FFFFFF',
-                        cgray: '#f5f5f5',
-                        point: '#444444', //background gray
-                        point1:'#eba568', //orange
-                        point2:'#626262', //light gray
-                        point3:'#fe4337' //red
+                        cgray: '#e5e7eb',
+                        point: '#3D4148',   // 헤더/사이드바/푸터 배경 (다크 그레이)
+                        point1: '#FF4D4D',  // 액센트 (레드)
+                        point2: '#3D4148',  // 드롭다운 배경 (다크 그레이)
+                        point3: '#FF4D4D',  // 포인트 (레드)
+                        // 새 디자인 확장 색상
+                        'new-primary': '#FF4D4D',
+                        'new-secondary': '#3D4148',
+                        'new-coral': '#FF6B6B',
+                        'new-mint': '#4ECDC4',
+                        'new-amber': '#FFB347',
+                        'new-surface': '#F8F9FA',
+                        'new-ink': '#2D3047',
+                    },
+                    fontFamily: {
+                        'outfit': ['Outfit', 'sans-serif'],
+                        'noto': ['Noto Sans KR', 'sans-serif'],
                     }
                 }
             }
