@@ -162,7 +162,6 @@
                     </div>
                     <div class="p-4">
                         <h3 class="text-[0.95rem] font-semibold text-new-secondary mb-1.5 line-clamp-2 leading-[1.4]">{{ $post->mq_title }}</h3>
-                        <span class="text-xs text-gray-400">{{ $post->mq_content }}</span>
                     </div>
                 </a>
                 @endforeach
@@ -225,7 +224,7 @@
             </div>
             <div class="grid md:grid-cols-2 gap-4 md:gap-5">
                 @foreach($latestNews as $news)
-                <a href="{{ $news->mq_link }}" target="_blank" rel="noopener noreferrer" class="flex gap-4 bg-new-surface rounded-2xl p-4 md:p-5 card-lift group">
+                <a href="{{ $news->mq_source_url }}" target="_blank" rel="noopener noreferrer" class="flex gap-4 bg-new-surface rounded-2xl p-4 md:p-5 card-lift group">
                     @if($news->mq_image_url)
                     <div class="w-24 h-24 md:w-28 md:h-28 flex-shrink-0 rounded-xl overflow-hidden bg-gray-100">
                         <img src="{{ $news->mq_image_url }}" alt="{{ $news->mq_title }}" class="w-full h-full object-cover">
@@ -237,7 +236,7 @@
                         @endif
                         <h3 class="text-[0.95rem] font-semibold text-new-secondary mb-1.5 line-clamp-2 leading-[1.4] mt-1.5">{{ $news->mq_title }}</h3>
                         <p class="text-xs text-gray-400 line-clamp-2">{{ $news->mq_summary ?? '' }}</p>
-                        <p class="text-xs text-gray-300 mt-1.5">{{ $news->mq_source ?? '' }} · {{ \Carbon\Carbon::parse($news->mq_published_date)->format('m.d') }}</p>
+                        <p class="text-xs text-gray-300 mt-1.5">{{ $news->mq_company ?? '' }} · {{ \Carbon\Carbon::parse($news->mq_published_date)->format('Y.m.d') }}</p>
                     </div>
                 </a>
                 @endforeach
