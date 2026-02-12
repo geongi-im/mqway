@@ -111,11 +111,17 @@
             border-left: 4px solid #f59e0b;
             color: #92400e;
         }
+        /* 공통 애니메이션 */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .animate-fadeIn { animation: fadeIn 0.6s ease-out; }
+        .animate-slideUp { animation: slideUp 0.6s ease-out forwards; }
     </style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7078035340110573"
     crossorigin="anonymous"></script>
 </head>
-<body class="bg-primary min-h-screen flex flex-col">
+<body class="bg-primary min-h-screen flex flex-col" style="font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;">
     <!-- Header -->
     @include('layouts.partials.header')
 
