@@ -1,99 +1,147 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="min-h-screen bg-primary">
-    <div class="container mx-auto px-4 py-8">
-        <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-8">
-            <!-- 카테고리 -->
-            <div class="mb-4">
-                <span class="inline-block px-3 py-1 {{ $categoryColors[$post->mq_category] }} rounded-md text-sm font-medium">
+<!-- ===== Hero Background ===== -->
+<div class="relative bg-[#3D4148] pb-32 overflow-hidden">
+    <div class="absolute inset-0">
+        <div class="absolute inset-0 bg-gradient-to-br from-[#3D4148] via-[#2D3047] to-[#1A1C29] opacity-95"></div>
+        <div class="absolute top-0 right-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
+    </div>
+    <div class="container mx-auto px-4 pt-32 relative z-10">
+        <div class="max-w-4xl mx-auto">
+            <a href="{{ route('board-content.index') }}" class="inline-flex items-center text-gray-400 hover:text-white mb-6 transition-colors group">
+                <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center mr-2 group-hover:bg-white/20 transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                </div>
+                목록으로 돌아가기
+            </a>
+            
+            <div class="flex flex-wrap items-center gap-3 mb-4 animate-slideUp">
+                <span class="inline-block px-3 py-1 bg-[#4ECDC4] text-[#1A1C29] text-sm font-bold rounded-full shadow-lg shadow-[#4ECDC4]/20">
                     {{ $post->mq_category }}
                 </span>
-            </div>
-
-            <!-- 제목 -->
-            <h1 class="text-3xl font-bold text-gray-900 mb-4">{{ $post->mq_title }}</h1>
-
-            <!-- 메타 정보 -->
-            <div class="flex flex-wrap items-center text-gray-600 text-sm mb-8 gap-3">
-                <div class="flex items-center">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                <span class="text-gray-400 text-sm flex items-center bg-white/5 px-3 py-1 rounded-full">
+                    <svg class="w-4 h-4 mr-1.5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
-                    <span>{{ $post->mq_user_id }}</span>
-                </div>
-                <div class="flex items-center">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <span>{{ $post->mq_reg_date ? $post->mq_reg_date->format('Y.m.d H:i') : '' }}</span>
-                </div>
-                <div class="flex items-center">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                    <span>{{ number_format($post->mq_view_cnt) }}</span>
-                </div>
+                    {{ $post->mq_reg_date ? $post->mq_reg_date->format('Y.m.d') : '' }}
+                </span>
             </div>
+            
+            <h1 class="text-3xl md:text-5xl font-bold text-white mb-6 leading-tight animate-slideUp" style="animation-delay: 0.1s;">
+                {{ $post->mq_title }}
+            </h1>
 
-            <!-- 이미지 -->
-            @if($post->mq_image)
-                <div class="gallery grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8" id="gallery-main">
-                    @foreach($post->mq_image as $index => $image)
-                        @if(strpos($image, 'no_image') === false)
-                        <a href="{{ asset($image) }}"
-                           data-pswp-width=""
-                           data-pswp-height=""
-                           class="block aspect-square hover:opacity-90 transition-opacity gallery-item">
-                            <img src="{{ asset($image) }}"
-                                 alt="{{ $post->mq_original_image[$index] ?? '게시글 이미지' }}"
-                                 class="w-full h-full object-contain bg-gray-50 rounded-lg shadow-md cursor-pointer p-2">
-                        </a>
-                        @endif
-                    @endforeach
+            <div class="flex items-center justify-between border-t border-white/10 pt-6 animate-slideUp" style="animation-delay: 0.2s;">
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#4ECDC4] to-[#2AA9A0] flex items-center justify-center text-white font-bold shadow-lg">
+                            {{ mb_substr($post->mq_user_id, 0, 1) }}
+                        </div>
+                        <div>
+                            <p class="text-white font-medium">{{ $post->mq_user_id }}</p>
+                            <p class="text-xs text-gray-400">Contributor</p>
+                        </div>
+                    </div>
                 </div>
-            @endif
-
-            <!-- 내용 -->
-            <div class="prose max-w-none mb-8">
-                {!! $post->mq_content !!}
-            </div>
-
-            <!-- 버튼 영역 -->
-            <div class="flex justify-between items-center">
-                <!-- 좌측 버튼 -->
-                <a href="{{ route('board-content.index') }}" 
-                   class="inline-flex items-center justify-center h-10 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all text-gray-700 text-sm">
-                    목록
-                </a>
-                
-                <!-- 우측 버튼 그룹 -->
-                <div class="flex items-center gap-2">
-                    @if(auth()->check() && auth()->user()->mq_user_id === $post->mq_user_id)
-                        <a href="{{ route('board-content.edit', $post->idx) }}" 
-                           class="inline-flex items-center justify-center h-10 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all text-gray-700 text-sm">
-                            수정
-                        </a>
-                        <form action="{{ route('board-content.destroy', $post->idx) }}"
-                              method="POST"
-                              onsubmit="return confirmDelete()">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit"
-                                    class="inline-flex items-center justify-center h-10 px-4 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-200 transition-all text-sm">
-                                삭제
-                            </button>
-                        </form>
-                    @endif
-                    <button onclick="likePost(event, {{ $post->idx }})" 
-                            class="inline-flex items-center justify-center gap-2 h-10 px-4 {{ $isLiked ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-600' }} rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-200 transition-all group"
-                            title="{{ auth()->check() ? '좋아요' : '로그인이 필요합니다' }}">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                <div class="flex items-center gap-6">
+                    <div class="flex items-center text-gray-400/80 text-sm font-medium" title="조회수">
+                        <svg class="w-5 h-5 mr-2 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                         </svg>
-                        <span>{{ number_format($post->mq_like_cnt) }}</span>
+                        {{ number_format($post->mq_view_cnt) }}
+                    </div>
+                    
+                    <div class="h-4 w-px bg-white/10"></div>
+
+                    <button onclick="likePost(event, {{ $post->idx }})" 
+                            class="flex items-center px-4 py-2 rounded-full transition-all duration-300 group ring-1 ring-inset {{ $isLiked ? 'bg-[#FF4D4D] text-white ring-[#FF4D4D] shadow-[0_0_15px_rgba(255,77,77,0.4)]' : 'bg-white/5 text-gray-300 ring-white/10 hover:bg-white/10 hover:ring-white/30 hover:text-white' }}"
+                            id="headerLikeBtn">
+                        <svg class="w-4 h-4 mr-2 transition-transform duration-300 group-hover:scale-110 {{ $isLiked ? 'fill-current' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                        <span class="font-medium text-sm mr-1.5">좋아요</span>
+                        <span id="headerLikeCount" class="font-bold text-sm">{{ number_format($post->mq_like_cnt) }}</span>
                     </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== Content Section ===== -->
+<div class="container mx-auto px-4 -mt-20 relative z-20 pb-20">
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden animate-slideUp" style="animation-delay: 0.3s;">
+            <div class="p-8 md:p-12">
+                <!-- 이미지 갤러리 -->
+                @if($post->mq_image)
+                    <div class="gallery grid grid-cols-2 md:grid-cols-3 gap-4 mb-10" id="gallery-main">
+                        @foreach($post->mq_image as $index => $image)
+                            @if(strpos($image, 'no_image') === false)
+                            <a href="{{ asset($image) }}"
+                               data-pswp-width=""
+                               data-pswp-height=""
+                               class="block aspect-square rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all hover:scale-[1.02] gallery-item group relative">
+                                <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors z-10"></div>
+                                <img src="{{ asset($image) }}"
+                                     alt="{{ $post->mq_original_image[$index] ?? '게시글 이미지' }}"
+                                     class="w-full h-full object-cover">
+                            </a>
+                            @endif
+                        @endforeach
+                    </div>
+                @endif
+
+                <!-- 본문 내용 -->
+                <div class="prose prose-lg max-w-none prose-headings:text-[#2D3047] prose-p:text-gray-600 prose-a:text-[#4ECDC4] prose-strong:text-[#2D3047] prose-img:rounded-xl prose-img:shadow-lg">
+                    {!! $post->mq_content !!}
+                </div>
+
+                <!-- Bottom Like CTA -->
+                <div class="flex flex-col items-center justify-center py-12 mt-12 mb-8 border-y border-gray-100 bg-gray-50/50 rounded-2xl">
+                    <p class="text-[#2D3047] font-bold text-lg mb-6">이 콘텐츠가 도움이 되셨나요?</p>
+                    <button onclick="likePost(event, {{ $post->idx }})"
+                            id="bottomLikeBtn"
+                            class="group relative flex items-center justify-center w-16 h-16 rounded-full transition-all duration-300 shadow-xl hover:scale-110 hover:-translate-y-1 mb-4
+                            {{ $isLiked ? 'bg-[#FF4D4D] text-white shadow-[#FF4D4D]/40' : 'bg-white text-gray-300 border border-gray-200 hover:border-[#FF4D4D] hover:text-[#FF4D4D] hover:shadow-[#FF4D4D]/20' }}">
+                        <svg class="w-8 h-8 transition-transform duration-300 group-hover:scale-110 {{ $isLiked ? 'fill-current' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                        </svg>
+                    </button>
+                    <p class="text-gray-400 text-sm font-medium">
+                        <span id="bottomLikeCount" class="font-bold text-[#2D3047]">{{ number_format($post->mq_like_cnt) }}</span>명이 좋아합니다
+                    </p>
+                </div>
+
+                <!-- 하단 액션 버튼 -->
+                <div class="mt-12 pt-8 border-t border-gray-100 flex justify-between items-center">
+                    <a href="{{ route('board-content.index') }}" 
+                       class="inline-flex items-center px-6 py-3 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all font-medium">
+                        목록으로
+                    </a>
+                    
+                    <div class="flex items-center gap-3">
+                        @if(auth()->check() && auth()->user()->mq_user_id === $post->mq_user_id)
+                            <a href="{{ route('board-content.edit', $post->idx) }}" 
+                               class="inline-flex items-center px-5 py-3 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all font-medium">
+                                수정
+                            </a>
+                            <form action="{{ route('board-content.destroy', $post->idx) }}"
+                                  method="POST"
+                                  onsubmit="return confirmDelete()">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit"
+                                        class="inline-flex items-center px-5 py-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all font-medium">
+                                    삭제
+                                </button>
+                            </form>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
@@ -115,7 +163,7 @@ async function likePost(event, idx) {
     @endguest
 
     try {
-        const button = event.currentTarget;
+        const button = event.currentTarget; // 클릭된 버튼 (헤더 등)
         const response = await fetch(`/board-content/${idx}/like`, {
             method: 'POST',
             headers: {
@@ -132,20 +180,8 @@ async function likePost(event, idx) {
             return;
         }
 
-        // 좋아요 수 업데이트
-        const likeCountElements = document.querySelectorAll('button[onclick^="likePost"] span');
-        likeCountElements.forEach(element => {
-            element.textContent = new Intl.NumberFormat().format(data.likes);
-        });
-
-        // 버튼 스타일 변경 (좋아요 상태에 따라)
-        if (data.isLiked) {
-            button.classList.remove('bg-gray-100', 'text-gray-600');
-            button.classList.add('bg-yellow-100', 'text-yellow-800');
-        } else {
-            button.classList.remove('bg-yellow-100', 'text-yellow-800');
-            button.classList.add('bg-gray-100', 'text-gray-600');
-        }
+        // 좋아요 수 및 버튼 스타일 업데이트 (헤더 버튼)
+        updateLikeButtonStyles(data.isLiked, data.likes);
 
     } catch (error) {
         console.error('Error:', error);
@@ -153,12 +189,48 @@ async function likePost(event, idx) {
     }
 }
 
-// PhotoSwipe 초기화
+function updateLikeButtonStyles(isLiked, likesCount) {
+    const formattedCount = new Intl.NumberFormat().format(likesCount);
+    
+    // Header Button Update
+    const headerBtn = document.getElementById('headerLikeBtn');
+    const headerCount = document.getElementById('headerLikeCount');
+    if(headerBtn) {
+        const icon = headerBtn.querySelector('svg');
+        if (isLiked) {
+            headerBtn.className = 'flex items-center px-4 py-2 rounded-full transition-all duration-300 group ring-1 ring-inset bg-[#FF4D4D] text-white ring-[#FF4D4D] shadow-[0_0_15px_rgba(255,77,77,0.4)]';
+            icon.classList.add('fill-current');
+        } else {
+            headerBtn.className = 'flex items-center px-4 py-2 rounded-full transition-all duration-300 group ring-1 ring-inset bg-white/5 text-gray-300 ring-white/10 hover:bg-white/10 hover:ring-white/30 hover:text-white';
+            icon.classList.remove('fill-current');
+        }
+        if(headerCount) headerCount.textContent = formattedCount;
+    }
+
+    // Bottom Button Update
+    const bottomBtn = document.getElementById('bottomLikeBtn');
+    const bottomCount = document.getElementById('bottomLikeCount');
+    if(bottomBtn) {
+        const icon = bottomBtn.querySelector('svg');
+        if (isLiked) {
+            bottomBtn.className = 'group relative flex items-center justify-center w-16 h-16 rounded-full transition-all duration-300 shadow-xl hover:scale-110 hover:-translate-y-1 mb-4 bg-[#FF4D4D] text-white shadow-[#FF4D4D]/40';
+            icon.classList.add('fill-current');
+        } else {
+            bottomBtn.className = 'group relative flex items-center justify-center w-16 h-16 rounded-full transition-all duration-300 shadow-xl hover:scale-110 hover:-translate-y-1 mb-4 bg-white text-gray-300 border border-gray-200 hover:border-[#FF4D4D] hover:text-[#FF4D4D] hover:shadow-[#FF4D4D]/20';
+            icon.classList.remove('fill-current');
+        }
+        if(bottomCount) bottomCount.textContent = formattedCount;
+    }
+}
+
+// PhotoSwipe 초기화 및 본문 이미지 처리 (기존 로직 유지 및 개선)
 document.addEventListener('DOMContentLoaded', async function() {
-    // 메인 갤러리 (첨부 이미지) 크기 설정
+    // ... (기존 PhotoSwipe 및 이미지 처리 스크립트 그대로 유지하되, 스타일만 조정된 HTML 구조에 맞게 동작) ...
+    // PhotoSwipe 로직은 HTML 구조에 의존적이므로, 기존 스크립트를 가져와서 렌더링하도록 하겠습니다.
+    // 여기서는 편의상 핵심 로직을 그대로 포함시킵니다.
+    
     const mainGallery = document.getElementById('gallery-main');
     if (mainGallery) {
-        // 첨부 이미지들의 실제 크기 설정
         const galleryItems = mainGallery.querySelectorAll('.gallery-item');
         for (const item of galleryItems) {
             const img = item.querySelector('img');
@@ -175,9 +247,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             pswpModule: PhotoSwipe,
             bgOpacity: 0.9,
             showHideOpacity: true,
-            // 애니메이션 개선
             easing: 'cubic-bezier(0.4, 0, 0.22, 1)',
-            // 초기 줌 레벨 최적화
             initialZoomLevel: 'fit',
             secondaryZoomLevel: 1.5,
             maxZoomLevel: 3
@@ -185,7 +255,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         lightbox.init();
     }
 
-    // 이미지 실제 크기 가져오기
     function getImageDimensions(img) {
         return new Promise((resolve) => {
             if (img.naturalWidth && img.naturalHeight) {
@@ -200,7 +269,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     }
 
-    // 본문 내 이미지 처리
     async function initContentImages() {
         const contentDiv = document.querySelector('.prose');
         if (!contentDiv) return;
@@ -208,10 +276,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         const images = contentDiv.querySelectorAll('img');
 
         for (const img of images) {
-            // 이미지 실제 크기 가져오기
             const dimensions = await getImageDimensions(img);
-
-            // 이미지를 감싸는 링크가 없다면 새로 생성
             let link = img.parentElement;
             if (link.tagName !== 'A') {
                 link = document.createElement('a');
@@ -219,39 +284,28 @@ document.addEventListener('DOMContentLoaded', async function() {
                 img.parentNode.insertBefore(link, img);
                 link.appendChild(img);
             } else {
-                // 기존 링크가 있다면 href를 이미지 src로 업데이트
                 link.href = img.src;
             }
 
-            // PhotoSwipe 속성 추가 (실제 이미지 크기 사용)
             link.setAttribute('data-pswp-width', dimensions.width.toString());
             link.setAttribute('data-pswp-height', dimensions.height.toString());
             link.setAttribute('data-gallery', 'content-gallery');
 
-            // 클릭 이벤트 추가
             link.addEventListener('click', function(e) {
                 e.preventDefault();
-
-                // 갤러리 아이템 배열 생성
                 const galleryItems = Array.from(contentDiv.querySelectorAll('a[data-gallery="content-gallery"]')).map(link => ({
                     src: link.href,
                     width: parseInt(link.getAttribute('data-pswp-width')),
                     height: parseInt(link.getAttribute('data-pswp-height')),
                     alt: link.querySelector('img')?.alt || ''
                 }));
-
-                // 클릭된 이미지의 인덱스 찾기
                 const clickedIndex = Array.from(contentDiv.querySelectorAll('a[data-gallery="content-gallery"]')).indexOf(this);
-
-                // PhotoSwipe 인스턴스 생성 및 열기
                 const pswp = new PhotoSwipe({
                     dataSource: galleryItems,
                     index: clickedIndex,
                     bgOpacity: 0.9,
                     showHideOpacity: true,
-                    // 애니메이션 개선
                     easing: 'cubic-bezier(0.4, 0, 0.22, 1)',
-                    // 초기 줌 레벨 최적화
                     initialZoomLevel: 'fit',
                     secondaryZoomLevel: 1.5,
                     maxZoomLevel: 3
@@ -259,28 +313,13 @@ document.addEventListener('DOMContentLoaded', async function() {
                 pswp.init();
             });
 
-            // 이미지 스타일 개선
-            img.style.cursor = 'pointer';
+            // 스타일 개선
+            img.classList.add('rounded-xl', 'shadow-lg', 'mx-auto', 'block');
             img.style.maxWidth = '100%';
             img.style.height = 'auto';
-            img.style.borderRadius = '8px';
-            img.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
-            img.style.transition = 'opacity 0.3s ease';
-            // 잔상 방지를 위한 스타일
-            img.style.willChange = 'auto';
-            img.style.backfaceVisibility = 'hidden';
-
-            // 호버 효과
-            img.addEventListener('mouseenter', function() {
-                this.style.opacity = '0.9';
-            });
-            img.addEventListener('mouseleave', function() {
-                this.style.opacity = '1';
-            });
         }
     }
 
-    // 본문 이미지 초기화
     initContentImages();
 });
 </script>
