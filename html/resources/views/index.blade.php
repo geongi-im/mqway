@@ -2,17 +2,11 @@
 
 @section('content')
 <style>
-    /* ===== index-new 디자인 시스템 재현 ===== */
-    .main-page { font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif; }
-
     /* Keyframes from index-new */
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes cardFloat1 { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-12px) rotate(-1deg); } }
     @keyframes cardFloat2 { 0%, 100% { transform: translateY(0) rotate(2deg); } 50% { transform: translateY(-10px) rotate(4deg); } }
     @keyframes cardFloat3 { 0%, 100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-8px) rotate(1deg); } }
 
-    .animate-fadeIn { animation: fadeIn 0.8s ease; }
     .animate-slideUp-1 { animation: slideUp 0.8s ease 0.1s forwards; }
     .animate-slideUp-2 { animation: slideUp 0.8s ease 0.2s forwards; }
     .animate-slideUp-3 { animation: slideUp 0.8s ease 0.3s forwards; }
