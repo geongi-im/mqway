@@ -1,107 +1,147 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="min-h-screen bg-primary">
-    <div class="container mx-auto px-4 py-8">
-        <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-8">
-            <h1 class="text-2xl font-bold text-gray-900 mb-8">새 게시글 작성</h1>
+<!-- ===== Header Section ===== -->
+<div class="relative bg-[#3D4148] py-12 overflow-hidden">
+    <div class="absolute inset-0">
+        <div class="absolute inset-0 bg-gradient-to-br from-[#3D4148] via-[#2D3047] to-[#1A1C29] opacity-95"></div>
+        <div class="absolute top-0 right-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
+    </div>
+    <div class="container mx-auto px-4 relative z-10 text-center">
+        <h1 class="text-3xl font-bold text-white mb-2">새 인사이트 작성</h1>
+        <p class="text-gray-400 text-sm">투자에 도움이 되는 새로운 시각과 정보를 공유해보세요.</p>
+    </div>
+</div>
 
-            <form action="{{ route('board-insights.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
-                @csrf
+<div class="min-h-screen bg-gray-50 -mt-8 pb-20 relative z-20">
+    <div class="container mx-auto px-4">
+        <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div class="p-8 md:p-10">
+                <form action="{{ route('board-insights.store') }}" method="POST" enctype="multipart/form-data" class="space-y-8">
+                    @csrf
 
-                <div class="space-y-2">
-                    <label for="mq_category" class="block text-sm font-medium text-gray-700">카테고리</label>
-                    <select name="mq_category" 
-                            id="mq_category"
-                            class="w-full h-12 px-4 border border-gray-300 rounded-xl focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all bg-white cursor-pointer @error('mq_category') border-red-500 @enderror"
-                            required>
-                        <option value="">카테고리를 선택하세요</option>
-                        @foreach($categories as $category)
-                            <option value="{{ $category }}" {{ old('mq_category') == $category ? 'selected' : '' }}>
-                                {{ $category }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('mq_category')
-                        <p class="text-sm text-red-500">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <div class="space-y-2">
-                    <label for="mq_title" class="block text-sm font-medium text-gray-700">제목</label>
-                    <input type="text" 
-                           name="mq_title" 
-                           id="mq_title" 
-                           value="{{ old('mq_title') }}"
-                           class="w-full h-12 px-4 border border-gray-300 rounded-xl focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all @error('mq_title') border-red-500 @enderror"
-                           placeholder="제목을 입력하세요"
-                           required>
-                    @error('mq_title')
-                        <p class="text-sm text-red-500">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <!-- 내용 (CKEditor) -->
-                <div class="space-y-2">
-                    <label for="editor" class="block text-sm font-medium text-gray-700">내용</label>
-                    <textarea name="mq_content" id="editor">{{ old('mq_content') }}</textarea>
-                    @error('mq_content')
-                        <p class="text-sm text-red-500">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <div class="space-y-2">
-                    <div class="flex justify-between items-center">
-                        <label class="block text-sm font-medium text-gray-700">첨부 이미지</label>
-                    </div>
-
-                    <div id="fileUploadContainer">
-                        <div class="file-input-group relative mb-3" data-index="0">
-                            <input type="file"
-                                   name="mq_image[]"
-                                   accept="image/*"
-                                   class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                   onchange="previewAttachment(this)">
-                            <div class="w-full h-12 px-4 border border-gray-300 rounded-xl bg-white flex items-center justify-between cursor-pointer hover:border-yellow-500 transition-all">
-                                <span class="file-label text-text-dark">이미지를 선택하세요</span>
-                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    <!-- 카테고리 -->
+                    <div class="space-y-2">
+                        <label for="mq_category" class="text-sm font-semibold text-[#2D3047] block">카테고리 <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <select name="mq_category" 
+                                    id="mq_category"
+                                    class="w-full h-12 pl-4 pr-10 border border-gray-200 rounded-xl focus:outline-none focus:border-[#9F5AFF] focus:ring-2 focus:ring-[#9F5AFF]/20 transition-all bg-gray-50 cursor-pointer appearance-none font-medium text-gray-700 @error('mq_category') border-red-500 @enderror"
+                                    required>
+                                <option value="">카테고리를 선택하세요</option>
+                                @foreach($categories as $category)
+                                    <option value="{{ $category }}" {{ old('mq_category') == $category ? 'selected' : '' }}>
+                                        {{ $category }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
                             </div>
-                            <div class="attachment-preview hidden mt-2" data-index="0">
-                                <div class="relative inline-block">
-                                    <img src="" alt="첨부 이미지 미리보기" class="w-24 h-24 object-cover rounded-lg border border-gray-200 shadow-sm">
-                                    <button type="button" onclick="removeAttachmentPreview(this)"
-                                            class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-sm hover:bg-red-600 transition-colors">
-                                        ×
-                                    </button>
+                        </div>
+                        @error('mq_category')
+                            <p class="text-sm text-red-500 flex items-center mt-1">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                {{ $message }}
+                            </p>
+                        @enderror
+                    </div>
+
+                    <!-- 제목 -->
+                    <div class="space-y-2">
+                        <label for="mq_title" class="text-sm font-semibold text-[#2D3047] block">제목 <span class="text-red-500">*</span></label>
+                        <input type="text" 
+                               name="mq_title" 
+                               id="mq_title" 
+                               value="{{ old('mq_title') }}"
+                               class="w-full h-12 px-4 border border-gray-200 rounded-xl focus:outline-none focus:border-[#9F5AFF] focus:ring-2 focus:ring-[#9F5AFF]/20 transition-all bg-gray-50 placeholder-gray-400 font-medium @error('mq_title') border-red-500 @enderror"
+                               placeholder="제목을 입력하세요"
+                               required>
+                        @error('mq_title')
+                            <p class="text-sm text-red-500 flex items-center mt-1">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                {{ $message }}
+                            </p>
+                        @enderror
+                    </div>
+
+                    <!-- 내용 (CKEditor) -->
+                    <div class="space-y-2">
+                        <label for="editor" class="text-sm font-semibold text-[#2D3047] block">내용</label>
+                        <div class="prose max-w-none">
+                            <textarea name="mq_content" id="editor">{{ old('mq_content') }}</textarea>
+                        </div>
+                        @error('mq_content')
+                            <p class="text-sm text-red-500">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- 첨부 이미지 업로드 (다중) -->
+                    <div class="space-y-4 pt-6 border-t border-gray-100">
+                        <div class="flex justify-between items-end">
+                            <div>
+                                <label class="text-sm font-semibold text-[#2D3047] block mb-1">추가 이미지 첨부</label>
+                                <p class="text-xs text-gray-400">최대 5개, 파일당 2MB 이하</p>
+                            </div>
+                            <button type="button" 
+                                    class="text-sm px-3 py-1.5 bg-[#9F5AFF]/10 text-[#7B2CBF] hover:bg-[#9F5AFF]/20 rounded-lg transition-colors font-medium flex items-center gap-1" 
+                                    onclick="addFileInput()">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                이미지 추가
+                            </button>
+                        </div>
+
+                        <div id="fileUploadContainer" class="space-y-3">
+                            <!-- 첫 번째 파일 입력 -->
+                            <div class="file-input-group animate-fadeIn" data-index="0">
+                                <div class="relative group">
+                                    <input type="file"
+                                           name="mq_image[]"
+                                           accept="image/*"
+                                           class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                           onchange="previewAttachment(this)">
+                                    <div class="w-full h-12 px-4 border border-gray-200 rounded-xl bg-gray-50 flex items-center justify-between cursor-pointer group-hover:border-[#9F5AFF] transition-all">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-lg bg-gray-200 flex items-center justify-center text-gray-500 attachment-icon">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                            </div>
+                                            <span class="file-label text-gray-500 text-sm">이미지를 선택하세요</span>
+                                        </div>
+                                        <svg class="w-5 h-5 text-gray-400 group-hover:text-[#9F5AFF] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                    </div>
+                                </div>
+                                
+                                <!-- 미리보기 -->
+                                <div class="attachment-preview hidden mt-2 ml-1">
+                                    <div class="relative inline-block group">
+                                        <img src="" alt="미리보기" class="w-20 h-20 object-cover rounded-lg shadow-sm border border-gray-100">
+                                        <button type="button" onclick="removeAttachmentPreview(this)"
+                                                class="absolute -top-1 -right-1 w-5 h-5 bg-gray-800 text-white rounded-full flex items-center justify-center text-xs hover:bg-black transition-colors shadow-sm opacity-0 group-hover:opacity-100">
+                                            ×
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="flex items-center justify-between mt-4">
-                        <p class="text-sm text-text-dark">최대 5개까지 업로드 가능 (파일당 2MB 이하)</p>
+
+                    <!-- 버튼 영역 -->
+                    <div class="flex items-center justify-between pt-8 border-t border-gray-100 mt-8">
                         <button type="button" 
-                                class="btn-image-plus px-3 py-1.5 bg-point text-cdark hover:bg-opacity-90 transition-all text-xs font-medium rounded-xl flex items-center gap-1.5" 
-                                onclick="addFileInput()">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                            </svg>
+                                onclick="if(confirm('작성 중인 내용이 저장되지 않고 사라집니다.\n목록 페이지로 돌아가시겠습니까?')) { location.href='{{ route('board-insights.index') }}'; }"
+                                class="inline-flex items-center justify-center px-6 h-12 text-gray-500 hover:text-gray-700 font-medium transition-colors">
+                            취소
+                        </button>
+                        <button type="submit" 
+                                class="inline-flex items-center justify-center px-8 h-12 bg-[#2D3047] text-white rounded-xl hover:bg-[#3D4148] transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-bold text-lg">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                            게시글 등록
                         </button>
                     </div>
-                </div>
-
-                <div class="flex justify-end gap-3 pt-6">
-                    <a href="{{ route('board-insights.index') }}" 
-                       class="inline-flex items-center justify-center px-6 h-12 border border-gray-300 rounded-xl hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all text-gray-700">
-                        취소
-                    </a>
-                    <button type="submit" 
-                            class="inline-flex items-center justify-center px-6 h-12 bg-point1 text-cdark rounded-xl hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-dark focus:ring-offset-2 transition-all">
-                        작성하기
-                    </button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
 </div>
@@ -184,6 +224,7 @@
             console.error('Error:', error);
         });
 
+    // 파일 입력 추가 기능
     function addFileInput() {
         const container = document.getElementById('fileUploadContainer');
         const inputs = container.getElementsByClassName('file-input-group');
@@ -196,75 +237,43 @@
         const newIndex = inputs.length;
         const newInput = inputs[0].cloneNode(true);
 
+        // 인덱스 업데이트
         newInput.setAttribute('data-index', newIndex);
-        newInput.querySelector('.attachment-preview').setAttribute('data-index', newIndex);
-
+        
+        // 초기화
         newInput.querySelector('input').value = '';
         newInput.querySelector('.file-label').textContent = '이미지를 선택하세요';
-        newInput.querySelector('.attachment-preview').classList.add('hidden');
+        
+        // 이미지 아이콘 초기화
+        const iconContainer = newInput.querySelector('.attachment-icon');
+        if(iconContainer) iconContainer.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>';
+        
+        const preview = newInput.querySelector('.attachment-preview');
+        if(preview) preview.classList.add('hidden');
 
-        const deleteButton = document.createElement('button');
-        deleteButton.type = 'button';
-        deleteButton.className = 'absolute -right-8 top-1/2 -translate-y-1/2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors text-sm';
-        deleteButton.innerHTML = '×';
-        deleteButton.onclick = function() {
-            const preview = this.parentElement.querySelector('.attachment-preview img');
-            if (preview.src.startsWith('blob:')) {
-                URL.revokeObjectURL(preview.src);
-            }
-            this.parentElement.remove();
-        };
+        // 삭제 버튼이 이미 있는지 확인하고 없으면 추가
+        if (!newInput.querySelector('.delete-btn')) {
+            const deleteWrapper = document.createElement('div');
+            deleteWrapper.className = 'absolute -right-8 top-1/2 -translate-y-1/2 delete-btn';
+            deleteWrapper.innerHTML = `
+                <button type="button" class="w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center hover:bg-red-200 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            `;
+            deleteWrapper.onclick = function() {
+                const previewImg = this.parentElement.querySelector('.attachment-preview img');
+                if (previewImg && previewImg.src.startsWith('blob:')) {
+                    URL.revokeObjectURL(previewImg.src);
+                }
+                this.parentElement.remove();
+            };
+            newInput.appendChild(deleteWrapper);
+        }
 
-        newInput.appendChild(deleteButton);
         container.appendChild(newInput);
     }
 
-
-    function previewThumbnail(input) {
-        const label = document.querySelector('.thumbnail-label');
-        const preview = document.getElementById('thumbnailPreview');
-        const previewImage = document.getElementById('thumbnailPreviewImage');
-
-        if (input.files && input.files[0]) {
-            const file = input.files[0];
-
-            if (file.size > 2 * 1024 * 1024) {
-                alert('파일 크기는 2MB 이하로 선택해주세요.');
-                input.value = '';
-                label.textContent = '썸네일 이미지를 선택하세요';
-                return;
-            }
-
-            if (!file.type.match('image.*')) {
-                alert('이미지 파일만 선택할 수 있습니다.');
-                input.value = '';
-                label.textContent = '썸네일 이미지를 선택하세요';
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                previewImage.src = e.target.result;
-                preview.classList.remove('hidden');
-                label.textContent = file.name;
-            };
-            reader.readAsDataURL(file);
-        } else {
-            label.textContent = '썸네일 이미지를 선택하세요';
-            preview.classList.add('hidden');
-        }
-    }
-
-    function removeThumbnailPreview() {
-        const input = document.getElementById('mq_thumbnail_image');
-        const label = document.querySelector('.thumbnail-label');
-        const preview = document.getElementById('thumbnailPreview');
-
-        input.value = '';
-        label.textContent = '썸네일 이미지를 선택하세요';
-        preview.classList.add('hidden');
-    }
-
+    // 첨부 이미지 미리보기
     function previewAttachment(input) {
         const group = input.closest('.file-input-group');
         const label = group.querySelector('.file-label');
@@ -274,6 +283,7 @@
         if (input.files && input.files[0]) {
             const file = input.files[0];
 
+            // 파일 유효성 검사
             if (!validateImageFile(file)) {
                 input.value = '';
                 label.textContent = '이미지를 선택하세요';
@@ -294,12 +304,14 @@
         }
     }
 
+    // 첨부 이미지 미리보기 제거
     function removeAttachmentPreview(button) {
         const group = button.closest('.file-input-group');
         const input = group.querySelector('input[type="file"]');
         const label = group.querySelector('.file-label');
         const preview = group.querySelector('.attachment-preview');
 
+        // 메모리 정리
         const img = preview.querySelector('img');
         if (img.src.startsWith('blob:')) {
             URL.revokeObjectURL(img.src);
@@ -310,15 +322,18 @@
         preview.classList.add('hidden');
     }
 
+    // 파일 유효성 검사
     function validateImageFile(file) {
-        const maxSize = 2 * 1024 * 1024;
+        const maxSize = 2 * 1024 * 1024; // 2MB
         const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
+        // 파일 크기 검사
         if (file.size > maxSize) {
             alert('파일 크기는 2MB 이하로 선택해주세요.');
             return false;
         }
 
+        // 파일 타입 검사
         if (!allowedTypes.includes(file.type)) {
             alert('이미지 파일만 선택할 수 있습니다.');
             return false;
@@ -331,53 +346,29 @@
 .ck-editor__editable {
     min-height: 400px;
     max-height: 600px;
+    border-radius: 0 0 0.75rem 0.75rem !important;
 }
 .ck-editor__editable:focus {
     box-shadow: none !important;
-    border-color: rgb(234 179 8) !important;
+    border-color: #9F5AFF !important;
 }
 .ck.ck-toolbar {
     border-color: #e5e7eb !important;
+    border-radius: 0.75rem 0.75rem 0 0 !important;
+    background: #f9fafb !important;
 }
 .ck.ck-toolbar .ck-toolbar__items {
     flex-wrap: wrap;
 }
 
-.btn-image-plus {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 9999px;
+/* 애니메이션 */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
-
-.file-input-group {
-    position: relative;
-    margin-bottom: 1rem;
-}
-
-.file-input-group:last-child {
-    margin-bottom: 0;
-}
-
-.file-input-group:not(:first-child) {
-    padding-right: 0;
-    margin-right: 2rem;
-}
-
-.btn-image-plus {
-    height: 28px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-}
-
-.btn-image-plus:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.animate-fadeIn {
+    animation: fadeIn 0.3s ease-out forwards;
 }
 </style>
 @endpush
-@endsection
+@endsection 
