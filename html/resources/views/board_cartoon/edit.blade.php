@@ -17,7 +17,7 @@
     <div class="container mx-auto px-4">
         <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
             <div class="p-8 md:p-10">
-                <form action="{{ route('board-cartoon.update', $boardCartoon->id) }}" method="POST" enctype="multipart/form-data" class="space-y-8">
+                <form action="{{ route('board-cartoon.update', $post->idx) }}" method="POST" enctype="multipart/form-data" class="space-y-8">
                     @csrf
                     @method('PUT')
 
@@ -31,7 +31,7 @@
                                     required>
                                 <option value="">카테고리를 선택하세요</option>
                                 @foreach($categories as $category)
-                                    <option value="{{ $category }}" {{ (old('mq_category') == $category || $boardCartoon->mq_category == $category) ? 'selected' : '' }}>
+                                    <option value="{{ $category }}" {{ (old('mq_category') == $category || $post->mq_category == $category) ? 'selected' : '' }}>
                                         {{ $category }}
                                     </option>
                                 @endforeach
@@ -56,7 +56,7 @@
                         <input type="text" 
                                name="mq_title" 
                                id="mq_title" 
-                               value="{{ old('mq_title', $boardCartoon->mq_title) }}"
+                               value="{{ old('mq_title', $post->mq_title) }}"
                                class="w-full h-12 px-4 border border-gray-200 rounded-xl focus:outline-none focus:border-[#9F5AFF] focus:ring-2 focus:ring-[#9F5AFF]/20 transition-all bg-gray-50 placeholder-gray-400 font-medium @error('mq_title') border-red-500 @enderror"
                                placeholder="제목을 입력하세요"
                                required>
@@ -72,7 +72,7 @@
                     <div class="space-y-2">
                         <label for="editor" class="text-sm font-semibold text-[#2D3047] block">내용</label>
                         <div class="prose max-w-none">
-                            <textarea name="mq_content" id="editor">{{ old('mq_content', $boardCartoon->mq_content) }}</textarea>
+                            <textarea name="mq_content" id="editor">{{ old('mq_content', $post->mq_content) }}</textarea>
                         </div>
                         @error('mq_content')
                             <p class="text-sm text-red-500">{{ $message }}</p>
@@ -84,10 +84,10 @@
                         <label class="text-sm font-semibold text-[#2D3047] block">썸네일 이미지</label>
                         <div class="thumbnail-upload-container">
                             <!-- 현재 썸네일 표시 -->
-                            @if($boardCartoon->mq_thumbnail_image)
+                            @if($post->mq_thumbnail_image)
                                 <div id="currentThumbnail" class="mb-4">
                                     <div class="flex items-start p-4 bg-gray-50 border border-gray-100 rounded-xl">
-                                        <img src="{{ asset('storage/' . $boardCartoon->mq_thumbnail_image) }}" 
+                                        <img src="{{ asset('storage/' . $post->mq_thumbnail_image) }}" 
                                              alt="현재 썸네일" 
                                              class="w-32 h-auto rounded-lg shadow-sm">
                                         <div class="ml-4">
@@ -128,11 +128,11 @@
                     <!-- 첨부 이미지 관리 -->
                     <div class="space-y-6 pt-6 border-t border-gray-100">
                         <!-- 기존 첨부 이미지 -->
-                        @if($boardCartoon->boardImages && count($boardCartoon->boardImages) > 0)
+                        @if($post->boardImages && count($post->boardImages) > 0)
                             <div>
                                 <h3 class="text-sm font-semibold text-[#2D3047] mb-3">기존 만화 컷</h3>
                                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    @foreach($boardCartoon->boardImages as $image)
+                                    @foreach($post->boardImages as $image)
                                         <div class="relative group" id="existing-image-{{ $image->id }}">
                                             <div class="aspect-auto rounded-xl overflow-hidden bg-gray-100 border border-gray-200">
                                                 <img src="{{ asset('storage/' . $image->mq_path) }}" 
@@ -210,10 +210,11 @@
 
                     <!-- 버튼 영역 -->
                     <div class="flex items-center justify-between pt-8 border-t border-gray-100 mt-8">
-                        <a href="{{ route('board-cartoon.show', $boardCartoon->id) }}" 
-                           class="inline-flex items-center justify-center px-6 h-12 text-gray-500 hover:text-gray-700 font-medium transition-colors">
-                            취소하고 돌아가기
-                        </a>
+                        <button type="button" 
+                                onclick="if(confirm('수정 중인 내용이 저장되지 않고 사라집니다.\n이전 페이지로 돌아가시겠습니까?')) { location.href='{{ route('board-cartoon.show', $post->idx) }}'; }"
+                                class="inline-flex items-center justify-center px-6 h-12 text-gray-500 hover:text-gray-700 font-medium transition-colors">
+                            취소
+                        </button>
                         <button type="submit" 
                                 class="inline-flex items-center justify-center px-8 h-12 bg-[#2D3047] text-white rounded-xl hover:bg-[#3D4148] transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-bold text-lg">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -510,4 +511,3 @@
 </style>
 @endpush
 @endsection
-```

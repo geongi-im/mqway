@@ -172,10 +172,11 @@
 
                     <!-- 버튼 영역 -->
                     <div class="flex items-center justify-between pt-8 border-t border-gray-100 mt-8">
-                        <a href="{{ route('board-content.index') }}" 
-                           class="inline-flex items-center justify-center px-6 h-12 text-gray-500 hover:text-gray-700 font-medium transition-colors">
-                            취소하고 돌아가기
-                        </a>
+                        <button type="button" 
+                                onclick="if(confirm('작성 중인 내용이 저장되지 않고 사라집니다.\n목록 페이지로 돌아가시겠습니까?')) { location.href='{{ route('board-content.index') }}'; }"
+                                class="inline-flex items-center justify-center px-6 h-12 text-gray-500 hover:text-gray-700 font-medium transition-colors">
+                            취소
+                        </button>
                         <button type="submit" 
                                 class="inline-flex items-center justify-center px-8 h-12 bg-[#2D3047] text-white rounded-xl hover:bg-[#3D4148] transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-bold text-lg">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
