@@ -45,26 +45,40 @@ class NewsController extends Controller
         $categories = ['전체'];
         $categories = array_merge($categories, News::distinct()->pluck('mq_category')->toArray());
 
+        // 로그인한 사용자의 스크랩 URL 목록 가져오기
+        $scrappedUrls = [];
+        if (auth()->check()) {
+            $scrappedUrls = \App\Models\NewsScrap::where('mq_user_id', auth()->user()->mq_user_id)
+                ->pluck('mq_url')
+                ->toArray();
+        }
+
         // 오늘의 뉴스 1면 조회
         $topNews = NewsTop::byDate(today())
                           ->active()
                           ->orderBy('idx', 'asc')
                           ->get()
-                          ->map(function($news) {
+                          ->map(function($news) use ($scrappedUrls) {
                               return [
                                   'idx' => $news->idx,
                                   'company' => $news->mq_company,
                                   'company_logo' => $news->getCompanyLogo(),
                                   'title' => $news->mq_title,
-                                  'source_url' => $news->mq_source_url
+                                  'source_url' => $news->mq_source_url,
+                                  'is_scrapped' => in_array($news->mq_source_url, $scrappedUrls)
                               ];
                           });
 
+        // 일반 뉴스 목록에도 스크랩 여부 추가 (Collection 변환 필요 없이 뷰에서 처리하거나 여기서 미리 처리)
+        // Paginator는 map을 직접 쓰기 어려우므로, 뷰에서 in_array로 체크하거나 여기서 transform 할 수 있음
+        // 효율을 위해 뷰에 $scrappedUrls를 넘겨주는 방식이 낫습니다.
+        
         return view('news.index', [
             'news' => $news,
             'categories' => $categories,
             'categoryColors' => $this->categoryColors,
-            'topNews' => $topNews
+            'topNews' => $topNews,
+            'scrappedUrls' => $scrappedUrls // 뷰에 전달
         ]);
     }
 
@@ -154,17 +168,26 @@ class NewsController extends Controller
         try {
             $newsDate = Carbon::parse($date);
 
+            // 로그인한 사용자의 스크랩 URL 목록
+            $scrappedUrls = [];
+            if (auth()->check()) {
+                $scrappedUrls = \App\Models\NewsScrap::where('mq_user_id', auth()->user()->mq_user_id)
+                    ->pluck('mq_url')
+                    ->toArray();
+            }
+
             $topNews = NewsTop::byDate($newsDate)
                               ->active()
                               ->orderBy('idx', 'asc')
                               ->get()
-                              ->map(function($news) {
+                              ->map(function($news) use ($scrappedUrls) {
                                   return [
                                       'idx' => $news->idx,
                                       'company' => $news->mq_company,
                                       'company_logo' => $news->getCompanyLogo(),
                                       'title' => $news->mq_title,
-                                      'source_url' => $news->mq_source_url
+                                      'source_url' => $news->mq_source_url,
+                                      'is_scrapped' => in_array($news->mq_source_url, $scrappedUrls)
                                   ];
                               });
 
