@@ -1,46 +1,61 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="min-h-screen bg-primary">
-    <div class="container mx-auto px-4 py-8">
-        <div class="max-w-5xl mx-auto bg-white rounded-2xl shadow-lg p-6">
-            <!-- 카테고리 및 제목 영역 -->
-            <div class="mb-4">
-                <span class="inline-block px-3 py-1 {{ $categoryColors[$post->mq_investor_code] ?? 'bg-blue-100 text-blue-800' }} rounded-md text-sm font-medium">
-                    {{ $post->mq_investor_code }}
+<!-- ===== Hero Section ===== -->
+<section class="relative pt-32 pb-20 overflow-hidden bg-[#3D4148]">
+    <div class="absolute inset-0">
+        <div class="absolute inset-0 bg-gradient-to-br from-[#3D4148] via-[#2D3047] to-[#1A1C29] opacity-95"></div>
+        <div class="absolute top-0 right-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
+    </div>
+    <div class="container mx-auto px-4 relative z-10">
+        <div class="max-w-5xl mx-auto">
+            <!-- 카테고리 뱃지 -->
+            <div class="mb-4 animate-slideUp">
+                <span class="inline-block px-3 py-1 text-sm font-bold rounded-full shadow-lg {{ $categoryColors[$post->mq_investor_code] ?? 'bg-blue-100 text-blue-800' }}">
+                    {{ strtoupper($post->mq_investor_code) }}
                 </span>
             </div>
-
+            
             <!-- 제목 -->
-            <h1 class="text-3xl font-bold text-gray-900 mb-4">{{ $post->mq_title }}</h1>
-
+            <h1 class="text-3xl md:text-4xl font-bold text-white mb-6 leading-tight tracking-tight animate-slideUp" style="animation-delay: 0.1s;">
+                {{ $post->mq_title }}
+            </h1>
+            
             <!-- 메타 정보 -->
-            <div class="flex flex-wrap items-center text-gray-600 text-sm mb-8 gap-3">
+            <div class="flex flex-wrap items-center gap-4 text-gray-400 text-sm animate-slideUp" style="animation-delay: 0.2s;">
                 <div class="flex items-center">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 mr-1.5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                     <span>{{ $post->mq_user_id }}</span>
                 </div>
                 <div class="flex items-center">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 mr-1.5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                     <span>{{ $post->mq_reg_date ? $post->mq_reg_date->format('Y.m.d H:i') : '' }}</span>
                 </div>
                 <div class="flex items-center">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 mr-1.5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                     </svg>
                     <span>{{ number_format($post->mq_view_cnt) }}</span>
                 </div>
             </div>
+        </div>
+    </div>
+</section>
 
-            <!-- 포트폴리오 대시보드 스타일의 콘텐츠 영역 -->
-            <div class="portfolio-content mb-8">
-                <!-- 기존 내용 대신 구조화된 콘텐츠 -->
-                <div class="portfolio-dashboard">
+<!-- ===== Content Section ===== -->
+<div class="min-h-screen bg-gray-50 -mt-8 pb-20 relative z-20">
+    <div class="container mx-auto px-4">
+        <div class="max-w-5xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div class="p-6 md:p-10">
+                <!-- 포트폴리오 대시보드 스타일의 콘텐츠 영역 -->
+                <div class="portfolio-content mb-8">
+                    <!-- 기존 내용 대신 구조화된 콘텐츠 -->
+                    <div class="portfolio-dashboard">
                     <!-- 원본 HTML 내용을 Blade에 맞게 수정하여 표시 -->
                     <style>
                         /* 대시보드 스타일 */
@@ -590,18 +605,19 @@
             </div>
 
             <!-- 버튼 영역 -->
-            <div class="flex justify-between items-center mt-10">
+            <div class="flex justify-between items-center pt-8 mt-8 border-t border-gray-100">
                 <!-- 좌측 버튼 -->
                 <a href="{{ route('board-portfolio.index') }}" 
-                   class="inline-flex items-center justify-center h-10 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all text-gray-700 text-sm">
-                    목록
+                   class="inline-flex items-center justify-center h-11 px-5 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all text-gray-600 text-sm font-medium">
+                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    목록으로
                 </a>
                 
                 <!-- 우측 버튼 그룹 -->
                 <div class="flex items-center gap-2">
                     @if(auth()->check() && auth()->user()->mq_user_id === $post->mq_user_id)
                         <a href="{{ route('board-portfolio.edit', $post->idx) }}" 
-                           class="inline-flex items-center justify-center h-10 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all text-gray-700 text-sm">
+                           class="inline-flex items-center justify-center h-11 px-5 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all text-gray-600 text-sm font-medium">
                             수정
                         </a>
                         <form action="{{ route('board-portfolio.destroy', $post->idx) }}"
@@ -610,20 +626,21 @@
                             @csrf
                             @method('DELETE')
                             <button type="submit"
-                                    class="inline-flex items-center justify-center h-10 px-4 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-200 transition-all text-sm">
+                                    class="inline-flex items-center justify-center h-11 px-5 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-all text-sm font-medium shadow-sm hover:shadow-md">
                                 삭제
                             </button>
                         </form>
                     @endif
                     <button onclick="likePost(event, {{ $post->idx }})" 
-                            class="inline-flex items-center justify-center gap-2 h-10 px-4 {{ $isLiked ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-600' }} rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-200 transition-all group"
+                            class="inline-flex items-center justify-center gap-2 h-11 px-5 {{ $isLiked ? 'bg-[#FFD700]/15 text-[#92400E] border border-[#FFD700]/40' : 'bg-gray-50 text-gray-500 border border-gray-200' }} rounded-xl transition-all group hover:shadow-sm"
                             title="{{ auth()->check() ? '좋아요' : '로그인이 필요합니다' }}">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5" fill="{{ $isLiked ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                         </svg>
-                        <span>{{ number_format($post->mq_like_cnt) }}</span>
+                        <span class="font-medium">{{ number_format($post->mq_like_cnt) }}</span>
                     </button>
                 </div>
+            </div>
             </div>
         </div>
     </div>
