@@ -25,7 +25,7 @@ abstract class AbstractBoardController extends Controller
     public function index(Request $request)
     {
         $model = app($this->modelClass);
-        $query = $model::where('mq_status', 1);
+        $query = $model::with('user')->where('mq_status', 1);
         
         // 검색 처리
         if ($request->has('search') && $request->search !== '') {

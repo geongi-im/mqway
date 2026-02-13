@@ -24,71 +24,101 @@
     </div>
 </section>
 
-<!-- ===== Search & Filter Section ===== -->
-<div class="container mx-auto px-4 -mt-10 relative z-20 mb-12 animate-slideUp" style="animation-delay: 0.2s;">
-    <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 max-w-5xl mx-auto">
-        <form action="{{ route('board-cartoon.index') }}" method="GET" class="space-y-6">
-            <!-- 검색바 -->
-            <div class="flex flex-col md:flex-row gap-4">
-                <div class="relative flex-grow group">
-                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <svg class="w-5 h-5 text-gray-400 group-focus-within:text-[#9F5AFF] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
-                    </div>
+<!-- ===== Search Section ===== -->
+<div class="container mx-auto px-4 -mt-10 relative z-20 mb-10 animate-slideUp" style="animation-delay: 0.2s;">
+    <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 max-w-4xl mx-auto">
+        <form action="{{ route('board-cartoon.index') }}" method="GET">
+            <!-- 현재 필터 상태 유지 -->
+            @if(request('category'))
+                <input type="hidden" name="category" value="{{ request('category') }}">
+            @endif
+            @if(request('sort'))
+                <input type="hidden" name="sort" value="{{ request('sort') }}">
+            @endif
+            
+            <div class="flex items-center gap-2">
+                <!-- 검색 입력창 (내부에 돋보기 아이콘 포함) -->
+                <div class="relative flex-grow">
                     <input type="text" 
                            name="search"
                            value="{{ request('search') }}"
-                           class="w-full h-12 pl-12 pr-4 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:ring-2 focus:ring-[#9F5AFF] focus:border-transparent transition-all placeholder-gray-400" 
+                           class="w-full h-12 pl-4 pr-12 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:ring-2 focus:ring-[#9F5AFF] focus:border-transparent transition-all placeholder-gray-400" 
                            placeholder="만화 제목이나 내용을 검색해보세요">
-                </div>
-                <div class="flex gap-2">
-                    <button type="submit" class="h-12 px-8 bg-[#2D3047] text-white font-medium rounded-xl hover:bg-[#3D4148] transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 whitespace-nowrap">
-                        검색하기
-                    </button>
-                    <a href="{{ route('board-cartoon.index') }}" class="h-12 w-12 flex items-center justify-center bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 transition-all" title="초기화">
+                    <button type="submit" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-[#9F5AFF] transition-colors" title="검색">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
-                    </a>
-                </div>
-            </div>
-
-            <!-- 필터 옵션 -->
-            <div class="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t border-gray-100">
-                <div class="flex flex-wrap gap-2 w-full sm:w-auto">
-                    <select name="category" 
-                            onchange="this.form.submit()"
-                            class="h-10 pl-3 pr-8 bg-white border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-2 focus:ring-[#9F5AFF] focus:border-transparent hover:border-gray-300 transition-colors cursor-pointer">
-                        <option value="">전체 카테고리</option>
-                        @foreach($categories as $category)
-                            <option value="{{ $category }}" {{ request('category') == $category ? 'selected' : '' }}>
-                                {{ $category }}
-                            </option>
-                        @endforeach
-                    </select>
-                    
-                    <select name="sort" 
-                            onchange="this.form.submit()"
-                            class="h-10 pl-3 pr-8 bg-white border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-2 focus:ring-[#9F5AFF] focus:border-transparent hover:border-gray-300 transition-colors cursor-pointer">
-                        <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>최신순</option>
-                        <option value="views" {{ request('sort') == 'views' ? 'selected' : '' }}>조회순</option>
-                        <option value="likes" {{ request('sort') == 'likes' ? 'selected' : '' }}>좋아요순</option>
-                    </select>
+                    </button>
                 </div>
 
+                <!-- 초기화 (검색/필터 활성 시에만 노출) -->
+                @if(request('search') || request('category') || (request('sort') && request('sort') !== 'latest'))
+                <a href="{{ route('board-cartoon.index') }}" class="h-10 w-10 flex-shrink-0 flex items-center justify-center text-gray-400 hover:text-[#FF4D4D] hover:bg-red-50 rounded-lg transition-all" title="초기화">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </a>
+                @endif
+
+                <!-- 글쓰기 (로그인 시에만) -->
                 @auth
                 <a href="{{ route('board-cartoon.create') }}" 
-                   class="inline-flex items-center justify-center h-10 px-6 bg-[#9F5AFF]/10 text-[#7B2CBF] font-medium rounded-lg hover:bg-[#9F5AFF]/20 transition-all text-sm">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                   class="h-10 w-10 flex-shrink-0 flex items-center justify-center text-gray-400 hover:text-[#9F5AFF] hover:bg-[#9F5AFF]/10 rounded-lg transition-all" title="만화 등록">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                     </svg>
-                    만화 등록
                 </a>
                 @endauth
             </div>
         </form>
     </div>
+</div>
+
+<!-- ===== Filter Toolbar ===== -->
+<div class="container mx-auto px-4 mb-8 max-w-7xl animate-slideUp" style="animation-delay: 0.3s;">
+    <form action="{{ route('board-cartoon.index') }}" method="GET" id="filterForm">
+        <!-- 검색어 상태 유지 -->
+        @if(request('search'))
+            <input type="hidden" name="search" value="{{ request('search') }}">
+        @endif
+
+        <div class="flex flex-row items-center justify-between gap-4">
+            <!-- 좌측: 카테고리 필터 -->
+            <div class="relative">
+                <select name="category" 
+                        onchange="document.getElementById('filterForm').submit()"
+                        class="appearance-none h-9 pl-3 pr-9 bg-white border border-gray-200 text-gray-600 text-sm rounded-full focus:ring-2 focus:ring-[#9F5AFF]/30 focus:border-[#9F5AFF] hover:border-gray-300 transition-all cursor-pointer font-medium">
+                    <option value="">전체 카테고리</option>
+                    @foreach($categories as $category)
+                        <option value="{{ $category }}" {{ request('category') == $category ? 'selected' : '' }}>
+                            {{ $category }}
+                        </option>
+                    @endforeach
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- 우측: 정렬 -->
+            <div class="relative">
+                <select name="sort" 
+                        onchange="document.getElementById('filterForm').submit()"
+                        class="appearance-none h-9 pl-3 pr-9 bg-white border border-gray-200 text-gray-600 text-sm rounded-full focus:ring-2 focus:ring-[#9F5AFF]/30 focus:border-[#9F5AFF] hover:border-gray-300 transition-all cursor-pointer font-medium">
+                    <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>최신순</option>
+                    <option value="views" {{ request('sort') == 'views' ? 'selected' : '' }}>조회순</option>
+                    <option value="likes" {{ request('sort') == 'likes' ? 'selected' : '' }}>좋아요순</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </form>
 </div>
 
 <!-- ===== Content Grid ===== -->
@@ -147,7 +177,16 @@
                         </a>
                         
                         <div class="mt-auto pt-3 border-t border-gray-50 flex items-center justify-between text-xs text-gray-400 font-medium">
-                            <span>{{ $post->mq_reg_date ? $post->mq_reg_date->format('Y.m.d') : '' }}</span>
+                            <div class="flex items-center gap-2">
+                                <span class="flex items-center">
+                                    <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
+                                    {{ $post->user->mq_user_id ?? '익명' }}
+                                </span>
+                                <span class="text-gray-200">·</span>
+                                <span>{{ $post->mq_reg_date ? $post->mq_reg_date->format('Y.m.d') : '' }}</span>
+                            </div>
                             <div class="flex items-center gap-3">
                                 <span class="flex items-center hover:text-[#9F5AFF] transition-colors">
                                     <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -176,14 +215,3 @@
     @endif
 </div>
 @endsection
-
-@push('scripts')
-<script>
-// 필터 변경 시 자동 서브밋
-document.querySelectorAll('select[name="category"], select[name="sort"]').forEach(select => {
-    select.addEventListener('change', () => {
-        select.closest('form').submit();
-    });
-});
-</script>
-@endpush
