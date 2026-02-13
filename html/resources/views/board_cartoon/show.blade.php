@@ -19,7 +19,7 @@
             </a>
             
             <div class="flex flex-wrap items-center gap-3 mb-4 animate-slideUp">
-                <span class="inline-block px-3 py-1 bg-[#9F5AFF] text-white text-sm font-bold rounded-full shadow-lg shadow-[#9F5AFF]/20">
+                <span class="inline-block px-3 py-1 text-sm font-bold rounded-full shadow-lg {{ $categoryColors[$post->mq_category] ?? 'bg-gray-100 text-gray-800' }}">
                     {{ $post->mq_category }}
                 </span>
                 <span class="text-gray-400 text-sm flex items-center bg-white/5 px-3 py-1 rounded-full">
