@@ -1,139 +1,169 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="min-h-screen bg-primary py-8">
-    <div class="max-w-6xl mx-auto px-4">
-        <!-- 페이지 헤더 (중앙 정렬) -->
-        <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-point mb-2">MQ 매핑</h1>
-            <p class="text-secondary">나의 현재와 미래를 연결하는 꿈의 지도를 만들어보세요</p>
-            <p class="text-sm text-gray-500 mt-1">원하는 미래의 모습이나 목표를 선택하여 나만의 매핑을 완성해보세요</p>
-        </div>
+<!-- ===== Hero Section ===== -->
+<section class="relative pt-32 pb-24 overflow-hidden bg-[#3D4148]">
+    <div class="absolute inset-0">
+        <div class="absolute inset-0 bg-gradient-to-br from-[#3D4148] via-[#2D3047] to-[#1A1C29] opacity-95"></div>
+        <div class="absolute top-0 right-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
+        <div class="absolute -top-24 -right-24 w-96 h-96 bg-[#4ECDC4] rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob"></div>
+        <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-[#FF4D4D] rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-2000"></div>
+    </div>
 
-        <!-- 선택된 아이템 카운터 -->
-        <div class="bg-white rounded-lg p-4 mb-6 shadow-sm">
-            <div class="flex justify-between items-center mb-4">
+    <div class="container mx-auto px-4 relative z-10 text-center animate-slideUp">
+        <a href="{{ route('mypage.index') }}" class="inline-flex items-center text-gray-400 hover:text-white mb-6 transition-colors group">
+            <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center mr-2 group-hover:bg-white/20 transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+            </div>
+            마이페이지로 돌아가기
+        </a>
+        <br />
+        <span class="inline-block py-1 px-3 rounded-full bg-white/10 border border-white/20 text-white text-sm font-medium mb-4 backdrop-blur-md">
+            🗺️ MQ Mapping
+        </span>
+        <h1 class="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight tracking-tight">
+            MQ 매핑
+        </h1>
+        <p class="text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed font-light">
+            나의 현재와 미래를 연결하는 꿈의 지도를 만들어보세요.<br class="hidden md:block">
+            원하는 미래의 모습이나 목표를 선택하여 나만의 매핑을 완성해보세요.
+        </p>
+    </div>
+</section>
+
+<div class="container mx-auto px-4 -mt-10 relative z-20 max-w-6xl">
+    <!-- 선택된 아이템 카운터 -->
+    <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-8 animate-slideUp" style="animation-delay: 0.2s;">
+        <div class="flex justify-between items-center mb-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#4ECDC4] to-[#2AA9A0] flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                    </svg>
+                </div>
                 <div>
-                    <span class="text-sm text-secondary">선택된 목표:</span>
-                    <span id="selected-count" class="text-lg font-bold text-point ml-2">0</span>
-                    <span class="text-sm text-secondary">개</span>
-                </div>
-                <div class="flex items-center space-x-3">
-                    <button id="add-custom-goal-btn" class="inline-flex items-center gap-1 text-sm bg-white border border-point1 text-point1 px-3 py-2 rounded-md hover:bg-point1 hover:text-white transition-all">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                        </svg>
-                        <span>직접 추가</span>
-                    </button>
+                    <span class="text-sm text-gray-400 font-medium">선택된 목표:</span>
+                    <span id="selected-count" class="text-xl font-bold text-[#2D3047] ml-2">0</span>
+                    <span class="text-sm text-gray-400 font-medium">개</span>
                 </div>
             </div>
-
-            <!-- 선택된 목표 리스트 -->
-            <div id="selected-goals-list" class="hidden border-t pt-4 mt-4">
-                <div class="flex justify-between items-center mb-3">
-                    <h3 class="text-sm font-semibold text-point">선택된 목표 목록</h3>
-                </div>
-                <div id="selected-goals-container" class="space-y-2 max-h-[240px] overflow-y-auto">
-                    <!-- 동적으로 추가될 목표 항목들 -->
-                </div>
-            </div>
-        </div>
-
-        <!-- 카테고리 필터 -->
-        <div class="bg-white rounded-lg p-4 mb-6 shadow-sm">
-            <div class="flex flex-wrap gap-2">
-                @foreach($categories as $key => $label)
-                <button class="category-filter {{ $key === 'all' ? 'active bg-point1 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }} px-4 py-2 rounded-full text-sm" data-category="{{ $key }}">
-                    {{ $label }}
+            <div class="flex items-center space-x-3">
+                <button id="add-custom-goal-btn" class="inline-flex items-center gap-1.5 text-sm bg-white border border-[#FF4D4D] text-[#FF4D4D] px-4 py-2.5 rounded-xl hover:bg-[#FF4D4D] hover:text-white transition-all font-medium">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    <span>직접 추가</span>
                 </button>
-                @endforeach
             </div>
         </div>
 
-        <!-- 매핑 그리드 -->
-        <div class="bg-white rounded-lg shadow-sm p-6">
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="mapping-grid">
-                @foreach($mappingItems as $item)
-                <div class="mapping-item relative group cursor-pointer" data-category="{{ $item['category'] }}" data-id="{{ $item['id'] }}" data-description="{{ $item['description'] }}">
-                    <div class="aspect-square rounded-lg overflow-hidden bg-white shadow-sm border border-gray-100 relative">
-                        @if($item['image'])
-                            <!-- 이미지 (전체 영역) -->
-                            <img src="{{ $item['image'] }}" alt="{{ $item['description'] }}"
-                                 class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
-                        @else
-                            <!-- 노이미지 썸네일 -->
-                            <div class="w-full h-full bg-gray-200 flex items-center justify-center">
-                                <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                </svg>
-                            </div>
-                        @endif
+        <!-- 선택된 목표 리스트 -->
+        <div id="selected-goals-list" class="hidden border-t border-gray-100 pt-4 mt-4">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="text-sm font-bold text-[#2D3047]">선택된 목표 목록</h3>
+            </div>
+            <div id="selected-goals-container" class="space-y-2 max-h-[240px] overflow-y-auto custom-scrollbar">
+                <!-- 동적으로 추가될 목표 항목들 -->
+            </div>
+        </div>
+    </div>
 
-                        <!-- 하단 그라데이션 오버레이 (텍스트 가독성을 위한) -->
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+    <!-- 카테고리 필터 -->
+    <div class="bg-white rounded-2xl shadow-xl p-6 mb-8 animate-slideUp" style="animation-delay: 0.3s;">
+        <div class="flex flex-wrap gap-2">
+            @foreach($categories as $key => $label)
+            <button class="category-filter {{ $key === 'all' ? 'active bg-[#FF4D4D] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }} px-4 py-2 rounded-full text-sm font-medium transition-all" data-category="{{ $key }}">
+                {{ $label }}
+            </button>
+            @endforeach
+        </div>
+    </div>
 
-                        <!-- 텍스트 오버레이 -->
-                        <div class="absolute bottom-0 left-0 right-0 p-3 text-center">
-                            <div class="text-sm font-medium text-white leading-tight drop-shadow-lg">{{ $item['description'] }}</div>
+    <!-- 매핑 그리드 -->
+    <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 pb-20 animate-slideUp" style="animation-delay: 0.4s;">
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5" id="mapping-grid">
+            @foreach($mappingItems as $item)
+            <div class="mapping-item relative group cursor-pointer" data-category="{{ $item['category'] }}" data-id="{{ $item['id'] }}" data-description="{{ $item['description'] }}">
+                <div class="aspect-square rounded-xl overflow-hidden bg-white shadow-sm border border-gray-100 relative">
+                    @if($item['image'])
+                        <!-- 이미지 (전체 영역) -->
+                        <img src="{{ $item['image'] }}" alt="{{ $item['description'] }}"
+                             class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
+                    @else
+                        <!-- 노이미지 썸네일 -->
+                        <div class="w-full h-full bg-gray-100 flex items-center justify-center">
+                            <svg class="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
                         </div>
+                    @endif
+
+                    <!-- 하단 그라데이션 오버레이 (텍스트 가독성을 위한) -->
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+
+                    <!-- 텍스트 오버레이 -->
+                    <div class="absolute bottom-0 left-0 right-0 p-3 text-center">
+                        <div class="text-sm font-medium text-white leading-tight drop-shadow-lg">{{ $item['description'] }}</div>
                     </div>
-                    <input type="checkbox" class="mapping-checkbox absolute top-2 right-2 w-5 h-5 text-point1 bg-white border-2 border-gray-300 rounded focus:ring-point1 shadow-sm">
-                    <div class="absolute inset-0 bg-point1 bg-opacity-20 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg"></div>
                 </div>
-                @endforeach
+                <input type="checkbox" class="mapping-checkbox absolute top-2 right-2 w-5 h-5 text-[#FF4D4D] bg-white border-2 border-gray-300 rounded focus:ring-[#FF4D4D] shadow-sm">
+                <div class="absolute inset-0 bg-[#4ECDC4] bg-opacity-20 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl"></div>
             </div>
+            @endforeach
+        </div>
 
-            <!-- 무한 스크롤 로딩 인디케이터 -->
-            <div id="scroll-loading" class="hidden text-center py-8">
-                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-point1"></div>
-                <p class="text-sm text-gray-500 mt-2">로딩 중...</p>
-            </div>
+        <!-- 무한 스크롤 로딩 인디케이터 -->
+        <div id="scroll-loading" class="hidden text-center py-8">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#4ECDC4]"></div>
+            <p class="text-sm text-gray-400 mt-2">로딩 중...</p>
+        </div>
 
-            <!-- 더 이상 로드할 항목이 없을 때 메시지 -->
-            <div id="scroll-end" class="hidden text-center py-8">
-                <p class="text-sm text-gray-500">모든 항목을 불러왔습니다.</p>
-            </div>
+        <!-- 더 이상 로드할 항목이 없을 때 메시지 -->
+        <div id="scroll-end" class="hidden text-center py-8">
+            <p class="text-sm text-gray-400">모든 항목을 불러왔습니다.</p>
         </div>
     </div>
 </div>
 
 <!-- 샘플 목표 확인 팝업 -->
-<div id="confirm-goal-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-    <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-bold text-point">목표 추가</h2>
-            <button id="close-confirm-modal-btn" class="text-gray-500 hover:text-gray-700">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<div id="confirm-goal-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 p-8">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold text-[#2D3047]">목표 추가</h2>
+            <button id="close-confirm-modal-btn" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-200 transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
             </button>
         </div>
 
-        <div class="space-y-4">
+        <div class="space-y-5">
             <!-- 선택된 목표 미리보기 -->
-            <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
-                <div id="confirm-goal-image-container" class="w-20 h-20 rounded flex-shrink-0"></div>
+            <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
+                <div id="confirm-goal-image-container" class="w-20 h-20 rounded-xl flex-shrink-0 overflow-hidden"></div>
                 <div class="flex-1">
                     <div id="confirm-goal-description-container">
-                        <p id="confirm-goal-description" class="text-sm font-medium text-secondary"></p>
+                        <p id="confirm-goal-description" class="text-sm font-medium text-[#2D3047]"></p>
                     </div>
                 </div>
             </div>
 
             <!-- 목표 연도 선택 -->
             <div>
-                <label for="confirm-goal-year" class="block text-sm font-medium text-secondary mb-2">목표 연도</label>
-                <select id="confirm-goal-year" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-point1 focus:border-point1">
+                <label for="confirm-goal-year" class="block text-sm font-semibold text-[#2D3047] mb-2">목표 연도</label>
+                <select id="confirm-goal-year" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4ECDC4] focus:border-transparent transition-all">
                     <!-- JavaScript로 동적 생성 -->
                 </select>
             </div>
 
             <!-- 버튼 -->
             <div class="flex gap-3 pt-2">
-                <button type="button" id="cancel-confirm-modal-btn" class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors">
+                <button type="button" id="cancel-confirm-modal-btn" class="flex-1 px-4 py-3 border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 transition-all font-medium">
                     취소
                 </button>
-                <button type="button" id="save-confirm-goal-btn" class="flex-1 px-4 py-2 bg-point1 text-white rounded-md hover:bg-opacity-90 transition-colors">
+                <button type="button" id="save-confirm-goal-btn" class="flex-1 px-4 py-3 bg-gradient-to-r from-[#4ECDC4] to-[#2AA9A0] text-white rounded-xl hover:shadow-lg transition-all font-medium">
                     저장하기
                 </button>
             </div>
@@ -142,11 +172,11 @@
 </div>
 
 <!-- 커스텀 목표 추가/편집 팝업 -->
-<div id="custom-goal-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-    <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
-        <div class="flex justify-between items-center mb-4">
+<div id="custom-goal-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 p-8">
+        <div class="flex justify-between items-center mb-6">
             <div class="flex items-center gap-3">
-                <h2 id="custom-modal-title" class="text-xl font-bold text-point">나만의 목표 추가</h2>
+                <h2 id="custom-modal-title" class="text-xl font-bold text-[#2D3047]">나만의 목표 추가</h2>
                 <!-- 삭제 버튼 (편집 모드일 때만 표시) -->
                 <button type="button" id="delete-custom-goal-from-modal-btn" class="hidden text-red-500 hover:text-red-600 transition-colors" title="삭제하기">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -154,18 +184,18 @@
                     </svg>
                 </button>
             </div>
-            <button id="close-modal-btn" class="text-gray-500 hover:text-gray-700">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button id="close-modal-btn" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-200 transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
             </button>
         </div>
 
-        <form id="custom-goal-form" class="space-y-4">
+        <form id="custom-goal-form" class="space-y-5">
             <!-- 이미지 업로드 (편집 시에는 숨김) -->
             <div id="custom-image-upload-section">
-                <label class="block text-sm font-medium text-secondary mb-2">목표 이미지</label>
-                <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-point1 transition-colors cursor-pointer" id="image-upload-area">
+                <label class="block text-sm font-semibold text-[#2D3047] mb-2">목표 이미지</label>
+                <div class="border-2 border-dashed border-gray-200 rounded-xl p-4 text-center hover:border-[#4ECDC4] transition-colors cursor-pointer" id="image-upload-area">
                     <input type="file" id="custom-goal-image" accept="image/*" class="hidden">
                     <div id="image-preview-area">
                         <svg class="w-12 h-12 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -179,32 +209,32 @@
 
             <!-- 기존 이미지 미리보기 (편집 시에만 표시) -->
             <div id="custom-image-preview-section" class="hidden">
-                <label class="block text-sm font-medium text-secondary mb-2">현재 이미지</label>
-                <div id="custom-existing-image-container" class="flex justify-center items-center p-4 bg-gray-50 rounded-lg">
+                <label class="block text-sm font-semibold text-[#2D3047] mb-2">현재 이미지</label>
+                <div id="custom-existing-image-container" class="flex justify-center items-center p-4 bg-gray-50 rounded-xl">
                     <!-- 이미지가 동적으로 추가됨 -->
                 </div>
             </div>
 
             <!-- 목표 설명 -->
             <div>
-                <label for="custom-goal-description" class="block text-sm font-medium text-secondary mb-2">목표 설명</label>
-                <input type="text" id="custom-goal-description" placeholder="예: 세계 여행, 자격증 취득, 창업 등" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-point1 focus:border-point1" required>
+                <label for="custom-goal-description" class="block text-sm font-semibold text-[#2D3047] mb-2">목표 설명</label>
+                <input type="text" id="custom-goal-description" placeholder="예: 세계 여행, 자격증 취득, 창업 등" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4ECDC4] focus:border-transparent transition-all" required>
             </div>
 
             <!-- 목표 연도 -->
             <div>
-                <label for="custom-goal-year" class="block text-sm font-medium text-secondary mb-2">목표 연도</label>
-                <select id="custom-goal-year" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-point1 focus:border-point1">
+                <label for="custom-goal-year" class="block text-sm font-semibold text-[#2D3047] mb-2">목표 연도</label>
+                <select id="custom-goal-year" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4ECDC4] focus:border-transparent transition-all">
                     <!-- JavaScript로 동적 생성 -->
                 </select>
             </div>
 
             <!-- 버튼 -->
             <div class="flex gap-3 pt-2">
-                <button type="button" id="cancel-modal-btn" class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors">
+                <button type="button" id="cancel-modal-btn" class="flex-1 px-4 py-3 border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 transition-all font-medium">
                     취소
                 </button>
-                <button type="submit" id="custom-goal-submit-btn" class="flex-1 px-4 py-2 bg-point1 text-white rounded-md hover:bg-opacity-90 transition-colors">
+                <button type="submit" id="custom-goal-submit-btn" class="flex-1 px-4 py-3 bg-gradient-to-r from-[#FF4D4D] to-[#e03e3e] text-white rounded-xl hover:shadow-lg transition-all font-medium">
                     추가하기
                 </button>
             </div>
@@ -1133,12 +1163,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
 .mapping-item.selected {
     transform: translateY(-2px);
-    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 4px 20px rgba(78, 205, 196, 0.3);
 }
 
 .mapping-item.selected .mapping-checkbox {
-    background-color: #3B82F6;
-    border-color: #3B82F6;
+    background-color: #FF4D4D;
+    border-color: #FF4D4D;
 }
 
 .mapping-checkbox {
@@ -1147,8 +1177,8 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 .mapping-checkbox:checked {
-    background-color: #3B82F6;
-    border-color: #3B82F6;
+    background-color: #FF4D4D;
+    border-color: #FF4D4D;
 }
 
 .category-filter {

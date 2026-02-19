@@ -26,10 +26,6 @@
         border-color: #FF4D4D;
     }
 
-    /* 스크롤바 숨기기 */
-    .scrollbar-hide::-webkit-scrollbar { display: none; }
-    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-
     /* 슬라이더 스타일 */
     .invest-slider {
         -webkit-appearance: none; appearance: none;

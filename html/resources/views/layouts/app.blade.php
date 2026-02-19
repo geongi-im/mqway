@@ -117,6 +117,16 @@
         
         .animate-fadeIn { animation: fadeIn 0.6s ease-out; }
         .animate-slideUp { animation: slideUp 0.6s ease-out forwards; }
+
+        /* 공통 커스텀 스크롤바 */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+
+        /* 스크롤바 숨김 유틸리티 */
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7078035340110573"
     crossorigin="anonymous"></script>
