@@ -3,11 +3,7 @@
 @section('title', '알쏭달쏭 경제용어, 짝꿍을 찾아라!')
 
 @push('styles')
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-    body {
-        font-family: 'Noto Sans KR', sans-serif;
-    }
     .card-flip {
         transition: transform 0.6s;
         transform-style: preserve-3d;
@@ -39,135 +35,195 @@
         0%, 100% { transform: scale(1); background-color: rgb(239, 68, 68); }
         50% { transform: scale(1.05); background-color: rgb(220, 38, 38); }
     }
-    .timer {
-        font-family: 'Courier New', monospace;
-        font-weight: bold;
+
+    /* 랭킹 아이템 호버 효과 */
+    .ranking-item {
+        transition: all 0.2s ease;
     }
-    /* TailwindCSS가 이미 로드되어 있다고 가정하고, 필요한 경우 추가 스타일만 여기에 작성합니다. */
-    /* 예를 들어, body의 기본 배경색이 layouts.app에서 지정된 것과 다를 경우 여기서 오버라이드 할 수 있습니다. */
-    /* body {
-        background-color: #f0f4f8; /* 예시 배경색 */
-    /* } */
+    .ranking-item:hover {
+        transform: translateX(4px);
+    }
+
+    /* 옵션 버튼 호버 */
+    .option-btn {
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 2px solid rgba(255,255,255,0.15);
+        backdrop-filter: blur(8px);
+    }
+    .option-btn:hover {
+        border-color: #4ECDC4;
+        background: rgba(78, 205, 196, 0.08);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(78, 205, 196, 0.15);
+    }
 </style>
 @endpush
 
 @section('content')
-<div class="min-h-screen bg-gray-50 py-12">
-    <!-- 메인 화면 -->
-    <div id="mainScreen" class="container mx-auto px-4">
-        <div class="text-center">
-            <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-                알쏭달쏭 경제용어, 짝꿍을 찾아라!
-            </h1>
-            <p class="text-lg text-gray-600 mb-8">
-                재미있는 카드 게임으로 경제 용어를 배워보세요!
-            </p>
+<!-- ===== Hero Background ===== -->
+<div class="relative bg-[#3D4148] pb-32 overflow-hidden">
+    <div class="absolute inset-0">
+        <div class="absolute inset-0 bg-gradient-to-br from-[#3D4148] via-[#2D3047] to-[#1A1C29] opacity-95"></div>
+        <div class="absolute top-0 right-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
+    </div>
+    <div class="absolute -top-24 -right-24 w-96 h-96 bg-[#4ECDC4] rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob"></div>
+    <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-[#FF4D4D] rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-2000"></div>
 
-            <div class="max-w-2xl mx-auto bg-white rounded-lg p-8 shadow-md mb-8">
-                <h2 class="text-xl font-bold text-gray-800 mb-4">게임 방법</h2>
-                <div class="text-left space-y-3">
-                    <p class="text-gray-600">1. 경제 용어 카드와 설명 카드 중 알맞은 짝을 찾으세요.</p>
-                    <p class="text-gray-600">2. 정답을 맞히면 점수를 얻고, 다음 문제로 넘어갑니다.</p>
-                    <p class="text-gray-600">3. 모든 문제를 풀면 게임이 종료되고, 점수와 시간이 기록됩니다.</p>
-                    <p class="text-gray-600">4. 가장 높은 점수와 빠른 시간으로 랭킹에 도전하세요!</p>
+    <div class="relative z-10 container mx-auto px-4 pt-12 pb-8 text-center">
+        <div class="inline-flex items-center gap-2 bg-white/10 text-white/90 py-1.5 px-4 rounded-full text-sm font-medium mb-4 border border-white/10 backdrop-blur-md animate-fadeIn">
+            <span>🃏</span> <span>학습 도구</span>
+        </div>
+        <h1 class="font-outfit text-3xl md:text-5xl font-extrabold text-white mb-4 tracking-tight animate-slideUp" style="animation-delay: 0.1s;">
+            알쏭달쏭 경제용어, <span class="text-[#4ECDC4]">짝꿍</span>을 찾아라!
+        </h1>
+        <p class="text-white/70 text-base md:text-lg max-w-2xl mx-auto leading-relaxed animate-slideUp" style="animation-delay: 0.2s;">
+            재미있는 카드 게임으로 경제 용어를 배워보세요!
+        </p>
+    </div>
+</div>
+
+<!-- ===== Main Content ===== -->
+<div class="relative z-20 -mt-24 pb-16">
+    <div class="container mx-auto px-4 max-w-4xl">
+
+        <!-- 메인 화면 -->
+        <div id="mainScreen">
+            <!-- 게임 방법 카드 -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-6 animate-slideUp" style="animation-delay: 0.3s;">
+                <h2 class="text-xl font-bold text-[#2D3047] mb-5 flex items-center gap-2">
+                    <span class="w-8 h-8 bg-gradient-to-br from-[#4ECDC4] to-[#26D0CE] rounded-lg flex items-center justify-center text-white text-sm">📖</span>
+                    게임 방법
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="flex items-start gap-3 p-4 bg-[#F8F9FB] rounded-xl">
+                        <span class="flex-shrink-0 w-7 h-7 bg-[#FF4D4D] text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
+                        <p class="text-gray-600 text-sm leading-relaxed">경제 용어 카드와 설명 카드 중 알맞은 짝을 찾으세요.</p>
+                    </div>
+                    <div class="flex items-start gap-3 p-4 bg-[#F8F9FB] rounded-xl">
+                        <span class="flex-shrink-0 w-7 h-7 bg-[#FFB347] text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
+                        <p class="text-gray-600 text-sm leading-relaxed">정답을 맞히면 점수를 얻고, 다음 문제로 넘어갑니다.</p>
+                    </div>
+                    <div class="flex items-start gap-3 p-4 bg-[#F8F9FB] rounded-xl">
+                        <span class="flex-shrink-0 w-7 h-7 bg-[#4ECDC4] text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
+                        <p class="text-gray-600 text-sm leading-relaxed">모든 문제를 풀면 게임이 종료되고, 점수와 시간이 기록됩니다.</p>
+                    </div>
+                    <div class="flex items-start gap-3 p-4 bg-[#F8F9FB] rounded-xl">
+                        <span class="flex-shrink-0 w-7 h-7 bg-[#7C5CFC] text-white rounded-full flex items-center justify-center text-xs font-bold">4</span>
+                        <p class="text-gray-600 text-sm leading-relaxed">가장 높은 점수와 빠른 시간으로 랭킹에 도전하세요!</p>
+                    </div>
+                </div>
+
+                <div class="text-center mt-8">
+                    <button id="startBtn" class="bg-gradient-to-r from-[#FF4D4D] to-[#FF6B6B] hover:from-[#FF3333] hover:to-[#FF4D4D] text-white font-bold py-4 px-10 rounded-xl transition-all duration-300 text-lg shadow-[0_8px_25px_rgba(255,77,77,0.35)] hover:-translate-y-1 hover:shadow-[0_12px_35px_rgba(255,77,77,0.45)]">
+                        🎮 게임 시작하기
+                    </button>
                 </div>
             </div>
 
-            <div class="space-y-4 mb-8">
-                <button id="startBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-4 px-8 rounded-full transition-all duration-300 text-lg transform hover:scale-105 hover:shadow-lg">
-                    게임 시작하기
-                </button>
-            </div>
-
-            <!-- 랭킹 표시 -->
-            <div id="rankingDisplay" class="max-w-md mx-auto bg-white rounded-lg p-6 shadow-md">
-                <h3 class="text-xl font-bold text-gray-800 mb-4">베스트 랭킹</h3>
+            <!-- 랭킹 카드 -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 animate-slideUp" style="animation-delay: 0.4s;">
+                <h3 class="text-xl font-bold text-[#2D3047] mb-5 flex items-center gap-2">
+                    <span class="w-8 h-8 bg-gradient-to-br from-[#FFB347] to-[#FFCC33] rounded-lg flex items-center justify-center text-white text-sm">🏆</span>
+                    베스트 랭킹
+                </h3>
                 <div id="rankingList" class="space-y-2">
                     <!-- 랭킹 데이터가 여기에 표시됩니다 -->
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- 게임 화면 -->
-    <div id="gameScreen" class="container mx-auto px-4 py-8 hidden">
-        <!-- 게임 헤더 -->
-        <div class="flex justify-between items-center mb-6">
-            <div class="text-2xl font-bold text-gray-800">
-                문제 <span id="currentQuestion">1</span> / <span id="totalQuestions">15</span>
-            </div>
-            <div class="timer text-2xl text-blue-600 bg-white px-4 py-2 rounded-lg shadow-md">
-                <span id="gameTimer">00:00</span>
-            </div>
-        </div>
-
-        <!-- 현재 문제 카드 (카드 덱 및 화살표 제거, 중앙 정렬) -->
-        <div class="flex justify-center items-center mb-8">
-            <div class="text-center">
-                <div class="text-lg font-semibold text-gray-700 mb-2">현재 문제</div>
-                <div id="currentCard" class="w-48 h-72 bg-blue-100 rounded-xl shadow-lg flex items-center justify-center border-2 border-blue-200">
-                    <div id="currentTerm" class="text-3xl font-bold text-blue-700"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 선택지들 -->
-        <div class="max-w-4xl mx-auto">
-            <h3 class="text-xl font-semibold text-center text-gray-800 mb-4">
-                위 용어에 맞는 설명을 골라주세요!
-            </h3>
-            <div id="optionsContainer" class="grid md:grid-cols-2 gap-4 mb-6">
-                <!-- 선택지들이 여기에 생성됩니다 -->
-            </div>
-
-            <!-- PASS 버튼 및 메인으로 버튼 -->
-            <div class="text-center space-x-4">
-                <button id="passBtn" class="bg-gray-500 text-white font-semibold text-lg px-8 py-3 rounded-full shadow-md hover:bg-gray-600 transition-all duration-300" style="display: none;">
-                    PASS (건너뛰기)
-                </button>
-                <button id="goToMainFromGameBtn" class="bg-red-500 text-white font-semibold text-lg px-8 py-3 rounded-full shadow-md hover:bg-red-600 transition-all duration-300">
-                    포기하기
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 결과 화면 -->
-    <div id="resultScreen" class="container mx-auto px-4 py-8 hidden">
-        <div class="text-center max-w-2xl mx-auto">
-            <h2 class="text-3xl font-bold text-gray-800 mb-6">게임 완료!</h2>
-
-            <div class="bg-white rounded-lg p-8 shadow-md mb-6">
-                <div class="space-y-4">
-                    <div class="text-2xl">
-                        <span class="font-semibold text-gray-700">정답:</span>
-                        <span id="finalScore" class="text-3xl font-bold text-blue-600">0</span>점
+        <!-- 게임 화면 -->
+        <div id="gameScreen" class="hidden">
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <!-- 게임 헤더 -->
+                <div class="flex justify-between items-center mb-8">
+                    <div class="flex items-center gap-3">
+                        <span class="text-sm font-medium text-gray-500">문제</span>
+                        <span class="text-2xl font-bold text-[#2D3047]"><span id="currentQuestion">1</span> / <span id="totalQuestions">15</span></span>
                     </div>
-                    <div class="text-2xl">
-                        <span class="font-semibold text-gray-700">시간:</span>
-                        <span id="finalTime" class="text-3xl font-bold timer text-blue-600">00:00</span>
+                    <div class="bg-gradient-to-r from-[#2D3047] to-[#3D4148] text-white px-5 py-2.5 rounded-xl shadow-lg font-mono text-lg font-bold tracking-wider">
+                        <span id="gameTimer">00:00</span>
                     </div>
-                    <div id="rankMessage" class="text-lg font-semibold text-gray-600"></div>
                 </div>
-            </div>
 
-            <!-- 업데이트된 랭킹 -->
-            <div class="bg-white rounded-lg p-6 shadow-md mb-6">
-                <h3 class="text-xl font-bold text-gray-800 mb-4">최고 랭킹</h3>
-                <div id="finalRanking" class="space-y-2">
-                    <!-- 업데이트된 랭킹이 표시됩니다 -->
+                <!-- 진행바 -->
+                <div class="w-full bg-gray-100 rounded-full h-2 mb-8 overflow-hidden">
+                    <div id="gameProgressBar" class="h-full rounded-full bg-gradient-to-r from-[#4ECDC4] to-[#26D0CE] transition-all duration-500" style="width: 0%"></div>
                 </div>
-            </div>
 
-            <div class="space-x-4">
-                <button id="playAgainBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold text-lg px-8 py-3 rounded-full shadow-md transition-all duration-300 transform hover:scale-105">
-                    다시 플레이
-                </button>
-                <button id="backToMainBtn" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold text-lg px-8 py-3 rounded-full shadow-md transition-all duration-300 transform hover:scale-105">
-                    메인으로
-                </button>
+                <!-- 현재 문제 카드 -->
+                <div class="flex justify-center items-center mb-8">
+                    <div class="text-center">
+                        <div class="text-sm font-medium text-gray-400 mb-3 uppercase tracking-wider">현재 문제</div>
+                        <div id="currentCard" class="w-52 h-36 bg-gradient-to-br from-[#2D3047] to-[#3D4148] rounded-2xl shadow-[0_12px_32px_rgba(45,48,71,0.3)] flex items-center justify-center border border-white/10 p-4">
+                            <div id="currentTerm" class="text-2xl font-extrabold text-white text-center leading-tight"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 선택지들 -->
+                <div class="max-w-3xl mx-auto">
+                    <h3 class="text-base font-semibold text-center text-gray-500 mb-5">
+                        위 용어에 맞는 설명을 골라주세요!
+                    </h3>
+                    <div id="optionsContainer" class="grid md:grid-cols-2 gap-3 mb-8">
+                        <!-- 선택지들이 여기에 생성됩니다 -->
+                    </div>
+
+                    <!-- PASS 버튼 및 메인으로 버튼 -->
+                    <div class="text-center flex justify-center gap-3">
+                        <button id="passBtn" class="bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold text-sm px-6 py-3 rounded-xl transition-all duration-300" style="display: none;">
+                            ⏭ PASS
+                        </button>
+                        <button id="goToMainFromGameBtn" class="bg-[#FF4D4D]/10 hover:bg-[#FF4D4D]/20 text-[#FF4D4D] font-semibold text-sm px-6 py-3 rounded-xl transition-all duration-300">
+                            포기하기
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
+
+        <!-- 결과 화면 -->
+        <div id="resultScreen" class="hidden">
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-10">
+                <div class="text-center mb-8">
+                    <div class="text-5xl mb-4">🎉</div>
+                    <h2 class="text-3xl font-extrabold text-[#2D3047] mb-6">게임 완료!</h2>
+
+                    <div class="grid grid-cols-2 gap-4 max-w-sm mx-auto mb-6">
+                        <div class="bg-gradient-to-br from-[#4ECDC4]/10 to-[#4ECDC4]/5 rounded-2xl p-5 text-center">
+                            <div class="text-sm text-gray-500 mb-1">정답</div>
+                            <div class="text-3xl font-extrabold text-[#4ECDC4]"><span id="finalScore">0</span>점</div>
+                        </div>
+                        <div class="bg-gradient-to-br from-[#FF4D4D]/10 to-[#FF4D4D]/5 rounded-2xl p-5 text-center">
+                            <div class="text-sm text-gray-500 mb-1">시간</div>
+                            <div class="text-3xl font-extrabold text-[#FF4D4D] font-mono"><span id="finalTime">00:00</span></div>
+                        </div>
+                    </div>
+                    <div id="rankMessage" class="text-base font-medium text-gray-500"></div>
+                </div>
+
+                <!-- 최종 랭킹 -->
+                <div class="bg-[#F8F9FB] rounded-2xl p-6 mb-8">
+                    <h3 class="text-lg font-bold text-[#2D3047] mb-4 flex items-center gap-2">
+                        <span>🏆</span> 최고 랭킹
+                    </h3>
+                    <div id="finalRanking" class="space-y-2">
+                        <!-- 업데이트된 랭킹이 표시됩니다 -->
+                    </div>
+                </div>
+
+                <div class="flex justify-center gap-3">
+                    <button id="playAgainBtn" class="bg-gradient-to-r from-[#4ECDC4] to-[#26D0CE] text-white font-bold text-base px-8 py-3.5 rounded-xl shadow-[0_8px_25px_rgba(78,205,196,0.35)] hover:-translate-y-1 hover:shadow-[0_12px_35px_rgba(78,205,196,0.45)] transition-all duration-300">
+                        🔄 다시 플레이
+                    </button>
+                    <button id="backToMainBtn" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-base px-8 py-3.5 rounded-xl transition-all duration-300">
+                        메인으로
+                    </button>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 @endsection
@@ -198,7 +254,7 @@
             document.getElementById('startBtn').addEventListener('click', () => {
                 if (!IS_USER_LOGGED_IN) {
                     alert('로그인이 필요합니다.');
-                    return; // 로그인 안되어 있으면 게임 시작 중단
+                    return;
                 }
                 this.startGame();
             });
@@ -262,6 +318,11 @@
             document.getElementById('totalQuestions').textContent = this.questions.length;
             document.getElementById('currentTerm').textContent = question.term;
             
+            // 진행바 업데이트
+            const progress = ((this.currentQuestionIndex) / this.questions.length) * 100;
+            const progressBar = document.getElementById('gameProgressBar');
+            if (progressBar) progressBar.style.width = progress + '%';
+
             this.createOptions(question);
         }
 
@@ -276,7 +337,7 @@
             
             options.forEach((option) => {
                 const button = document.createElement('button');
-                button.className = 'bg-white hover:bg-blue-50 border-2 border-gray-200 text-gray-700 font-medium text-base px-6 py-4 rounded-full shadow-sm transition-all duration-200 hover:border-blue-500 text-left';
+                button.className = 'option-btn bg-white/80 text-gray-700 font-medium text-sm px-5 py-4 rounded-xl shadow-sm text-left leading-relaxed';
                 button.textContent = option;
 
                 button.addEventListener('click', () => {
@@ -301,17 +362,17 @@
             
             if (selectedAnswer === correctAnswer) {
                 this.score++;
-                buttonElement.className = buttonElement.className.replace('bg-white', 'bg-green-500');
-                buttonElement.classList.add('text-white', 'pulse-correct');
+                buttonElement.classList.remove('bg-white/80');
+                buttonElement.classList.add('bg-green-500', 'text-white', 'pulse-correct', 'border-green-500');
                 this.showFeedback('정답이에요! 🎉', 'success');
             } else {
-                buttonElement.className = buttonElement.className.replace('bg-white', 'bg-red-500');
-                buttonElement.classList.add('text-white', 'pulse-wrong');
+                buttonElement.classList.remove('bg-white/80');
+                buttonElement.classList.add('bg-red-500', 'text-white', 'pulse-wrong', 'border-red-500');
                 
                 buttons.forEach(btn => {
                     if (btn.textContent === correctAnswer) {
-                        btn.className = btn.className.replace('bg-white', 'bg-green-500');
-                        btn.classList.add('text-white');
+                        btn.classList.remove('bg-white/80');
+                        btn.classList.add('bg-green-500', 'text-white', 'border-green-500');
                     }
                 });
                 this.showFeedback('아쉬워요! 다음에는 맞출 수 있어요 💪', 'error');
@@ -322,8 +383,8 @@
 
         showFeedback(message, type) {
             const feedback = document.createElement('div');
-            feedback.className = `fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 text-2xl font-bold px-8 py-4 rounded-2xl shadow-lg ${
-                type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+            feedback.className = `fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 text-xl font-bold px-8 py-4 rounded-2xl shadow-2xl backdrop-blur-md ${
+                type === 'success' ? 'bg-green-500/90 text-white' : 'bg-red-500/90 text-white'
             }`;
             feedback.textContent = message;
             document.body.appendChild(feedback);
@@ -353,27 +414,28 @@
                 
                 const container = document.getElementById(targetElementId);
                 if (rankings.length === 0) {
-                    container.innerHTML = '<p class="text-gray-500">아직 기록이 없습니다.</p>';
+                    container.innerHTML = '<p class="text-gray-400 text-center py-4">아직 기록이 없습니다.</p>';
                     return;
                 }
                 
                 container.innerHTML = rankings.map((record, index) => {
-                    const isTopThree = index < 3;
-                    const rowBgClass = isTopThree ? 'bg-yellow-100' : 'bg-gray-50';
+                    const medals = ['🥇', '🥈', '🥉'];
+                    const medal = index < 3 ? medals[index] : `${index + 1}`;
+                    const bgClass = index < 3 ? 'bg-gradient-to-r from-[#FFB347]/10 to-[#FFCC33]/5 border border-[#FFB347]/20' : 'bg-[#F8F9FB]';
 
                     return `
-                        <div class="flex items-center p-2 ${rowBgClass} rounded-lg w-full text-sm">
-                            <span class="font-bold w-[15%] pr-1">${index + 1}위</span>
-                            <span class="w-[40%] truncate pr-2">${record.userName || '익명'}</span>
-                            <span class="w-[20%] text-right pr-2">${record.score}점</span>
-                            <span class="timer w-[25%] text-right">${record.time_formatted}</span>
+                        <div class="ranking-item flex items-center p-3 ${bgClass} rounded-xl w-full text-sm">
+                            <span class="font-bold w-[12%] text-center text-base">${medal}</span>
+                            <span class="w-[38%] truncate pr-2 font-medium text-[#2D3047]">${record.userName || '익명'}</span>
+                            <span class="w-[25%] text-right pr-2 text-[#4ECDC4] font-bold">${record.score}점</span>
+                            <span class="font-mono w-[25%] text-right text-gray-500">${record.time_formatted}</span>
                         </div>
                     `;
                 }).join('');
             } catch (error) {
                 console.error("Ranking fetch error:", error);
                 const container = document.getElementById(targetElementId);
-                container.innerHTML = '<p class="text-red-500">랭킹을 불러오는데 실패했습니다.</p>';
+                container.innerHTML = '<p class="text-red-400 text-center py-4">랭킹을 불러오는데 실패했습니다.</p>';
             }
         }
 
@@ -388,8 +450,8 @@
             document.getElementById('finalTime').textContent = 
                 `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             
-            let rankMsgText = '결과를 처리 중입니다...'; // 초기 메시지
-            let shouldFetchRanking = true; // 기본적으로 랭킹을 가져오도록 설정
+            let rankMsgText = '결과를 처리 중입니다...';
+            let shouldFetchRanking = true;
 
             try {
                 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
@@ -413,7 +475,6 @@
                     rankMsgText = '로그인이 필요하여 결과를 저장할 수 없습니다.';
                     shouldFetchRanking = false; 
                 } else if (!response.ok) {
-                    // 401 이외의 HTTP 에러 (400, 402+, 5xx 등)
                     let errorDetail = `서버 응답 오류 (코드: ${response.status})`; 
                     try {
                         const errorData = await response.json();
@@ -431,17 +492,14 @@
                     }
                     rankMsgText = `게임 결과 저장 실패: ${errorDetail}`;
                 } else {
-                    // 성공적으로 응답을 받은 경우 (response.ok === true 및 로그인 리디렉션 아님)
                     const result = await response.json(); 
                     console.log('Game result saved:', result);
                     rankMsgText = '게임 결과가 저장되었습니다!';
                 }
             } catch (networkOrParsingError) {
-                // 네트워크 에러 (fetch 실패) 또는 성공 응답의 JSON 파싱 실패 시
                 console.error("게임 결과 저장 중 네트워크 또는 파싱 에러:", networkOrParsingError);
                 rankMsgText = '결과 저장 중 통신 또는 데이터 처리 오류가 발생했습니다.';
             } finally {
-                // 항상 실행되는 블록
                 document.getElementById('rankMessage').textContent = rankMsgText;
                 if (shouldFetchRanking) {
                     await this.fetchAndDisplayRanking('finalRanking');
@@ -478,7 +536,6 @@
 
         abandonGameAndGoToMain() {
             if (confirm('정말로 게임을 포기하고 메인 화면으로 돌아가시겠습니까?')) {
-                // 타이머 중지 및 초기화
                 this.stopTimer();
                 this.isGameActive = false;
                 this.startTime = null;
@@ -486,14 +543,11 @@
                 this.currentQuestionIndex = 0;
                 this.score = 0;
                 
-                // 타이머 표시 초기화
                 document.getElementById('gameTimer').textContent = '00:00';
                 
-                // 화면 전환
                 this.hideScreen('gameScreen');
                 this.showScreen('mainScreen');
                 
-                // 랭킹 갱신
                 this.fetchAndDisplayRanking();
             }
         }
@@ -503,4 +557,4 @@
         new EconomyCardGame();
     });
 </script>
-@endpush 
+@endpush
