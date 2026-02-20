@@ -63,10 +63,12 @@
                 <!-- 글쓰기 -->
                 @auth
                 <a href="{{ route('board-insights.create') }}" 
-                   class="h-10 w-10 flex-shrink-0 flex items-center justify-center text-gray-400 hover:text-[#9F5AFF] hover:bg-[#9F5AFF]/10 rounded-lg transition-all" title="새 글 작성">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                   class="group flex-shrink-0 inline-flex items-center justify-center gap-2 h-12 px-5 bg-point1 text-white font-bold rounded-xl shadow-lg shadow-point1/25 hover:bg-[#E63E3E] hover:shadow-xl hover:shadow-point1/35 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300"
+                   title="글쓰기">
+                    <svg class="w-5 h-5 transition-transform duration-300 group-hover:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
                     </svg>
+                    <span class="hidden sm:inline text-sm tracking-wide">글쓰기</span>
                 </a>
                 @endauth
             </div>

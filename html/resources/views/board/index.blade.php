@@ -55,11 +55,12 @@
         <div class="flex items-center gap-2">
             @auth
                 <a href="{{ route('board.create') }}" 
-                   class="inline-flex items-center justify-center h-10 px-4 bg-point1 text-cdark rounded-lg hover:bg-opacity-90 transition-all text-sm whitespace-nowrap">
-                    <svg class="w-5 h-5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                   class="group inline-flex items-center justify-center gap-2 h-12 px-5 bg-point1 text-white font-bold rounded-xl shadow-lg shadow-point1/25 hover:bg-[#E63E3E] hover:shadow-xl hover:shadow-point1/35 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300"
+                   title="글쓰기">
+                    <svg class="w-5 h-5 transition-transform duration-300 group-hover:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
                     </svg>
-                    글쓰기
+                    <span class="hidden sm:inline text-sm tracking-wide">글쓰기</span>
                 </a>
             @endauth
         </div>
