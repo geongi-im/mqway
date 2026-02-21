@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use App\Models\Member;
+use App\Rules\ForbiddenWord;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -67,7 +68,8 @@ class RegisterController extends Controller
                 'string',
                 'min:4',
                 'max:20',
-                'unique:mq_member,mq_user_id'
+                'unique:mq_member,mq_user_id',
+                new ForbiddenWord
             ],
             'mq_user_password' => [
                 'required',
@@ -77,7 +79,7 @@ class RegisterController extends Controller
                 'regex:/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d\W_]{8,50}$/',
                 'confirmed'
             ],
-            'mq_user_name' => ['required', 'string', 'max:255'],
+            'mq_user_name' => ['required', 'string', 'max:255', new ForbiddenWord],
             'mq_user_email' => ['required', 'string', 'email', 'max:255', 'unique:mq_member,mq_user_email'],
             'mq_birthday' => ['nullable', 'date', 'before:today'],
             'agree_terms' => ['required', 'accepted'],
@@ -150,6 +152,15 @@ class RegisterController extends Controller
             return response()->json([
                 'available' => false,
                 'message' => '아이디는 4~20자여야 합니다.'
+            ]);
+        }
+
+        // 금지 단어 체크
+        $forbidden = new ForbiddenWord();
+        if (!$forbidden->passes('mq_user_id', $userId)) {
+            return response()->json([
+                'available' => false,
+                'message' => '사용할 수 없는 단어가 포함되어 있습니다.'
             ]);
         }
 
