@@ -25,6 +25,7 @@ use App\Http\Controllers\BoardResearchController;
 use App\Http\Controllers\BoardVideoController;
 use App\Http\Controllers\BoardPortfolioController;
 use App\Http\Controllers\BoardInsightsController;
+use App\Http\Controllers\BoardMissionController;
 use App\Http\Controllers\EconomyTermGameController;
 use App\Http\Controllers\FinancialQuizController;
 use App\Http\Controllers\RetirementCalculatorController;
@@ -191,6 +192,21 @@ Route::prefix('board-insights')->middleware('auth')->group(function () {
     Route::post('/delete-image/{idx}/{filename}', [BoardInsightsController::class, 'deleteImage'])->name('board-insights.delete-image');
     Route::delete('/{idx}/thumbnail', [BoardInsightsController::class, 'deleteThumbnail'])->name('board-insights.delete-thumbnail');
     Route::get('/{idx}', [BoardInsightsController::class, 'show'])->name('board-insights.show');
+});
+
+// 미션 게시판 (회원 전용, 본인 글만 열람 가능, 관리자는 전체)
+Route::prefix('board-mission')->middleware('auth')->group(function () {
+    Route::get('/', [BoardMissionController::class, 'index'])->name('board-mission.index');
+    Route::get('/create', [BoardMissionController::class, 'create'])->name('board-mission.create');
+    Route::post('/', [BoardMissionController::class, 'store'])->name('board-mission.store');
+    Route::post('/upload-image', [BoardMissionController::class, 'uploadImage'])->name('board-mission.upload.image');
+    Route::get('/{idx}/edit', [BoardMissionController::class, 'edit'])->name('board-mission.edit');
+    Route::put('/{idx}', [BoardMissionController::class, 'update'])->name('board-mission.update');
+    Route::delete('/{idx}', [BoardMissionController::class, 'destroy'])->name('board-mission.destroy');
+    Route::post('/{idx}/like', [BoardMissionController::class, 'like'])->name('board-mission.like');
+    Route::post('/delete-image/{idx}/{filename}', [BoardMissionController::class, 'deleteImage'])->name('board-mission.delete-image');
+    Route::delete('/{idx}/thumbnail', [BoardMissionController::class, 'deleteThumbnail'])->name('board-mission.delete-thumbnail');
+    Route::get('/{idx}', [BoardMissionController::class, 'show'])->name('board-mission.show');
 });
 
 // 투자대가의 포트폴리오 게시판 (비회원도 볼 수 있음, 글쓰기는 회원만)

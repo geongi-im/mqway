@@ -126,18 +126,24 @@
 
     <!-- 비밀번호 변경 (일반 계정만) -->
     @if(!$user->mq_provider)
-    <div class="bg-white rounded-2xl shadow-xl p-8 md:p-10 mb-8 animate-slideUp" style="animation-delay: 0.3s;">
-        <div class="flex items-center gap-3 mb-8">
-            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#FF4D4D] to-[#e03e3e] flex items-center justify-center">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
+    <div class="bg-white rounded-2xl shadow-xl mb-8 animate-slideUp overflow-hidden" style="animation-delay: 0.3s;">
+        <button type="button" onclick="document.getElementById('password-change-form').classList.toggle('hidden'); document.getElementById('password-change-chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-8 md:p-10 focus:outline-none hover:bg-gray-50 transition-colors">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#FF4D4D] to-[#e03e3e] flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-[#2D3047]">비밀번호 변경</h2>
             </div>
-            <h2 class="text-2xl font-bold text-[#2D3047]">비밀번호 변경</h2>
-        </div>
+            <svg id="password-change-chevron" class="w-6 h-6 text-gray-400 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </button>
 
-        <form method="POST" action="{{ route('mypage.change-password') }}" class="space-y-6">
-            @csrf
+        <div id="password-change-form" class="hidden px-8 md:px-10 pb-8 md:pb-10 pt-2 border-t border-gray-100">
+            <form method="POST" action="{{ route('mypage.change-password') }}" class="space-y-6">
+                @csrf
 
             <div>
                 <label for="current_password" class="block text-sm font-semibold text-[#2D3047] mb-2">
@@ -195,6 +201,7 @@
                 </button>
             </div>
         </form>
+        </div>
     </div>
     @else
     <div class="bg-white/80 backdrop-blur-sm border border-blue-100 rounded-2xl shadow-sm p-6 mb-8 animate-slideUp" style="animation-delay: 0.3s;">
@@ -212,7 +219,7 @@
     @endif
 
     <!-- ===== 메뉴 카드 그리드 ===== -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pb-20 animate-slideUp" style="animation-delay: 0.4s;">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pb-20 animate-slideUp" style="animation-delay: 0.4s;">
         <!-- 뉴스 스크랩 카드 -->
         <a href="{{ route('mypage.news-scrap.index') }}" class="group bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
             <div class="p-8">
@@ -246,6 +253,25 @@
             <div class="px-8 py-4 bg-gray-50/50 border-t border-gray-50 flex items-center justify-between">
                 <span class="text-xs text-gray-400 font-medium">바로가기</span>
                 <svg class="w-4 h-4 text-gray-300 group-hover:text-[#4ECDC4] group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </div>
+        </a>
+
+        <!-- 미션 게시판 카드 -->
+        <a href="{{ route('board-mission.index') }}" class="group bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8">
+                <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-purple-500/20">
+                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-[#2D3047] mb-2 group-hover:text-purple-600 transition-colors">미션 게시판</h3>
+                <p class="text-gray-500 text-sm">나의 미션과 성취를 확인하세요</p>
+            </div>
+            <div class="px-8 py-4 bg-gray-50/50 border-t border-gray-50 flex items-center justify-between">
+                <span class="text-xs text-gray-400 font-medium">바로가기</span>
+                <svg class="w-4 h-4 text-gray-300 group-hover:text-purple-600 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
             </div>

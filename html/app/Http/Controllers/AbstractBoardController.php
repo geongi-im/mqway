@@ -677,12 +677,8 @@ abstract class AbstractBoardController extends Controller
      */
     protected function getCategories($boardType)
     {
-        if ($boardType === 'board_content') {
-            return $this->getBoardContentCategories();
-        } else if ($boardType === 'board_cartoon') {
-            return $this->getBoardCartoonCategories();
-        } else if ($boardType === 'board_research') {
-            return $this->getBoardResearchCategories();
+        if ($boardType && isset($this->fixedCategories[$boardType])) {
+            return $this->fixedCategories[$boardType];
         }
 
         $modelClass = $this->modelClass;
@@ -711,6 +707,8 @@ abstract class AbstractBoardController extends Controller
             return 'board_portfolio';
         } else if (strpos($this->modelClass, 'BoardInsights') !== false) {
             return 'board_insights';
+        } else if (strpos($this->modelClass, 'BoardMission') !== false) {
+            return 'board_mission';
         }
 
         return null;
