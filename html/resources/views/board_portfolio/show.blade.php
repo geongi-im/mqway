@@ -789,13 +789,9 @@ function buildChartItems(data) {
     });
 }
 
-// TOP10 데이터: 상위 10개 + 나머지를 "기타"로 묶기
+// TOP10 데이터: 상위 10개만 반환
 function getTop10Data() {
-    if (sortedData.length <= 10) return sortedData;
-    const top10 = sortedData.slice(0, 10);
-    const rest = sortedData.slice(10);
-    const othersValue = rest.reduce((sum, item) => sum + item.value, 0);
-    return [...top10, { name: '기타 (' + rest.length + '종목)', value: Math.round(othersValue * 100) / 100, _isOther: true }];
+    return sortedData.slice(0, 10);
 }
 
 // 차트 모드 전환
