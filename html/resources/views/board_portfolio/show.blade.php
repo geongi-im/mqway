@@ -260,6 +260,48 @@
                             overflow: hidden;
                         }
 
+                        /* 차트 토글 버튼 */
+                        .chart-toggle-wrap {
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            margin-bottom: 30px;
+                        }
+
+                        .chart-toggle-wrap .chart-title {
+                            margin-bottom: 0;
+                        }
+
+                        .chart-toggle-btns {
+                            display: inline-flex;
+                            background: #f3f4f6;
+                            border-radius: 10px;
+                            padding: 3px;
+                            gap: 2px;
+                        }
+
+                        .chart-toggle-btns button {
+                            padding: 6px 16px;
+                            border: none;
+                            border-radius: 8px;
+                            font-size: 0.85rem;
+                            font-weight: 600;
+                            cursor: pointer;
+                            transition: all 0.25s ease;
+                            background: transparent;
+                            color: #9ca3af;
+                        }
+
+                        .chart-toggle-btns button:hover {
+                            color: #1f2937;
+                        }
+
+                        .chart-toggle-btns button.active {
+                            background: #ffffff;
+                            color: #1f2937;
+                            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+                        }
+
                         .chart-header {
                             text-align: center;
                             margin-bottom: 30px;
@@ -537,8 +579,12 @@
 
                             <!-- 포트폴리오 비중 도넛 차트 -->
                             <div class="chart-section">
-                                <div class="chart-header">
+                                <div class="chart-toggle-wrap">
                                     <h2 class="chart-title">포트폴리오 구성 비중</h2>
+                                    <div class="chart-toggle-btns">
+                                        <button id="chartToggleTop10" class="active" onclick="switchChartMode('top10')">TOP 10</button>
+                                        <button id="chartToggleAll" onclick="switchChartMode('all')">전체</button>
+                                    </div>
                                 </div>
                                 <div id="portfolioChart"></div>
                             </div>
@@ -703,63 +749,75 @@ async function likePost(event, idx) {
 // 차트 데이터 설정
 const chartData = @json($chartData);
 
-// 도넛 차트 초기화
-function initDonutChart() {
-    const chartDom = document.getElementById('portfolioChart');
-    const myChart = echarts.init(chartDom);
+// 차트 인스턴스 전역 보관
+let portfolioChart = null;
+let currentChartMode = 'top10';
 
-    // ECharts 전용 색상 설정 (더 확실한 방법)
-    const echartsColors = [
-        '#FFD700', '#FF8C00', '#FF6B35', '#DC143C', '#B22222', '#8B0000',
-        '#FF1493', '#FF69B4', '#DA70D6', '#BA55D3', '#9370DB', '#8A2BE2',
-        '#4B0082', '#483D8B', '#6A5ACD', '#7B68EE', '#9966CC', '#8B008B',
-        '#4169E1', '#0000FF', '#1E90FF', '#00BFFF', '#87CEEB', '#87CEFA',
-        '#00CED1', '#20B2AA', '#48D1CC', '#40E0D0', '#00FFFF', '#E0FFFF',
-        '#00FF7F', '#32CD32', '#90EE90', '#98FB98', '#ADFF2F', '#9AFF9A',
-        '#FFFF00', '#FFFFE0', '#FFFACD', '#F0E68C', '#BDB76B', '#DAA520',
-        '#FFB6C1', '#FFA07A', '#FA8072', '#E9967A', '#F4A460', '#D2691E',
-        '#CD853F', '#BC8F8F', '#F5DEB3', '#DEB887', '#D2B48C', '#A0522D',
-        '#8FBC8F', '#556B2F', '#6B8E23', '#808000', '#228B22', '#006400'
-    ];
+// ECharts 전용 색상 팔레트
+const echartsColors = [
+    '#FFD700', '#FF8C00', '#FF6B35', '#DC143C', '#B22222', '#8B0000',
+    '#FF1493', '#FF69B4', '#DA70D6', '#BA55D3', '#9370DB', '#8A2BE2',
+    '#4B0082', '#483D8B', '#6A5ACD', '#7B68EE', '#9966CC', '#8B008B',
+    '#4169E1', '#0000FF', '#1E90FF', '#00BFFF', '#87CEEB', '#87CEFA',
+    '#00CED1', '#20B2AA', '#48D1CC', '#40E0D0', '#00FFFF', '#E0FFFF',
+    '#00FF7F', '#32CD32', '#90EE90', '#98FB98', '#ADFF2F', '#9AFF9A',
+    '#FFFF00', '#FFFFE0', '#FFFACD', '#F0E68C', '#BDB76B', '#DAA520',
+    '#FFB6C1', '#FFA07A', '#FA8072', '#E9967A', '#F4A460', '#D2691E',
+    '#CD853F', '#BC8F8F', '#F5DEB3', '#DEB887', '#D2B48C', '#A0522D',
+    '#8FBC8F', '#556B2F', '#6B8E23', '#808000', '#228B22', '#006400'
+];
 
-    // 필요한 만큼 색상 생성
-    while (echartsColors.length < chartData.length) {
-        const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
-        // 너무 밝거나 어두운 색상 제외
-        if (randomColor !== '#FFFFFF' && randomColor !== '#000000') {
-            echartsColors.push(randomColor);
-        }
-    }
+// 데이터를 비율 순으로 정렬 (큰 것부터)
+const sortedData = [...chartData].sort((a, b) => b.value - a.value);
 
-    // 데이터를 비율 순으로 정렬 (큰 것부터)
-    const sortedData = [...chartData].sort((a, b) => b.value - a.value);
-    const smallItems = sortedData.filter(item => item.value < 0.1);
-
-    // 실제 데이터 사용 - 더 확실한 색상 적용
-    const chartItems = sortedData.map((item, index) => {
-        const color = echartsColors[index % echartsColors.length];
-        
+// chartItems 생성 함수
+function buildChartItems(data) {
+    return data.map((item, index) => {
+        const color = item._isOther ? '#D1D5DB' : echartsColors[index % echartsColors.length];
         return {
             value: item.value,
             name: item.name,
             itemStyle: {
                 color: color,
-                borderRadius: 3, // borderRadius를 줄여서 작은 항목도 잘 보이게
-                borderWidth: 1,  // borderWidth를 줄여서 작은 항목도 잘 보이게
+                borderRadius: 3,
+                borderWidth: 1,
                 borderColor: '#ffffff',
                 shadowBlur: 2,
                 shadowColor: 'rgba(0, 0, 0, 0.1)'
-            },
-            // 강제로 색상 지정
-            visualMap: {
-                color: color
             }
         };
     });
+}
+
+// TOP10 데이터: 상위 10개 + 나머지를 "기타"로 묶기
+function getTop10Data() {
+    if (sortedData.length <= 10) return sortedData;
+    const top10 = sortedData.slice(0, 10);
+    const rest = sortedData.slice(10);
+    const othersValue = rest.reduce((sum, item) => sum + item.value, 0);
+    return [...top10, { name: '기타 (' + rest.length + '종목)', value: Math.round(othersValue * 100) / 100, _isOther: true }];
+}
+
+// 차트 모드 전환
+function switchChartMode(mode) {
+    currentChartMode = mode;
+
+    // 버튼 활성화 토글
+    document.getElementById('chartToggleTop10').classList.toggle('active', mode === 'top10');
+    document.getElementById('chartToggleAll').classList.toggle('active', mode === 'all');
+
+    renderChart();
+}
+
+// 차트 렌더링
+function renderChart() {
+    const data = currentChartMode === 'top10' ? getTop10Data() : sortedData;
+    const chartItems = buildChartItems(data);
+    const colors = chartItems.map(item => item.itemStyle.color);
 
     const option = {
         backgroundColor: 'transparent',
-        color: echartsColors.slice(0, chartData.length), // 실제 데이터 개수만큼만 색상 설정
+        color: colors,
         tooltip: {
             trigger: 'item',
             formatter: function(params) {
@@ -768,9 +826,7 @@ function initDonutChart() {
             backgroundColor: 'rgba(255, 255, 255, 0.95)',
             borderColor: '#ffd100',
             borderWidth: 1,
-            textStyle: {
-                color: '#1f2937'
-            },
+            textStyle: { color: '#1f2937' },
             extraCssText: 'box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);'
         },
         legend: {
@@ -783,68 +839,55 @@ function initDonutChart() {
             pageIconSize: [12, 12],
             pageIconColor: '#ffd100',
             pageIconInactiveColor: '#e5e7eb',
-            pageTextStyle: {
-                color: '#1f2937',
-                fontSize: 10
-            },
-            textStyle: {
-                color: '#4b5563',
-                fontSize: 12
-            },
+            pageTextStyle: { color: '#1f2937', fontSize: 10 },
+            textStyle: { color: '#4b5563', fontSize: 12 },
             icon: 'circle',
             formatter: function (name) {
                 const item = chartItems.find(d => d.name === name);
-                return `${name}  ${item.value}%`;
+                return item ? `${name}  ${item.value}%` : name;
             }
         },
-        series: [
-            {
-                name: '포트폴리오 비중',
-                type: 'pie',
-                radius: ['40%', '70%'],
-                center: ['50%', '50%'],
-                avoidLabelOverlap: false,
-                minAngle: 2, // 최소 각도 설정으로 작은 항목도 보이게
-                minShowLabelAngle: 0, // 모든 라벨 표시
-                itemStyle: {
-                    borderRadius: 8,
-                    borderColor: '#ffffff',
-                    borderWidth: 1
-                },
+        series: [{
+            name: '포트폴리오 비중',
+            type: 'pie',
+            radius: ['40%', '70%'],
+            center: ['50%', '50%'],
+            avoidLabelOverlap: false,
+            minAngle: 2,
+            minShowLabelAngle: 0,
+            itemStyle: {
+                borderRadius: 8,
+                borderColor: '#ffffff',
+                borderWidth: 1
+            },
+            label: { show: false, position: 'center' },
+            emphasis: {
                 label: {
-                    show: false,
-                    position: 'center'
-                },
-                emphasis: {
-                    label: {
-                        show: true,
-                        fontSize: 20,
-                        fontWeight: 'bold',
-                        color: '#1f2937',
-                        formatter: function(params) {
-                            return `${params.name}\n${params.value}%`;
-                        }
-                    },
-                    itemStyle: {
-                        shadowBlur: 20,
-                        shadowOffsetX: 0,
-                        shadowColor: 'rgba(255, 209, 0, 0.3)'
+                    show: true,
+                    fontSize: 20,
+                    fontWeight: 'bold',
+                    color: '#1f2937',
+                    formatter: function(params) {
+                        return `${params.name}\n${params.value}%`;
                     }
                 },
-                labelLine: {
-                    show: false
-                },
-                data: chartItems,
-                animationType: 'scale',
-                animationEasing: 'elasticOut',
-                animationDelay: function (idx) {
-                    return Math.random() * 200;
+                itemStyle: {
+                    shadowBlur: 20,
+                    shadowOffsetX: 0,
+                    shadowColor: 'rgba(255, 209, 0, 0.3)'
                 }
+            },
+            labelLine: { show: false },
+            data: chartItems,
+            animationType: 'scale',
+            animationEasing: 'elasticOut',
+            animationDelay: function (idx) {
+                return Math.random() * 200;
             }
-        ]
+        }]
     };
 
-    // 모바일 화면에서 차트 옵션 변경
+    // 모바일 반응형 조정
     if (window.innerWidth <= 480) {
         option.legend.bottom = '0';
         option.legend.itemGap = 5;
@@ -861,39 +904,29 @@ function initDonutChart() {
         option.series[0].radius = ['35%', '60%'];
     }
 
-    myChart.setOption(option);
+    portfolioChart.setOption(option, true); // true = notMerge, 이전 데이터 완전 교체
+}
+
+// 도넛 차트 초기화
+function initDonutChart() {
+    const chartDom = document.getElementById('portfolioChart');
+    portfolioChart = echarts.init(chartDom);
+
+    // 필요한 만큼 색상 생성
+    while (echartsColors.length < chartData.length) {
+        const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+        if (randomColor !== '#FFFFFF' && randomColor !== '#000000') {
+            echartsColors.push(randomColor);
+        }
+    }
+
+    // 기본 TOP10 모드로 렌더링
+    renderChart();
 
     // 반응형 처리
     window.addEventListener('resize', function() {
-        myChart.resize();
-        
-        // 창 크기에 따라 차트 옵션 다시 설정
-        const newOption = {...option};
-        
-        if (window.innerWidth <= 480) {
-            newOption.legend.bottom = '0';
-            newOption.legend.itemGap = 5;
-            newOption.legend.pageIconSize = [6, 6];
-            newOption.legend.textStyle.fontSize = 8;
-            newOption.series[0].center = ['50%', '40%'];
-            newOption.series[0].radius = ['30%', '55%'];
-        } else if (window.innerWidth <= 768) {
-            newOption.legend.bottom = '2%';
-            newOption.legend.itemGap = 8;
-            newOption.legend.pageIconSize = [8, 8];
-            newOption.legend.textStyle.fontSize = 10;
-            newOption.series[0].center = ['50%', '45%'];
-            newOption.series[0].radius = ['35%', '60%'];
-        } else {
-            newOption.legend.bottom = '5%';
-            newOption.legend.itemGap = 12;
-            newOption.legend.pageIconSize = [12, 12];
-            newOption.legend.textStyle.fontSize = 12;
-            newOption.series[0].center = ['50%', '50%'];
-            newOption.series[0].radius = ['40%', '70%'];
-        }
-        
-        myChart.setOption(newOption);
+        portfolioChart.resize();
+        renderChart();
     });
 }
 
