@@ -29,6 +29,7 @@ use App\Http\Controllers\BoardMissionController;
 use App\Http\Controllers\EconomyTermGameController;
 use App\Http\Controllers\FinancialQuizController;
 use App\Http\Controllers\RetirementCalculatorController;
+use App\Http\Controllers\NeedWantGameController;
 use App\Http\Controllers\Api\CashflowApiController;
 use App\Http\Controllers\NewsScrapController;
 
@@ -335,6 +336,7 @@ Route::prefix('tools')->group(function () {
     Route::get('/economy-term-game/ranking', [EconomyTermGameController::class, 'getRanking'])->name('tools.economy-term-game.ranking');
     Route::get('/financial-quiz', [FinancialQuizController::class, 'index'])->name('tools.financial-quiz');
     Route::get('/retirement-calculator', [RetirementCalculatorController::class, 'index'])->name('tools.retirement-calculator');
+    Route::get('/need-want-game', [NeedWantGameController::class, 'index'])->name('tools.need-want-game');
 });
 
 // 캐시플로우 게임 API 라우트 (web에서 세션 기반 인증 사용)

@@ -40,6 +40,7 @@ class HeaderComposer
                     ['label' => '경제 용어 카드 맞추기', 'url' => route('tools.economy-term-game'), 'active' => $request->routeIs('tools.economy-term-game'), 'onclick' => ''],
                     ['label' => '경제 상식 퀴즈', 'url' => route('tools.financial-quiz'), 'active' => $request->routeIs('tools.financial-quiz'), 'onclick' => ''],
                     ['label' => '노후 자금 계산기', 'url' => route('tools.retirement-calculator'), 'active' => $request->routeIs('tools.retirement-calculator'), 'onclick' => ''],
+                    ['label' => 'Need or Want?', 'url' => route('tools.need-want-game'), 'active' => $request->routeIs('tools.need-want-game'), 'onclick' => ''],
                 ],
             ],
             [
