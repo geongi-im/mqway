@@ -337,6 +337,7 @@ Route::prefix('tools')->group(function () {
     Route::get('/financial-quiz', [FinancialQuizController::class, 'index'])->name('tools.financial-quiz');
     Route::get('/retirement-calculator', [RetirementCalculatorController::class, 'index'])->name('tools.retirement-calculator');
     Route::get('/need-want-game', [NeedWantGameController::class, 'index'])->name('tools.need-want-game');
+    Route::post('/need-want-game/store', [NeedWantGameController::class, 'storeGameResult'])->name('tools.need-want-game.store');
 });
 
 // 캐시플로우 게임 API 라우트 (web에서 세션 기반 인증 사용)

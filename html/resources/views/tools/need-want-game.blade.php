@@ -34,7 +34,7 @@
             <span>🛒</span> <span>학습 도구</span>
         </div>
         <h1 class="font-outfit text-3xl md:text-5xl font-extrabold text-white mb-4 tracking-tight animate-slideUp" style="animation-delay: 0.1s;">
-            Need or <span class="text-[#FF6B6B]">Want</span><span class="text-[#4ECDC4]">?</span>
+            Need or Want<span class="text-[#FF6B6B]">?</span>
         </h1>
         <p class="text-white/70 text-base md:text-lg max-w-2xl mx-auto leading-relaxed animate-slideUp" style="animation-delay: 0.2s;">
             물건을 보고 "꼭 필요한 것"인지 "갖고 싶은 것"인지 생각해보세요!
@@ -148,18 +148,7 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const ITEMS = [
-        { id: 1, emoji: '🍎', name: '건강한 음식', description: '우리 몸이 튼튼하게 자라기 위해 필요한 과일과 채소예요.' },
-        { id: 2, emoji: '🎮', name: '게임기', description: '재미있는 비디오 게임을 할 수 있는 최신 게임 콘솔이에요.' },
-        { id: 3, emoji: '📚', name: '교과서', description: '학교에서 공부할 때 꼭 필요한 교과서와 학습 교재예요.' },
-        { id: 4, emoji: '👟', name: '운동화', description: '체육 시간이나 운동할 때 신는 편안한 신발이에요.' },
-        { id: 5, emoji: '🧸', name: '인형', description: '귀여운 캐릭터가 그려진 부드러운 봉제 인형이에요.' },
-        { id: 6, emoji: '💊', name: '감기약', description: '감기에 걸렸을 때 빨리 낫도록 도와주는 약이에요.' },
-        { id: 7, emoji: '🍭', name: '사탕', description: '달콤하고 맛있는 간식거리예요.' },
-        { id: 8, emoji: '🏠', name: '따뜻한 집', description: '비바람을 막아주고 가족이 함께 생활하는 안전한 공간이에요.' },
-        { id: 9, emoji: '📱', name: '스마트폰', description: '사진도 찍고 게임도 할 수 있는 최신 휴대전화예요.' },
-        { id: 10, emoji: '🧥', name: '겨울 외투', description: '추운 겨울에 몸을 따뜻하게 감싸주는 두꺼운 옷이에요.' }
-    ];
+    const ITEMS = @json($items);
 
     const MAX_ITEMS = 5;
     const MAX_SKIPS = 3;
@@ -258,8 +247,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 
                 <div class="text-center mb-6">
-                    <div class="w-24 h-24 mx-auto bg-gradient-to-br from-[#4ECDC4]/20 to-[#4ECDC4]/5 rounded-[2rem] flex items-center justify-center mb-4 shadow-inner border border-[#4ECDC4]/10">
-                        <span class="text-5xl nw-emoji-pop inline-block">${currentItem.emoji}</span>
+                    <div class="w-24 h-24 mx-auto bg-gradient-to-br from-[#4ECDC4]/20 to-[#4ECDC4]/5 rounded-[2rem] flex items-center justify-center mb-4 shadow-inner border border-[#4ECDC4]/10 overflow-hidden">
+                        ${currentItem.image ? '<img src="' + currentItem.image + '" alt="' + currentItem.name + '" class="w-full h-full object-cover nw-emoji-pop">' : '<span class="text-4xl nw-emoji-pop inline-block text-[#4ECDC4] font-bold">' + currentItem.name.charAt(0) + '</span>'}
                     </div>
                     <h3 class="text-2xl font-bold text-[#2D3047] mb-2 tracking-tight nw-font-display">${currentItem.name}</h3>
                     <p class="text-gray-500 text-sm md:text-base leading-relaxed max-w-[280px] mx-auto break-keep nw-font-body font-medium">${currentItem.description}</p>
@@ -378,6 +367,9 @@ document.addEventListener('DOMContentLoaded', function() {
         var needCount = completedItems.filter(function(c) { return c.choice === 'need'; }).length;
         var wantCount = completedItems.filter(function(c) { return c.choice === 'want'; }).length;
 
+        // 서버에 게임 결과 저장
+        saveGameResult();
+
         var resultEmoji, resultMsg;
         if (needCount > wantCount) { resultEmoji = '👏'; resultMsg = '필요한 것과 원하는 것을 잘 구분하고 있어요!'; }
         else if (wantCount > needCount) { resultEmoji = '😎'; resultMsg = '갖고 싶은 것이 많군요! 솔직해서 좋아요!'; }
@@ -389,8 +381,8 @@ document.addEventListener('DOMContentLoaded', function() {
             var isNeed = item.choice === 'need';
             resultCardsHtml += `
                 <div class="nw-card-enter bg-white border border-gray-100 rounded-2xl p-4 mb-3 shadow-[0_4px_12px_rgba(0,0,0,0.03)] flex items-start gap-4 transition-all hover:shadow-[0_6px_16px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 duration-300 group" style="animation-delay: ${i * 0.1}s;">
-                    <div class="flex-shrink-0 w-12 h-12 md:w-14 md:h-14 ${isNeed ? 'bg-gradient-to-br from-[#E8FAF7] to-white' : 'bg-gradient-to-br from-[#FFF5F5] to-white'} rounded-xl flex items-center justify-center text-2xl md:text-3xl shadow-inner border border-gray-50 group-hover:scale-105 transition-transform duration-300">
-                        ${item.item.emoji}
+                    <div class="flex-shrink-0 w-12 h-12 md:w-14 md:h-14 ${isNeed ? 'bg-gradient-to-br from-[#E8FAF7] to-white' : 'bg-gradient-to-br from-[#FFF5F5] to-white'} rounded-xl flex items-center justify-center shadow-inner border border-gray-50 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+                        ${item.item.image ? '<img src="' + item.item.image + '" alt="' + item.item.name + '" class="w-full h-full object-cover">' : '<span class="text-lg font-bold ' + (isNeed ? 'text-[#4ECDC4]' : 'text-[#FF6B6B]') + '">' + item.item.name.charAt(0) + '</span>'}
                     </div>
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2 mb-2">
@@ -413,23 +405,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     <p class="text-gray-500 font-medium text-sm md:text-base nw-font-body">${resultMsg}</p>
                 </div>
                 
-                <div class="flex justify-center gap-4 md:gap-6 mb-8">
-                    <div class="flex flex-col items-center justify-center w-28 h-28 md:w-32 md:h-32 rounded-3xl bg-gradient-to-br from-[#4ECDC4]/20 to-[#4ECDC4]/5 border border-[#4ECDC4]/20 shadow-sm relative overflow-hidden group">
-                        <div class="absolute inset-0 bg-[#4ECDC4] opacity-0 group-hover:opacity-5 transition-opacity duration-300"></div>
-                        <span class="text-5xl font-extrabold text-[#4ECDC4] leading-none mb-1 group-hover:scale-110 transition-transform duration-300 nw-font-display">${needCount}</span>
-                        <span class="text-xs font-bold text-[#4ECDC4]/70 uppercase tracking-wider relative z-10 bg-white/50 px-3 py-1 rounded-full mt-1 nw-font-body">Need</span>
-                    </div>
-                    <div class="flex flex-col items-center justify-center w-28 h-28 md:w-32 md:h-32 rounded-3xl bg-gradient-to-br from-[#FF6B6B]/20 to-[#FF6B6B]/5 border border-[#FF6B6B]/20 shadow-sm relative overflow-hidden group">
-                        <div class="absolute inset-0 bg-[#FF6B6B] opacity-0 group-hover:opacity-5 transition-opacity duration-300"></div>
-                        <span class="text-5xl font-extrabold text-[#FF6B6B] leading-none mb-1 group-hover:scale-110 transition-transform duration-300 nw-font-display">${wantCount}</span>
-                        <span class="text-xs font-bold text-[#FF6B6B]/70 uppercase tracking-wider relative z-10 bg-white/50 px-3 py-1 rounded-full mt-1 nw-font-body">Want</span>
-                    </div>
-                </div>
-                
+
                 <div class="mb-8">
                     <div class="flex items-center gap-2 mb-4 justify-center">
                         <h4 class="font-bold text-[#2D3047] text-lg nw-font-display">나의 선택 결과</h4>
-                        <span class="bg-gray-100 border border-gray-200 text-gray-500 text-xs font-bold px-2.5 py-1 rounded-full shadow-sm nw-font-body">총 5개</span>
                     </div>
                     <div class="flex flex-col gap-1">
                         ${resultCardsHtml}
@@ -465,6 +444,38 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 300);
         enableBodyScroll();
     };
+
+    /**
+     * 게임 결과를 서버에 저장합니다.
+     */
+    function saveGameResult() {
+        var answers = completedItems.map(function(item) {
+            return {
+                item_idx: item.item.id,
+                item_name: item.item.name,
+                choice: item.choice,
+                reason: item.reason
+            };
+        });
+
+        fetch('{{ route("tools.need-want-game.store") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({ answers: answers })
+        })
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
+            if (data.success) {
+                console.log('게임 결과 저장 완료');
+            }
+        })
+        .catch(function(error) {
+            console.error('게임 결과 저장 실패:', error);
+        });
+    }
 });
 </script>
 @endpush
