@@ -5,7 +5,7 @@
 - **모델**: Gemini Imagen 3 (nano banana)
 - **스타일**: Pixar/Disney 3D 애니메이션
 - **해상도**: 512x512px (정사각형)
-- **총 개수**: 45개 (5개 카테고리 × 9개)
+- **총 개수**: 70개 (5개 카테고리 × 14개)
 
 ---
 
@@ -97,6 +97,71 @@ Important: Absolutely NO text, NO Korean characters, NO song titles, NO music so
 Square format optimized for thumbnail icon (512x512px).
 ```
 
+#### 1-6. "클레이로 우리 가족 얼굴 만들어서 액자에 넣기" (7세)
+```
+A Pixar style 3D rendered scene showing a cheerful young child proudly presenting a colorful clay sculpture of their family placed in a small wooden picture frame.
+Art style: Pixar animation movie quality.
+Composition: Close-up on the child and their clay art.
+Color palette: Warm clay colors, bright playdough.
+Lighting: Soft indoor afternoon light.
+Background: Cozy home play area.
+Mood: Proud, creative.
+Important: Absolutely NO text, NO Korean characters.
+Square format 512x512px.
+```
+
+#### 1-7. "재활용 종이박스와 우유갑으로 거북선 만들기" (7세)
+```
+A Pixar style 3D rendered scene showing a cheerful young child sitting on the floor, creatively building a cool turtle ship using recycled cardboard boxes, milk cartons, and craft supplies.
+Art style: Pixar animation.
+Composition: Medium shot.
+Color palette: Cardboard brown, white milk cartons.
+Lighting: Bright indoor sunlight.
+Background: Ordinary Korean living room.
+Mood: Imaginative.
+Important: Absolutely NO text, NO Korean characters.
+Square format 512x512px.
+```
+
+#### 1-8. "다이소 스티커로 나만의 다이어리(다꾸) 1페이지 완성하기" (10세)
+```
+A Pixar style 3D rendered scene showing a happy elementary school kid sitting at a desk, carefully decorating a diary page with lots of cute colorful stickers, shiny stars, and cute character decals.
+Art style: Pixar animation.
+Composition: Top-down slightly angled close-up.
+Color palette: Pastel pink, soft blue, sparkling yellow stickers, white paper.
+Lighting: Focused warm desk lamp.
+Background: Cozy kid's bedroom desk.
+Mood: Focused.
+Important: Absolutely NO text, NO Korean characters.
+Square format 512x512px.
+```
+
+#### 1-9. "학교 학예회 장기자랑 쓸 배경 음악 직접 믹싱해보기" (14세)
+```
+A Pixar style 3D rendered scene showing a determined teenage youth mixing music on a computer software, wearing headphones, preparing background audio tracks for a school festival performance.
+Art style: Pixar animation.
+Composition: Medium shot.
+Color palette: Glowing screen blue, dark room, neon purple accents.
+Lighting: Cool screen lighting glowing on the face.
+Background: Teenager's bedroom.
+Mood: Focused, rhythmic.
+Important: Absolutely NO text, NO Korean characters.
+Square format 512x512px.
+```
+
+#### 1-10. "스마트폰 앱으로 릴스/쇼츠 댄스 챌린지 영상 편집하기" (14세)
+```
+A Pixar style 3D rendered scene showing a determined teenage youth holding a smartphone on a tripod, editing dynamic social media challenge dance videos with colorful transition effects on screen.
+Art style: Pixar animation.
+Composition: Medium shot.
+Color palette: Trendy neon pink, vivid blue.
+Lighting: Bright ring light setup.
+Background: Trendy teenager room.
+Mood: Energetic, trendy.
+Important: Absolutely NO text, NO Korean characters.
+Square format 512x512px.
+```
+
 ---
 
 ### 2. Adventure (탐험) 카테고리
@@ -164,6 +229,71 @@ Background: Forest campsite with trees silhouetted against starry sky, peaceful 
 Mood: Cozy, adventurous, peaceful outdoor night experience.
 Important: Absolutely NO text, NO Korean characters, NO camping site names, NO tent brand names visible in the image.
 Square format optimized for thumbnail icon (512x512px).
+```
+
+#### 2-6. "주말 아침 아빠랑 동네 뒷산 약수터까지 걸어 다녀오기" (7세)
+```
+A Pixar style 3D rendered scene showing a cheerful young child and dad wearing hiking clothes, happily walking on a neighborhood mountain trail towards a natural spring water spot in the morning.
+Art style: Pixar animation quality.
+Composition: Medium shot.
+Color palette: Bright green forest, morning sunlight, colorful hiking clothes.
+Lighting: Fresh morning sunlight through trees.
+Background: Mountain trail with trees.
+Mood: Energetic, refreshing.
+Important: Absolutely NO text, NO Korean characters.
+Square format 512x512px.
+```
+
+#### 2-7. "교통카드 직접 찍고 엄마랑 시내버스 뒷자리 타보기" (7세)
+```
+A Pixar style 3D rendered scene showing a cheerful young child proudly tapping a transportation card on a scanner inside a modern city bus, standing next to mom, heading to the back seats.
+Art style: Pixar animation.
+Composition: Medium shot inside the bus.
+Color palette: Bright blue bus interior, colorful clothes.
+Lighting: Daylight through bus windows.
+Background: City bus interior.
+Mood: Excited, growing up.
+Important: Absolutely NO text, NO Korean characters.
+Square format 512x512px.
+```
+
+#### 2-8. "지하철 노선도 보고 혼자서 문구점 다녀오기 심부름" (10세)
+```
+A Pixar style 3D rendered scene showing a confident elementary school kid standing in a subway station holding a colorful subway map, safely completing a solo errand to a stationery store.
+Art style: Pixar animation.
+Composition: Medium shot from slightly low angle.
+Color palette: Bright subway station tiles, colorful kid's jacket.
+Lighting: Bright indoor subway station lighting.
+Background: Clean subway platform.
+Mood: Confident, independent.
+Important: Absolutely NO text, NO Korean characters.
+Square format 512x512px.
+```
+
+#### 2-9. "친구들이랑 기차(KTX) 타고 1박 2일 우정 여행 가보기" (14세)
+```
+A Pixar style 3D rendered scene showing teenage friends holding train tickets at a KTX train station platform, wearing colorful backpacks, ready to travel for a 2-day friendship trip.
+Art style: Pixar animation.
+Composition: Medium shot.
+Color palette: Blue train, orange backpacks, bright sunny day.
+Lighting: Bright outdoor sunlight.
+Background: Modern train station platform.
+Mood: Adventurous, excited.
+Important: Absolutely NO text, NO Korean characters.
+Square format 512x512px.
+```
+
+#### 2-10. "따릉이 빌려서 친구들과 한강 공원 자전거 라이딩하기" (14세)
+```
+A Pixar style 3D rendered scene showing teenage friends riding public rental bicycles along a beautiful riverside park on a sunny day.
+Art style: Pixar animation.
+Composition: Dynamic wide shot.
+Color palette: Green grass, blue river, white and green bicycles.
+Lighting: Clear bright afternoon sunlight.
+Background: Riverside park path.
+Mood: Refreshing, active.
+Important: Absolutely NO text, NO Korean characters.
+Square format 512x512px.
 ```
 
 ---
@@ -235,6 +365,71 @@ Important: Absolutely NO text, NO Korean characters, NO team names, NO competiti
 Square format optimized for thumbnail icon (512x512px).
 ```
 
+#### 3-6. "태권도 승급 심사 당당하게 합격해서 색깔 띠 매기" (7세)
+```
+A Pixar style 3D rendered scene showing a cheerful young child proudly wearing a cool yellow taekwondo belt over a white uniform, striking a confident martial arts pose after passing the promotion test.
+Art style: Pixar animation.
+Composition: Medium shot.
+Color palette: White uniform, yellow belt, warm wooden floor.
+Lighting: Bright indoor studio light.
+Background: Taekwondo gym.
+Mood: Proud, energetic.
+Important: Absolutely NO text, NO Korean characters.
+Square format 512x512px.
+```
+
+#### 3-7. "훌라후프 땅에 안 떨어뜨리고 연속 30번 돌리기" (7세)
+```
+A Pixar style 3D rendered scene showing a cheerful young child successfully spinning a colorful hula hoop around their waist in a park, smiling proudly.
+Art style: Pixar animation.
+Composition: Medium shot.
+Color palette: Rainbow hula hoop, green park grass.
+Lighting: Bright sunlight.
+Background: Neighborhood park.
+Mood: Joyful, successful focus.
+Important: Absolutely NO text, NO Korean characters.
+Square format 512x512px.
+```
+
+#### 3-8. "학교 쌩쌩이(이단뛰기) 10번 연속 성공하기" (10세)
+```
+A Pixar style 3D rendered scene showing a determined elementary school kid successfully performing a double-under jump rope trick on a school playground, floating dynamically in the air.
+Art style: Pixar animation.
+Composition: Dynamic mid-air shot.
+Color palette: Colorful jumping rope, sandy playground.
+Lighting: Bright sunny daylight.
+Background: School playground.
+Mood: Focused, triumphant.
+Important: Absolutely NO text, NO Korean characters.
+Square format 512x512px.
+```
+
+#### 3-9. "체육대회 반 대항전 피구/계주 경기에서 대활약하기" (14세)
+```
+A Pixar style 3D rendered scene showing a determined teenage youth making an athletic dodgeball throw in an energetic middle school sports day match.
+Art style: Pixar animation.
+Composition: Dynamic action shot.
+Color palette: Bright blue sky, colorful sports uniforms.
+Lighting: Dramatic bright sunlight.
+Background: School athletic field.
+Mood: Competitive, energetic.
+Important: Absolutely NO text, NO Korean characters.
+Square format 512x512px.
+```
+
+#### 3-10. "컴퓨터활용능력이나 워드프로세서 자격증 시험 합격하기" (14세)
+```
+A Pixar style 3D rendered scene showing a confident teenage youth proudly holding up a shiny computer science certification card while sitting at a computer desk.
+Art style: Pixar animation.
+Composition: Medium shot.
+Color palette: Gold certification card, glowing computer screen.
+Lighting: Soft room light.
+Background: Modern study desk.
+Mood: Accomplished, smart.
+Important: Absolutely NO text, NO Korean characters.
+Square format 512x512px.
+```
+
 ---
 
 ### 4. Growth (성장) 카테고리
@@ -304,6 +499,71 @@ Important: Absolutely NO readable book titles, NO Korean text, NO English words,
 Square format optimized for thumbnail icon (512x512px).
 ```
 
+#### 4-6. "어른용 젓가락으로 흘리지 않고 밥 끝까지 먹기" (7세)
+```
+A Pixar style 3D rendered scene showing a cheerful young child successfully eating a healthy meal using adult-sized metal chopsticks, picking up a piece of food perfectly.
+Art style: Pixar animation.
+Composition: Close-up on child and chopsticks.
+Color palette: Warm dining table colors, appetizing food colors.
+Lighting: Cozy dining room light.
+Background: Home dining area.
+Mood: Proud, grown-up.
+Important: Absolutely NO text, NO Korean characters.
+Square format 512x512px.
+```
+
+#### 4-7. "혼자서 머리 감고 깨끗하게 샤워 마친 후 스스로 옷 입기" (7세)
+```
+A Pixar style 3D rendered scene showing a cheerful young child wrapped in a fluffy towel, proudly looking at the mirror after successfully washing their own hair independently.
+Art style: Pixar animation.
+Composition: Medium shot.
+Color palette: White towel, light blue bathroom tiles.
+Lighting: Bright clean bathroom light.
+Background: Cozy home bathroom.
+Mood: Fresh, independent.
+Important: Absolutely NO text, NO Korean characters.
+Square format 512x512px.
+```
+
+#### 4-8. "어린이 통장 만들어서 세뱃돈과 용돈 꾸준히 저축하기" (10세)
+```
+A Pixar style 3D rendered scene showing a happy elementary school kid sitting at a desk, carefully putting pocket money bills into a cute piggy bank while excitedly looking at their first kid's bank savings book.
+Art style: Pixar animation.
+Composition: Top-down slightly angled close-up.
+Color palette: Green bills, pink piggy bank, blue bankbook.
+Lighting: Warm desk lamp.
+Background: Kid's room desk.
+Mood: Responsible, proud.
+Important: Absolutely NO text, NO Korean characters.
+Square format 512x512px.
+```
+
+#### 4-9. "하루 30분씩 밀리지 않고 매일 눈높이/구몬 학습지 풀기" (10세)
+```
+A Pixar style 3D rendered scene showing a focused elementary school kid sitting at a desk consistently studying a colorful workbook with magical sparkles coming out from completed pages.
+Art style: Pixar animation.
+Composition: Medium shot.
+Color palette: Bright colorful workbook, blue desk.
+Lighting: Warm sunny afternoon light from window.
+Background: Cozy reading corner.
+Mood: Diligent, growing.
+Important: Absolutely NO text, NO Korean characters.
+Square format 512x512px.
+```
+
+#### 4-10. "내가 가고 싶은 목표 대학교 캠퍼스 탐방 다녀오기" (14세)
+```
+A Pixar style 3D rendered scene showing a determined teenage youth looking proudly at a grand university campus building with a backpack on, feeling inspired about the future.
+Art style: Pixar animation.
+Composition: Low angle shot looking up at the kid and campus.
+Color palette: Bright sunny sky, green trees, classic brick buildings.
+Lighting: Inspiring bright daylight.
+Background: Classical university campus courtyard.
+Mood: Inspired, ambitious.
+Important: Absolutely NO text, NO Korean characters.
+Square format 512x512px.
+```
+
 ---
 
 ### 5. Experience (경험) 카테고리
@@ -371,6 +631,71 @@ Background: Community center or soup kitchen with serving counter, tables, other
 Mood: Compassionate, fulfilling, meaningful community service.
 Important: Absolutely NO text, NO Korean characters, NO organization names, NO apron text, NO time records visible in the image.
 Square format optimized for thumbnail icon (512x512px).
+```
+
+#### 5-6. "주말농장이나 체험농장에 가서 싱싱한 딸기나 고구마 캐기" (7세)
+```
+A Pixar style 3D rendered scene showing a cheerful young child proudly holding up freshly picked vibrant red strawberries in a small basket at a sunny farm with green fields.
+Art style: Pixar animation.
+Composition: Medium shot.
+Color palette: Bright red strawberries, lush green plants, warm yellow sun.
+Lighting: Bright sunny outdoor light.
+Background: Farm vegetable field.
+Mood: Joyful, natural discovery.
+Important: Absolutely NO text, NO Korean characters.
+Square format 512x512px.
+```
+
+#### 5-7. "분리수거 날 엄마 아빠 도와서 페트병과 종이 분리하기" (7세)
+```
+A Pixar style 3D rendered scene showing a helpful young child sorting clean plastic bottles and cardboard paper into colorful recycling bins next to parents, smiling proudly.
+Art style: Pixar animation.
+Composition: Medium shot.
+Color palette: Transparent bottles, brown cardboard, blue and green bins.
+Lighting: Warm late afternoon sunlight.
+Background: Neighborhood recycling area.
+Mood: Helpful, responsible.
+Important: Absolutely NO text, NO Korean characters.
+Square format 512x512px.
+```
+
+#### 5-8. "직업체험관(키자니아 등)에 가서 꿈꾸는 직업 3가지 체험하기" (10세)
+```
+A Pixar style 3D rendered scene showing a happy elementary school kid wearing a pilot uniform and a firefighter helmet playfully, enjoying interactive career learning at a colorful indoor theme park.
+Art style: Pixar animation.
+Composition: Medium shot.
+Color palette: Bright engaging colors, uniform details.
+Lighting: Vibrant indoor theme park lights.
+Background: Kid's career theme park.
+Mood: Excited, exploring dreams.
+Important: Absolutely NO text, NO Korean characters.
+Square format 512x512px.
+```
+
+#### 5-9. "하교 길 교복 입고 단짝 친구들과 인생네컷(셀프 사진) 찍기" (14세)
+```
+A Pixar style 3D rendered scene showing happy teenage friends in neat school uniforms squeezing into a fun DIY photo booth, wearing silly animal headbands, making cute poses for the camera.
+Art style: Pixar animation.
+Composition: Close-up inside the photo booth.
+Color palette: Pastel pink curtains, colorful flash lighting.
+Lighting: Bright photo booth flash ring light.
+Background: Inside a modern photo booth.
+Mood: Fun, friendship lasting forever.
+Important: Absolutely NO text, NO Korean characters.
+Square format 512x512px.
+```
+
+#### 5-10. "학원 끝나는 밤, 친구들이랑 편의점 삼각김밥, 컵라면 야식 먹기" (14세)
+```
+A Pixar style 3D rendered scene showing teenage friends having a late-night snack together, sitting outside a brightly lit convenience store, happily holding an onigiri and instant noodles.
+Art style: Pixar animation.
+Composition: Medium shot.
+Color palette: Dark night sky, glowing convenience store neon lights.
+Lighting: Warm glow from the store windows illuminating faces.
+Background: Korean convenience store exterior at night.
+Mood: Cozy, bonding, everyday student life.
+Important: Absolutely NO text, NO Korean characters.
+Square format 512x512px.
 ```
 
 ---
@@ -458,7 +783,7 @@ WHERE idx = 1;
 
 ## 📊 진행 체크리스트
 
-### Creation (창작) - 9개
+### Creation (창작) - 14개
 - [ ] 1. 색종이로 종이접기 100개 만들기 (7세)
 - [ ] 2. 그림 그려서 냉장고에 10개 붙이기 (7세)
 - [ ] 3. 레고로 우리 집 만들기 (7세)
@@ -468,8 +793,13 @@ WHERE idx = 1;
 - [ ] 7. 네이버 블로그에 웹툰 10편 연재하기 (14세)
 - [ ] 8. 유니티로 3D 게임 1개 완성하기 (14세)
 - [ ] 9. 작곡 앱으로 노래 3곡 만들기 (14세)
+- [ ] 10. 클레이로 우리 가족 얼굴 만들어서 액자에 넣기 (7세)
+- [ ] 11. 재활용 종이박스와 우유갑으로 거북선 만들기 (7세)
+- [ ] 12. 다이소 스티커로 나만의 다이어리(다꾸) 1페이지 완성하기 (10세)
+- [ ] 13. 학교 학예회 장기자랑 쓸 배경 음악 직접 믹싱해보기 (14세)
+- [ ] 14. 스마트폰 앱으로 릴스/쇼츠 댄스 챌린지 영상 편집하기 (14세)
 
-### Adventure (탐험) - 9개
+### Adventure (탐험) - 14개
 - [ ] 1. 동물원에서 동물 10종류 보기 (7세)
 - [ ] 2. 바닷가에서 조개껍데기 20개 줍기 (7세)
 - [ ] 3. 할머니 집에 혼자 가보기 (7세)
@@ -479,19 +809,29 @@ WHERE idx = 1;
 - [ ] 7. 제주 올레길 1코스 완주하기 (14세)
 - [ ] 8. 일본 도쿄 자유여행 가기 (14세)
 - [ ] 9. 스쿠버다이빙 오픈워터 자격증 따기 (14세)
+- [ ] 10. 주말 아침 아빠랑 동네 뒷산 약수터까지 걸어 다녀오기 (7세)
+- [ ] 11. 교통카드 직접 찍고 엄마랑 시내버스 뒷자리 타보기 (7세)
+- [ ] 12. 지하철 노선도 보고 혼자서 문구점 다녀오기 심부름 (10세)
+- [ ] 13. 친구들이랑 기차(KTX) 타고 1박 2일 우정 여행 가보기 (14세)
+- [ ] 14. 따릉이 빌려서 친구들과 한강 공원 자전거 라이딩하기 (14세)
 
-### Challenge (도전) - 9개
+### Challenge (도전) - 14개
 - [ ] 1. 자전거 보조바퀴 떼고 타기 (7세)
 - [ ] 2. 수영장에서 물에 얼굴 담그기 (7세)
 - [ ] 3. 구구단 2단~5단 외우기 (7세)
 - [ ] 4. 학교 달리기 대회에서 3등 안에 들기 (10세)
 - [ ] 5. 피아노 발표회에서 연주하기 (10세)
 - [ ] 6. 주산 3급 자격증 따기 (10세)
-- [ ] 7. 하프 마라�on(21km) 완주하기 (14세)
+- [ ] 7. 하프 마라톤(21km) 완주하기 (14세)
 - [ ] 8. 전국 과학 경진대회 본선 진출하기 (14세)
 - [ ] 9. 로봇 코딩 대회에서 입상하기 (14세)
+- [ ] 10. 태권도 승급 심사 당당하게 합격해서 색깔 띠 매기 (7세)
+- [ ] 11. 훌라후프 땅에 안 떨어뜨리고 연속 30번 돌리기 (7세)
+- [ ] 12. 학교 쌩쌩이(이단뛰기) 10번 연속 성공하기 (10세)
+- [ ] 13. 체육대회 반 대항전 피구/계주 경기에서 대활약하기 (14세)
+- [ ] 14. 컴퓨터활용능력이나 워드프로세서 자격증 시험 합격하기 (14세)
 
-### Growth (성장) - 9개
+### Growth (성장) - 14개
 - [ ] 1. 한글 받침까지 완벽하게 읽기 (7세)
 - [ ] 2. 동화책 20권 읽고 부모님께 이야기하기 (7세)
 - [ ] 3. 혼자서 신발 끈 묶기 (7세)
@@ -501,8 +841,13 @@ WHERE idx = 1;
 - [ ] 7. 토익 600점 이상 받기 (14세)
 - [ ] 8. 파이썬으로 웹 크롤링 프로그램 만들기 (14세)
 - [ ] 9. 한국사능력검정시험 3급 합격하기 (14세)
+- [ ] 10. 어른용 젓가락으로 흘리지 않고 밥 끝까지 먹기 (7세)
+- [ ] 11. 혼자서 머리 감고 깨끗하게 샤워 마친 후 스스로 옷 입기 (7세)
+- [ ] 12. 어린이 통장 만들어서 세뱃돈과 용돈 꾸준히 저축하기 (10세)
+- [ ] 13. 하루 30분씩 밀리지 않고 매일 눈높이/구몬 학습지 풀기 (10세)
+- [ ] 14. 내가 가고 싶은 목표 대학교 캠퍼스 탐방 다녀오기 (14세)
 
-### Experience (경험) - 9개
+### Experience (경험) - 14개
 - [ ] 1. 롯데월드에서 놀이기구 5개 타기 (7세)
 - [ ] 2. 뮤지컬 공연 보러 가기 (7세)
 - [ ] 3. 친구 생일파티에 초대받기 (7세)
@@ -512,6 +857,11 @@ WHERE idx = 1;
 - [ ] 7. 학생회 임원으로 활동하기 (14세)
 - [ ] 8. 봉사활동 50시간 채우기 (14세)
 - [ ] 9. 영화 시사회 시사단 참여하기 (14세)
+- [ ] 10. 주말농장이나 체험농장에 가서 싱싱한 딸기나 고구마 캐기 (7세)
+- [ ] 11. 분리수거 날 엄마 아빠 도와서 페트병과 종이 분리하기 (7세)
+- [ ] 12. 직업체험관(키자니아 등)에 가서 꿈꾸는 직업 3가지 체험하기 (10세)
+- [ ] 13. 하교 길 교복 입고 단짝 친구들과 인생네컷(셀프 사진) 찍기 (14세)
+- [ ] 14. 학원 끝나는 밤, 친구들이랑 편의점 삼각김밥, 컵라면 야식 먹기 (14세)
 
 ---
 

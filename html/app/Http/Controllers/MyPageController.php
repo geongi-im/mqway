@@ -146,7 +146,7 @@ class MyPageController extends Controller
         $selectedItems = $userMappings->map(function($item) {
             $imagePath = $item->mq_image;
             if ($imagePath && !str_starts_with($imagePath, 'http')) {
-                $imagePath = asset('storage/uploads/mapping/' . $imagePath);
+                $imagePath = asset('images/mapping/' . $imagePath);
             }
 
             return [
@@ -222,7 +222,7 @@ class MyPageController extends Controller
             $imagePath = $item->mq_image;
             if ($imagePath && !str_starts_with($imagePath, 'http')) {
                 // 로컬 이미지인 경우 storage 경로 추가
-                $imagePath = asset('storage/uploads/mapping/' . $imagePath);
+                $imagePath = asset('images/mapping/' . $imagePath);
             }
 
             return [
@@ -262,7 +262,11 @@ class MyPageController extends Controller
                         $decodedImage = base64_decode($imageData);
 
                         $filename = 'mapping_custom_' . $user->mq_user_id . '_' . time() . '.png';
-                        Storage::disk('public')->put('uploads/mapping/' . $filename, $decodedImage);
+                        $savePath = public_path('images/mapping');
+                        if (!file_exists($savePath)) {
+                            mkdir($savePath, 0755, true);
+                        }
+                        file_put_contents($savePath . '/' . $filename, $decodedImage);
                         $imagePath = $filename;
                     }
 
@@ -336,8 +340,9 @@ class MyPageController extends Controller
                     // 커스텀 목표인 경우 mq_mapping_item과 이미지도 삭제
                     if ($mappingItem && $mappingItem->mq_category === 'custom') {
                         // 이미지 파일 삭제
-                        if ($mappingItem->mq_image && Storage::disk('public')->exists('uploads/mapping/' . $mappingItem->mq_image)) {
-                            Storage::disk('public')->delete('uploads/mapping/' . $mappingItem->mq_image);
+                        $imagePath = public_path('images/mapping/' . $mappingItem->mq_image);
+                        if ($mappingItem->mq_image && file_exists($imagePath)) {
+                            unlink($imagePath);
                         }
 
                         // mq_mapping_item에서 삭제
@@ -372,7 +377,7 @@ class MyPageController extends Controller
         $selectedItems = $userMappings->map(function($item) {
             $imagePath = $item->mq_image;
             if ($imagePath && !str_starts_with($imagePath, 'http')) {
-                $imagePath = asset('storage/uploads/mapping/' . $imagePath);
+                $imagePath = asset('images/mapping/' . $imagePath);
             }
 
             return [
