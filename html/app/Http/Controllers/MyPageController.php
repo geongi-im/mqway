@@ -146,7 +146,7 @@ class MyPageController extends Controller
         $selectedItems = $userMappings->map(function($item) {
             $imagePath = $item->mq_image;
             if ($imagePath && !str_starts_with($imagePath, 'http')) {
-                $imagePath = asset('images/mapping/' . $imagePath);
+                $imagePath = asset('storage/uploads/mapping/' . $imagePath);
             }
 
             return [
@@ -222,7 +222,7 @@ class MyPageController extends Controller
             $imagePath = $item->mq_image;
             if ($imagePath && !str_starts_with($imagePath, 'http')) {
                 // 로컬 이미지인 경우 storage 경로 추가
-                $imagePath = asset('images/mapping/' . $imagePath);
+                $imagePath = asset('storage/uploads/mapping/' . $imagePath);
             }
 
             return [
@@ -246,28 +246,23 @@ class MyPageController extends Controller
         $description = $request->input('description');
         $targetYear = $request->input('targetYear');
         $action = $request->input('action');
-        $imageData = $request->input('imageData'); // Base64 이미지 데이터
 
         try {
             if ($action === 'add') {
                 $miIdx = $itemId;
+                $imageUrl = null;
 
                 // 커스텀 목표인 경우 mq_mapping_item에 먼저 저장
                 if (str_starts_with($itemId, 'custom-')) {
                     $imagePath = null;
 
-                    if ($imageData) {
-                        // Base64 이미지를 파일로 저장
-                        $imageData = preg_replace('/^data:image\/\w+;base64,/', '', $imageData);
-                        $decodedImage = base64_decode($imageData);
-
-                        $filename = 'mapping_custom_' . $user->mq_user_id . '_' . time() . '.png';
-                        $savePath = public_path('images/mapping');
-                        if (!file_exists($savePath)) {
-                            mkdir($savePath, 0755, true);
-                        }
-                        file_put_contents($savePath . '/' . $filename, $decodedImage);
+                    if ($request->hasFile('imageFile')) {
+                        $image = $request->file('imageFile');
+                        $extension = $image->getClientOriginalExtension() ?: 'png';
+                        $filename = 'mapping_custom_' . $user->mq_user_id . '_' . time() . '.' . $extension;
+                        $image->storeAs('uploads/mapping', $filename, 'public');
                         $imagePath = $filename;
+                        $imageUrl = asset('storage/uploads/mapping/' . $filename);
                     }
 
                     // mq_mapping_item에 저장
@@ -290,7 +285,7 @@ class MyPageController extends Controller
                     'mq_update_date' => now()
                 ]);
 
-                return response()->json(['success' => true, 'mi_idx' => $miIdx]);
+                return response()->json(['success' => true, 'mi_idx' => $miIdx, 'image_url' => $imageUrl]);
 
             } elseif ($action === 'update') {
                 // 목표 연도 업데이트
@@ -340,9 +335,8 @@ class MyPageController extends Controller
                     // 커스텀 목표인 경우 mq_mapping_item과 이미지도 삭제
                     if ($mappingItem && $mappingItem->mq_category === 'custom') {
                         // 이미지 파일 삭제
-                        $imagePath = public_path('images/mapping/' . $mappingItem->mq_image);
-                        if ($mappingItem->mq_image && file_exists($imagePath)) {
-                            unlink($imagePath);
+                        if ($mappingItem->mq_image && Storage::disk('public')->exists('uploads/mapping/' . $mappingItem->mq_image)) {
+                            Storage::disk('public')->delete('uploads/mapping/' . $mappingItem->mq_image);
                         }
 
                         // mq_mapping_item에서 삭제
@@ -377,7 +371,7 @@ class MyPageController extends Controller
         $selectedItems = $userMappings->map(function($item) {
             $imagePath = $item->mq_image;
             if ($imagePath && !str_starts_with($imagePath, 'http')) {
-                $imagePath = asset('images/mapping/' . $imagePath);
+                $imagePath = asset('storage/uploads/mapping/' . $imagePath);
             }
 
             return [

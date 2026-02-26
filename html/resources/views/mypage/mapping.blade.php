@@ -280,7 +280,8 @@ document.addEventListener('DOMContentLoaded', function() {
     let selectedItems = new Map(); // {id: {description, targetYear}}
     const currentYear = new Date().getFullYear();
     let customGoalCounter = 0;
-    let customGoalImageData = null;
+    let customGoalImageFile = null;  // 실제 File 객체 저장
+    let customGoalImagePreviewUrl = null;  // 미리보기용 URL
 
     // 서버에서 받은 선택된 아이템 초기화
     @if(isset($selectedItems) && count($selectedItems) > 0)
@@ -553,30 +554,25 @@ document.addEventListener('DOMContentLoaded', function() {
         confirmGoalModal.classList.add('flex');
     }
 
-    // 단일 목표 저장/삭제 함수
-    function saveSingleGoal(itemId, description, targetYear, action, imageData = null, callback = null) {
-        const payload = {
-            id: itemId,
-            description: description,
-            targetYear: targetYear,
-            action: action
-        };
+    // 단일 목표 저장/삭제 함수 (FormData 사용)
+    function saveSingleGoal(itemId, description, targetYear, action, imageFile = null, callback = null) {
+        const formData = new FormData();
+        formData.append('id', itemId);
+        formData.append('description', description);
+        formData.append('targetYear', targetYear);
+        formData.append('action', action);
 
-        // 커스텀 목표인 경우 이미지 데이터 포함
-        if (itemId.startsWith('custom-')) {
-            const item = selectedItems.get(itemId);
-            if (item && item.imageSrc) {
-                payload.imageData = item.imageSrc;
-            }
+        // 커스텀 목표인 경우 이미지 파일 포함
+        if (imageFile) {
+            formData.append('imageFile', imageFile);
         }
 
         fetch('{{ route("mypage.mapping.save") }}', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
             },
-            body: JSON.stringify(payload)
+            body: formData
         })
         .then(response => response.json())
         .then(data => {
@@ -910,7 +906,11 @@ document.addEventListener('DOMContentLoaded', function() {
         customGoalModal.classList.add('hidden');
         customGoalModal.classList.remove('flex');
         customGoalForm.reset();
-        customGoalImageData = null;
+        customGoalImageFile = null;
+        if (customGoalImagePreviewUrl) {
+            URL.revokeObjectURL(customGoalImagePreviewUrl);
+            customGoalImagePreviewUrl = null;
+        }
         customModalEditingId = null;
         imagePreviewArea.innerHTML = `
             <svg class="w-12 h-12 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1030,21 +1030,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            LoadingManager.show();
+            // 이전 미리보기 URL 해제
+            if (customGoalImagePreviewUrl) {
+                URL.revokeObjectURL(customGoalImagePreviewUrl);
+            }
 
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                customGoalImageData = event.target.result;
-                imagePreviewArea.innerHTML = `
-                    <img src="${event.target.result}" alt="미리보기" class="max-h-40 mx-auto rounded">
-                `;
-                LoadingManager.hide();
-            };
-            reader.onerror = function() {
-                LoadingManager.hide();
-                alert('이미지를 읽는 중 오류가 발생했습니다.');
-            };
-            reader.readAsDataURL(file);
+            // 실제 File 객체 저장
+            customGoalImageFile = file;
+            customGoalImagePreviewUrl = URL.createObjectURL(file);
+
+            imagePreviewArea.innerHTML = `
+                <img src="${customGoalImagePreviewUrl}" alt="미리보기" class="max-h-40 mx-auto rounded">
+            `;
         }
     });
 
@@ -1065,26 +1062,31 @@ document.addEventListener('DOMContentLoaded', function() {
             customGoalCounter++;
             const tempCustomId = `custom-${customGoalCounter}`;
 
-            // selectedItems에 임시 추가 (이미지가 없으면 null)
+            // selectedItems에 임시 추가 (미리보기 URL 사용)
             selectedItems.set(tempCustomId, {
                 description: description,
                 targetYear: selectedYear,
-                imageSrc: customGoalImageData,
+                imageSrc: customGoalImagePreviewUrl,
                 category: 'custom'
             });
 
             // 선택된 목표 목록에 추가
-            addGoalToList(tempCustomId, description, customGoalImageData);
+            addGoalToList(tempCustomId, description, customGoalImagePreviewUrl);
             updateSelectedCount();
 
-            // AJAX로 즉시 저장하고 실제 ID를 받아 처리
-            saveSingleGoal(tempCustomId, description, selectedYear, 'add', null, function(data) {
+            // AJAX로 즉시 저장하고 실제 ID를 받아 처리 (파일 객체 전달)
+            saveSingleGoal(tempCustomId, description, selectedYear, 'add', customGoalImageFile, function(data) {
                 if (data.mi_idx) {
                     const realId = data.mi_idx.toString();
 
                     // selectedItems의 키를 임시 ID에서 실제 ID로 변경
                     const itemData = selectedItems.get(tempCustomId);
                     selectedItems.delete(tempCustomId);
+
+                    // 서버에서 반환된 이미지 URL로 업데이트
+                    if (data.image_url) {
+                        itemData.imageSrc = data.image_url;
+                    }
                     selectedItems.set(realId, itemData);
 
                     // 선택 목록의 ID 업데이트
@@ -1095,6 +1097,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (checkbox) checkbox.setAttribute('data-id', realId);
                         const yearSelect = goalItem.querySelector('.target-year-select');
                         if (yearSelect) yearSelect.setAttribute('data-id', realId);
+                        // 이미지 src도 서버 URL로 업데이트
+                        if (data.image_url) {
+                            const img = goalItem.querySelector('img');
+                            if (img) img.src = data.image_url;
+                        }
                     }
 
                     // 샘플 그리드에 추가 (custom 카테고리이므로 필터가 custom일 때만 보임)
@@ -1102,7 +1109,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         const newItem = {
                             id: realId,
                             category: 'custom',
-                            image: customGoalImageData,
+                            image: data.image_url || customGoalImagePreviewUrl,
                             description: description
                         };
                         const itemHtml = createMappingItemHtml(newItem);
