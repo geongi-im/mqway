@@ -356,6 +356,88 @@ class MyPageController extends Controller
         }
     }
 
+    public function visionBoard()
+    {
+        $user = Auth::user();
+
+        // 사용자가 선택한 매핑 데이터 조회
+        $userMappings = DB::table('mq_mapping_user as mu')
+            ->join('mq_mapping_item as mi', 'mu.mi_idx', '=', 'mi.idx')
+            ->where('mu.mq_user_id', $user->mq_user_id)
+            ->select('mi.idx', 'mi.mq_category', 'mi.mq_image', 'mi.mq_description', 'mu.mq_target_year')
+            ->orderBy('mu.mq_target_year', 'asc')
+            ->get();
+
+        // 선택된 아이템 정보를 배열로 변환
+        $selectedItems = $userMappings->map(function($item) {
+            $imagePath = $item->mq_image;
+            if ($imagePath && !str_starts_with($imagePath, 'http')) {
+                $imagePath = asset('storage/uploads/mapping/' . $imagePath);
+            }
+
+            return [
+                'id' => $item->idx,
+                'category' => $item->mq_category,
+                'description' => $item->mq_description,
+                'targetYear' => $item->mq_target_year,
+                'imageSrc' => $imagePath
+            ];
+        })->values()->toArray();
+
+        // 카테고리 라벨
+        $categoryLabels = [
+            'creation' => '창작',
+            'adventure' => '탐험',
+            'challenge' => '도전',
+            'growth' => '성장',
+            'experience' => '경험',
+            'custom' => '기타'
+        ];
+
+        // 저장된 비전보드 캔버스 데이터 조회
+        $savedBoard = DB::table('mq_mapping_vision_board')
+            ->where('mq_user_id', $user->mq_user_id)
+            ->first();
+        $canvasData = $savedBoard ? $savedBoard->canvas_data : null;
+
+        return view('mypage.vision-board', compact('user', 'selectedItems', 'categoryLabels', 'canvasData'));
+    }
+
+    /**
+     * 비전보드 캔버스 상태 저장 (AJAX)
+     */
+    public function saveVisionBoard(Request $request)
+    {
+        $user = Auth::user();
+        $canvasData = $request->input('canvas_data');
+
+        if (!$canvasData) {
+            return response()->json(['success' => false, 'message' => '캔버스 데이터가 없습니다.'], 400);
+        }
+
+        $exists = DB::table('mq_mapping_vision_board')
+            ->where('mq_user_id', $user->mq_user_id)
+            ->exists();
+
+        if ($exists) {
+            DB::table('mq_mapping_vision_board')
+                ->where('mq_user_id', $user->mq_user_id)
+                ->update([
+                    'canvas_data' => $canvasData,
+                    'mq_update_date' => now()
+                ]);
+        } else {
+            DB::table('mq_mapping_vision_board')->insert([
+                'mq_user_id' => $user->mq_user_id,
+                'canvas_data' => $canvasData,
+                'mq_reg_date' => now()
+            ]);
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+
     public function likedContent()
     {
         $user = Auth::user();

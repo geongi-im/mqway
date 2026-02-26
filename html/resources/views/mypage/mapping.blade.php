@@ -36,21 +36,46 @@
 <div class="container mx-auto px-4 -mt-10 relative z-20 max-w-6xl">
     <!-- 선택된 아이템 카운터 -->
     <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-8 animate-slideUp" style="animation-delay: 0.2s;">
-        <div class="flex justify-between items-center mb-4">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#4ECDC4] to-[#2AA9A0] flex items-center justify-center">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
-                    </svg>
+        <div class="flex flex-col gap-3 mb-4">
+            <!-- 상단: 카운터 + 데스크톱 버튼 -->
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#4ECDC4] to-[#2AA9A0] flex items-center justify-center flex-shrink-0">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <span class="text-sm text-gray-400 font-medium">선택된 목표:</span>
+                        <span id="selected-count" class="text-xl font-bold text-[#2D3047] ml-2">0</span>
+                        <span class="text-sm text-gray-400 font-medium">개</span>
+                    </div>
                 </div>
-                <div>
-                    <span class="text-sm text-gray-400 font-medium">선택된 목표:</span>
-                    <span id="selected-count" class="text-xl font-bold text-[#2D3047] ml-2">0</span>
-                    <span class="text-sm text-gray-400 font-medium">개</span>
+                <!-- 데스크톱에서만 보이는 인라인 버튼 -->
+                <div class="hidden md:flex items-center space-x-3">
+                    <a href="{{ route('mypage.vision-board') }}" class="inline-flex items-center gap-1.5 text-sm bg-gradient-to-r from-[#4ECDC4] to-[#2AA9A0] text-white px-4 py-2.5 rounded-xl hover:shadow-lg transition-all font-medium">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        <span>비전보드</span>
+                    </a>
+                    <button id="add-custom-goal-btn-desktop" class="inline-flex items-center gap-1.5 text-sm bg-white border border-[#FF4D4D] text-[#FF4D4D] px-4 py-2.5 rounded-xl hover:bg-[#FF4D4D] hover:text-white transition-all font-medium">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        <span>직접 추가</span>
+                    </button>
                 </div>
             </div>
-            <div class="flex items-center space-x-3">
-                <button id="add-custom-goal-btn" class="inline-flex items-center gap-1.5 text-sm bg-white border border-[#FF4D4D] text-[#FF4D4D] px-4 py-2.5 rounded-xl hover:bg-[#FF4D4D] hover:text-white transition-all font-medium">
+            <!-- 모바일에서만 보이는 풀 너비 버튼 -->
+            <div class="flex md:hidden gap-2">
+                <a href="{{ route('mypage.vision-board') }}" class="flex-1 inline-flex items-center justify-center gap-2 text-sm bg-gradient-to-r from-[#4ECDC4] to-[#2AA9A0] text-white px-4 py-2.5 rounded-xl hover:shadow-lg transition-all font-medium">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    <span>비전보드</span>
+                </a>
+                <button id="add-custom-goal-btn" class="flex-1 inline-flex items-center justify-center gap-2 text-sm bg-white border border-[#FF4D4D] text-[#FF4D4D] px-4 py-2.5 rounded-xl hover:bg-[#FF4D4D] hover:text-white transition-all font-medium">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </svg>
@@ -824,10 +849,18 @@ document.addEventListener('DOMContentLoaded', function() {
         selectedCountEl.textContent = selectedItems.size;
     }
 
-    // 커스텀 모달 열기 (추가 모드)
+    // 커스텀 모달 열기 (추가 모드) - 모바일 버튼
     addCustomGoalBtn.addEventListener('click', () => {
         openCustomModal('add');
     });
+
+    // 커스텀 모달 열기 (추가 모드) - 데스크톱 버튼
+    const addCustomGoalBtnDesktop = document.getElementById('add-custom-goal-btn-desktop');
+    if (addCustomGoalBtnDesktop) {
+        addCustomGoalBtnDesktop.addEventListener('click', () => {
+            openCustomModal('add');
+        });
+    }
 
     // 커스텀 모달 열기 함수
     function openCustomModal(mode, goalData = null) {
