@@ -24,11 +24,11 @@
             🗺️ MQ Mapping
         </span>
         <h1 class="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight tracking-tight">
-            MQ 매핑
+            MQ 맵핑
         </h1>
         <p class="text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed font-light">
             나의 현재와 미래를 연결하는 꿈의 지도를 만들어보세요.<br class="hidden md:block">
-            원하는 미래의 모습이나 목표를 선택하여 나만의 매핑을 완성해보세요.
+            원하는 미래의 모습이나 목표를 선택하여 나만의 맵핑을 완성해보세요.
         </p>
     </div>
 </section>

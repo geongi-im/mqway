@@ -17,7 +17,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                 </svg>
             </div>
-            MQ 매핑으로 돌아가기
+            MQ 맵핑으로 돌아가기
         </a>
         <br />
         <span class="inline-block py-1 px-3 rounded-full bg-white/10 border border-white/20 text-white text-sm font-medium mb-4 backdrop-blur-md">
@@ -154,7 +154,7 @@
                         </svg>
                     </div>
                     <h3 class="text-lg font-bold text-[#2D3047] mb-2">아직 목표가 없어요</h3>
-                    <p class="text-sm text-gray-400 mb-5">MQ 매핑에서 나의 목표를 선택하면<br>여기에 비전보드가 완성됩니다!</p>
+                    <p class="text-sm text-gray-400 mb-5">MQ 맵핑에서 나의 목표를 선택하면<br>여기에 비전보드가 완성됩니다!</p>
                     <a href="{{ route('mypage.mapping') }}" class="inline-flex items-center gap-2 bg-gradient-to-r from-[#FF4D4D] to-[#e03e3e] text-white px-5 py-2.5 rounded-xl hover:shadow-lg transition-all font-medium text-sm">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>

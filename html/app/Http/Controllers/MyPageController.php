@@ -115,7 +115,7 @@ class MyPageController extends Controller
         // 생년월일 체크 - 없으면 프로필 페이지로 리다이렉트
         if (empty($user->mq_birthday)) {
             return redirect()->route('mypage.index')
-                ->with('error', 'MQ 매핑을 진행하려면 생일 정보가 필요합니다. 프로필에서 생일을 입력해주세요.');
+                ->with('error', 'MQ 맵핑을 진행하려면 생일 정보가 필요합니다. 프로필에서 생일을 입력해주세요.');
         }
 
         // 전체 매핑 아이템 데이터

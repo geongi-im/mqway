@@ -239,7 +239,7 @@
             </div>
         </a>
 
-        <!-- MQ 매핑 카드 -->
+        <!-- MQ 맵핑 카드 -->
         <a href="{{ route('mypage.mapping') }}" class="group bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
             <div class="p-8">
                 <div class="w-14 h-14 bg-gradient-to-br from-[#4ECDC4] to-[#2AA9A0] rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-[#4ECDC4]/20">
@@ -247,7 +247,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
                     </svg>
                 </div>
-                <h3 class="text-xl font-bold text-[#2D3047] mb-2 group-hover:text-[#4ECDC4] transition-colors">MQ 매핑</h3>
+                <h3 class="text-xl font-bold text-[#2D3047] mb-2 group-hover:text-[#4ECDC4] transition-colors">MQ 맵핑</h3>
                 <p class="text-gray-500 text-sm">나의 꿈의 지도를 만들어보세요</p>
             </div>
             <div class="px-8 py-4 bg-gray-50/50 border-t border-gray-50 flex items-center justify-between">
