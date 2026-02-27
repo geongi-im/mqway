@@ -118,8 +118,18 @@ class MyPageController extends Controller
                 ->with('error', 'MQ 맵핑을 진행하려면 생일 정보가 필요합니다. 프로필에서 생일을 입력해주세요.');
         }
 
-        // 전체 매핑 아이템 데이터
-        $allMappingItems = $this->getAllMappingItems();
+        // 사용자가 선택한 매핑 데이터 조회
+        $userMappings = DB::table('mq_mapping_user as mu')
+            ->join('mq_mapping_item as mi', 'mu.mi_idx', '=', 'mi.idx')
+            ->where('mu.mq_user_id', $user->mq_user_id)
+            ->select('mi.idx', 'mi.mq_category', 'mi.mq_image', 'mi.mq_description', 'mu.mq_target_year')
+            ->get();
+
+        // 선택된 아이템 ID 목록
+        $selectedItemIds = $userMappings->pluck('idx')->toArray();
+
+        // 전체 매핑 아이템 데이터 (선택된 아이템 최상위 + 나머지 랜덤)
+        $allMappingItems = $this->getAllMappingItems($selectedItemIds);
 
         // 초기 로드는 12개만
         $mappingItems = array_slice($allMappingItems, 0, 12);
@@ -134,13 +144,6 @@ class MyPageController extends Controller
             'experience' => '경험',
             'custom' => '기타'
         ];
-
-        // 사용자가 선택한 매핑 데이터 조회
-        $userMappings = DB::table('mq_mapping_user as mu')
-            ->join('mq_mapping_item as mi', 'mu.mi_idx', '=', 'mi.idx')
-            ->where('mu.mq_user_id', $user->mq_user_id)
-            ->select('mi.idx', 'mi.mq_category', 'mi.mq_image', 'mi.mq_description', 'mu.mq_target_year')
-            ->get();
 
         // 선택된 아이템 정보를 배열로 변환
         $selectedItems = $userMappings->map(function($item) {
@@ -163,12 +166,19 @@ class MyPageController extends Controller
 
     public function getMappingItems(Request $request)
     {
+        $user = Auth::user();
         $offset = $request->get('offset', 0);
         $limit = $request->get('limit', 6);
         $category = $request->get('category', 'all');
 
-        // 전체 매핑 아이템
-        $allItems = $this->getAllMappingItems();
+        // 사용자가 선택한 아이템 ID 목록 조회
+        $selectedItemIds = DB::table('mq_mapping_user')
+            ->where('mq_user_id', $user->mq_user_id)
+            ->pluck('mi_idx')
+            ->toArray();
+
+        // 전체 매핑 아이템 (선택된 아이템 최상위 + 나머지 랜덤)
+        $allItems = $this->getAllMappingItems($selectedItemIds);
 
         // 카테고리 필터링
         if ($category !== 'all') {
@@ -193,7 +203,7 @@ class MyPageController extends Controller
         ]);
     }
 
-    private function getAllMappingItems()
+    private function getAllMappingItems($selectedItemIds = [])
     {
         $user = Auth::user();
 
@@ -201,7 +211,6 @@ class MyPageController extends Controller
         $basicItems = DB::table('mq_mapping_item')
             ->where('mq_status', 1)
             ->whereIn('mq_category', ['creation', 'adventure', 'challenge', 'growth', 'experience'])
-            ->orderBy('idx', 'asc')
             ->get();
 
         // custom 카테고리는 현재 로그인한 사용자가 등록한 것만 조회
@@ -211,13 +220,12 @@ class MyPageController extends Controller
             ->where('mi.mq_category', 'custom')
             ->where('mu.mq_user_id', $user->mq_user_id)
             ->select('mi.*')
-            ->orderBy('mi.idx', 'asc')
             ->get();
 
         // 두 결과를 합침
         $items = $basicItems->merge($customItems);
 
-        return $items->map(function($item) {
+        $allItems = $items->map(function($item) {
             // 이미지 경로 처리
             $imagePath = $item->mq_image;
             if ($imagePath && !str_starts_with($imagePath, 'http')) {
@@ -232,6 +240,24 @@ class MyPageController extends Controller
                 'description' => $item->mq_description
             ];
         })->toArray();
+
+        // 선택된 아이템과 미선택 아이템 분리
+        $selectedGroup = [];
+        $unselectedGroup = [];
+
+        foreach ($allItems as $item) {
+            if (in_array($item['id'], $selectedItemIds)) {
+                $selectedGroup[] = $item;
+            } else {
+                $unselectedGroup[] = $item;
+            }
+        }
+
+        // 미선택 아이템을 랜덤으로 섞기
+        shuffle($unselectedGroup);
+
+        // 선택된 아이템을 맨 앞에 배치하고 나머지 랜덤 아이템 뒤에 추가
+        return array_merge($selectedGroup, $unselectedGroup);
     }
 
     public function saveMapping(Request $request)
