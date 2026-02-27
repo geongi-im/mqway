@@ -3,7 +3,7 @@ services:
     container_name: nginx_${COMPOSE_PROJECT_NAME}
     image: nginx:latest
     ports:
-      - "80:80"
+      - "${WEB_PORT}:80"
     volumes:
       - ./html:/var/www/html:cached
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
