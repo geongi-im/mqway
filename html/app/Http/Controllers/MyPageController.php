@@ -256,7 +256,12 @@ class MyPageController extends Controller
                 if (str_starts_with($itemId, 'custom-')) {
                     $imagePath = null;
 
-                    if ($request->hasFile('imageFile')) {
+                    // AI 생성 이미지가 있는 경우
+                    $aiGeneratedFilename = $request->input('aiGeneratedFilename');
+                    if ($aiGeneratedFilename && Storage::disk('public')->exists('uploads/mapping/' . $aiGeneratedFilename)) {
+                        $imagePath = $aiGeneratedFilename;
+                        $imageUrl = asset('storage/uploads/mapping/' . $aiGeneratedFilename);
+                    } elseif ($request->hasFile('imageFile')) {
                         $image = $request->file('imageFile');
                         $extension = $image->getClientOriginalExtension() ?: 'png';
                         $filename = 'mapping_custom_' . $user->mq_user_id . '_' . time() . '.' . $extension;
@@ -353,6 +358,143 @@ class MyPageController extends Controller
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
+    }
+
+    /**
+     * AI 이미지 생성 (Gemini 3.1 Flash Image Preview)
+     * 목표 설명을 기반으로 Pixar 스타일 3D 이미지를 생성합니다.
+     */
+    public function generateMappingImage(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => '로그인이 필요합니다.'], 401);
+        }
+
+        $description = $request->input('description');
+        if (empty($description)) {
+            return response()->json(['success' => false, 'message' => '목표 설명을 입력해주세요.'], 400);
+        }
+
+        $apiKey = env('GEMINI_API_KEY');
+        if (empty($apiKey)) {
+            return response()->json(['success' => false, 'message' => 'API 키가 설정되지 않았습니다.'], 500);
+        }
+
+        // 프롬프트 생성 (mq_mapping_image_generation_guide.md 기반)
+        $prompt = $this->buildImagePrompt($description);
+
+        try {
+            $modelId = 'gemini-3.1-flash-image-preview';
+            $url = "https://generativelanguage.googleapis.com/v1beta/models/{$modelId}:streamGenerateContent?key={$apiKey}";
+
+            $payload = [
+                'contents' => [
+                    [
+                        'role' => 'user',
+                        'parts' => [
+                            ['text' => $prompt]
+                        ]
+                    ]
+                ],
+                'generationConfig' => [
+                    'responseModalities' => ['IMAGE'],
+                    'thinkingConfig' => [
+                        'thinkingLevel' => 'MINIMAL',
+                    ],
+                    'imageConfig' => [
+                        'imageSize' => '512',
+                    ],
+                ]
+            ];
+
+            $ch = curl_init();
+            curl_setopt_array($ch, [
+                CURLOPT_URL => $url,
+                CURLOPT_POST => true,
+                CURLOPT_HTTPHEADER => [
+                    'Content-Type: application/json',
+                ],
+                CURLOPT_POSTFIELDS => json_encode($payload),
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_TIMEOUT => 120,
+            ]);
+
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $curlError = curl_error($ch);
+            curl_close($ch);
+
+            if ($curlError) {
+                return response()->json(['success' => false, 'message' => 'API 요청 실패: ' . $curlError], 500);
+            }
+
+            if ($httpCode !== 200) {
+                return response()->json(['success' => false, 'message' => 'API 응답 오류 (HTTP ' . $httpCode . '): ' . $response], 500);
+            }
+
+            $data = json_decode($response, true);
+
+            // streamGenerateContent 응답은 JSON 배열 형태로 반환됨
+            // 배열의 각 요소에서 이미지 데이터를 찾음
+            $imageData = null;
+            $mimeType = 'image/png';
+
+            // 응답이 배열인 경우 (streamGenerateContent)
+            $chunks = is_array($data) && isset($data[0]) ? $data : [$data];
+
+            foreach ($chunks as $chunk) {
+                if (isset($chunk['candidates'][0]['content']['parts'])) {
+                    foreach ($chunk['candidates'][0]['content']['parts'] as $part) {
+                        if (isset($part['inlineData'])) {
+                            $imageData = $part['inlineData']['data'];
+                            $mimeType = $part['inlineData']['mimeType'] ?? 'image/png';
+                            break 2;
+                        }
+                    }
+                }
+            }
+
+            if (!$imageData) {
+                return response()->json(['success' => false, 'message' => '이미지 생성에 실패했습니다. 다시 시도해주세요.'], 500);
+            }
+
+            // Base64 디코딩 후 파일 저장
+            $imageBytes = base64_decode($imageData);
+            $extension = str_contains($mimeType, 'png') ? 'png' : 'jpg';
+            $filename = 'mapping_ai_' . $user->mq_user_id . '_' . time() . '_' . Str::random(4) . '.' . $extension;
+
+            Storage::disk('public')->put('uploads/mapping/' . $filename, $imageBytes);
+
+            $imageUrl = asset('storage/uploads/mapping/' . $filename);
+
+            return response()->json([
+                'success' => true,
+                'image_url' => $imageUrl,
+                'filename' => $filename
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => '이미지 생성 중 오류: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * 목표 설명을 기반으로 Pixar 3D 스타일 이미지 프롬프트를 생성합니다.
+     */
+    private function buildImagePrompt($description)
+    {
+        return "A Pixar style 3D rendered scene showing a child (randomly boy or girl) achieving or working towards the goal: \"{$description}\".
+The scene should visually represent this goal in a clear, child-friendly way with expressive character face and engaging environment.
+Art style: Pixar animation movie quality with smooth rendering, rounded shapes, and vibrant colors.
+Composition: Medium shot, well-balanced composition optimized for a square thumbnail.
+Color palette: Bright, warm, and inviting colors appropriate for the scene.
+Lighting: Warm, cheerful lighting that creates an optimistic atmosphere.
+Background: Simple, relevant environment that supports the goal theme without being too complex.
+Mood: Hopeful, determined, and inspiring.
+Important: Absolutely NO text, NO Korean characters, NO letters, NO numbers, NO brand names visible anywhere in the image.
+Square format optimized for thumbnail icon (512x512px).";
     }
 
     public function visionBoard()

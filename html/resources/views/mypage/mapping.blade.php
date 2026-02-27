@@ -198,7 +198,7 @@
 
 <!-- 커스텀 목표 추가/편집 팝업 -->
 <div id="custom-goal-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 p-8">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 p-8 max-h-[85vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-6">
             <div class="flex items-center gap-3">
                 <h2 id="custom-modal-title" class="text-xl font-bold text-[#2D3047]">나만의 목표 추가</h2>
@@ -220,14 +220,18 @@
             <!-- 이미지 업로드 (편집 시에는 숨김) -->
             <div id="custom-image-upload-section">
                 <label class="block text-sm font-semibold text-[#2D3047] mb-2">목표 이미지</label>
-                <div class="border-2 border-dashed border-gray-200 rounded-xl p-4 text-center hover:border-[#4ECDC4] transition-colors cursor-pointer" id="image-upload-area">
+                <div class="border-2 border-dashed border-gray-300 rounded-xl p-3 text-center hover:border-[#4ECDC4] hover:bg-[#4ECDC4]/5 transition-all cursor-pointer group" id="image-upload-area">
                     <input type="file" id="custom-goal-image" accept="image/*" class="hidden">
                     <div id="image-preview-area">
-                        <svg class="w-12 h-12 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                        </svg>
-                        <p class="text-sm text-gray-500">클릭하여 이미지를 업로드하세요</p>
-                        <p class="text-xs text-gray-400 mt-1">JPG, PNG, GIF (최대 5MB)</p>
+                        <div class="py-4">
+                            <div class="w-12 h-12 mx-auto mb-2 rounded-full bg-gradient-to-br from-[#4ECDC4]/20 to-[#2AA9A0]/20 flex items-center justify-center group-hover:from-[#4ECDC4]/30 group-hover:to-[#2AA9A0]/30 transition-all">
+                                <svg class="w-6 h-6 text-[#4ECDC4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                            </div>
+                            <p class="text-sm font-medium text-[#2D3047] mb-1">클릭하여 이미지를 업로드하세요</p>
+                            <p class="text-xs text-gray-400">JPG, PNG, GIF (최대 5MB)</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -244,6 +248,14 @@
             <div>
                 <label for="custom-goal-description" class="block text-sm font-semibold text-[#2D3047] mb-2">목표 설명</label>
                 <input type="text" id="custom-goal-description" placeholder="예: 세계 여행, 자격증 취득, 창업 등" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4ECDC4] focus:border-transparent transition-all" required>
+                <!-- AI 이미지 생성 - 보조 기능 -->
+                <div class="mt-1.5 flex items-center justify-end">
+                    <button type="button" id="ai-generate-image-btn" class="inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-[#7C3AED] transition-colors disabled:opacity-40 disabled:cursor-not-allowed group/ai">
+                        <span id="ai-btn-icon" class="text-sm">✨</span>
+                        <span id="ai-btn-text" class="underline underline-offset-2 decoration-gray-300 group-hover/ai:decoration-[#7C3AED] transition-colors">AI로 이미지 생성하기</span>
+                    </button>
+                </div>
+                <p id="ai-generate-hint" class="text-[11px] text-gray-300 mt-0.5 text-right">설명을 입력하면 AI가 이미지를 만들어줍니다</p>
             </div>
 
             <!-- 목표 연도 -->
@@ -282,6 +294,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let customGoalCounter = 0;
     let customGoalImageFile = null;  // 실제 File 객체 저장
     let customGoalImagePreviewUrl = null;  // 미리보기용 URL
+    let aiGeneratedFilename = null;  // AI 생성 이미지 파일명
 
     // 서버에서 받은 선택된 아이템 초기화
     @if(isset($selectedItems) && count($selectedItems) > 0)
@@ -555,15 +568,19 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // 단일 목표 저장/삭제 함수 (FormData 사용)
-    function saveSingleGoal(itemId, description, targetYear, action, imageFile = null, callback = null) {
+    function saveSingleGoal(itemId, description, targetYear, action, imageFile = null, callback = null, generatedFilename = null) {
         const formData = new FormData();
         formData.append('id', itemId);
         formData.append('description', description);
         formData.append('targetYear', targetYear);
         formData.append('action', action);
 
+        // AI 생성 이미지 파일명이 있는 경우
+        if (generatedFilename) {
+            formData.append('aiGeneratedFilename', generatedFilename);
+        }
         // 커스텀 목표인 경우 이미지 파일 포함
-        if (imageFile) {
+        else if (imageFile) {
             formData.append('imageFile', imageFile);
         }
 
@@ -701,7 +718,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // 이미지 HTML 생성
         let imageHTML = '';
         if (imageSrc) {
-            imageHTML = `<img src="${imageSrc}" alt="${description}" class="w-10 h-10 rounded object-cover">`;
+            imageHTML = `<img src="${imageSrc}" alt="${description}" class="w-10 h-10 rounded object-cover flex-shrink-0 cursor-zoom-in hover:ring-2 hover:ring-[#4ECDC4] transition-all" data-viewer-src="${imageSrc}">`;
         } else {
             imageHTML = `
                 <div class="w-10 h-10 rounded bg-gray-300 flex items-center justify-center flex-shrink-0">
@@ -747,6 +764,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // 목표 리스트 표시
         selectedGoalsList.classList.remove('hidden');
+
+        // 이미지 뷰어 이벤트 등록 (PhotoSwipe)
+        const viewerImg = goalItem.querySelector('[data-viewer-src]');
+        if (viewerImg) {
+            viewerImg.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const src = this.getAttribute('data-viewer-src');
+                openImageViewer(src);
+            });
+        }
 
         // 연도 변경 이벤트
         const yearSelect = goalItem.querySelector('.target-year-select');
@@ -907,17 +934,24 @@ document.addEventListener('DOMContentLoaded', function() {
         customGoalModal.classList.remove('flex');
         customGoalForm.reset();
         customGoalImageFile = null;
+        aiGeneratedFilename = null;
         if (customGoalImagePreviewUrl) {
             URL.revokeObjectURL(customGoalImagePreviewUrl);
             customGoalImagePreviewUrl = null;
         }
         customModalEditingId = null;
+        // AI 버튼 상태 초기화
+        resetAiButton();
         imagePreviewArea.innerHTML = `
-            <svg class="w-12 h-12 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-            </svg>
-            <p class="text-sm text-gray-500">클릭하여 이미지를 업로드하세요</p>
-            <p class="text-xs text-gray-400 mt-1">JPG, PNG, GIF (최대 5MB)</p>
+            <div class="py-4">
+                <div class="w-12 h-12 mx-auto mb-2 rounded-full bg-gradient-to-br from-[#4ECDC4]/20 to-[#2AA9A0]/20 flex items-center justify-center">
+                    <svg class="w-6 h-6 text-[#4ECDC4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                <p class="text-sm font-medium text-[#2D3047] mb-1">클릭하여 이미지를 업로드하세요</p>
+                <p class="text-xs text-gray-400">JPG, PNG, GIF (최대 5MB)</p>
+            </div>
         `;
     }
 
@@ -1035,14 +1069,98 @@ document.addEventListener('DOMContentLoaded', function() {
                 URL.revokeObjectURL(customGoalImagePreviewUrl);
             }
 
-            // 실제 File 객체 저장
+            // 실제 File 객체 저장 (AI 생성 이미지 초기화)
             customGoalImageFile = file;
+            aiGeneratedFilename = null;
             customGoalImagePreviewUrl = URL.createObjectURL(file);
 
             imagePreviewArea.innerHTML = `
-                <img src="${customGoalImagePreviewUrl}" alt="미리보기" class="max-h-40 mx-auto rounded">
+                <img src="${customGoalImagePreviewUrl}" alt="미리보기" class="max-h-52 w-auto mx-auto rounded-lg">
             `;
+
+            // AI 버튼 상태 초기화
+            resetAiButton();
         }
+    });
+
+    // AI 이미지 생성 버튼
+    const aiGenerateBtn = document.getElementById('ai-generate-image-btn');
+    const aiBtnIcon = document.getElementById('ai-btn-icon');
+    const aiBtnText = document.getElementById('ai-btn-text');
+    const aiGenerateHint = document.getElementById('ai-generate-hint');
+
+    function resetAiButton() {
+        aiBtnIcon.textContent = '✨';
+        aiBtnIcon.classList.remove('animate-spin');
+        aiBtnText.textContent = 'AI로 이미지 생성하기';
+        aiGenerateBtn.disabled = false;
+        aiGenerateHint.textContent = '설명을 입력하면 AI가 이미지를 만들어줍니다';
+        aiGenerateHint.classList.remove('text-green-500');
+        aiGenerateHint.classList.add('text-gray-300');
+    }
+
+    aiGenerateBtn.addEventListener('click', function() {
+        const description = customGoalDescription.value.trim();
+        if (!description) {
+            alert('목표 설명을 먼저 입력해주세요.');
+            customGoalDescription.focus();
+            return;
+        }
+
+        // 로딩 상태
+        aiGenerateBtn.disabled = true;
+        aiBtnIcon.innerHTML = '<svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+        aiBtnText.textContent = '생성 중...';
+        aiGenerateHint.textContent = '10~30초 정도 소요됩니다';
+        aiGenerateHint.classList.remove('text-green-500');
+        aiGenerateHint.classList.add('text-gray-300');
+
+        fetch('{{ route("mypage.mapping.generate-image") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ description: description })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // 기존 파일 업로드 초기화
+                customGoalImageFile = null;
+                if (customGoalImagePreviewUrl) {
+                    URL.revokeObjectURL(customGoalImagePreviewUrl);
+                }
+
+                // AI 생성 이미지로 설정
+                aiGeneratedFilename = data.filename;
+                customGoalImagePreviewUrl = data.image_url;
+
+                // 미리보기 업데이트
+                imagePreviewArea.innerHTML = `
+                    <div class="relative">
+                        <img src="${data.image_url}" alt="AI 생성 이미지" class="max-h-52 w-auto mx-auto rounded-lg">
+                        <div class="absolute top-2 right-2 bg-[#7C3AED] text-white text-xs px-2 py-0.5 rounded-full font-medium shadow-sm">AI ✨</div>
+                    </div>
+                `;
+
+                // 성공 상태
+                aiBtnIcon.textContent = '✅';
+                aiBtnText.textContent = '생성 완료!';
+                aiGenerateHint.textContent = '아래 추가하기 버튼을 눌러 저장하세요';
+                aiGenerateHint.classList.remove('text-gray-300');
+                aiGenerateHint.classList.add('text-green-500');
+                aiGenerateBtn.disabled = false;
+            } else {
+                alert(data.message || '이미지 생성에 실패했습니다.');
+                resetAiButton();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('이미지 생성 중 오류가 발생했습니다.');
+            resetAiButton();
+        });
     });
 
     // 커스텀 목표 추가/편집 폼 제출
@@ -1074,7 +1192,7 @@ document.addEventListener('DOMContentLoaded', function() {
             addGoalToList(tempCustomId, description, customGoalImagePreviewUrl);
             updateSelectedCount();
 
-            // AJAX로 즉시 저장하고 실제 ID를 받아 처리 (파일 객체 전달)
+            // AJAX로 즉시 저장하고 실제 ID를 받아 처리 (파일 객체 또는 AI 생성 파일명 전달)
             saveSingleGoal(tempCustomId, description, selectedYear, 'add', customGoalImageFile, function(data) {
                 if (data.mi_idx) {
                     const realId = data.mi_idx.toString();
@@ -1118,7 +1236,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         restoreSelectedStates();
                     }
                 }
-            });
+            }, aiGeneratedFilename);
         } else if (customModalMode === 'edit') {
             // 편집 모드
             const editingId = customModalEditingId;
@@ -1188,6 +1306,42 @@ document.addEventListener('DOMContentLoaded', function() {
             closeCustomModal();
         }
     });
+    // 이미지 뷰어 (PhotoSwipe 활용)
+    function openImageViewer(src) {
+        const tempImg = new Image();
+        tempImg.onload = function() {
+            const pswp = new PhotoSwipe({
+                dataSource: [{
+                    src: src,
+                    width: this.naturalWidth || 800,
+                    height: this.naturalHeight || 800
+                }],
+                index: 0,
+                bgOpacity: 0.9,
+                showHideOpacity: true,
+                initialZoomLevel: 'fit',
+                secondaryZoomLevel: 1.5,
+                maxZoomLevel: 3
+            });
+            pswp.init();
+        };
+        tempImg.onerror = function() {
+            // 이미지 로드 실패 시 기본 크기로 열기
+            const pswp = new PhotoSwipe({
+                dataSource: [{
+                    src: src,
+                    width: 800,
+                    height: 800
+                }],
+                index: 0,
+                bgOpacity: 0.9,
+                showHideOpacity: true,
+                initialZoomLevel: 'fit'
+            });
+            pswp.init();
+        };
+        tempImg.src = src;
+    }
 });
 </script>
 

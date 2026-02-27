@@ -274,6 +274,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/mypage/mapping', [App\Http\Controllers\MyPageController::class, 'mapping'])->name('mypage.mapping');
     Route::get('/mypage/mapping/items', [App\Http\Controllers\MyPageController::class, 'getMappingItems'])->name('mypage.mapping.items');
     Route::post('/mypage/mapping/save', [App\Http\Controllers\MyPageController::class, 'saveMapping'])->name('mypage.mapping.save');
+    Route::post('/mypage/mapping/generate-image', [App\Http\Controllers\MyPageController::class, 'generateMappingImage'])->name('mypage.mapping.generate-image');
     Route::get('/mypage/vision-board', [App\Http\Controllers\MyPageController::class, 'visionBoard'])->name('mypage.vision-board');
     Route::post('/mypage/vision-board/save', [App\Http\Controllers\MyPageController::class, 'saveVisionBoard'])->name('mypage.vision-board.save');
     Route::get('/mypage/liked-content', [App\Http\Controllers\MyPageController::class, 'likedContent'])->name('mypage.liked-content');
