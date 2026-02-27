@@ -26,9 +26,6 @@ services:
       - DB_DATABASE=${MYSQL_DATABASE}
       - DB_USERNAME=${MYSQL_USER}
       - DB_PASSWORD=${MYSQL_PASSWORD}
-      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-      - GOOGLE_REDIRECT_URI=${GOOGLE_REDIRECT_URI}
     command: >
       sh -c "
       mkdir -p storage/logs bootstrap/cache &&
