@@ -33,6 +33,7 @@ services:
       chmod -R 775 storage bootstrap/cache &&
       composer install --no-interaction --no-dev --optimize-autoloader &&
       php artisan storage:link &&
+      php artisan migrate --force &&
       php-fpm7.2 -F
       "
 
