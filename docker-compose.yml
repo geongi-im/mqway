@@ -57,7 +57,7 @@ services:
       MYSQL_COLLATION: utf8mb4_unicode_ci
       TZ: Asia/Seoul
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost 2>/dev/null || exit 1"]
       interval: 5s
       timeout: 3s
       retries: 10
