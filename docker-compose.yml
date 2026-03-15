@@ -26,6 +26,8 @@ services:
       - DB_DATABASE=${MYSQL_DATABASE}
       - DB_USERNAME=${MYSQL_USER}
       - DB_PASSWORD=${MYSQL_PASSWORD}
+    depends_on:
+      - mysql
     command: >
       sh -c "
       mkdir -p storage/logs bootstrap/cache &&
@@ -33,6 +35,10 @@ services:
       chmod -R 775 storage bootstrap/cache &&
       composer install --no-interaction --no-dev --optimize-autoloader &&
       php artisan storage:link &&
+      echo 'Waiting for MySQL...' &&
+      until php -r \"try { new PDO('mysql:host='.\\$$_ENV['DB_HOST'].';dbname='.\\$$_ENV['DB_DATABASE'], \\$$_ENV['DB_USERNAME'], \\$$_ENV['DB_PASSWORD']); echo 'Connected'; exit(0); } catch(Exception \\$$e) { exit(1); }\" 2>/dev/null; do
+        sleep 2;
+      done &&
       php artisan migrate --force &&
       php-fpm7.2 -F
       "
