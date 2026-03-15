@@ -27,7 +27,8 @@ services:
       - DB_USERNAME=${MYSQL_USER}
       - DB_PASSWORD=${MYSQL_PASSWORD}
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     command: >
       sh -c "
       mkdir -p storage/logs bootstrap/cache &&
@@ -35,10 +36,6 @@ services:
       chmod -R 775 storage bootstrap/cache &&
       composer install --no-interaction --no-dev --optimize-autoloader &&
       php artisan storage:link &&
-      echo 'Waiting for MySQL...' &&
-      until php -r \"try { new PDO('mysql:host='.\\$$_ENV['DB_HOST'].';dbname='.\\$$_ENV['DB_DATABASE'], \\$$_ENV['DB_USERNAME'], \\$$_ENV['DB_PASSWORD']); echo 'Connected'; exit(0); } catch(Exception \\$$e) { exit(1); }\" 2>/dev/null; do
-        sleep 2;
-      done &&
       php artisan migrate --force &&
       php-fpm7.2 -F
       "
@@ -59,4 +56,9 @@ services:
       MYSQL_CHARSET: utf8mb4
       MYSQL_COLLATION: utf8mb4_unicode_ci
       TZ: Asia/Seoul
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
