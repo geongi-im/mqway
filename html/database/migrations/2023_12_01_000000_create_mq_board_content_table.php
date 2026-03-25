@@ -13,7 +13,8 @@ class CreateMqBoardContentTable extends Migration
      */
     public function up()
     {
-        Schema::create('mq_board_content', function (Blueprint $table) {
+        if (!Schema::hasTable('mq_board_content')) {
+            Schema::create('mq_board_content', function (Blueprint $table) {
             $table->increments('idx');
             $table->string('mq_title');
             $table->text('mq_content');
@@ -27,6 +28,7 @@ class CreateMqBoardContentTable extends Migration
             $table->timestamp('mq_reg_date')->nullable();
             $table->timestamp('mq_update_date')->nullable();
         });
+        }
     }
 
     /**

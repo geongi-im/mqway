@@ -11,7 +11,8 @@ class CreateMqMappingItemTable extends Migration
      */
     public function up(): void
     {
-        Schema::create('mq_mapping_item', function (Blueprint $table) {
+        if (!Schema::hasTable('mq_mapping_item')) {
+            Schema::create('mq_mapping_item', function (Blueprint $table) {
             $table->bigIncrements('idx');
             $table->string('mq_category', 50)->comment('카테고리 creation(창작), adventure(탐험), challenge(도전), growth(성장), experience(경험), custom(기타)');
             $table->text('mq_image')->nullable()->comment('저장된 이미지 파일명');
@@ -20,6 +21,7 @@ class CreateMqMappingItemTable extends Migration
             $table->timestamp('mq_reg_date')->useCurrent();
             $table->timestamp('mq_update_date')->nullable();
         });
+        }
     }
 
     /**

@@ -13,7 +13,8 @@ class CreateMqBoardResearchTable extends Migration
      */
     public function up()
     {
-        Schema::create('mq_board_research', function (Blueprint $table) {
+        if (!Schema::hasTable('mq_board_research')) {
+            Schema::create('mq_board_research', function (Blueprint $table) {
             $table->increments('idx');
             $table->string('mq_title');
             $table->text('mq_content');
@@ -27,6 +28,7 @@ class CreateMqBoardResearchTable extends Migration
             $table->timestamp('mq_reg_date')->nullable();
             $table->timestamp('mq_update_date')->nullable();
         });
+        }
     }
 
     /**

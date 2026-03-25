@@ -13,7 +13,8 @@ class CreateMqNewsScrapTable extends Migration
      */
     public function up()
     {
-        Schema::create('mq_news_scrap', function (Blueprint $table) {
+        if (!Schema::hasTable('mq_news_scrap')) {
+            Schema::create('mq_news_scrap', function (Blueprint $table) {
             $table->bigIncrements('idx');
             $table->string('mq_user_id', 100)->comment('작성자 ID');
             $table->string('mq_title', 500)->comment('뉴스 제목');
@@ -30,6 +31,7 @@ class CreateMqNewsScrapTable extends Migration
             $table->index('mq_status');
             $table->index('mq_reg_date');
         });
+        }
     }
 
     /**

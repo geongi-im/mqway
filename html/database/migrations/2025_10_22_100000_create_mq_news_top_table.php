@@ -13,7 +13,8 @@ class CreateMqNewsTopTable extends Migration
      */
     public function up()
     {
-        Schema::create('mq_news_top', function (Blueprint $table) {
+        if (!Schema::hasTable('mq_news_top')) {
+            Schema::create('mq_news_top', function (Blueprint $table) {
             $table->bigIncrements('idx');
             $table->date('mq_news_date')->comment('뉴스 날짜');
             $table->string('mq_company', 100)->comment('신문사명');
@@ -27,6 +28,7 @@ class CreateMqNewsTopTable extends Migration
             $table->index('mq_news_date');
             $table->index(['mq_news_date', 'mq_status']);
         });
+        }
     }
 
     /**

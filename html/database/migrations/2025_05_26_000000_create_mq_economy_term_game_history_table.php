@@ -13,7 +13,8 @@ class CreateMqEconomyTermGameHistoryTable extends Migration
      */
     public function up()
     {
-        Schema::create('mq_economy_term_game_history', function (Blueprint $table) {
+        if (!Schema::hasTable('mq_economy_term_game_history')) {
+            Schema::create('mq_economy_term_game_history', function (Blueprint $table) {
             $table->bigIncrements('idx'); // idx(인덱스) - bigIncrements는 unsignedBigInteger PK, auto-increment
             $table->string('mq_user_id', 100);
             $table->integer('mq_total_count'); // mq_total_count(제출 문제 총 갯수)
@@ -25,6 +26,7 @@ class CreateMqEconomyTermGameHistoryTable extends Migration
             $table->index('mq_user_id');
             $table->index('mq_reg_date');
         });
+        }
     }
 
     /**

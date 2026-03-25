@@ -11,7 +11,8 @@ class CreateMqLifeSearchTable extends Migration
      */
     public function up(): void
     {
-        Schema::create('mq_life_search', function (Blueprint $table) {
+        if (!Schema::hasTable('mq_life_search')) {
+            Schema::create('mq_life_search', function (Blueprint $table) {
             $table->increments('idx');  // Auto-increment primary key
             $table->string('mq_user_id');  // 사용자 ID
             $table->string('mq_category');  // 카테고리
@@ -21,6 +22,7 @@ class CreateMqLifeSearchTable extends Migration
             $table->timestamp('mq_reg_date')->useCurrent();  // 등록일
             $table->timestamp('mq_update_date')->nullable();  // 수정일
         });
+        }
     }
 
     /**

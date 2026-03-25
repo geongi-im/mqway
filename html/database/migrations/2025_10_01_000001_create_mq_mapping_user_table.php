@@ -11,7 +11,8 @@ class CreateMqMappingUserTable extends Migration
      */
     public function up(): void
     {
-        Schema::create('mq_mapping_user', function (Blueprint $table) {
+        if (!Schema::hasTable('mq_mapping_user')) {
+            Schema::create('mq_mapping_user', function (Blueprint $table) {
             $table->bigIncrements('idx');
             $table->string('mq_user_id', 100)->comment('회원 아이디');
             $table->unsignedBigInteger('mi_idx')->comment('매핑 아이템 ID (mq_mapping_item의 idx)');
@@ -31,6 +32,7 @@ class CreateMqMappingUserTable extends Migration
                   ->on('mq_mapping_item')
                   ->onDelete('cascade');
         });
+        }
     }
 
     /**
