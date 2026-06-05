@@ -13,10 +13,17 @@ class AddThumbnailFieldsToMqBoardContentTable extends Migration
      */
     public function up()
     {
-        Schema::table('mq_board_content', function (Blueprint $table) {
-            $table->text('mq_thumbnail_image')->nullable()->after('mq_original_image');
-            $table->text('mq_thumbnail_original')->nullable()->after('mq_thumbnail_image');
-        });
+        if (!Schema::hasColumn('mq_board_content', 'mq_thumbnail_image')) {
+            Schema::table('mq_board_content', function (Blueprint $table) {
+                $table->text('mq_thumbnail_image')->nullable()->after('mq_original_image');
+            });
+        }
+
+        if (!Schema::hasColumn('mq_board_content', 'mq_thumbnail_original')) {
+            Schema::table('mq_board_content', function (Blueprint $table) {
+                $table->text('mq_thumbnail_original')->nullable()->after('mq_thumbnail_image');
+            });
+        }
     }
 
     /**
@@ -26,8 +33,5 @@ class AddThumbnailFieldsToMqBoardContentTable extends Migration
      */
     public function down()
     {
-        Schema::table('mq_board_content', function (Blueprint $table) {
-            $table->dropColumn(['mq_thumbnail_image', 'mq_thumbnail_original']);
-        });
     }
 }

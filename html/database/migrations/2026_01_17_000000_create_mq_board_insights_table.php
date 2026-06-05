@@ -13,24 +13,26 @@ class CreateMqBoardInsightsTable extends Migration
      */
     public function up()
     {
-        Schema::create('mq_board_insights', function (Blueprint $table) {
-            $table->increments('idx');
-            $table->string('mq_title');
-            $table->text('mq_content');
-            $table->string('mq_category');
-            $table->string('mq_user_id');
-            $table->text('mq_image')->nullable();
-            $table->text('mq_original_image')->nullable();
-            $table->integer('mq_view_cnt')->default(0);
-            $table->integer('mq_like_cnt')->default(0);
-            $table->tinyInteger('mq_status')->default(1);
-            $table->timestamp('mq_reg_date')->nullable();
-            $table->timestamp('mq_update_date')->nullable();
-            
-            $table->index('mq_category');
-            $table->index('mq_user_id');
-            $table->index('mq_status');
-        });
+        if (!Schema::hasTable('mq_board_insights')) {
+            Schema::create('mq_board_insights', function (Blueprint $table) {
+                $table->increments('idx');
+                $table->string('mq_title');
+                $table->text('mq_content');
+                $table->string('mq_category');
+                $table->string('mq_user_id');
+                $table->text('mq_image')->nullable();
+                $table->text('mq_original_image')->nullable();
+                $table->integer('mq_view_cnt')->default(0);
+                $table->integer('mq_like_cnt')->default(0);
+                $table->tinyInteger('mq_status')->default(1);
+                $table->timestamp('mq_reg_date')->nullable();
+                $table->timestamp('mq_update_date')->nullable();
+
+                $table->index('mq_category');
+                $table->index('mq_user_id');
+                $table->index('mq_status');
+            });
+        }
     }
 
     /**

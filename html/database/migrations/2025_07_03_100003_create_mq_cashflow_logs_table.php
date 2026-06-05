@@ -13,7 +13,8 @@ class CreateMqCashflowLogsTable extends Migration
      */
     public function up()
     {
-        Schema::create('mq_cashflow_logs', function (Blueprint $table) {
+        if (!Schema::hasTable('mq_cashflow_logs')) {
+            Schema::create('mq_cashflow_logs', function (Blueprint $table) {
             // 기본 정보
             $table->bigIncrements('idx')->comment('로그 고유 식별자');
             $table->unsignedBigInteger('mq_game_idx')->comment('게임 테이블 외래키');
@@ -28,7 +29,8 @@ class CreateMqCashflowLogsTable extends Migration
             $table->index('mq_game_idx', 'idx_game_idx'); // 외래키를 위한 인덱스
             $table->foreign('mq_game_idx', 'fk_logs_game_idx')->references('idx')->on('mq_cashflow_games')->onDelete('cascade');
             $table->index(['mq_game_idx', 'mq_reg_date'], 'idx_logs_game_date');
-        });
+            });
+        }
     }
 
     /**

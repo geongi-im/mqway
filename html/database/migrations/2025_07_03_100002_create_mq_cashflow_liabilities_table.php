@@ -13,7 +13,8 @@ class CreateMqCashflowLiabilitiesTable extends Migration
      */
     public function up()
     {
-        Schema::create('mq_cashflow_liabilities', function (Blueprint $table) {
+        if (!Schema::hasTable('mq_cashflow_liabilities')) {
+            Schema::create('mq_cashflow_liabilities', function (Blueprint $table) {
             // 기본 정보
             $table->bigIncrements('idx')->comment('부채 고유 식별자');
             $table->unsignedBigInteger('mq_game_idx')->comment('게임 테이블 외래키');
@@ -37,7 +38,8 @@ class CreateMqCashflowLiabilitiesTable extends Migration
             $table->foreign('mq_game_idx', 'fk_liabilities_game_idx')->references('idx')->on('mq_cashflow_games')->onDelete('cascade');
             $table->index(['mq_game_idx', 'mq_liability_type'], 'idx_liabilities_game_type');
             $table->index('mq_property_id', 'idx_liabilities_property');
-        });
+            });
+        }
     }
 
     /**
