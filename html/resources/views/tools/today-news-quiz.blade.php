@@ -106,7 +106,7 @@
                 <div class="rounded-2xl border border-white/12 bg-white/10 p-5 backdrop-blur">
                     <div>
                         <div>
-                            <p class="text-sm font-semibold text-white/62">오늘 기준일</p>
+                            <p class="text-sm font-semibold text-white/62">뉴스 기준일</p>
                             <p class="mt-1 font-outfit text-2xl font-extrabold">{{ $displayDate }}</p>
                         </div>
                     </div>
@@ -120,7 +120,7 @@
                         </button>
                     @else
                         <button type="button" disabled class="mt-5 flex w-full cursor-not-allowed items-center justify-center rounded-xl bg-white/20 px-6 py-4 text-base font-extrabold text-white/60">
-                            오늘 퀴즈 준비중
+                            퀴즈 준비중
                         </button>
                     @endif
                 </div>
@@ -134,12 +134,12 @@
                 <div class="news-quiz-card rounded-2xl bg-white p-6 md:p-8">
                     <div class="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
                         <div>
-                            <p class="text-sm font-bold text-[#4ECDC4]">오늘의 도전</p>
+                            <p class="text-sm font-bold text-[#4ECDC4]">랜덤 도전</p>
                             <h2 class="mt-2 text-2xl font-extrabold text-[#2D3047]">
                                 @if($todayQuiz)
                                     뉴스 헤드라인을 읽고 핵심 키워드를 맞혀보세요.
                                 @else
-                                    오늘 등록된 뉴스 퀴즈가 없습니다.
+                                    등록된 뉴스 퀴즈가 없습니다.
                                 @endif
                             </h2>
                         </div>
@@ -182,7 +182,7 @@
                     </div>
                     <p class="mt-4 text-sm leading-relaxed text-gray-500">
                         @if($isLoggedIn)
-                            오늘 퀴즈를 완료하면 연속 참여일이 반영됩니다.
+                            퀴즈를 완료하면 연속 참여일이 반영됩니다.
                         @else
                             비회원도 퀴즈를 풀 수 있지만 참여 기록은 저장되지 않습니다.
                         @endif
@@ -202,7 +202,7 @@
                 <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div>
                         <p class="text-sm font-bold text-[#FFB347]">랭킹</p>
-                        <h2 class="mt-2 text-2xl font-extrabold text-[#2D3047]">오늘의 뉴스 퀴즈 랭킹</h2>
+                        <h2 class="mt-2 text-2xl font-extrabold text-[#2D3047]">뉴스 퀴즈 랭킹</h2>
                     </div>
                     <span class="rounded-full bg-[#F8F9FB] px-4 py-2 text-sm font-semibold text-gray-500">정답 · 연속 참여일 기준</span>
                 </div>
@@ -223,7 +223,7 @@
                         </div>
                     @empty
                         <div class="rounded-xl border border-dashed border-gray-200 bg-[#FBFCFE] px-4 py-8 text-center text-sm font-semibold text-gray-400">
-                            아직 오늘의 랭킹 기록이 없습니다.
+                            아직 랭킹 기록이 없습니다.
                         </div>
                     @endforelse
                 </div>

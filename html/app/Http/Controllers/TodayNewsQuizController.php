@@ -16,17 +16,17 @@ class TodayNewsQuizController extends Controller
     {
         $today = now()->toDateString();
         $quiz = NewsQuiz::active()
-            ->whereDate('mq_news_date', $today)
-            ->orderBy('idx')
+            ->inRandomOrder()
             ->first();
 
         $todayQuiz = $quiz ? $this->formatQuizForView($quiz) : null;
-        $rankingItems = $this->getRankingItems($today);
+        $selectedNewsDate = $todayQuiz ? $todayQuiz['mq_news_date'] : $today;
+        $rankingItems = $todayQuiz ? $this->getRankingItems($selectedNewsDate) : [];
 
         $streakInfo = Auth::check()
             ? [
                 'days' => $this->calculateCurrentStreak(Auth::user()->mq_user_id),
-                'played_today' => $this->hasPlayedToday(Auth::user()->mq_user_id, $today),
+                'played_today' => $this->hasPlayedDate(Auth::user()->mq_user_id, $today),
             ]
             : null;
 
@@ -59,9 +59,10 @@ class TodayNewsQuizController extends Controller
 
         $userId = Auth::user()->mq_user_id;
         $newsDate = $this->formatDate($quiz->mq_news_date);
+        $playedDate = now()->toDateString();
 
         try {
-            $streakDays = $this->calculateStreakForDate($userId, $newsDate);
+            $streakDays = $this->calculateStreakForDate($userId, $playedDate);
 
             $history = NewsQuizHistory::firstOrNew([
                 'mq_user_id' => $userId,
@@ -202,7 +203,8 @@ class TodayNewsQuizController extends Controller
     {
         return NewsQuizHistory::where('mq_user_id', $userId)
             ->where('mq_status', 1)
-            ->pluck('mq_news_date')
+            ->selectRaw('DATE(COALESCE(mq_update_date, mq_reg_date)) as played_date')
+            ->pluck('played_date')
             ->map(function ($date) {
                 return $this->formatDate($date);
             })
@@ -214,11 +216,11 @@ class TodayNewsQuizController extends Controller
             ->all();
     }
 
-    private function hasPlayedToday($userId, $today)
+    private function hasPlayedDate($userId, $date)
     {
         return NewsQuizHistory::where('mq_user_id', $userId)
             ->where('mq_status', 1)
-            ->whereDate('mq_news_date', $today)
+            ->whereRaw('DATE(COALESCE(mq_update_date, mq_reg_date)) = ?', [$date])
             ->exists();
     }
 
