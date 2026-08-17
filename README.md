@@ -111,6 +111,9 @@ mqway/
 # Docker Compose 프로젝트 이름
 COMPOSE_PROJECT_NAME=mqway
 
+# 웹서버 설정 (docker-compose.yml이 ${WEB_PORT}로 참조하므로 필수)
+WEB_PORT=8080
+
 # MySQL 설정
 MYSQL_HOSTNAME=mysql
 MYSQL_PORT=3306
@@ -130,7 +133,7 @@ APP_NAME=MQWAY
 APP_ENV=local
 APP_KEY=base64:your_app_key
 APP_DEBUG=true
-APP_URL=http://localhost
+APP_URL=http://localhost:8080
 
 # 데이터베이스 설정
 DB_CONNECTION=mysql
@@ -148,33 +151,56 @@ GOOGLE_REDIRECT_URI=${APP_URL}/auth/google/callback
 
 ### 2. Docker 컨테이너 실행
 
+**로컬 개발 환경 (Windows/WSL2)**
+
 ```bash
 # 컨테이너 빌드 및 실행
-docker-compose up -d
+docker compose -f docker-compose.yml -f docker-compose.local.yml up -d
 
 # 컨테이너 확인
-docker-compose ps
+docker compose ps
+```
+
+`docker-compose.local.yml`은 `vendor`, `storage/framework`, `bootstrap/cache`를
+named volume으로 옮겨 WSL2의 9p 파일시스템 왕복을 없애고, php가 준비될 때까지
+nginx를 대기시켜 기동 중 502를 방지합니다. **첫 실행은 vendor volume이 비어 있어
+`composer install` 전체가 돌기 때문에 수 분 걸립니다.**
+
+캐시를 초기화할 때는 volume까지 함께 지워야 합니다 (`vendor`와 `bootstrap/cache`가
+따로 남으면 부팅 시 오류가 날 수 있음):
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.local.yml down -v
+```
+
+**서버 (Ubuntu)**
+
+서버는 bind mount가 native ext4라 위 최적화의 이득이 없고, named volume이 호스트
+파일을 가려 세션 초기화·vendor 재설치 등 부작용만 생깁니다. `docker-compose.local.yml`은
+적용하지 마세요.
+
+```bash
+docker compose up -d
+docker compose ps
 ```
 
 ### 3. Laravel 초기 설정
+
+`composer install`, `php artisan storage:link`, `php artisan migrate --force`는
+컨테이너 기동 시 `docker-compose.yml`의 `command`가 매번 자동 실행하므로
+수동으로 할 필요가 없습니다. 최초 1회 앱 키 생성만 직접 해주면 됩니다.
 
 ```bash
 # PHP 컨테이너 접속
 docker exec -it php_mqway bash
 
-# 애플리케이션 키 생성
+# 애플리케이션 키 생성 (html/.env의 APP_KEY가 비어 있을 때만)
 php artisan key:generate
-
-# 데이터베이스 마이그레이션
-php artisan migrate
-
-# 스토리지 링크 생성
-php artisan storage:link
 ```
 
 ### 4. 접속
 
-브라우저에서 `http://localhost`로 접속합니다.
+브라우저에서 `http://localhost:8080`으로 접속합니다. (포트는 `.env`의 `WEB_PORT`)
 
 ## 주요 시스템 구성
 

@@ -1,0 +1,63 @@
+# 로컬(Windows/WSL2) 전용 오버레이. 서버에는 적용하지 않는다.
+#
+# 사용법:
+#   docker compose -f docker-compose.yml -f docker-compose.local.yml up -d
+#
+# 서버(Ubuntu)는 bind mount가 native ext4라 아래 최적화의 이득이 없고,
+# named volume이 호스트 파일을 가려서 세션 초기화/vendor 재설치 같은
+# 부작용만 남는다. 그래서 파일명을 override가 아닌 local로 두어
+# compose가 자동 병합하지 않게 한다. (override.yml이면 서버에서 git pull만
+# 해도 자동 적용된다.)
+
+services:
+  # php가 9000을 열 때까지 nginx를 대기시켜 기동 중 502를 없앤다.
+  nginx:
+    depends_on:
+      php:
+        condition: service_healthy
+
+  php:
+    volumes:
+      # 직접 편집하지 않는 의존성/생성물만 named volume(리눅스 VM의 ext4)에 배치해
+      # 9p 왕복을 없앤다. 소스(./html)는 base의 bind mount를 그대로 쓴다.
+      # storage/logs는 일부러 제외 — 호스트에서 로그를 바로 읽기 위해.
+      - vendor:/var/www/html/vendor
+      - framework_cache:/var/www/html/storage/framework
+      - bootstrap_cache:/var/www/html/bootstrap/cache
+      - composer_cache:/root/.composer
+    environment:
+      # composer 2.2는 COMPOSER_HOME을 디렉터리 존재 여부로 탐색하므로
+      # /root/.config가 생기면 캐시가 조용히 volume 밖으로 이동한다. 명시적으로 고정.
+      - COMPOSER_CACHE_DIR=/root/.composer/cache
+    # ┌─────────────────────────────────────────────────────────────────────┐
+    # │ 주의: compose는 command를 병합하지 않고 통째로 교체한다.            │
+    # │ 그래서 base의 command를 여기 복제해 둘 수밖에 없다.                 │
+    # │ docker-compose.yml의 command를 수정하면 이쪽도 함께 고칠 것.        │
+    # └─────────────────────────────────────────────────────────────────────┘
+    # base와 다른 점은 mkdir 대상뿐이다. storage/framework를 named volume으로
+    # 덮으면 빈 상태로 마운트되어 호스트의 cache/sessions/views가 가려지므로,
+    # Laravel이 첫 요청에서 죽지 않도록 하위 디렉터리를 직접 만들어 준다.
+    command: >
+      sh -c "
+      mkdir -p storage/logs storage/framework/cache/data storage/framework/sessions storage/framework/views bootstrap/cache &&
+      chown -R www-data:www-data storage bootstrap/cache &&
+      chmod -R 775 storage bootstrap/cache &&
+      composer install --no-interaction --no-dev --optimize-autoloader &&
+      php artisan storage:link &&
+      php artisan migrate --force &&
+      php-fpm7.2 -F
+      "
+    # composer install + migrate가 끝난 뒤에야 php-fpm이 9000을 연다.
+    # 첫 기동은 vendor volume이 비어 있어 full composer install이 걸리므로 넉넉히 둔다.
+    healthcheck:
+      test: ["CMD", "bash", "-c", "cat < /dev/null > /dev/tcp/127.0.0.1/9000"]
+      interval: 5s
+      timeout: 3s
+      start_period: 600s
+      retries: 3
+
+volumes:
+  vendor:
+  framework_cache:
+  bootstrap_cache:
+  composer_cache:

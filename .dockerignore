@@ -1,0 +1,13 @@
+# 빌드 컨텍스트 최소화.
+#
+# Dockerfile이 컨텍스트에서 가져가는 건 set_permissions.sh 하나뿐이다
+# (COPY set_permissions.sh). 소스(./html)와 DB(./data/mysql)는 빌드가 아니라
+# docker-compose의 bind mount로 런타임에 붙으므로 컨텍스트에 있을 필요가 없다.
+#
+# 그래서 전부 제외하고 필요한 것만 되살린다. 컨텍스트가 292MB -> 1KB 미만이 된다.
+# (data/mysql 214MB + html/vendor 27MB가 매 빌드마다 daemon으로 전송되고 있었음)
+#
+# 주의: Dockerfile에 COPY를 추가하면 아래에 !예외를 함께 추가해야 한다.
+#       빼먹으면 "not found in build context"로 빌드가 명확히 실패한다.
+*
+!set_permissions.sh
