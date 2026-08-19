@@ -112,7 +112,8 @@ mqway/
 COMPOSE_PROJECT_NAME=mqway
 
 # 웹서버 설정 (docker-compose.yml이 ${WEB_PORT}로 참조하므로 필수)
-WEB_PORT=8080
+# 호스트에서 80이 이미 점유되어 있으면 8080 등으로 바꾸고 APP_URL도 함께 맞출 것
+WEB_PORT=80
 
 # MySQL 설정
 MYSQL_HOSTNAME=mysql
@@ -133,7 +134,7 @@ APP_NAME=MQWAY
 APP_ENV=local
 APP_KEY=base64:your_app_key
 APP_DEBUG=true
-APP_URL=http://localhost:8080
+APP_URL=http://localhost
 
 # 데이터베이스 설정
 DB_CONNECTION=mysql
@@ -200,7 +201,7 @@ php artisan key:generate
 
 ### 4. 접속
 
-브라우저에서 `http://localhost:8080`으로 접속합니다. (포트는 `.env`의 `WEB_PORT`)
+브라우저에서 `http://localhost`로 접속합니다. (포트는 `.env`의 `WEB_PORT`)
 
 ## 주요 시스템 구성
 
