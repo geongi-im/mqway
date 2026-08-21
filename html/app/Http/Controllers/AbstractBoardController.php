@@ -675,7 +675,7 @@ abstract class AbstractBoardController extends Controller
     /**
      * 카테고리 목록 가져오기 (Trait 사용)
      */
-    protected function getCategories($boardType)
+    protected function getCategories($boardType = null)
     {
         if ($boardType && isset($this->fixedCategories[$boardType])) {
             return $this->fixedCategories[$boardType];
