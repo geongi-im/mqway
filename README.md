@@ -178,24 +178,21 @@ php artisan storage:link
 
 ### 5. 마이그레이션 (배포 시)
 
-컨테이너 이름은 `.env`의 `COMPOSE_PROJECT_NAME`에서 자동으로 읽습니다.
+컨테이너 이름은 `php_<COMPOSE_PROJECT_NAME>` 형식입니다. (기본값: `php_mqway`)
 
 ```bash
-# 대기 중인 마이그레이션 실행 (실행 전/후 상태를 함께 출력)
-./migrate.sh
-
-# 적용 상태만 확인
-./migrate.sh status
-
-# 마지막 배치 되돌리기 (확인 프롬프트 있음)
-./migrate.sh rollback
-```
-
-스크립트를 쓰지 않고 직접 실행할 경우:
-
-```bash
+# 대기 중인 마이그레이션 실행
 docker exec php_mqway php artisan migrate --force
+
+# 적용 상태 확인
+docker exec php_mqway php artisan migrate:status
+
+# 마지막 배치 되돌리기
+docker exec php_mqway php artisan migrate:rollback --force
 ```
+
+php 컨테이너는 시작 시 `php artisan migrate --force`를 자동 실행하므로,
+컨테이너를 재시작하면 마이그레이션도 함께 적용됩니다.
 
 ## 주요 시스템 구성
 
