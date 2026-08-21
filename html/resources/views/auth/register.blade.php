@@ -57,7 +57,7 @@
                                 <span class="ml-3 text-sm text-secondary">(선택) 마케팅 정보 수신에 동의합니다</span>
                             </label>
                         </div>
-                        <p class="text-xs text-gray-500 ml-7">이벤트, 혜택 등의 정보를 이메일로 받아보실 수 있습니다. 동의하지 않아도 회원가입이 가능합니다.</p>
+                        <p class="text-xs text-gray-500 ml-7">이벤트, 혜택 등의 정보를 이메일 및 휴대폰(SMS)으로 받아보실 수 있습니다. 동의하지 않아도 회원가입이 가능합니다.</p>
                         @error('agree_marketing')
                             <p class="text-red-500 text-xs ml-7">{{ $message }}</p>
                         @enderror
