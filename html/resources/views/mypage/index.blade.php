@@ -86,7 +86,7 @@
             <div class="mb-6">
                 <label for="mq_profile_image" class="block text-sm font-semibold text-[#2D3047] mb-2">프로필 이미지</label>
                 <input type="file" id="mq_profile_image" name="mq_profile_image" accept=".png, .jpg, .jpeg, .gif" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4ECDC4] focus:border-transparent bg-gray-50 transition-all text-sm @error('mq_profile_image') border-red-500 @enderror">
-                <p class="text-xs text-gray-400 mt-2">JPG, PNG, GIF 파일만 업로드 가능합니다. (최대 2MB)</p>
+                <p class="text-xs text-gray-400 mt-2">JPG, PNG, GIF 파일만 업로드 가능합니다. (최대 5MB)</p>
                 @error('mq_profile_image')
                     <p class="text-red-500 text-xs mt-2">{{ $message }}</p>
                 @enderror

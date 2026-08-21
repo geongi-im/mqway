@@ -40,9 +40,12 @@ RUN mkdir -p /run/php && \
     sed -i 's/pm.max_spare_servers = 3/pm.max_spare_servers = 35/' /etc/php/7.2/fpm/pool.d/www.conf && \
     echo "pm.max_requests = 500" >> /etc/php/7.2/fpm/pool.d/www.conf
 
-# 업로드 관련 설정 (php.ini 기본 upload_max_filesize 2M -> 4M)
+# 업로드 관련 설정 (php.ini 기본값 upload_max_filesize 2M / post_max_size 8M)
+# 앱 제한은 파일당 5MB(max:5120)이므로 upload_max_filesize에 여유를 둬서
+# PHP가 아니라 Laravel 검증이 걸리도록 함. 다중 업로드 총량은 40M.
+# 순서: nginx 50M > post_max_size 40M > upload_max_filesize 6M > 앱 5MB
 # conf.d는 php.ini 이후에 로드되므로 여기 값이 우선 적용됨. fpm/cli 모두 동일하게 지정.
-RUN echo "upload_max_filesize = 4M" > /etc/php/7.2/fpm/conf.d/99-uploads.ini && echo "post_max_size = 8M" >> /etc/php/7.2/fpm/conf.d/99-uploads.ini && cp /etc/php/7.2/fpm/conf.d/99-uploads.ini /etc/php/7.2/cli/conf.d/99-uploads.ini
+RUN echo "upload_max_filesize = 6M" > /etc/php/7.2/fpm/conf.d/99-uploads.ini && echo "post_max_size = 40M" >> /etc/php/7.2/fpm/conf.d/99-uploads.ini && cp /etc/php/7.2/fpm/conf.d/99-uploads.ini /etc/php/7.2/cli/conf.d/99-uploads.ini
 
 # 기존 www-data 사용자 설정 부분 수정
 ARG USER_ID=1000

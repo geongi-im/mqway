@@ -436,7 +436,7 @@ abstract class AbstractBoardController extends Controller
             
             // 파일 유효성 검사
             $request->validate([
-                'upload' => 'required|image|max:2048'
+                'upload' => 'required|image|max:5120'
             ]);
             
             $originalName = $file->getClientOriginalName();
@@ -651,8 +651,8 @@ abstract class AbstractBoardController extends Controller
             'mq_title' => 'required|max:255',
             'mq_content' => 'required',
             'mq_category' => 'required|in:' . implode(',', $validCategories),
-            'mq_image.*' => 'nullable|image|max:2048',
-            'mq_thumbnail_image' => 'nullable|image|max:2048'
+            'mq_image.*' => 'nullable|image|max:5120',
+            'mq_thumbnail_image' => 'nullable|image|max:5120'
         ]);
     }
     

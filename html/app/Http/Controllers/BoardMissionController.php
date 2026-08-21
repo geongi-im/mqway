@@ -189,7 +189,7 @@ class BoardMissionController extends AbstractBoardController
             $file = $request->file('upload');
             
             $request->validate([
-                'upload' => 'required|image|max:2048'
+                'upload' => 'required|image|max:5120'
             ]);
             
             $originalName = $file->getClientOriginalName();
