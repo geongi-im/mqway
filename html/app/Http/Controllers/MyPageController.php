@@ -64,6 +64,8 @@ class MyPageController extends Controller
             'mq_user_email.required' => '이메일을 입력해주세요.',
             'mq_user_email.email' => '올바른 이메일 형식이 아닙니다.',
             'mq_user_name.required' => '이름을 입력해주세요.',
+            'mq_user_name.max' => '이름은 최대 255자까지 가능합니다.',
+            'mq_birthday.date' => '올바른 날짜 형식이 아닙니다.',
             'mq_phone.regex' => '올바른 휴대폰번호 형식이 아닙니다. (예: 010-1234-5678)',
             'mq_phone.max' => '휴대폰번호는 최대 20자까지 가능합니다.',
         ]);

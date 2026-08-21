@@ -97,7 +97,10 @@
                 </div>
                 <div>
                     <label for="mq_user_name" class="block text-sm font-semibold text-[#2D3047] mb-2">이름</label>
-                    <input type="text" id="mq_user_name" name="mq_user_name" value="{{ $user->mq_user_name }}" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4ECDC4] focus:border-transparent transition-all">
+                    <input type="text" id="mq_user_name" name="mq_user_name" value="{{ old('mq_user_name', $user->mq_user_name) }}" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4ECDC4] focus:border-transparent transition-all @error('mq_user_name') border-red-500 @enderror">
+                    @error('mq_user_name')
+                        <p class="text-red-500 text-xs mt-2">{{ $message }}</p>
+                    @enderror
                 </div>
                 <div>
                     <label for="mq_user_email" class="block text-sm font-semibold text-[#2D3047] mb-2">이메일</label>
@@ -109,8 +112,11 @@
                         <label for="mq_birthday" class="text-sm font-semibold text-[#2D3047]">생일</label>
                         <span id="age-display" class="text-sm text-[#4ECDC4] font-semibold {{ !$user->mq_birthday ? 'hidden' : '' }}">(만 <span id="calculated-age">{{ $user->mq_birthday ? \Carbon\Carbon::parse($user->mq_birthday)->age : '0' }}</span>세)</span>
                     </div>
-                    <input type="date" id="mq_birthday" name="mq_birthday" value="{{ $user->mq_birthday ? $user->mq_birthday->format('Y-m-d') : '' }}" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4ECDC4] focus:border-transparent transition-all">
+                    <input type="date" id="mq_birthday" name="mq_birthday" value="{{ old('mq_birthday', $user->mq_birthday ? $user->mq_birthday->format('Y-m-d') : '') }}" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4ECDC4] focus:border-transparent transition-all @error('mq_birthday') border-red-500 @enderror">
                     <p id="birthday-help-text" class="text-xs text-gray-400 mt-2 {{ $user->mq_birthday ? 'hidden' : '' }}">생일을 입력해주세요.</p>
+                    @error('mq_birthday')
+                        <p class="text-red-500 text-xs mt-2">{{ $message }}</p>
+                    @enderror
                 </div>
                 <div class="md:col-span-2">
                     <label for="mq_phone" class="block text-sm font-semibold text-[#2D3047] mb-2">휴대폰번호</label>
