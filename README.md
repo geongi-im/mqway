@@ -176,6 +176,27 @@ php artisan storage:link
 
 브라우저에서 `http://localhost`로 접속합니다.
 
+### 5. 마이그레이션 (배포 시)
+
+컨테이너 이름은 `.env`의 `COMPOSE_PROJECT_NAME`에서 자동으로 읽습니다.
+
+```bash
+# 대기 중인 마이그레이션 실행 (실행 전/후 상태를 함께 출력)
+./migrate.sh
+
+# 적용 상태만 확인
+./migrate.sh status
+
+# 마지막 배치 되돌리기 (확인 프롬프트 있음)
+./migrate.sh rollback
+```
+
+스크립트를 쓰지 않고 직접 실행할 경우:
+
+```bash
+docker exec php_mqway php artisan migrate --force
+```
+
 ## 주요 시스템 구성
 
 ### 인증 시스템
