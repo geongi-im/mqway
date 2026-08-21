@@ -162,6 +162,25 @@
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
                         </div>
+
+                        <!-- 휴대폰번호 (선택) -->
+                        <div class="md:col-span-2">
+                            <label for="mq_phone" class="block text-sm font-medium text-secondary mb-2">
+                                휴대폰번호
+                            </label>
+                            <input type="tel"
+                                   id="mq_phone"
+                                   name="mq_phone"
+                                   value="{{ old('mq_phone') }}"
+                                   inputmode="numeric"
+                                   maxlength="13"
+                                   placeholder="010-1234-5678"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-point1 focus:border-point1 @error('mq_phone') border-red-500 @enderror">
+                            <p class="text-xs text-gray-500 mt-1">선택 입력 항목입니다. 숫자만 입력하면 자동으로 '-'가 추가됩니다.</p>
+                            @error('mq_phone')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
                     </div>
                 </div>
 
@@ -237,6 +256,21 @@ document.getElementById('mq_user_email').addEventListener('input', function() {
         const messageEl = document.getElementById('email_check_message');
         messageEl.classList.add('hidden');
         messageEl.classList.remove('text-green-600', 'text-red-500');
+    }
+});
+
+// 휴대폰번호 입력 시 자동 하이픈 처리
+document.getElementById('mq_phone').addEventListener('input', function() {
+    const digits = this.value.replace(/[^0-9]/g, '').slice(0, 11);
+
+    if (digits.length < 4) {
+        this.value = digits;
+    } else if (digits.length < 8) {
+        this.value = digits.slice(0, 3) + '-' + digits.slice(3);
+    } else if (digits.length < 11) {
+        this.value = digits.slice(0, 3) + '-' + digits.slice(3, 6) + '-' + digits.slice(6);
+    } else {
+        this.value = digits.slice(0, 3) + '-' + digits.slice(3, 7) + '-' + digits.slice(7);
     }
 });
 
@@ -399,6 +433,15 @@ document.querySelector('form').addEventListener('submit', function(e) {
         const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailPattern.test(email)) {
             errors.push('올바른 이메일 형식이 아닙니다.');
+        }
+    }
+
+    // 휴대폰번호 검증 (선택 항목이므로 입력된 경우에만)
+    const phone = document.getElementById('mq_phone').value.trim();
+    if (phone) {
+        const phonePattern = /^01[016789]-?\d{3,4}-?\d{4}$/;
+        if (!phonePattern.test(phone)) {
+            errors.push('올바른 휴대폰번호 형식이 아닙니다. (예: 010-1234-5678)');
         }
     }
 

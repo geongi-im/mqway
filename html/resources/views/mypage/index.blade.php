@@ -112,6 +112,14 @@
                     <input type="date" id="mq_birthday" name="mq_birthday" value="{{ $user->mq_birthday ? $user->mq_birthday->format('Y-m-d') : '' }}" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4ECDC4] focus:border-transparent transition-all">
                     <p id="birthday-help-text" class="text-xs text-gray-400 mt-2 {{ $user->mq_birthday ? 'hidden' : '' }}">생일을 입력해주세요.</p>
                 </div>
+                <div class="md:col-span-2">
+                    <label for="mq_phone" class="block text-sm font-semibold text-[#2D3047] mb-2">휴대폰번호</label>
+                    <input type="tel" id="mq_phone" name="mq_phone" value="{{ old('mq_phone', $user->mq_phone_formatted) }}" inputmode="numeric" maxlength="13" placeholder="010-1234-5678" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4ECDC4] focus:border-transparent transition-all @error('mq_phone') border-red-500 @enderror">
+                    <p class="text-xs text-gray-400 mt-2">선택 입력 항목입니다. 숫자만 입력하면 자동으로 '-'가 추가됩니다.</p>
+                    @error('mq_phone')
+                        <p class="text-red-500 text-xs mt-2">{{ $message }}</p>
+                    @enderror
+                </div>
             </div>
             <div class="flex justify-end pt-4">
                 <button type="submit" class="inline-flex items-center px-8 py-3 bg-gradient-to-r from-[#4ECDC4] to-[#2AA9A0] text-white rounded-xl hover:shadow-lg hover:-translate-y-0.5 transition-all font-semibold">
@@ -510,6 +518,37 @@ document.addEventListener('DOMContentLoaded', function() {
                 updateAgeDisplay(event.target.value);
             } else if (event.target.value.length === 0) { // 값이 지워지면
                 updateAgeDisplay('');
+            }
+        });
+    }
+
+    // 휴대폰번호 입력 시 자동 하이픈 처리
+    const phoneInput = document.getElementById('mq_phone');
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function() {
+            const digits = this.value.replace(/[^0-9]/g, '').slice(0, 11);
+
+            if (digits.length < 4) {
+                this.value = digits;
+            } else if (digits.length < 8) {
+                this.value = digits.slice(0, 3) + '-' + digits.slice(3);
+            } else if (digits.length < 11) {
+                this.value = digits.slice(0, 3) + '-' + digits.slice(3, 6) + '-' + digits.slice(6);
+            } else {
+                this.value = digits.slice(0, 3) + '-' + digits.slice(3, 7) + '-' + digits.slice(7);
+            }
+        });
+    }
+
+    // 프로필 폼 휴대폰번호 검증 (선택 항목이므로 입력된 경우에만)
+    const profileForm = document.querySelector('form[action="{{ route('mypage.profile.update') }}"]');
+    if (profileForm && phoneInput) {
+        profileForm.addEventListener('submit', function(e) {
+            const phone = phoneInput.value.trim();
+            if (phone && !/^01[016789]-?\d{3,4}-?\d{4}$/.test(phone)) {
+                e.preventDefault();
+                alert('올바른 휴대폰번호 형식이 아닙니다. (예: 010-1234-5678)');
+                phoneInput.focus();
             }
         });
     }

@@ -82,6 +82,7 @@ class RegisterController extends Controller
             'mq_user_name' => ['required', 'string', 'max:255', new ForbiddenWord],
             'mq_user_email' => ['required', 'string', 'email', 'max:255', 'unique:mq_member,mq_user_email'],
             'mq_birthday' => ['nullable', 'date', 'before:today'],
+            'mq_phone' => ['nullable', 'string', 'max:20', 'regex:/^01[016789]-?\d{3,4}-?\d{4}$/'],
             'agree_terms' => ['required', 'accepted'],
             'agree_privacy' => ['required', 'accepted'],
         ], [
@@ -100,6 +101,8 @@ class RegisterController extends Controller
             'mq_user_email.unique' => '이미 사용 중인 이메일입니다.',
             'mq_birthday.date' => '올바른 날짜 형식이 아닙니다.',
             'mq_birthday.before' => '생년월일은 오늘 이전 날짜여야 합니다.',
+            'mq_phone.regex' => '올바른 휴대폰번호 형식이 아닙니다. (예: 010-1234-5678)',
+            'mq_phone.max' => '휴대폰번호는 최대 20자까지 가능합니다.',
             'agree_terms.required' => '이용약관에 동의해주세요.',
             'agree_terms.accepted' => '이용약관에 동의해주세요.',
             'agree_privacy.required' => '개인정보 수집 및 이용에 동의해주세요.',
@@ -121,6 +124,7 @@ class RegisterController extends Controller
             'mq_user_name' => $data['mq_user_name'],
             'mq_user_email' => $data['mq_user_email'],
             'mq_birthday' => $data['mq_birthday'] ?? null,
+            'mq_phone' => $data['mq_phone'] ?? null,  // Mutator가 숫자만 남겨서 저장
             'mq_provider' => null,
             'mq_provider_id' => null,
             'mq_status' => 1,

@@ -57,17 +57,21 @@ class MyPageController extends Controller
             ],
             'mq_profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'mq_birthday' => 'nullable|date',
+            'mq_phone' => ['nullable', 'string', 'max:20', 'regex:/^01[016789]-?\d{3,4}-?\d{4}$/'],
         ], [
             'mq_user_email.unique' => '이미 사용 중인 이메일입니다.',
             'mq_user_email.required' => '이메일을 입력해주세요.',
             'mq_user_email.email' => '올바른 이메일 형식이 아닙니다.',
             'mq_user_name.required' => '이름을 입력해주세요.',
+            'mq_phone.regex' => '올바른 휴대폰번호 형식이 아닙니다. (예: 010-1234-5678)',
+            'mq_phone.max' => '휴대폰번호는 최대 20자까지 가능합니다.',
         ]);
 
         $updateData = [
             'mq_user_name' => $request->mq_user_name,
             'mq_user_email' => $request->mq_user_email,
             'mq_birthday' => $request->mq_birthday,
+            'mq_phone' => $request->mq_phone,  // Mutator가 숫자만 남겨서 저장
         ];
 
         // 프로필 이미지 처리
