@@ -18,7 +18,7 @@
       <div class="grid md:grid-cols-2 gap-6">
         <div>
           <h3 class="font-bold text-gray-700 mb-2">수집하는 개인정보 항목</h3>
-          <p class="text-gray-600">이름, 이메일 주소, 서비스 이용 기록, 접속 로그, 쿠키</p>
+          <p class="text-gray-600">이름, 이메일 주소, 서비스 이용 기록, 접속 로그, 쿠키 / (선택) 휴대폰번호</p>
         </div>
         <div>
           <h3 class="font-bold text-gray-700 mb-2">개인정보 이용 목적</h3>

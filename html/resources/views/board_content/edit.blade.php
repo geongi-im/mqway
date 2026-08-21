@@ -171,7 +171,7 @@
                             <div class="flex justify-between items-end mb-3">
                                 <div>
                                     <label class="text-sm font-semibold text-[#2D3047] block mb-1">이미지 추가</label>
-                                    <p class="text-xs text-gray-400">최대 5개, 파일당 2MB 이하</p>
+                                    <p class="text-xs text-gray-400">최대 5개, 파일당 5MB 이하</p>
                                 </div>
                                 <button type="button" 
                                         class="text-sm px-3 py-1.5 bg-[#9F5AFF]/10 text-[#7B2CBF] hover:bg-[#9F5AFF]/20 rounded-lg transition-colors font-medium flex items-center gap-1" 
@@ -351,9 +351,9 @@
         if (input.files && input.files[0]) {
             const file = input.files[0];
 
-            // 파일 크기 체크 (2MB)
-            if (file.size > 2 * 1024 * 1024) {
-                alert('파일 크기는 2MB 이하로 선택해주세요.');
+            // 파일 크기 체크 (5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('파일 크기는 5MB 이하로 선택해주세요.');
                 input.value = '';
                 label.textContent = existingThumbnail ? '썸네일 이미지 변경하기' : '썸네일 이미지를 선택하세요';
                 return;
@@ -531,12 +531,12 @@
 
     // 파일 유효성 검사
     function validateImageFile(file) {
-        const maxSize = 2 * 1024 * 1024; // 2MB
+        const maxSize = 5 * 1024 * 1024; // 5MB
         const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
         // 파일 크기 검사
         if (file.size > maxSize) {
-            alert('파일 크기는 2MB 이하로 선택해주세요.');
+            alert('파일 크기는 5MB 이하로 선택해주세요.');
             return false;
         }
 

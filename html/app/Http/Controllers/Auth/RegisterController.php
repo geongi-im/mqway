@@ -82,8 +82,10 @@ class RegisterController extends Controller
             'mq_user_name' => ['required', 'string', 'max:255', new ForbiddenWord],
             'mq_user_email' => ['required', 'string', 'email', 'max:255', 'unique:mq_member,mq_user_email'],
             'mq_birthday' => ['nullable', 'date', 'before:today'],
+            'mq_phone' => ['nullable', 'string', 'max:20', 'regex:/^01[016789]-?\d{3,4}-?\d{4}$/'],
             'agree_terms' => ['required', 'accepted'],
             'agree_privacy' => ['required', 'accepted'],
+            'agree_marketing' => ['nullable', 'boolean'],
         ], [
             'mq_user_id.required' => '아이디를 입력해주세요.',
             'mq_user_id.min' => '아이디는 최소 4자 이상이어야 합니다.',
@@ -100,6 +102,8 @@ class RegisterController extends Controller
             'mq_user_email.unique' => '이미 사용 중인 이메일입니다.',
             'mq_birthday.date' => '올바른 날짜 형식이 아닙니다.',
             'mq_birthday.before' => '생년월일은 오늘 이전 날짜여야 합니다.',
+            'mq_phone.regex' => '올바른 휴대폰번호 형식이 아닙니다. (예: 010-1234-5678)',
+            'mq_phone.max' => '휴대폰번호는 최대 20자까지 가능합니다.',
             'agree_terms.required' => '이용약관에 동의해주세요.',
             'agree_terms.accepted' => '이용약관에 동의해주세요.',
             'agree_privacy.required' => '개인정보 수집 및 이용에 동의해주세요.',
@@ -115,12 +119,18 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
+        // 마케팅 정보 수신동의는 선택 항목 (동의한 경우에만 동의 시점 기록)
+        $marketingAgree = !empty($data['agree_marketing']);
+
         return Member::create([
             'mq_user_id' => $data['mq_user_id'],
             'mq_user_password' => $data['mq_user_password'], // Mutator가 자동으로 해시화
             'mq_user_name' => $data['mq_user_name'],
             'mq_user_email' => $data['mq_user_email'],
             'mq_birthday' => $data['mq_birthday'] ?? null,
+            'mq_phone' => $data['mq_phone'] ?? null,  // Mutator가 숫자만 남겨서 저장
+            'mq_marketing_agree' => $marketingAgree,
+            'mq_marketing_agree_date' => $marketingAgree ? now() : null,
             'mq_provider' => null,
             'mq_provider_id' => null,
             'mq_status' => 1,

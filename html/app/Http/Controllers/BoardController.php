@@ -120,7 +120,7 @@ class BoardController extends AbstractBoardController
             'mq_title' => 'required|max:255',
             'mq_content' => 'required',
             'mq_category' => 'required|in:' . implode(',', $validCategories),
-            'mq_image.*' => 'image|max:2048'
+            'mq_image.*' => 'image|max:5120'
         ]);
 
         $imagePaths = [];
@@ -221,7 +221,7 @@ class BoardController extends AbstractBoardController
             'mq_title' => 'required|max:255',
             'mq_content' => 'required',
             'mq_category' => 'required|in:' . implode(',', $validCategories),
-            'mq_image.*' => 'nullable|image|max:2048'
+            'mq_image.*' => 'nullable|image|max:5120'
         ]);
 
         $board = Board::findOrFail($idx);
@@ -318,7 +318,7 @@ class BoardController extends AbstractBoardController
             
             // 파일 유효성 검사
             $request->validate([
-                'upload' => 'required|image|max:2048'
+                'upload' => 'required|image|max:5120'
             ]);
             
             $originalName = $file->getClientOriginalName();

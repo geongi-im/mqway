@@ -215,8 +215,8 @@ class BoardCartoonController extends AbstractBoardController
             'mq_title' => 'required|max:255',
             'mq_content' => 'required',
             'mq_category' => 'required|in:' . implode(',', $validCategories),
-            'mq_image.*' => 'required|image|max:2048',
-            'mq_thumbnail_image' => 'nullable|image|max:2048'
+            'mq_image.*' => 'required|image|max:5120',
+            'mq_thumbnail_image' => 'nullable|image|max:5120'
         ]);
     }
 
@@ -226,7 +226,7 @@ class BoardCartoonController extends AbstractBoardController
             $file = $request->file('upload');
 
             $request->validate([
-                'upload' => 'required|image|max:2048'
+                'upload' => 'required|image|max:5120'
             ]);
 
             $extension = $file->getClientOriginalExtension();

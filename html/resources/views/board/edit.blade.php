@@ -107,7 +107,7 @@
                     </div>
 
                     <div class="flex items-center justify-between mt-4">
-                        <p class="text-sm text-text-dark">최대 5개까지 업로드 가능 (파일당 2MB 이하)</p>
+                        <p class="text-sm text-text-dark">최대 5개까지 업로드 가능 (파일당 5MB 이하)</p>
                         <button type="button" 
                                 class="btn-image-plus px-3 py-1.5 bg-point text-cdark hover:bg-opacity-90 transition-all text-xs font-medium rounded-xl flex items-center gap-1.5" 
                                 onclick="addFileInput()">

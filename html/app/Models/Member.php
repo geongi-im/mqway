@@ -24,7 +24,10 @@ class Member extends Authenticatable
         'mq_status',
         'mq_level',
         'mq_profile_image',
-        'mq_birthday'
+        'mq_birthday',
+        'mq_phone',
+        'mq_marketing_agree',
+        'mq_marketing_agree_date'
     ];
 
     protected $hidden = [
@@ -33,7 +36,9 @@ class Member extends Authenticatable
     ];
 
     protected $casts = [
-        'mq_birthday' => 'date'
+        'mq_birthday' => 'date',
+        'mq_marketing_agree' => 'boolean',
+        'mq_marketing_agree_date' => 'datetime'
     ];
 
     /**
@@ -60,5 +65,32 @@ class Member extends Authenticatable
         if (!empty($value)) {
             $this->attributes['mq_user_password'] = Hash::make($value);
         }
+    }
+
+    /**
+     * 휴대폰번호는 숫자만 저장 (선택 항목이므로 빈 값은 null)
+     */
+    public function setMqPhoneAttribute($value)
+    {
+        $digits = preg_replace('/[^0-9]/', '', (string) $value);
+        $this->attributes['mq_phone'] = $digits === '' ? null : $digits;
+    }
+
+    /**
+     * 화면 출력용 휴대폰번호 (010-1234-5678)
+     */
+    public function getMqPhoneFormattedAttribute()
+    {
+        $phone = $this->mq_phone;
+
+        if (empty($phone)) {
+            return null;
+        }
+
+        if (preg_match('/^(\d{3})(\d{3,4})(\d{4})$/', $phone, $matches)) {
+            return $matches[1] . '-' . $matches[2] . '-' . $matches[3];
+        }
+
+        return $phone;
     }
 } 

@@ -203,6 +203,24 @@ php artisan key:generate
 
 브라우저에서 `http://localhost`로 접속합니다. (포트는 `.env`의 `WEB_PORT`)
 
+### 5. 마이그레이션 (배포 시)
+
+컨테이너 이름은 `php_<COMPOSE_PROJECT_NAME>` 형식입니다. (기본값: `php_mqway`)
+
+```bash
+# 대기 중인 마이그레이션 실행
+docker exec php_mqway php artisan migrate --force
+
+# 적용 상태 확인
+docker exec php_mqway php artisan migrate:status
+
+# 마지막 배치 되돌리기
+docker exec php_mqway php artisan migrate:rollback --force
+```
+
+php 컨테이너는 시작 시 `php artisan migrate --force`를 자동 실행하므로,
+컨테이너를 재시작하면 마이그레이션도 함께 적용됩니다.
+
 ## 주요 시스템 구성
 
 ### 인증 시스템

@@ -163,7 +163,7 @@
                             <div class="flex justify-between items-end mb-3">
                                 <div>
                                     <label class="text-sm font-semibold text-[#2D3047] block mb-1">만화 컷 추가</label>
-                                    <p class="text-xs text-gray-400">순서대로 업로드해주세요. (최대 20개, 파일당 2MB 이하)</p>
+                                    <p class="text-xs text-gray-400">순서대로 업로드해주세요. (최대 20개, 파일당 5MB 이하, 한 번에 총 40MB 이하)</p>
                                 </div>
                                 <button type="button" 
                                         class="text-sm px-3 py-1.5 bg-[#9F5AFF]/10 text-[#7B2CBF] hover:bg-[#9F5AFF]/20 rounded-lg transition-colors font-medium flex items-center gap-1" 
@@ -450,11 +450,11 @@
     }
 
     function validateImageFile(file) {
-        const maxSize = 2 * 1024 * 1024; // 2MB
+        const maxSize = 5 * 1024 * 1024; // 5MB
         const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
         if (file.size > maxSize) {
-            alert('파일 크기는 2MB 이하로 선택해주세요.');
+            alert('파일 크기는 5MB 이하로 선택해주세요.');
             return false;
         }
 
@@ -465,6 +465,30 @@
 
         return true;
     }
+
+    // 업로드 총량 검사 (php.ini post_max_size 40M 대비)
+    const MAX_TOTAL_UPLOAD = 40 * 1024 * 1024; // 40MB
+
+    function totalSelectedSize(form) {
+        let total = 0;
+        form.querySelectorAll('input[type="file"]').forEach(input => {
+            Array.from(input.files || []).forEach(file => { total += file.size; });
+        });
+        return total;
+    }
+
+    document.querySelectorAll('form[enctype="multipart/form-data"]').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            const total = totalSelectedSize(form);
+            if (total > MAX_TOTAL_UPLOAD) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                alert('선택한 이미지의 전체 크기가 '
+                    + (total / 1024 / 1024).toFixed(1)
+                    + 'MB입니다. 한 번에 총 40MB까지만 업로드할 수 있으니 개수를 줄여주세요.');
+            }
+        });
+    });
 </script>
 <style>
 .ck-editor__editable {

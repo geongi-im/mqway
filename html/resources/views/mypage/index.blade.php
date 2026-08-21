@@ -85,8 +85,11 @@
             <!-- 프로필 이미지 업로드 -->
             <div class="mb-6">
                 <label for="mq_profile_image" class="block text-sm font-semibold text-[#2D3047] mb-2">프로필 이미지</label>
-                <input type="file" id="mq_profile_image" name="mq_profile_image" accept=".png, .jpg, .jpeg, .gif" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4ECDC4] focus:border-transparent bg-gray-50 transition-all text-sm">
-                <p class="text-xs text-gray-400 mt-2">JPG, PNG, GIF 파일만 업로드 가능합니다. (최대 2MB)</p>
+                <input type="file" id="mq_profile_image" name="mq_profile_image" accept=".png, .jpg, .jpeg, .gif" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4ECDC4] focus:border-transparent bg-gray-50 transition-all text-sm @error('mq_profile_image') border-red-500 @enderror">
+                <p class="text-xs text-gray-400 mt-2">JPG, PNG, GIF 파일만 업로드 가능합니다. (최대 5MB)</p>
+                @error('mq_profile_image')
+                    <p class="text-red-500 text-xs mt-2">{{ $message }}</p>
+                @enderror
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -97,22 +100,63 @@
                 </div>
                 <div>
                     <label for="mq_user_name" class="block text-sm font-semibold text-[#2D3047] mb-2">이름</label>
-                    <input type="text" id="mq_user_name" name="mq_user_name" value="{{ $user->mq_user_name }}" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4ECDC4] focus:border-transparent transition-all">
+                    <input type="text" id="mq_user_name" name="mq_user_name" value="{{ old('mq_user_name', $user->mq_user_name) }}" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4ECDC4] focus:border-transparent transition-all @error('mq_user_name') border-red-500 @enderror">
+                    @error('mq_user_name')
+                        <p class="text-red-500 text-xs mt-2">{{ $message }}</p>
+                    @enderror
                 </div>
                 <div>
                     <label for="mq_user_email" class="block text-sm font-semibold text-[#2D3047] mb-2">이메일</label>
-                    <input type="email" id="mq_user_email" name="mq_user_email" value="{{ $user->mq_user_email }}" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4ECDC4] focus:border-transparent transition-all">
+                    <input type="email" id="mq_user_email" name="mq_user_email" value="{{ old('mq_user_email', $user->mq_user_email) }}" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4ECDC4] focus:border-transparent transition-all @error('mq_user_email') border-red-500 @enderror">
                     <p id="email_check_message" class="text-xs mt-2 hidden"></p>
+                    @error('mq_user_email')
+                        <p class="text-red-500 text-xs mt-2">{{ $message }}</p>
+                    @enderror
                 </div>
                 <div>
                     <div class="flex items-center gap-2 mb-2">
                         <label for="mq_birthday" class="text-sm font-semibold text-[#2D3047]">생일</label>
                         <span id="age-display" class="text-sm text-[#4ECDC4] font-semibold {{ !$user->mq_birthday ? 'hidden' : '' }}">(만 <span id="calculated-age">{{ $user->mq_birthday ? \Carbon\Carbon::parse($user->mq_birthday)->age : '0' }}</span>세)</span>
                     </div>
-                    <input type="date" id="mq_birthday" name="mq_birthday" value="{{ $user->mq_birthday ? $user->mq_birthday->format('Y-m-d') : '' }}" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4ECDC4] focus:border-transparent transition-all">
+                    <input type="date" id="mq_birthday" name="mq_birthday" value="{{ old('mq_birthday', $user->mq_birthday ? $user->mq_birthday->format('Y-m-d') : '') }}" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4ECDC4] focus:border-transparent transition-all @error('mq_birthday') border-red-500 @enderror">
                     <p id="birthday-help-text" class="text-xs text-gray-400 mt-2 {{ $user->mq_birthday ? 'hidden' : '' }}">생일을 입력해주세요.</p>
+                    @error('mq_birthday')
+                        <p class="text-red-500 text-xs mt-2">{{ $message }}</p>
+                    @enderror
+                </div>
+                <div class="md:col-span-2">
+                    <label for="mq_phone" class="block text-sm font-semibold text-[#2D3047] mb-2">휴대폰번호</label>
+                    <input type="tel" id="mq_phone" name="mq_phone" value="{{ old('mq_phone', $user->mq_phone_formatted) }}" inputmode="numeric" maxlength="13" placeholder="010-1234-5678" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4ECDC4] focus:border-transparent transition-all @error('mq_phone') border-red-500 @enderror">
+                    <p class="text-xs text-gray-400 mt-2">선택 입력 항목입니다. 숫자만 입력하면 자동으로 '-'가 추가됩니다.</p>
+                    @error('mq_phone')
+                        <p class="text-red-500 text-xs mt-2">{{ $message }}</p>
+                    @enderror
                 </div>
             </div>
+
+            <!-- 마케팅 정보 수신 동의 (선택, 언제든 변경 가능) -->
+            <div class="border border-gray-200 rounded-xl p-5 bg-gray-50">
+                <!-- 체크 해제 시에도 값이 전송되도록 hidden을 앞에 둠 (수신 철회 처리) -->
+                <input type="hidden" name="agree_marketing" value="0">
+                <label class="flex items-start cursor-pointer">
+                    <input type="checkbox" id="agree_marketing" name="agree_marketing" value="1"
+                           {{ old('agree_marketing', $user->mq_marketing_agree) ? 'checked' : '' }}
+                           class="mt-0.5 w-4 h-4 text-[#4ECDC4] border-gray-300 rounded focus:ring-[#4ECDC4]">
+                    <span class="ml-3">
+                        <span class="block text-sm font-semibold text-[#2D3047]">(선택) 마케팅 정보 수신에 동의합니다</span>
+                        <span class="block text-xs text-gray-400 mt-1">이벤트, 혜택 등의 정보를 이메일 및 휴대폰(SMS)으로 받아보실 수 있습니다. 체크를 해제하면 수신이 중단됩니다.</span>
+                    </span>
+                </label>
+                @if($user->mq_marketing_agree_date)
+                    <p class="text-xs text-gray-400 mt-3 ml-7">
+                        {{ $user->mq_marketing_agree ? '동의' : '철회' }} 일시: {{ $user->mq_marketing_agree_date->format('Y-m-d H:i') }}
+                    </p>
+                @endif
+                @error('agree_marketing')
+                    <p class="text-red-500 text-xs mt-2 ml-7">{{ $message }}</p>
+                @enderror
+            </div>
+
             <div class="flex justify-end pt-4">
                 <button type="submit" class="inline-flex items-center px-8 py-3 bg-gradient-to-r from-[#4ECDC4] to-[#2AA9A0] text-white rounded-xl hover:shadow-lg hover:-translate-y-0.5 transition-all font-semibold">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -510,6 +554,37 @@ document.addEventListener('DOMContentLoaded', function() {
                 updateAgeDisplay(event.target.value);
             } else if (event.target.value.length === 0) { // 값이 지워지면
                 updateAgeDisplay('');
+            }
+        });
+    }
+
+    // 휴대폰번호 입력 시 자동 하이픈 처리
+    const phoneInput = document.getElementById('mq_phone');
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function() {
+            const digits = this.value.replace(/[^0-9]/g, '').slice(0, 11);
+
+            if (digits.length < 4) {
+                this.value = digits;
+            } else if (digits.length < 8) {
+                this.value = digits.slice(0, 3) + '-' + digits.slice(3);
+            } else if (digits.length < 11) {
+                this.value = digits.slice(0, 3) + '-' + digits.slice(3, 6) + '-' + digits.slice(6);
+            } else {
+                this.value = digits.slice(0, 3) + '-' + digits.slice(3, 7) + '-' + digits.slice(7);
+            }
+        });
+    }
+
+    // 프로필 폼 휴대폰번호 검증 (선택 항목이므로 입력된 경우에만)
+    const profileForm = document.querySelector('form[action="{{ route('mypage.profile.update') }}"]');
+    if (profileForm && phoneInput) {
+        profileForm.addEventListener('submit', function(e) {
+            const phone = phoneInput.value.trim();
+            if (phone && !/^01[016789]-?\d{3,4}-?\d{4}$/.test(phone)) {
+                e.preventDefault();
+                alert('올바른 휴대폰번호 형식이 아닙니다. (예: 010-1234-5678)');
+                phoneInput.focus();
             }
         });
     }

@@ -55,20 +55,39 @@ class MyPageController extends Controller
                 'max:255',
                 'unique:mq_member,mq_user_email,' . $user->idx . ',idx'
             ],
-            'mq_profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'mq_profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
             'mq_birthday' => 'nullable|date',
+            'mq_phone' => ['nullable', 'string', 'max:20', 'regex:/^01[016789]-?\d{3,4}-?\d{4}$/'],
+            'agree_marketing' => ['nullable', 'boolean'],
         ], [
             'mq_user_email.unique' => '이미 사용 중인 이메일입니다.',
             'mq_user_email.required' => '이메일을 입력해주세요.',
             'mq_user_email.email' => '올바른 이메일 형식이 아닙니다.',
+            'mq_user_email.max' => '이메일은 최대 255자까지 가능합니다.',
+            'mq_profile_image.image' => '이미지 파일만 업로드할 수 있습니다.',
+            'mq_profile_image.mimes' => 'JPG, PNG, GIF 형식의 파일만 업로드할 수 있습니다.',
+            'mq_profile_image.max' => '프로필 이미지는 최대 5MB까지 업로드할 수 있습니다.',
+            'mq_profile_image.uploaded' => '프로필 이미지 업로드에 실패했습니다. 파일 크기가 5MB를 초과하지 않는지 확인해주세요.',
             'mq_user_name.required' => '이름을 입력해주세요.',
+            'mq_user_name.max' => '이름은 최대 255자까지 가능합니다.',
+            'mq_birthday.date' => '올바른 날짜 형식이 아닙니다.',
+            'mq_phone.regex' => '올바른 휴대폰번호 형식이 아닙니다. (예: 010-1234-5678)',
+            'mq_phone.max' => '휴대폰번호는 최대 20자까지 가능합니다.',
         ]);
 
         $updateData = [
             'mq_user_name' => $request->mq_user_name,
             'mq_user_email' => $request->mq_user_email,
             'mq_birthday' => $request->mq_birthday,
+            'mq_phone' => $request->mq_phone,  // Mutator가 숫자만 남겨서 저장
         ];
+
+        // 마케팅 정보 수신동의: 동의/철회 상태가 바뀐 시점만 기록
+        $marketingAgree = $request->boolean('agree_marketing');
+        if ($marketingAgree !== (bool) $user->mq_marketing_agree) {
+            $updateData['mq_marketing_agree'] = $marketingAgree;
+            $updateData['mq_marketing_agree_date'] = now();
+        }
 
         // 프로필 이미지 처리
         if ($request->hasFile('mq_profile_image')) {
