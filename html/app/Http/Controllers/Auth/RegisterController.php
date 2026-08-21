@@ -85,6 +85,7 @@ class RegisterController extends Controller
             'mq_phone' => ['nullable', 'string', 'max:20', 'regex:/^01[016789]-?\d{3,4}-?\d{4}$/'],
             'agree_terms' => ['required', 'accepted'],
             'agree_privacy' => ['required', 'accepted'],
+            'agree_marketing' => ['nullable', 'boolean'],
         ], [
             'mq_user_id.required' => '아이디를 입력해주세요.',
             'mq_user_id.min' => '아이디는 최소 4자 이상이어야 합니다.',
@@ -118,6 +119,9 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
+        // 마케팅 정보 수신동의는 선택 항목 (동의한 경우에만 동의 시점 기록)
+        $marketingAgree = !empty($data['agree_marketing']);
+
         return Member::create([
             'mq_user_id' => $data['mq_user_id'],
             'mq_user_password' => $data['mq_user_password'], // Mutator가 자동으로 해시화
@@ -125,6 +129,8 @@ class RegisterController extends Controller
             'mq_user_email' => $data['mq_user_email'],
             'mq_birthday' => $data['mq_birthday'] ?? null,
             'mq_phone' => $data['mq_phone'] ?? null,  // Mutator가 숫자만 남겨서 저장
+            'mq_marketing_agree' => $marketingAgree,
+            'mq_marketing_agree_date' => $marketingAgree ? now() : null,
             'mq_provider' => null,
             'mq_provider_id' => null,
             'mq_status' => 1,

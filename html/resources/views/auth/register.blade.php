@@ -49,6 +49,18 @@
                         @error('agree_privacy')
                             <p class="text-red-500 text-xs ml-7">{{ $message }}</p>
                         @enderror
+
+                        <!-- 마케팅 정보 수신 동의 (선택) -->
+                        <div class="flex items-center justify-between">
+                            <label class="flex items-center cursor-pointer">
+                                <input type="checkbox" name="agree_marketing" id="agree_marketing" value="1" {{ old('agree_marketing') ? 'checked' : '' }} class="agree-checkbox w-4 h-4 text-point1 border-gray-300 rounded focus:ring-point1">
+                                <span class="ml-3 text-sm text-secondary">(선택) 마케팅 정보 수신에 동의합니다</span>
+                            </label>
+                        </div>
+                        <p class="text-xs text-gray-500 ml-7">이벤트, 혜택 등의 정보를 이메일로 받아보실 수 있습니다. 동의하지 않아도 회원가입이 가능합니다.</p>
+                        @error('agree_marketing')
+                            <p class="text-red-500 text-xs ml-7">{{ $message }}</p>
+                        @enderror
                     </div>
                 </div>
 

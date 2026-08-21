@@ -25,7 +25,9 @@ class Member extends Authenticatable
         'mq_level',
         'mq_profile_image',
         'mq_birthday',
-        'mq_phone'
+        'mq_phone',
+        'mq_marketing_agree',
+        'mq_marketing_agree_date'
     ];
 
     protected $hidden = [
@@ -34,7 +36,9 @@ class Member extends Authenticatable
     ];
 
     protected $casts = [
-        'mq_birthday' => 'date'
+        'mq_birthday' => 'date',
+        'mq_marketing_agree' => 'boolean',
+        'mq_marketing_agree_date' => 'datetime'
     ];
 
     /**
