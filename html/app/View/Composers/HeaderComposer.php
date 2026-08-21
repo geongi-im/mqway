@@ -58,13 +58,14 @@ class HeaderComposer
             [
                 'label' => '투자 정보',
                 'url' => route('board-research.index'),
-                'active' => $request->is('board-research*') || $request->is('board-news*') || $request->is('board-portfolio*') || $request->is('board-insights*'),
+                'active' => $request->is('board-research*') || $request->is('board-news*') || $request->is('board-portfolio*') || $request->is('board-insights*') || $request->is('board-scrap*'),
                 'target' => 'investment',
                 'children' => [
                     ['label' => '투자 리서치', 'url' => route('board-research.index'), 'active' => $request->routeIs('board-research.*'), 'onclick' => ''],
                     ['label' => '투자 인사이트', 'url' => route('board-insights.index'), 'active' => $request->routeIs('board-insights.*'), 'onclick' => ''],
                     ['label' => '투자대가의 포트폴리오', 'url' => route('board-portfolio.index'), 'active' => $request->routeIs('board-portfolio.*'), 'onclick' => ''],
                     ['label' => '뉴스 게시판', 'url' => route('board-news.index'), 'active' => $request->routeIs('board-news.*'), 'onclick' => ''],
+                    ['label' => '뉴스 스크랩', 'url' => route('board-scrap.index'), 'active' => $request->routeIs('board-scrap.*'), 'onclick' => ''],
                 ],
             ],
         ];

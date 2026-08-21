@@ -509,7 +509,7 @@ async function handleScrap(title, url, isScrapped = false) {
 
     try {
         // 2. 중복 체크 API 호출
-        const response = await fetch('{{ route('mypage.news-scrap.check-duplicate') }}', {
+        const response = await fetch('{{ route('board-scrap.check-duplicate') }}', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -535,7 +535,7 @@ async function handleScrap(title, url, isScrapped = false) {
         }
 
         // 5. 중복 아닌 경우 글쓰기 페이지로 이동 (제목과 URL 전달)
-        const createUrl = new URL('{{ route('mypage.news-scrap.create') }}');
+        const createUrl = new URL('{{ route('board-scrap.create') }}');
         createUrl.searchParams.append('title', title);
         createUrl.searchParams.append('url', url);
         window.location.href = createUrl.toString();

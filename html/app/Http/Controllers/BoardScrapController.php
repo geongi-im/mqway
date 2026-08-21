@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\NewsScrap;
+use App\Models\BoardScrap;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -10,27 +10,51 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
-class NewsScrapController extends Controller
+class BoardScrapController extends Controller
 {
-    protected $uploadPath = 'uploads/news_scrap';
+    protected $uploadPath = 'uploads/board_scrap';
 
     /**
-     * 생성자 - 회원 인증 미들웨어 적용
+     * 생성자 - 목록/상세는 비회원도 열람 가능, 나머지는 회원 전용
+     *
+     * checkDuplicate 는 AJAX 로 호출되므로 미들웨어를 걸지 않고
+     * 컨트롤러 안에서 JSON 401(requireLogin)을 직접 응답한다.
      */
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware('auth')->except(['index', 'show', 'checkDuplicate']);
     }
 
     /**
-     * 뉴스 스크랩 목록 (본인 것만 조회)
+     * 뉴스 스크랩 목록
+     *
+     * 기본: 공개된 스크랩 전체 (비회원 열람 가능)
+     * ?mine=1: 본인이 작성한 스크랩 전체 (공개 + 나만보기, 회원 전용)
      */
     public function index(Request $request)
     {
-        $userId = Auth::user()->mq_user_id;
+        $userId = Auth::check() ? Auth::user()->mq_user_id : null;
+        $mine = $request->boolean('mine');
 
-        $query = NewsScrap::where('mq_user_id', $userId)
-                         ->where('mq_status', 1);
+        // 내 스크랩 보기는 로그인 필요
+        if ($mine && !$userId) {
+            return redirect()->guest(route('login'));
+        }
+
+        $query = BoardScrap::with('user')->active();
+
+        if ($mine) {
+            $query->ownedBy($userId);
+
+            // 공개 여부 필터 (내 스크랩에서만 의미 있음)
+            if ($request->visibility === 'public') {
+                $query->where('mq_is_public', 1);
+            } elseif ($request->visibility === 'private') {
+                $query->where('mq_is_public', 0);
+            }
+        } else {
+            $query->publicOnly();
+        }
 
         // 검색 처리
         if ($request->has('search') && $request->search !== '') {
@@ -42,13 +66,38 @@ class NewsScrapController extends Controller
             });
         }
 
-        // 정렬 (최신순)
-        $query->orderBy('mq_reg_date', 'desc');
+        // 정렬
+        $sort = $request->get('sort', 'latest');
+        switch ($sort) {
+            case 'views':
+                $query->orderBy('mq_view_cnt', 'desc');
+                break;
+            case 'likes':
+                $query->orderBy('mq_like_cnt', 'desc');
+                break;
+            default:
+                // 공개 목록은 공개로 전환한 시점 기준 (오래된 글을 오늘 공개해도 상단에 노출)
+                $query->orderBy($mine ? 'mq_reg_date' : 'mq_public_date', 'desc');
+        }
+        $query->orderBy('idx', 'desc'); // 동일 시각 글의 페이지네이션 순서 고정
 
         $scraps = $query->paginate(12);
 
-        return view('mypage.news_scrap.index', [
-            'scraps' => $scraps
+        // 내 스크랩 탭의 공개/나만보기 개수
+        $myCounts = null;
+        if ($mine) {
+            $myCounts = [
+                'public' => BoardScrap::active()->ownedBy($userId)->where('mq_is_public', 1)->count(),
+                'private' => BoardScrap::active()->ownedBy($userId)->where('mq_is_public', 0)->count(),
+            ];
+        }
+
+        return view('board_scrap.index', [
+            'scraps' => $scraps,
+            'mine' => $mine,
+            'sort' => $sort,
+            'visibility' => $request->visibility,
+            'myCounts' => $myCounts,
         ]);
     }
 
@@ -57,7 +106,7 @@ class NewsScrapController extends Controller
      */
     public function create()
     {
-        return view('mypage.news_scrap.create');
+        return view('board_scrap.create');
     }
 
     /**
@@ -70,7 +119,8 @@ class NewsScrapController extends Controller
             'mq_title' => 'required|string|max:500',
             'mq_url' => 'required|url|max:2000',
             'mq_reason' => 'required|string',
-            'mq_new_terms' => 'nullable|string|max:5000'
+            'mq_new_terms' => 'nullable|string|max:5000',
+            'mq_is_public' => 'nullable|boolean'
         ], [
             'mq_title.required' => '뉴스 제목을 입력해주세요.',
             'mq_title.max' => '뉴스 제목은 500자 이내로 입력해주세요.',
@@ -85,13 +135,18 @@ class NewsScrapController extends Controller
             // URL에서 자동으로 썸네일 추출
             $thumbnailUrl = $this->extractThumbnailFromUrl($request->mq_url);
 
-            $scrap = new NewsScrap();
+            // 체크하지 않으면 나만보기 (기본값)
+            $isPublic = $request->boolean('mq_is_public');
+
+            $scrap = new BoardScrap();
             $scrap->mq_user_id = Auth::user()->mq_user_id;
             $scrap->mq_title = $request->mq_title;
             $scrap->mq_url = $request->mq_url;
             $scrap->mq_reason = $request->mq_reason;
             $scrap->mq_new_terms = $request->mq_new_terms;
             $scrap->mq_thumbnail_url = $thumbnailUrl; // 자동 추출된 썸네일
+            $scrap->mq_is_public = $isPublic ? 1 : 0;
+            $scrap->mq_public_date = $isPublic ? Carbon::now() : null;
             $scrap->mq_status = 1;
             $scrap->mq_reg_date = Carbon::now();
 
@@ -100,8 +155,10 @@ class NewsScrapController extends Controller
             DB::commit();
 
             return redirect()
-                ->route('mypage.news-scrap.index')
-                ->with('success', '뉴스 스크랩이 등록되었습니다.');
+                ->route('board-scrap.show', $scrap->idx)
+                ->with('success', $isPublic
+                    ? '뉴스 스크랩이 등록되어 공개 게시판에 공유되었습니다.'
+                    : '뉴스 스크랩이 등록되었습니다. (나만보기)');
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -112,17 +169,39 @@ class NewsScrapController extends Controller
     }
 
     /**
-     * 상세보기
+     * 상세보기 (공개글은 누구나, 나만보기는 작성자 본인만)
      */
     public function show($idx)
     {
-        $scrap = NewsScrap::where('idx', $idx)
-                        ->where('mq_user_id', Auth::user()->mq_user_id)
-                        ->where('mq_status', 1)
+        $userId = Auth::check() ? Auth::user()->mq_user_id : null;
+
+        $scrap = BoardScrap::with('user')
+                        ->active()
+                        ->visibleTo($userId)
+                        ->where('idx', $idx)
                         ->firstOrFail();
 
-        return view('mypage.news_scrap.show', [
-            'scrap' => $scrap
+        $isOwner = $userId !== null && $scrap->isOwner($userId);
+
+        // 조회수 증가 (본인 조회 제외 + 세션으로 중복 증가 방지)
+        if (!$isOwner && !session()->has('viewed_news_scrap_'.$idx)) {
+            $scrap->increment('mq_view_cnt');
+            session(['viewed_news_scrap_'.$idx => true]);
+        }
+
+        $isLiked = false;
+        if ($userId) {
+            $isLiked = DB::table('mq_like_history')
+                ->where('mq_user_id', $userId)
+                ->where('mq_board_name', BoardScrap::BOARD_NAME)
+                ->where('mq_board_idx', $idx)
+                ->exists();
+        }
+
+        return view('board_scrap.show', [
+            'scrap' => $scrap,
+            'isOwner' => $isOwner,
+            'isLiked' => $isLiked
         ]);
     }
 
@@ -131,12 +210,12 @@ class NewsScrapController extends Controller
      */
     public function edit($idx)
     {
-        $scrap = NewsScrap::where('idx', $idx)
+        $scrap = BoardScrap::where('idx', $idx)
                         ->where('mq_user_id', Auth::user()->mq_user_id)
                         ->where('mq_status', 1)
                         ->firstOrFail();
 
-        return view('mypage.news_scrap.edit', [
+        return view('board_scrap.edit', [
             'scrap' => $scrap
         ]);
     }
@@ -146,7 +225,7 @@ class NewsScrapController extends Controller
      */
     public function update(Request $request, $idx)
     {
-        $scrap = NewsScrap::where('idx', $idx)
+        $scrap = BoardScrap::where('idx', $idx)
                         ->where('mq_user_id', Auth::user()->mq_user_id)
                         ->where('mq_status', 1)
                         ->firstOrFail();
@@ -156,7 +235,8 @@ class NewsScrapController extends Controller
             'mq_title' => 'required|string|max:500',
             'mq_url' => 'required|url|max:2000',
             'mq_reason' => 'required|string',
-            'mq_new_terms' => 'nullable|string|max:5000'
+            'mq_new_terms' => 'nullable|string|max:5000',
+            'mq_is_public' => 'nullable|boolean'
         ], [
             'mq_title.required' => '뉴스 제목을 입력해주세요.',
             'mq_title.max' => '뉴스 제목은 500자 이내로 입력해주세요.',
@@ -174,18 +254,27 @@ class NewsScrapController extends Controller
                 $scrap->mq_thumbnail_url = $thumbnailUrl;
             }
 
+            $wasPublic = $scrap->isPublic();
+            $isPublic = $request->boolean('mq_is_public');
+
             $scrap->mq_title = $request->mq_title;
             $scrap->mq_url = $request->mq_url;
             $scrap->mq_reason = $request->mq_reason;
             $scrap->mq_new_terms = $request->mq_new_terms;
+            $scrap->mq_is_public = $isPublic ? 1 : 0;
             $scrap->mq_update_date = Carbon::now();
+
+            // 나만보기 -> 공개로 전환한 시점을 기록 (공개 목록 정렬 기준)
+            if ($isPublic && !$wasPublic) {
+                $scrap->mq_public_date = Carbon::now();
+            }
 
             $scrap->save();
 
             DB::commit();
 
             return redirect()
-                ->route('mypage.news-scrap.show', $scrap->idx)
+                ->route('board-scrap.show', $scrap->idx)
                 ->with('success', '뉴스 스크랩이 수정되었습니다.');
 
         } catch (\Exception $e) {
@@ -201,7 +290,7 @@ class NewsScrapController extends Controller
      */
     public function destroy($idx)
     {
-        $scrap = NewsScrap::where('idx', $idx)
+        $scrap = BoardScrap::where('idx', $idx)
                         ->where('mq_user_id', Auth::user()->mq_user_id)
                         ->where('mq_status', 1)
                         ->firstOrFail();
@@ -217,13 +306,133 @@ class NewsScrapController extends Controller
             DB::commit();
 
             return redirect()
-                ->route('mypage.news-scrap.index')
+                ->route('board-scrap.index', ['mine' => 1])
                 ->with('success', '뉴스 스크랩이 삭제되었습니다.');
 
         } catch (\Exception $e) {
             DB::rollBack();
             return back()
                 ->with('error', '뉴스 스크랩 삭제 중 오류가 발생했습니다: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * 공개 / 나만보기 전환 (작성자 본인만)
+     *
+     * @param int $idx
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function toggleVisibility($idx)
+    {
+        $scrap = BoardScrap::active()
+                        ->ownedBy(Auth::user()->mq_user_id)
+                        ->where('idx', $idx)
+                        ->first();
+
+        if (!$scrap) {
+            return response()->json([
+                'success' => false,
+                'message' => '스크랩을 찾을 수 없습니다.'
+            ], 404);
+        }
+
+        try {
+            $nextIsPublic = !$scrap->isPublic();
+
+            $scrap->mq_is_public = $nextIsPublic ? 1 : 0;
+
+            // 공개로 전환하는 시점을 기록 (공개 목록 정렬 기준)
+            if ($nextIsPublic) {
+                $scrap->mq_public_date = Carbon::now();
+            }
+
+            $scrap->save();
+
+            return response()->json([
+                'success' => true,
+                'isPublic' => $nextIsPublic,
+                'message' => $nextIsPublic
+                    ? '공개 게시판에 공유되었습니다.'
+                    : '나만보기로 변경되었습니다.'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => '공개 설정 변경 중 오류가 발생했습니다.'
+            ], 500);
+        }
+    }
+
+    /**
+     * 좋아요 (토글). 공개된 스크랩만 대상.
+     *
+     * @param int $idx
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function like($idx)
+    {
+        $scrap = BoardScrap::active()
+                        ->publicOnly()
+                        ->where('idx', $idx)
+                        ->first();
+
+        if (!$scrap) {
+            return response()->json([
+                'success' => false,
+                'message' => '공개된 스크랩만 좋아요를 누를 수 있습니다.'
+            ], 404);
+        }
+
+        try {
+            $userId = Auth::user()->mq_user_id;
+
+            $existingLike = DB::table('mq_like_history')
+                ->where('mq_user_id', $userId)
+                ->where('mq_board_name', BoardScrap::BOARD_NAME)
+                ->where('mq_board_idx', $idx)
+                ->first();
+
+            if ($existingLike) {
+                // 좋아요 취소
+                DB::table('mq_like_history')
+                    ->where('idx', $existingLike->idx)
+                    ->delete();
+
+                if ($scrap->mq_like_cnt > 0) {
+                    $scrap->decrement('mq_like_cnt');
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'likes' => $scrap->fresh()->mq_like_cnt,
+                    'isLiked' => false,
+                    'message' => '좋아요가 취소되었습니다.'
+                ]);
+            }
+
+            // 좋아요 추가
+            DB::table('mq_like_history')->insert([
+                'mq_user_id' => $userId,
+                'mq_board_name' => BoardScrap::BOARD_NAME,
+                'mq_board_idx' => $idx,
+                'mq_reg_date' => Carbon::now(),
+            ]);
+
+            $scrap->increment('mq_like_cnt');
+
+            return response()->json([
+                'success' => true,
+                'likes' => $scrap->fresh()->mq_like_cnt,
+                'isLiked' => true,
+                'message' => '좋아요가 추가되었습니다.'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => '좋아요 처리 중 오류가 발생했습니다.'
+            ], 500);
         }
     }
 
@@ -496,7 +705,7 @@ class NewsScrapController extends Controller
         }
 
         // 중복 체크: 현재 사용자가 해당 URL을 이미 스크랩했는지 확인
-        $exists = NewsScrap::where('mq_user_id', $userId)
+        $exists = BoardScrap::where('mq_user_id', $userId)
                           ->where('mq_url', $url)
                           ->where('mq_status', 1)
                           ->exists();

@@ -221,15 +221,15 @@
     <!-- ===== 메뉴 카드 그리드 ===== -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pb-20 animate-slideUp" style="animation-delay: 0.4s;">
         <!-- 뉴스 스크랩 카드 -->
-        <a href="{{ route('mypage.news-scrap.index') }}" class="group bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+        <a href="{{ route('board-scrap.index', ['mine' => 1]) }}" class="group bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
             <div class="p-8">
                 <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-blue-500/20">
                     <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9.5a2.5 2.5 0 00-2.5-2.5H15"></path>
                     </svg>
                 </div>
-                <h3 class="text-xl font-bold text-[#2D3047] mb-2 group-hover:text-blue-600 transition-colors">뉴스 스크랩</h3>
-                <p class="text-gray-500 text-sm">관심있는 경제 뉴스 모음</p>
+                <h3 class="text-xl font-bold text-[#2D3047] mb-2 group-hover:text-blue-600 transition-colors">내 뉴스 스크랩</h3>
+                <p class="text-gray-500 text-sm">내가 쓴 스크랩 관리 · 공개 설정</p>
             </div>
             <div class="px-8 py-4 bg-gray-50/50 border-t border-gray-50 flex items-center justify-between">
                 <span class="text-xs text-gray-400 font-medium">바로가기</span>

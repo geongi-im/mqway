@@ -48,7 +48,7 @@ class NewsController extends Controller
         // 로그인한 사용자의 스크랩 URL 목록 가져오기
         $scrappedUrls = [];
         if (auth()->check()) {
-            $scrappedUrls = \App\Models\NewsScrap::where('mq_user_id', auth()->user()->mq_user_id)
+            $scrappedUrls = \App\Models\BoardScrap::where('mq_user_id', auth()->user()->mq_user_id)
                 ->pluck('mq_url')
                 ->toArray();
         }
@@ -171,7 +171,7 @@ class NewsController extends Controller
             // 로그인한 사용자의 스크랩 URL 목록
             $scrappedUrls = [];
             if (auth()->check()) {
-                $scrappedUrls = \App\Models\NewsScrap::where('mq_user_id', auth()->user()->mq_user_id)
+                $scrappedUrls = \App\Models\BoardScrap::where('mq_user_id', auth()->user()->mq_user_id)
                     ->pluck('mq_url')
                     ->toArray();
             }

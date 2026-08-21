@@ -304,7 +304,8 @@ document.addEventListener('DOMContentLoaded', function() {
         { path: '/board-research', target: 'investment' },
         { path: '/board-insights', target: 'investment' },
         { path: '/board-news', target: 'investment' },
-        { path: '/board-portfolio', target: 'investment' }
+        { path: '/board-portfolio', target: 'investment' },
+        { path: '/board-scrap', target: 'investment' }
     ];
 
     menuItems.forEach(item => {

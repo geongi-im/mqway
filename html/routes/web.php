@@ -32,7 +32,7 @@ use App\Http\Controllers\TodayNewsQuizController;
 use App\Http\Controllers\RetirementCalculatorController;
 use App\Http\Controllers\NeedWantGameController;
 use App\Http\Controllers\Api\CashflowApiController;
-use App\Http\Controllers\NewsScrapController;
+use App\Http\Controllers\BoardScrapController;
 
 /*
 |--------------------------------------------------------------------------
@@ -282,19 +282,32 @@ Route::middleware('auth')->group(function () {
     Route::post('/mypage/liked-content/unlike', [App\Http\Controllers\MyPageController::class, 'unlikeContent'])->name('mypage.liked-content.unlike');
 });
 
-// 뉴스 스크랩 (회원 전용)
-Route::prefix('mypage/news-scrap')->middleware('auth')->group(function () {
-    Route::get('/', [NewsScrapController::class, 'index'])->name('mypage.news-scrap.index');
-    Route::get('/create', [NewsScrapController::class, 'create'])->name('mypage.news-scrap.create');
-    Route::post('/', [NewsScrapController::class, 'store'])->name('mypage.news-scrap.store');
-    Route::get('/{idx}', [NewsScrapController::class, 'show'])->name('mypage.news-scrap.show');
-    Route::get('/{idx}/edit', [NewsScrapController::class, 'edit'])->name('mypage.news-scrap.edit');
-    Route::put('/{idx}', [NewsScrapController::class, 'update'])->name('mypage.news-scrap.update');
-    Route::delete('/{idx}', [NewsScrapController::class, 'destroy'])->name('mypage.news-scrap.destroy');
-    Route::post('/upload-image', [NewsScrapController::class, 'uploadImage'])->name('mypage.news-scrap.upload-image');
-    Route::post('/fetch-meta', [NewsScrapController::class, 'fetchMetaImage'])->name('mypage.news-scrap.fetch-meta');
-    Route::post('/check-duplicate', [NewsScrapController::class, 'checkDuplicate'])->name('mypage.news-scrap.check-duplicate');
+// 뉴스 스크랩 게시판 (목록/상세는 비회원도 열람 가능, 작성은 회원 전용)
+// 인증은 BoardScrapController 생성자에서 index/show/check-duplicate 를 제외하고 적용한다.
+Route::prefix('board-scrap')->group(function () {
+    Route::get('/', [BoardScrapController::class, 'index'])->name('board-scrap.index');
+    Route::get('/create', [BoardScrapController::class, 'create'])->name('board-scrap.create');
+    Route::post('/', [BoardScrapController::class, 'store'])->name('board-scrap.store');
+    Route::post('/upload-image', [BoardScrapController::class, 'uploadImage'])->name('board-scrap.upload-image');
+    Route::post('/fetch-meta', [BoardScrapController::class, 'fetchMetaImage'])->name('board-scrap.fetch-meta');
+    Route::post('/check-duplicate', [BoardScrapController::class, 'checkDuplicate'])->name('board-scrap.check-duplicate');
+    Route::get('/{idx}/edit', [BoardScrapController::class, 'edit'])->name('board-scrap.edit')->where('idx', '[0-9]+');
+    Route::put('/{idx}', [BoardScrapController::class, 'update'])->name('board-scrap.update')->where('idx', '[0-9]+');
+    Route::delete('/{idx}', [BoardScrapController::class, 'destroy'])->name('board-scrap.destroy')->where('idx', '[0-9]+');
+    Route::post('/{idx}/like', [BoardScrapController::class, 'like'])->name('board-scrap.like')->where('idx', '[0-9]+');
+    Route::post('/{idx}/visibility', [BoardScrapController::class, 'toggleVisibility'])->name('board-scrap.visibility')->where('idx', '[0-9]+');
+    Route::get('/{idx}', [BoardScrapController::class, 'show'])->name('board-scrap.show')->where('idx', '[0-9]+');
 });
+
+// 기존 마이페이지 경로 -> 게시판으로 301 리다이렉트 (북마크/외부 링크 보존)
+Route::permanentRedirect('/mypage/news-scrap', '/board-scrap?mine=1');
+Route::permanentRedirect('/mypage/news-scrap/create', '/board-scrap/create');
+Route::get('/mypage/news-scrap/{idx}', function ($idx) {
+    return redirect()->route('board-scrap.show', $idx, 301);
+})->where('idx', '[0-9]+');
+Route::get('/mypage/news-scrap/{idx}/edit', function ($idx) {
+    return redirect()->route('board-scrap.edit', $idx, 301);
+})->where('idx', '[0-9]+');
 
 // 개인정보처리방침
 Route::get('/privacy', function () {

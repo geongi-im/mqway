@@ -11,7 +11,7 @@
     </div>
 
     <div class="container mx-auto px-4 pt-28 pb-8 relative z-10 max-w-4xl animate-slideUp">
-        <a href="{{ route('mypage.news-scrap.index') }}" class="inline-flex items-center text-gray-400 hover:text-white mb-6 transition-colors group">
+        <a href="{{ route('board-scrap.index') }}" class="inline-flex items-center text-gray-400 hover:text-white mb-6 transition-colors group">
             <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center mr-2 group-hover:bg-white/20 transition-all">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
@@ -19,16 +19,42 @@
             </div>
             목록으로 돌아가기
         </a>
-        <span class="inline-block py-1 px-3 rounded-full bg-white/10 border border-white/20 text-white text-xs font-medium mb-4 backdrop-blur-md">
-            📰 News Scrap
-        </span>
+        <div class="flex flex-wrap items-center gap-2 mb-4">
+            <span class="inline-block py-1 px-3 rounded-full bg-white/10 border border-white/20 text-white text-xs font-medium backdrop-blur-md">
+                📰 News Scrap
+            </span>
+            @if($isOwner)
+                @if($scrap->isPublic())
+                <span id="visibilityBadge" class="inline-flex items-center gap-1 py-1 px-3 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-bold backdrop-blur-md">
+                    공개 중
+                </span>
+                @else
+                <span id="visibilityBadge" class="inline-flex items-center gap-1 py-1 px-3 rounded-full bg-white/10 border border-white/20 text-gray-300 text-xs font-bold backdrop-blur-md">
+                    나만보기
+                </span>
+                @endif
+            @endif
+        </div>
         <h1 class="text-3xl md:text-4xl font-bold text-white mb-4 leading-tight tracking-tight">{{ $scrap->mq_title }}</h1>
         <div class="flex flex-wrap items-center text-gray-400 text-sm gap-4">
+            <div class="flex items-center">
+                <svg class="w-4 h-4 mr-1.5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+                <span>{{ $scrap->getAuthorName() }}</span>
+            </div>
             <div class="flex items-center">
                 <svg class="w-4 h-4 mr-1.5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
                 <span>{{ $scrap->mq_reg_date ? $scrap->mq_reg_date->format('Y.m.d H:i') : '' }}</span>
+            </div>
+            <div class="flex items-center">
+                <svg class="w-4 h-4 mr-1.5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                </svg>
+                <span>조회 {{ number_format($scrap->mq_view_cnt) }}</span>
             </div>
             @if($scrap->mq_update_date)
             <div class="flex items-center text-gray-500">
@@ -102,10 +128,45 @@
             </div>
             @endif
 
+            <!-- 좋아요 (공개된 스크랩만) -->
+            @if($scrap->isPublic())
+            <div class="flex justify-center pb-8">
+                <button type="button"
+                        id="likeButton"
+                        data-liked="{{ $isLiked ? '1' : '0' }}"
+                        class="inline-flex items-center gap-2 h-12 px-6 rounded-full border transition-all font-semibold {{ $isLiked ? 'bg-[#FF4D4D] border-[#FF4D4D] text-white' : 'bg-white border-gray-200 text-gray-500 hover:border-[#FF4D4D] hover:text-[#FF4D4D]' }}">
+                    <svg class="w-5 h-5" fill="{{ $isLiked ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                    </svg>
+                    <span id="likeCount">{{ number_format($scrap->mq_like_cnt) }}</span>
+                </button>
+            </div>
+            @endif
+
+            <!-- 공개 설정 (작성자 본인만) -->
+            @if($isOwner)
+            <div class="mb-8 p-5 rounded-xl border border-gray-100 bg-gray-50 flex flex-wrap items-center justify-between gap-4">
+                <div>
+                    <p class="text-sm font-bold text-[#2D3047] mb-1">공개 설정</p>
+                    <p id="visibilityText" class="text-xs text-gray-500">
+                        {{ $scrap->isPublic()
+                            ? '이 스크랩은 뉴스 스크랩 게시판에 공개되어 있습니다.'
+                            : '나만 볼 수 있는 상태입니다. 공개하면 게시판 목록에 올라갑니다.' }}
+                    </p>
+                </div>
+                <button type="button"
+                        id="visibilityButton"
+                        data-public="{{ $scrap->isPublic() ? '1' : '0' }}"
+                        class="inline-flex items-center justify-center h-11 px-5 rounded-xl transition-all text-sm font-bold flex-shrink-0 {{ $scrap->isPublic() ? 'border border-gray-200 bg-white text-gray-600 hover:border-gray-300' : 'bg-gradient-to-r from-[#4ECDC4] to-[#2AA9A0] text-white hover:shadow-lg hover:-translate-y-0.5' }}">
+                    {{ $scrap->isPublic() ? '나만보기로 변경' : '공개 게시판에 공유' }}
+                </button>
+            </div>
+            @endif
+
             <!-- 버튼 영역 -->
             <div class="flex justify-between items-center pt-6 border-t border-gray-100">
                 <!-- 좌측 버튼 -->
-                <a href="{{ route('mypage.news-scrap.index') }}"
+                <a href="{{ route('board-scrap.index', $isOwner && !$scrap->isPublic() ? ['mine' => 1] : []) }}"
                    class="inline-flex items-center justify-center h-11 px-5 border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all text-gray-600 text-sm font-medium">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
@@ -113,16 +174,17 @@
                     목록
                 </a>
 
-                <!-- 우측 버튼 그룹 -->
+                <!-- 우측 버튼 그룹 (작성자 본인만) -->
+                @if($isOwner)
                 <div class="flex items-center gap-2">
-                    <a href="{{ route('mypage.news-scrap.edit', $scrap->idx) }}"
+                    <a href="{{ route('board-scrap.edit', $scrap->idx) }}"
                        class="inline-flex items-center justify-center h-11 px-5 border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all text-gray-600 text-sm font-medium">
                         <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                         </svg>
                         수정
                     </a>
-                    <form action="{{ route('mypage.news-scrap.destroy', $scrap->idx) }}"
+                    <form action="{{ route('board-scrap.destroy', $scrap->idx) }}"
                           method="POST"
                           onsubmit="return confirmDelete()"
                           class="inline">
@@ -137,6 +199,7 @@
                         </button>
                     </form>
                 </div>
+                @endif
             </div>
         </div>
     </div>
@@ -146,6 +209,98 @@
 <script>
 function confirmDelete() {
     return confirm('정말 삭제하시겠습니까?\n삭제된 스크랩은 복구할 수 없습니다.');
+}
+
+const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+// 좋아요 토글
+const likeButton = document.getElementById('likeButton');
+if (likeButton) {
+    likeButton.addEventListener('click', async () => {
+        @guest
+            alert('로그인이 필요한 기능입니다.');
+            window.location.href = '{{ route('login') }}';
+            return;
+        @endguest
+
+        likeButton.disabled = true;
+
+        try {
+            const response = await fetch('{{ route('board-scrap.like', $scrap->idx) }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                }
+            });
+            const data = await response.json();
+
+            if (!data.success) {
+                alert(data.message || '좋아요 처리 중 오류가 발생했습니다.');
+                return;
+            }
+
+            document.getElementById('likeCount').textContent = data.likes.toLocaleString();
+            likeButton.dataset.liked = data.isLiked ? '1' : '0';
+
+            const heart = likeButton.querySelector('svg');
+            if (data.isLiked) {
+                likeButton.className = 'inline-flex items-center gap-2 h-12 px-6 rounded-full border transition-all font-semibold bg-[#FF4D4D] border-[#FF4D4D] text-white';
+                heart.setAttribute('fill', 'currentColor');
+            } else {
+                likeButton.className = 'inline-flex items-center gap-2 h-12 px-6 rounded-full border transition-all font-semibold bg-white border-gray-200 text-gray-500 hover:border-[#FF4D4D] hover:text-[#FF4D4D]';
+                heart.setAttribute('fill', 'none');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('좋아요 처리 중 오류가 발생했습니다.');
+        } finally {
+            likeButton.disabled = false;
+        }
+    });
+}
+
+// 공개 / 나만보기 전환
+const visibilityButton = document.getElementById('visibilityButton');
+if (visibilityButton) {
+    visibilityButton.addEventListener('click', async () => {
+        const isPublic = visibilityButton.dataset.public === '1';
+
+        const message = isPublic
+            ? '나만보기로 변경하시겠습니까?\n공개 게시판 목록에서 사라집니다.'
+            : '이 스크랩을 공개 게시판에 공유하시겠습니까?\n다른 회원과 비회원도 볼 수 있게 됩니다.';
+
+        if (!confirm(message)) {
+            return;
+        }
+
+        visibilityButton.disabled = true;
+
+        try {
+            const response = await fetch('{{ route('board-scrap.visibility', $scrap->idx) }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                }
+            });
+            const data = await response.json();
+
+            if (!data.success) {
+                alert(data.message || '공개 설정 변경 중 오류가 발생했습니다.');
+                return;
+            }
+
+            alert(data.message);
+            // 좋아요 버튼 노출 여부가 공개 상태에 따라 달라지므로 새로고침
+            window.location.reload();
+        } catch (error) {
+            console.error(error);
+            alert('공개 설정 변경 중 오류가 발생했습니다.');
+        } finally {
+            visibilityButton.disabled = false;
+        }
+    });
 }
 </script>
 

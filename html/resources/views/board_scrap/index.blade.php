@@ -11,6 +11,7 @@
     </div>
 
     <div class="container mx-auto px-4 relative z-10 text-center animate-slideUp">
+        @if($mine)
         <a href="{{ route('mypage.index') }}" class="inline-flex items-center text-gray-400 hover:text-white mb-6 transition-colors group">
             <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center mr-2 group-hover:bg-white/20 transition-all">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -20,14 +21,19 @@
             마이페이지로 돌아가기
         </a>
         <br />
+        @endif
         <span class="inline-block py-1 px-3 rounded-full bg-white/10 border border-white/20 text-white text-sm font-medium mb-4 backdrop-blur-md">
             📰 News Scrap
         </span>
         <h1 class="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight tracking-tight">
-            뉴스 스크랩
+            {{ $mine ? '내 뉴스 스크랩' : '뉴스 스크랩' }}
         </h1>
         <p class="text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed font-light">
-            관심있는 경제 뉴스를 모아보세요.
+            @if($mine)
+                내가 스크랩한 뉴스를 관리하고 공개 여부를 설정하세요.
+            @else
+                다른 회원들이 공유한 뉴스와 그 뉴스를 고른 이유를 살펴보세요.
+            @endif
         </p>
     </div>
 </section>
@@ -35,7 +41,17 @@
 <!-- ===== Search Section ===== -->
 <div class="container mx-auto px-4 -mt-10 relative z-20 mb-10 animate-slideUp" style="animation-delay: 0.2s;">
     <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 max-w-4xl mx-auto">
-        <form action="{{ route('mypage.news-scrap.index') }}" method="GET">
+        <form action="{{ route('board-scrap.index') }}" method="GET">
+            @if($mine)
+                <input type="hidden" name="mine" value="1">
+            @endif
+            @if($visibility)
+                <input type="hidden" name="visibility" value="{{ $visibility }}">
+            @endif
+            @if($sort !== 'latest')
+                <input type="hidden" name="sort" value="{{ $sort }}">
+            @endif
+
             <div class="flex items-center gap-2">
                 <!-- 검색 입력창 -->
                 <div class="relative flex-grow">
@@ -53,7 +69,7 @@
 
                 <!-- 초기화 (검색 활성 시에만 노출) -->
                 @if(request('search'))
-                <a href="{{ route('mypage.news-scrap.index') }}" class="h-10 w-10 flex-shrink-0 flex items-center justify-center text-gray-400 hover:text-[#FF4D4D] hover:bg-red-50 rounded-lg transition-all" title="초기화">
+                <a href="{{ route('board-scrap.index', array_filter(['mine' => $mine ? 1 : null, 'visibility' => $visibility])) }}" class="h-10 w-10 flex-shrink-0 flex items-center justify-center text-gray-400 hover:text-[#FF4D4D] hover:bg-red-50 rounded-lg transition-all" title="초기화">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
@@ -61,7 +77,7 @@
                 @endif
 
                 <!-- 글쓰기 -->
-                <a href="{{ route('mypage.news-scrap.create') }}"
+                <a href="{{ route('board-scrap.create') }}"
                    class="h-10 w-10 flex-shrink-0 flex items-center justify-center text-gray-400 hover:text-[#9F5AFF] hover:bg-[#9F5AFF]/10 rounded-lg transition-all" title="새 스크랩 작성">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -72,12 +88,59 @@
     </div>
 </div>
 
+<!-- ===== Tabs ===== -->
+<div class="container mx-auto px-4 mb-6 max-w-7xl animate-slideUp" style="animation-delay: 0.25s;">
+    <div class="flex flex-wrap items-center gap-2">
+        <a href="{{ route('board-scrap.index', array_filter(['search' => request('search'), 'sort' => $sort !== 'latest' ? $sort : null])) }}"
+           class="px-4 py-2 rounded-xl text-sm font-bold transition-all {{ !$mine ? 'bg-[#2D3047] text-white shadow-lg' : 'bg-white text-gray-500 border border-gray-200 hover:border-gray-300' }}">
+            전체 공개 스크랩
+        </a>
+        @auth
+        <a href="{{ route('board-scrap.index', array_filter(['mine' => 1, 'search' => request('search'), 'sort' => $sort !== 'latest' ? $sort : null])) }}"
+           class="px-4 py-2 rounded-xl text-sm font-bold transition-all {{ $mine ? 'bg-[#2D3047] text-white shadow-lg' : 'bg-white text-gray-500 border border-gray-200 hover:border-gray-300' }}">
+            내 스크랩
+        </a>
+        @endauth
+
+        @if($mine && $myCounts)
+        <span class="mx-1 h-6 w-px bg-gray-200"></span>
+        <a href="{{ route('board-scrap.index', array_filter(['mine' => 1, 'search' => request('search')])) }}"
+           class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all {{ !$visibility ? 'bg-gray-100 text-gray-700' : 'text-gray-400 hover:bg-gray-50' }}">
+            전체 {{ $myCounts['public'] + $myCounts['private'] }}
+        </a>
+        <a href="{{ route('board-scrap.index', array_filter(['mine' => 1, 'visibility' => 'public', 'search' => request('search')])) }}"
+           class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all {{ $visibility === 'public' ? 'bg-emerald-100 text-emerald-700' : 'text-gray-400 hover:bg-gray-50' }}">
+            공개 {{ $myCounts['public'] }}
+        </a>
+        <a href="{{ route('board-scrap.index', array_filter(['mine' => 1, 'visibility' => 'private', 'search' => request('search')])) }}"
+           class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all {{ $visibility === 'private' ? 'bg-gray-200 text-gray-700' : 'text-gray-400 hover:bg-gray-50' }}">
+            나만보기 {{ $myCounts['private'] }}
+        </a>
+        @endif
+    </div>
+</div>
+
 <!-- ===== Filter Toolbar ===== -->
 <div class="container mx-auto px-4 mb-8 max-w-7xl animate-slideUp" style="animation-delay: 0.3s;">
-    <div class="flex items-center justify-between">
-        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-blue-50 text-blue-600">
+    <div class="flex items-center justify-between gap-4">
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-blue-50 text-blue-600 flex-shrink-0">
             총 {{ $scraps->total() }}개
         </span>
+
+        <!-- 정렬 -->
+        <div class="flex items-center gap-1 text-sm">
+            @foreach(['latest' => '최신순', 'likes' => '좋아요순', 'views' => '조회순'] as $key => $label)
+            <a href="{{ route('board-scrap.index', array_filter([
+                    'mine' => $mine ? 1 : null,
+                    'visibility' => $visibility,
+                    'search' => request('search'),
+                    'sort' => $key !== 'latest' ? $key : null,
+               ])) }}"
+               class="px-3 py-1.5 rounded-lg font-medium transition-all {{ $sort === $key ? 'bg-[#2D3047] text-white' : 'text-gray-500 hover:bg-white' }}">
+                {{ $label }}
+            </a>
+            @endforeach
+        </div>
     </div>
 </div>
 
@@ -93,17 +156,22 @@
             <h3 class="text-xl font-bold text-gray-900 mb-2">
                 @if(request('search'))
                     검색 결과가 없습니다
-                @else
+                @elseif($mine)
                     아직 스크랩한 뉴스가 없습니다
+                @else
+                    아직 공개된 스크랩이 없습니다
                 @endif
             </h3>
             <p class="text-gray-500 max-w-md mx-auto">
                 @if(request('search'))
                     '{{ request('search') }}'에 대한 검색 결과가 없습니다.<br>
                     다른 키워드로 검색해보시거나 필터를 변경해보세요.
-                @else
+                @elseif($mine)
                     관심있는 경제 뉴스를 스크랩해보세요!<br>
                     첫 번째 뉴스의 주인공이 되어보세요!
+                @else
+                    첫 번째로 뉴스 스크랩을 공유해보세요!<br>
+                    글을 쓸 때 '공개' 옵션을 켜면 이 목록에 올라옵니다.
                 @endif
             </p>
         </div>
@@ -111,7 +179,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             @foreach($scraps as $scrap)
                 <article class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-2 group flex flex-col h-full">
-                    <a href="{{ route('mypage.news-scrap.show', $scrap->idx) }}" class="block relative overflow-hidden aspect-video bg-gray-100">
+                    <a href="{{ route('board-scrap.show', $scrap->idx) }}" class="block relative overflow-hidden aspect-video bg-gray-100">
                         @if($scrap->hasThumbnail())
                             <img src="{{ $scrap->getThumbnailUrl() }}"
                                  alt="{{ $scrap->mq_title }}"
@@ -125,21 +193,66 @@
                                 <span class="text-xs font-medium opacity-50">No Image</span>
                             </div>
                         @endif
+
+                        <!-- 공개 여부 배지 (내 스크랩 목록에서만) -->
+                        @if($mine)
+                            @if($scrap->isPublic())
+                            <span class="absolute top-3 left-3 inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500 text-white shadow-lg">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                공개
+                            </span>
+                            @else
+                            <span class="absolute top-3 left-3 inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-gray-700 text-white shadow-lg">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                </svg>
+                                나만보기
+                            </span>
+                            @endif
+                        @endif
                     </a>
 
                     <div class="p-6 flex-1 flex flex-col">
-                        <a href="{{ route('mypage.news-scrap.show', $scrap->idx) }}" class="block mb-4">
+                        <a href="{{ route('board-scrap.show', $scrap->idx) }}" class="block mb-4">
                             <h3 class="text-xl font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-[#4ECDC4] transition-colors">
                                 {{ $scrap->mq_title }}
                             </h3>
                         </a>
+
+                        <!-- 작성자 · 지표 -->
+                        <div class="flex items-center justify-between text-xs text-gray-400 font-medium mb-3">
+                            <span class="inline-flex items-center gap-1.5 min-w-0">
+                                <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                                <span class="truncate">{{ $scrap->getAuthorName() }}</span>
+                            </span>
+                            <span class="inline-flex items-center gap-3 flex-shrink-0">
+                                <span class="inline-flex items-center gap-1" title="좋아요">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                                    </svg>
+                                    {{ number_format($scrap->mq_like_cnt) }}
+                                </span>
+                                <span class="inline-flex items-center gap-1" title="조회수">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                    {{ number_format($scrap->mq_view_cnt) }}
+                                </span>
+                            </span>
+                        </div>
 
                         <div class="mt-auto pt-4 border-t border-gray-50 flex items-center justify-between text-xs text-gray-400 font-medium">
                             <span class="flex items-center">
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
-                                {{ $scrap->mq_reg_date ? $scrap->mq_reg_date->format('Y.m.d') : '' }}
+                                @php $listedDate = $mine ? $scrap->mq_reg_date : ($scrap->mq_public_date ?: $scrap->mq_reg_date); @endphp
+                                {{ $listedDate ? $listedDate->format('Y.m.d') : '' }}
                             </span>
                             <a href="{{ $scrap->mq_url }}"
                                target="_blank"

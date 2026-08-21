@@ -11,8 +11,8 @@
         <span class="inline-block py-1 px-3 rounded-full bg-white/10 border border-white/20 text-white text-xs font-medium mb-3 backdrop-blur-md">
             📰 News Scrap
         </span>
-        <h1 class="text-3xl font-bold text-white mb-2">새 뉴스 스크랩 작성</h1>
-        <p class="text-gray-400 text-sm">관심 있는 뉴스를 스크랩하고 나만의 인사이트를 정리해보세요.</p>
+        <h1 class="text-3xl font-bold text-white mb-2">뉴스 스크랩 수정</h1>
+        <p class="text-gray-400 text-sm">스크랩한 뉴스의 내용을 수정합니다.</p>
     </div>
 </div>
 
@@ -20,8 +20,9 @@
     <div class="container mx-auto px-4">
         <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
             <div class="p-8 md:p-10">
-                <form action="{{ route('mypage.news-scrap.store') }}" method="POST" class="space-y-8" id="scrapForm">
+                <form action="{{ route('board-scrap.update', $scrap->idx) }}" method="POST" class="space-y-8" id="scrapForm">
                     @csrf
+                    @method('PUT')
 
                     <!-- 뉴스 제목 -->
                     <div class="space-y-2">
@@ -31,7 +32,7 @@
                         <input type="text"
                                name="mq_title"
                                id="mq_title"
-                               value="{{ old('mq_title') }}"
+                               value="{{ old('mq_title', $scrap->mq_title) }}"
                                class="w-full h-12 px-4 border border-gray-200 rounded-xl focus:outline-none focus:border-[#4ECDC4] focus:ring-2 focus:ring-[#4ECDC4]/20 transition-all bg-gray-50 font-medium text-gray-700 placeholder-gray-400 @error('mq_title') border-red-500 @enderror"
                                placeholder="뉴스 제목을 입력하세요"
                                required>
@@ -59,7 +60,7 @@
                             <input type="url"
                                    name="mq_url"
                                    id="mq_url"
-                                   value="{{ old('mq_url') }}"
+                                   value="{{ old('mq_url', $scrap->mq_url) }}"
                                    class="w-full h-12 pl-10 pr-4 border border-gray-200 rounded-xl focus:outline-none focus:border-[#4ECDC4] focus:ring-2 focus:ring-[#4ECDC4]/20 transition-all bg-gray-50 font-medium text-gray-700 placeholder-gray-400 @error('mq_url') border-red-500 @enderror"
                                    placeholder="https://example.com/news/article"
                                    required>
@@ -76,7 +77,7 @@
                             <svg class="w-3.5 h-3.5 text-[#4ECDC4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
-                            뉴스 원문 링크를 입력하세요. 썸네일 이미지는 자동으로 가져옵니다.
+                            URL이 변경되면 썸네일 이미지가 자동으로 다시 가져와집니다.
                         </p>
                     </div>
 
@@ -89,7 +90,7 @@
                             뉴스를 선택한 이유 <span class="text-red-500">*</span>
                         </label>
                         <p class="text-xs text-gray-400 mb-3">이 뉴스를 스크랩하는 이유와 느낀 점을 작성해주세요</p>
-                        <textarea name="mq_reason" id="editor">{{ old('mq_reason') }}</textarea>
+                        <textarea name="mq_reason" id="editor">{{ old('mq_reason', $scrap->mq_reason) }}</textarea>
                         @error('mq_reason')
                             <p class="text-sm text-red-500 flex items-center gap-1">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -111,7 +112,7 @@
                                   id="mq_new_terms"
                                   rows="4"
                                   class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-[#4ECDC4] focus:ring-2 focus:ring-[#4ECDC4]/20 transition-all bg-gray-50 resize-none text-gray-700 placeholder-gray-400 @error('mq_new_terms') border-red-500 @enderror"
-                                  placeholder="예: GDP (국내총생산) - 한 나라의 경제 규모를 나타내는 지표">{{ old('mq_new_terms') }}</textarea>
+                                  placeholder="예: GDP (국내총생산) - 한 나라의 경제 규모를 나타내는 지표">{{ old('mq_new_terms', $scrap->mq_new_terms) }}</textarea>
                         @error('mq_new_terms')
                             <p class="text-sm text-red-500 flex items-center gap-1">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -125,19 +126,41 @@
                     <!-- 구분선 -->
                     <div class="border-t border-gray-100"></div>
 
+                    <!-- 공개 설정 -->
+                    <div class="space-y-2">
+                        <label class="text-sm font-semibold text-[#2D3047] block">공개 설정</label>
+                        <!-- 체크박스는 해제 시 값을 보내지 않으므로 hidden 으로 기본값 0(나만보기)을 명시한다 -->
+                        <input type="hidden" name="mq_is_public" value="0">
+                        <label for="mq_is_public" class="flex items-start gap-3 p-4 rounded-xl border border-gray-200 bg-gray-50 cursor-pointer hover:border-[#4ECDC4] transition-all">
+                            <input type="checkbox"
+                                   name="mq_is_public"
+                                   id="mq_is_public"
+                                   value="1"
+                                   {{ old('mq_is_public', $scrap->mq_is_public) ? 'checked' : '' }}
+                                   class="mt-0.5 w-5 h-5 rounded border-gray-300 text-[#4ECDC4] focus:ring-[#4ECDC4]">
+                            <span class="text-sm">
+                                <span class="font-bold text-[#2D3047] block mb-1">뉴스 스크랩 게시판에 공개</span>
+                                <span class="text-gray-500">체크를 해제하면 나만 볼 수 있는 상태로 바뀌어 공개 목록에서 사라집니다.</span>
+                            </span>
+                        </label>
+                    </div>
+
+                    <!-- 구분선 -->
+                    <div class="border-t border-gray-100"></div>
+
                     <!-- 버튼 영역 -->
                     <div class="flex justify-end gap-3 pt-2">
                         <button type="button"
-                                onclick="if(confirm('작성 중인 내용이 사라집니다. 정말 취소하시겠습니까?')) { location.href='{{ route('mypage.news-scrap.index') }}'; }"
+                                onclick="if(confirm('수정 중인 내용이 사라집니다. 정말 취소하시겠습니까?')) { location.href='{{ route('board-scrap.show', $scrap->idx) }}'; }"
                                 class="inline-flex items-center justify-center px-6 h-12 border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all text-gray-600 font-medium">
                             취소
                         </button>
                         <button type="submit"
                                 class="inline-flex items-center justify-center px-8 h-12 bg-gradient-to-r from-[#4ECDC4] to-[#2AA9A0] text-white rounded-xl hover:shadow-lg hover:shadow-[#4ECDC4]/30 hover:-translate-y-0.5 transition-all font-bold">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                             </svg>
-                            스크랩 저장
+                            수정하기
                         </button>
                     </div>
                 </form>
@@ -167,7 +190,7 @@
 
         _initRequest() {
             const xhr = this.xhr = new XMLHttpRequest();
-            xhr.open('POST', '{{ route('mypage.news-scrap.upload-image') }}', true);
+            xhr.open('POST', '{{ route('board-scrap.upload-image') }}', true);
             xhr.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
             xhr.responseType = 'json';
         }
@@ -201,19 +224,6 @@
         editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
             return new UploadAdapter(loader);
         };
-    }
-
-    // URL 파라미터에서 제목과 URL 가져오기 (스크랩 버튼에서 전달)
-    const urlParams = new URLSearchParams(window.location.search);
-    const titleFromParam = urlParams.get('title');
-    const urlFromParam = urlParams.get('url');
-
-    // 파라미터가 있으면 입력 필드에 자동 입력
-    if (titleFromParam) {
-        document.getElementById('mq_title').value = titleFromParam;
-    }
-    if (urlFromParam) {
-        document.getElementById('mq_url').value = urlFromParam;
     }
 
     ClassicEditor
