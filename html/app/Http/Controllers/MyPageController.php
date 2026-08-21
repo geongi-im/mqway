@@ -58,6 +58,7 @@ class MyPageController extends Controller
             'mq_profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'mq_birthday' => 'nullable|date',
             'mq_phone' => ['nullable', 'string', 'max:20', 'regex:/^01[016789]-?\d{3,4}-?\d{4}$/'],
+            'agree_marketing' => ['nullable', 'boolean'],
         ], [
             'mq_user_email.unique' => '이미 사용 중인 이메일입니다.',
             'mq_user_email.required' => '이메일을 입력해주세요.',
@@ -73,6 +74,13 @@ class MyPageController extends Controller
             'mq_birthday' => $request->mq_birthday,
             'mq_phone' => $request->mq_phone,  // Mutator가 숫자만 남겨서 저장
         ];
+
+        // 마케팅 정보 수신동의: 동의/철회 상태가 바뀐 시점만 기록
+        $marketingAgree = $request->boolean('agree_marketing');
+        if ($marketingAgree !== (bool) $user->mq_marketing_agree) {
+            $updateData['mq_marketing_agree'] = $marketingAgree;
+            $updateData['mq_marketing_agree_date'] = now();
+        }
 
         // 프로필 이미지 처리
         if ($request->hasFile('mq_profile_image')) {

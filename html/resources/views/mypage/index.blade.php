@@ -121,6 +121,30 @@
                     @enderror
                 </div>
             </div>
+
+            <!-- 마케팅 정보 수신 동의 (선택, 언제든 변경 가능) -->
+            <div class="border border-gray-200 rounded-xl p-5 bg-gray-50">
+                <!-- 체크 해제 시에도 값이 전송되도록 hidden을 앞에 둠 (수신 철회 처리) -->
+                <input type="hidden" name="agree_marketing" value="0">
+                <label class="flex items-start cursor-pointer">
+                    <input type="checkbox" id="agree_marketing" name="agree_marketing" value="1"
+                           {{ old('agree_marketing', $user->mq_marketing_agree) ? 'checked' : '' }}
+                           class="mt-0.5 w-4 h-4 text-[#4ECDC4] border-gray-300 rounded focus:ring-[#4ECDC4]">
+                    <span class="ml-3">
+                        <span class="block text-sm font-semibold text-[#2D3047]">(선택) 마케팅 정보 수신에 동의합니다</span>
+                        <span class="block text-xs text-gray-400 mt-1">이벤트, 혜택 등의 정보를 이메일 및 휴대폰(SMS)으로 받아보실 수 있습니다. 체크를 해제하면 수신이 중단됩니다.</span>
+                    </span>
+                </label>
+                @if($user->mq_marketing_agree_date)
+                    <p class="text-xs text-gray-400 mt-3 ml-7">
+                        {{ $user->mq_marketing_agree ? '동의' : '철회' }} 일시: {{ $user->mq_marketing_agree_date->format('Y-m-d H:i') }}
+                    </p>
+                @endif
+                @error('agree_marketing')
+                    <p class="text-red-500 text-xs mt-2 ml-7">{{ $message }}</p>
+                @enderror
+            </div>
+
             <div class="flex justify-end pt-4">
                 <button type="submit" class="inline-flex items-center px-8 py-3 bg-gradient-to-r from-[#4ECDC4] to-[#2AA9A0] text-white rounded-xl hover:shadow-lg hover:-translate-y-0.5 transition-all font-semibold">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
