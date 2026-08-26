@@ -32,9 +32,11 @@ mqway/
 │   │   │   └── Middleware/       # 미들웨어
 │   │   ├── Logging/              # 로깅 설정
 │   │   ├── Models/               # Eloquent 모델
-│   │   ├── Policies/             # 인가 정책
 │   │   ├── Providers/            # 서비스 프로바이더
-│   │   └── Traits/               # 공통 트레이트
+│   │   ├── Rules/                # 커스텀 유효성 검사 규칙
+│   │   ├── Services/             # 외부 연동 / 도메인 서비스 (뉴스 본문 추출, AI 분석)
+│   │   ├── Traits/               # 공통 트레이트
+│   │   └── View/                 # 뷰 컴포저
 │   │
 │   ├── bootstrap/                # 프레임워크 부트스트랩
 │   │   └── cache/                # 프레임워크 캐시
@@ -58,18 +60,25 @@ mqway/
 │   │   ├── sass/                 # SASS 파일
 │   │   └── views/                # Blade 템플릿
 │   │       ├── auth/             # 인증 뷰
-│   │       ├── board/            # 게시판 뷰
+│   │       ├── beecube/          # 비큐브
+│   │       ├── board/            # 자유 게시판
+│   │       ├── board_cartoon/    # 만화 게시판
 │   │       ├── board_content/    # 콘텐츠 게시판
+│   │       ├── board_insights/   # 인사이트 게시판
+│   │       ├── board_mission/    # 미션 게시판
 │   │       ├── board_portfolio/  # 포트폴리오 게시판
 │   │       ├── board_research/   # 리서치 게시판
+│   │       ├── board_scrap/      # 뉴스 스크랩 게시판 (AI 분석 폼 포함)
 │   │       ├── board_video/      # 비디오 게시판
 │   │       ├── cashflow/         # 캐시플로우 게임
 │   │       ├── course/           # 코스 안내
 │   │       ├── emails/           # 이메일 템플릿
+│   │       ├── errors/           # 에러 페이지
 │   │       ├── guidebook/        # 가이드북
 │   │       ├── layouts/          # 레이아웃 템플릿
 │   │       ├── mypage/           # 마이페이지
 │   │       ├── news/             # 뉴스
+│   │       ├── pick/             # 픽
 │   │       └── tools/            # 교육 도구
 │   │
 │   ├── routes/                   # 라우팅 정의
@@ -148,7 +157,15 @@ DB_PASSWORD=your_password
 GOOGLE_CLIENT_ID=your_client_id
 GOOGLE_CLIENT_SECRET=your_client_secret
 GOOGLE_REDIRECT_URI=${APP_URL}/auth/google/callback
+
+# Gemini (뉴스 스크랩 AI 분석 / 챗봇 / 이미지 생성이 이 키를 공유)
+GEMINI_API_KEY=your_gemini_api_key
+# 뉴스 스크랩 AI 분석 모델. 구조화 출력과 url_context 도구를 지원하는 모델이어야 함
+GEMINI_API_MODEL=gemini-3.7-flash
 ```
+
+`GEMINI_API_KEY`가 비어 있으면 뉴스 스크랩의 [AI분석] 버튼만 동작하지 않고,
+스크랩 등록·수정·열람 등 나머지 기능은 정상 동작합니다.
 
 ### 2. Docker 컨테이너 실행
 
@@ -237,6 +254,7 @@ php 컨테이너는 시작 시 `php artisan migrate --force`를 자동 실행하
 - 경제 비디오 게시판
 - 포트폴리오 게시판
 - 뉴스 게시판
+- 뉴스 스크랩 게시판 (`/board-scrap`) — AI 분석, 글별 공개/나만보기
 
 ### 교육 도구 및 게임
 - 경제 용어 게임
@@ -252,9 +270,56 @@ php 컨테이너는 시작 시 `php artisan migrate --force`를 자동 실행하
 ### 마이페이지
 - 프로필 관리
 - 비밀번호 변경
-- 뉴스 스크랩
+- 내 뉴스 스크랩 (`/board-scrap?mine=1`)
 - MQ 맵핑
 - 좋아요한 콘텐츠
+
+## AI 기능 (Gemini)
+
+Gemini API를 세 곳에서 사용합니다. API 키는 `GEMINI_API_KEY` 하나를 공유하고,
+모델은 기능마다 요구사항이 달라 각각 지정합니다.
+
+| 기능 | 모델 | 위치 |
+|------|------|------|
+| 뉴스 스크랩 AI 분석 | `GEMINI_API_MODEL` (기본 `gemini-3.7-flash`) | `app/Services/NewsAiAnalyzer.php` |
+| 캐시플로우 챗봇 | `gemini-2.0-flash-lite` (하드코딩) | `app/Http/Controllers/GeminiBotController.php` |
+| MQ 맵핑 이미지 생성 | `gemini-3.1-flash-image-preview` (하드코딩) | `app/Http/Controllers/MyPageController.php` |
+
+키는 반드시 `config('services.gemini.api_key')`로 읽습니다. 설정 파일 밖에서
+`env()`를 직접 호출하면 `php artisan config:cache`를 켠 환경에서 `null`이 되어
+조용히 실패합니다.
+
+### 뉴스 스크랩 AI 분석
+
+`/board-scrap/create`에서 뉴스 링크를 넣고 **[AI분석]**을 누르면 네 개 파트를
+생성해 폼에 채웁니다. 사람이 입력하는 항목은 제목 · 링크 · 선택한 이유 세 개뿐입니다.
+
+1. 뉴스에 대한 짧은 해석
+2. 뉴스 본문 내 경제 용어 (최대 10개, 새로 알게 된 용어를 체크해 저장)
+3. 향후 전망 (단기 3~6개월 / 중장기 1~3년)
+4. 내 경제상황에 맞는 질문 2개
+
+**본문 확보는 2단입니다.** `NewsArticleExtractor`가 서버에서 HTML을 받아 언론사별
+컨테이너 XPath로 본문을 뽑고, 실패하면 `NewsAiAnalyzer`가 Gemini `url_context`
+도구로 모델이 URL을 직접 읽게 폴백합니다. 어느 경로를 탔는지는 `mq_ai_source`
+(`crawl` / `url_context`)에 남습니다. 기사가 아닌 페이지(로그인 · 삭제 · 목록)는
+모델이 `articleReadable=false`로 응답하고 사용자에게 안내 문구를 띄웁니다.
+
+네 파트는 **한 번의 호출**로 받습니다 (`responseSchema` 구조화 출력). 파트마다
+호출하면 지연과 비용이 4배가 되고 파트 간 톤이 어긋납니다. 파트별 지침은
+`NewsAiAnalyzer::taskPrompt()` 안에서 `[파트 1]`~`[파트 4]` 블록으로 나눠 관리하므로,
+문구를 손볼 때는 그 메서드만 고치면 됩니다.
+
+AI 결과는 초안이며 저장 전에 네 파트 모두 수정할 수 있습니다. 등록 · 수정 폼은
+`resources/views/board_scrap/_ai_form.blade.php`를 공용으로 씁니다.
+
+**개인화 근거는 두 가지뿐입니다.** 사용자가 쓴 "선택한 이유" 평문과 회원 생일로
+계산한 연령대입니다. 프로필 항목이 늘어나면 `BoardScrapController::buildUserContext()`에
+키를 더하고 `[파트 4]` 지침에 한 줄 추가하면 됩니다. 프롬프트가 `<user_context>`에
+있는 값만 쓰도록 지시되어 있어, 키가 없을 때 없는 정보를 추측하지 않습니다.
+
+호출당 응답 시간은 모델과 경로에 따라 4~20초입니다. 외부 LLM 호출이므로
+`/board-scrap/ai-analyze` 라우트에 회원당 분당 10회 제한(`throttle:10,1`)을 걸어 뒀습니다.
 
 ## 개발 환경
 
