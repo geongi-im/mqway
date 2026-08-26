@@ -29,9 +29,14 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+    # storage/framework 하위까지 만드는 이유: docker-compose.local.yml이
+    # storage/framework를 named volume으로 덮으면 빈 상태로 마운트되어 호스트의
+    # cache/sessions/views가 가려진다. 여기서 미리 만들어 두면 로컬이 command를
+    # 따로 덮어쓸 필요가 없다(compose는 command를 병합하지 않고 통째로 교체한다).
+    # 서버에는 이미 존재하는 디렉터리라 mkdir -p가 no-op이다.
     command: >
       sh -c "
-      mkdir -p storage/logs bootstrap/cache &&
+      mkdir -p storage/logs storage/framework/cache/data storage/framework/sessions storage/framework/views bootstrap/cache &&
       chown -R www-data:www-data storage bootstrap/cache &&
       chmod -R 775 storage bootstrap/cache &&
       composer install --no-interaction --no-dev --optimize-autoloader &&

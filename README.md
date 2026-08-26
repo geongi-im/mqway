@@ -156,22 +156,23 @@ GOOGLE_REDIRECT_URI=${APP_URL}/auth/google/callback
 
 ```bash
 # 컨테이너 빌드 및 실행
-docker compose -f docker-compose.yml -f docker-compose.local.yml up -d
+docker compose -f docker-compose.local.yml up -d
 
-# 컨테이너 확인
+# 컨테이너 확인 (ps/logs/exec은 프로젝트 이름으로 찾으므로 -f 불필요)
 docker compose ps
 ```
 
-`docker-compose.local.yml`은 `vendor`, `storage/framework`, `bootstrap/cache`를
-named volume으로 옮겨 WSL2의 9p 파일시스템 왕복을 없애고, php가 준비될 때까지
-nginx를 대기시켜 기동 중 502를 방지합니다. **첫 실행은 vendor volume이 비어 있어
-`composer install` 전체가 돌기 때문에 수 분 걸립니다.**
+`docker-compose.local.yml`은 `include`로 `docker-compose.yml`을 끌어오므로 `-f` 하나만
+지정하면 됩니다 (Docker Compose 2.20 이상 필요). `vendor`, `storage/framework`, `bootstrap/cache`를 named volume으로 옮겨
+WSL2의 9p 파일시스템 왕복을 없애고, php가 준비될 때까지 nginx를 대기시켜 기동 중 502를
+방지합니다. **첫 실행은 vendor volume이 비어 있어 `composer install` 전체가 돌기 때문에
+수 분 걸립니다.**
 
 캐시를 초기화할 때는 volume까지 함께 지워야 합니다 (`vendor`와 `bootstrap/cache`가
 따로 남으면 부팅 시 오류가 날 수 있음):
 
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.local.yml down -v
+docker compose -f docker-compose.local.yml down -v
 ```
 
 **서버 (Ubuntu)**
