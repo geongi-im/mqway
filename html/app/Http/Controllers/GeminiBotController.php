@@ -30,8 +30,9 @@ class GeminiBotController extends Controller
 
         return new StreamedResponse(function () use ($message, $imageData, $conversation) {
             try {
-                $apiKey = env('GEMINI_API_KEY');
-                $modelName = 'models/gemini-2.0-flash-lite'; 
+                // config 경유로 읽는다. config:cache 를 켜면 env() 직접 호출은 null 이 된다.
+                $apiKey = config('services.gemini.api_key');
+                $modelName = 'models/gemini-2.0-flash-lite';
                 $apiUrl = "https://generativelanguage.googleapis.com/v1beta/{$modelName}:streamGenerateContent?key={$apiKey}";
                 
                 $parts = [];

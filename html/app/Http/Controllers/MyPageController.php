@@ -422,7 +422,8 @@ class MyPageController extends Controller
             return response()->json(['success' => false, 'message' => '목표 설명을 입력해주세요.'], 400);
         }
 
-        $apiKey = env('GEMINI_API_KEY');
+        // config 경유로 읽는다. config:cache 를 켜면 env() 직접 호출은 null 이 된다.
+        $apiKey = config('services.gemini.api_key');
         if (empty($apiKey)) {
             return response()->json(['success' => false, 'message' => 'API 키가 설정되지 않았습니다.'], 500);
         }
