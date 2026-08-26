@@ -51,19 +51,33 @@
                         <label for="mq_url" class="text-sm font-semibold text-[#2D3047] block">
                             뉴스 링크 <span class="text-red-500">*</span>
                         </label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
-                                </svg>
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <div class="relative flex-1">
+                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                                    </svg>
+                                </div>
+                                <input type="url"
+                                       name="mq_url"
+                                       id="mq_url"
+                                       value="{{ old('mq_url', $scrap->mq_url) }}"
+                                       class="w-full h-12 pl-10 pr-4 border border-gray-200 rounded-xl focus:outline-none focus:border-[#4ECDC4] focus:ring-2 focus:ring-[#4ECDC4]/20 transition-all bg-gray-50 font-medium text-gray-700 placeholder-gray-400 @error('mq_url') border-red-500 @enderror"
+                                       placeholder="https://example.com/news/article"
+                                       required>
                             </div>
-                            <input type="url"
-                                   name="mq_url"
-                                   id="mq_url"
-                                   value="{{ old('mq_url', $scrap->mq_url) }}"
-                                   class="w-full h-12 pl-10 pr-4 border border-gray-200 rounded-xl focus:outline-none focus:border-[#4ECDC4] focus:ring-2 focus:ring-[#4ECDC4]/20 transition-all bg-gray-50 font-medium text-gray-700 placeholder-gray-400 @error('mq_url') border-red-500 @enderror"
-                                   placeholder="https://example.com/news/article"
-                                   required>
+                            <button type="button"
+                                    id="aiAnalyzeBtn"
+                                    class="inline-flex items-center justify-center gap-2 shrink-0 h-12 px-6 rounded-xl bg-gradient-to-r from-violet-500 to-indigo-500 text-white font-bold hover:shadow-lg hover:shadow-indigo-500/30 hover:-translate-y-0.5 transition-all">
+                                <svg class="ai-btn-spinner hidden w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                </svg>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                                </svg>
+                                <span class="ai-btn-label">AI분석</span>
+                            </button>
                         </div>
                         @error('mq_url')
                             <p class="text-sm text-red-500 flex items-center gap-1">
@@ -73,11 +87,15 @@
                                 {{ $message }}
                             </p>
                         @enderror
-                        <p class="text-xs text-gray-400 flex items-center gap-1.5">
-                            <svg class="w-3.5 h-3.5 text-[#4ECDC4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <p id="aiAnalyzeStatus" class="text-xs mt-2 hidden"></p>
+                        <p class="text-xs text-gray-400 flex items-start gap-1.5">
+                            <svg class="w-3.5 h-3.5 mt-0.5 shrink-0 text-[#4ECDC4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
-                            URL이 변경되면 썸네일 이미지가 자동으로 다시 가져와집니다.
+                            <span>
+                                <strong class="text-indigo-500">[AI분석]</strong> 을 다시 누르면 아래 AI 분석 결과가 새로 만들어진 내용으로 바뀝니다.
+                                URL이 변경되면 썸네일 이미지가 자동으로 다시 가져와집니다.
+                            </span>
                         </p>
                     </div>
 
@@ -101,27 +119,30 @@
                         @enderror
                     </div>
 
-                    <!-- 새로 알게된 용어 -->
-                    <div class="space-y-2">
-                        <label for="mq_new_terms" class="text-sm font-semibold text-[#2D3047] block">
-                            새로 알게된 용어
-                            <span class="text-xs font-normal text-gray-400 ml-1">선택사항</span>
-                        </label>
-                        <p class="text-xs text-gray-400 mb-3">이 뉴스를 통해 새롭게 알게된 경제 용어나 개념을 정리해보세요</p>
-                        <textarea name="mq_new_terms"
-                                  id="mq_new_terms"
-                                  rows="4"
-                                  class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-[#4ECDC4] focus:ring-2 focus:ring-[#4ECDC4]/20 transition-all bg-gray-50 resize-none text-gray-700 placeholder-gray-400 @error('mq_new_terms') border-red-500 @enderror"
-                                  placeholder="예: GDP (국내총생산) - 한 나라의 경제 규모를 나타내는 지표">{{ old('mq_new_terms', $scrap->mq_new_terms) }}</textarea>
-                        @error('mq_new_terms')
-                            <p class="text-sm text-red-500 flex items-center gap-1">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                {{ $message }}
-                            </p>
-                        @enderror
-                    </div>
+                    @include('board_scrap._ai_form', ['scrap' => $scrap])
+
+                    {{-- 예전 글이 남긴 자유 입력 용어 메모. 새 글에서는 AI 용어 리스트가 이 역할을 한다. --}}
+                    @if(!empty($scrap->mq_new_terms))
+                        <div class="space-y-2">
+                            <label for="mq_new_terms" class="text-sm font-semibold text-[#2D3047] block">
+                                새로 알게된 용어
+                                <span class="text-xs font-normal text-gray-400 ml-1">이전 형식</span>
+                            </label>
+                            <p class="text-xs text-gray-400 mb-3">예전에 직접 작성한 메모입니다. 그대로 두거나 위 용어 리스트로 옮긴 뒤 비워도 됩니다</p>
+                            <textarea name="mq_new_terms"
+                                      id="mq_new_terms"
+                                      rows="4"
+                                      class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-[#4ECDC4] focus:ring-2 focus:ring-[#4ECDC4]/20 transition-all bg-gray-50 resize-y text-gray-700 placeholder-gray-400 @error('mq_new_terms') border-red-500 @enderror">{{ old('mq_new_terms', $scrap->mq_new_terms) }}</textarea>
+                            @error('mq_new_terms')
+                                <p class="text-sm text-red-500 flex items-center gap-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    {{ $message }}
+                                </p>
+                            @enderror
+                        </div>
+                    @endif
 
                     <!-- 구분선 -->
                     <div class="border-t border-gray-100"></div>

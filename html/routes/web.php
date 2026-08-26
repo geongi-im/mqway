@@ -290,6 +290,8 @@ Route::prefix('board-scrap')->group(function () {
     Route::post('/', [BoardScrapController::class, 'store'])->name('board-scrap.store');
     Route::post('/upload-image', [BoardScrapController::class, 'uploadImage'])->name('board-scrap.upload-image');
     Route::post('/fetch-meta', [BoardScrapController::class, 'fetchMetaImage'])->name('board-scrap.fetch-meta');
+    // AI 분석은 외부 LLM 호출이므로 회원당 분당 10회로 제한한다
+    Route::post('/ai-analyze', [BoardScrapController::class, 'aiAnalyze'])->middleware('throttle:10,1')->name('board-scrap.ai-analyze');
     Route::post('/check-duplicate', [BoardScrapController::class, 'checkDuplicate'])->name('board-scrap.check-duplicate');
     Route::get('/{idx}/edit', [BoardScrapController::class, 'edit'])->name('board-scrap.edit')->where('idx', '[0-9]+');
     Route::put('/{idx}', [BoardScrapController::class, 'update'])->name('board-scrap.update')->where('idx', '[0-9]+');

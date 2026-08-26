@@ -111,7 +111,164 @@
                 </div>
             </div>
 
-            <!-- 새로 알게된 용어 -->
+            <!-- ===== AI 분석 결과 ===== -->
+            @if($scrap->hasAiAnalysis())
+            @php
+                $aiTerms = $scrap->getAiTerms();
+                $checkedTerms = $scrap->getCheckedTerms();
+                $outlookShort = $scrap->getOutlookLines('short');
+                $outlookLong = $scrap->getOutlookLines('long');
+                $aiQuestions = $scrap->getAiQuestions();
+            @endphp
+            <div class="mb-8 space-y-8">
+
+                <!-- 뉴스에 대한 짧은 해석 -->
+                @if($scrap->mq_ai_interpretation)
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center">
+                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                            </svg>
+                        </div>
+                        <h2 class="text-xl font-bold text-[#2D3047]">뉴스에 대한 짧은 해석</h2>
+                    </div>
+                    <div class="bg-violet-50/60 border border-violet-100 rounded-xl p-6">
+                        <p class="text-gray-800 whitespace-pre-line leading-relaxed">{{ $scrap->mq_ai_interpretation }}</p>
+                    </div>
+                </div>
+                @endif
+
+                <!-- 뉴스 속 경제 용어 -->
+                @if(count($aiTerms))
+                <div>
+                    <div class="flex flex-wrap items-center gap-3 mb-4">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#4ECDC4] to-[#2AA9A0] flex items-center justify-center">
+                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                            </svg>
+                        </div>
+                        <h2 class="text-xl font-bold text-[#2D3047]">뉴스 속 경제 용어</h2>
+                        <span class="text-xs text-gray-400">{{ count($aiTerms) }}개</span>
+                        @if(count($checkedTerms))
+                        <span class="inline-flex items-center gap-1 py-1 px-2.5 rounded-full bg-[#4ECDC4]/15 text-[#2AA9A0] text-xs font-bold">
+                            새로 알게 된 용어 {{ count($checkedTerms) }}개
+                        </span>
+                        @endif
+                    </div>
+                    <div class="space-y-3">
+                        @foreach($aiTerms as $term)
+                        <div class="rounded-xl border p-5 {{ $term['checked'] ? 'border-[#4ECDC4]/50 bg-[#4ECDC4]/5' : 'border-gray-100 bg-gray-50' }}">
+                            <div class="flex items-start gap-3">
+                                @if($term['checked'])
+                                <span class="shrink-0 w-5 h-5 mt-0.5 rounded-full bg-[#4ECDC4] flex items-center justify-center" title="새로 알게 된 용어">
+                                    <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </span>
+                                @else
+                                <span class="shrink-0 w-5 h-5 mt-0.5 flex items-center justify-center">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-gray-300"></span>
+                                </span>
+                                @endif
+                                <div class="min-w-0">
+                                    <p class="font-bold text-[#2D3047] mb-1">{{ $term['term'] }}</p>
+                                    <p class="text-gray-700 leading-relaxed">{{ $term['definition'] }}</p>
+                                    @if($term['context'])
+                                    <p class="text-xs text-gray-500 mt-2">이 기사에서: {{ $term['context'] }}</p>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+
+                <!-- 향후 전망 -->
+                @if(count($outlookShort) || count($outlookLong))
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
+                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                            </svg>
+                        </div>
+                        <h2 class="text-xl font-bold text-[#2D3047]">향후 전망</h2>
+                    </div>
+                    <div class="grid gap-4 md:grid-cols-2">
+                        @if(count($outlookShort))
+                        <div class="rounded-xl border border-amber-100 bg-amber-50/50 p-5">
+                            <p class="text-sm font-bold text-amber-700 mb-3 flex items-center gap-1.5">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                                단기 (3~6개월)
+                            </p>
+                            <ul class="space-y-2.5">
+                                @foreach($outlookShort as $line)
+                                <li class="flex items-start gap-2 text-gray-800 leading-relaxed">
+                                    <span class="shrink-0 mt-2 w-1 h-1 rounded-full bg-amber-400"></span>
+                                    <span>{{ $line }}</span>
+                                </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                        @endif
+                        @if(count($outlookLong))
+                        <div class="rounded-xl border border-indigo-100 bg-indigo-50/50 p-5">
+                            <p class="text-sm font-bold text-indigo-700 mb-3 flex items-center gap-1.5">
+                                <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+                                중장기 (1~3년)
+                            </p>
+                            <ul class="space-y-2.5">
+                                @foreach($outlookLong as $line)
+                                <li class="flex items-start gap-2 text-gray-800 leading-relaxed">
+                                    <span class="shrink-0 mt-2 w-1 h-1 rounded-full bg-indigo-400"></span>
+                                    <span>{{ $line }}</span>
+                                </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                        @endif
+                    </div>
+                </div>
+                @endif
+
+                <!-- 내 경제상황에 맞는 질문 -->
+                @if(count($aiQuestions))
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#2D3047] to-[#1A1C29] flex items-center justify-center">
+                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <h2 class="text-xl font-bold text-[#2D3047]">내 경제상황에 맞는 질문</h2>
+                    </div>
+                    <div class="space-y-3">
+                        @foreach($aiQuestions as $index => $question)
+                        <div class="rounded-xl border border-gray-200 bg-white p-5 flex items-start gap-4">
+                            <span class="shrink-0 w-7 h-7 rounded-full bg-[#2D3047] text-white text-xs font-bold flex items-center justify-center">
+                                {{ $index + 1 }}
+                            </span>
+                            <p class="text-gray-800 font-medium leading-relaxed">{{ $question }}</p>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+
+                <!-- AI 분석 안내 -->
+                <p class="text-xs text-gray-400 leading-relaxed border-t border-gray-100 pt-4">
+                    위 네 항목은 AI가 뉴스 원문을 읽고 만든 초안을 작성자가 다듬은 내용입니다.
+                    사실과 다를 수 있으니 중요한 판단은 원문과 공식 자료로 확인해주세요. 투자 권유가 아닙니다.
+                    @if($scrap->mq_ai_date)
+                    <br>AI 분석 {{ $scrap->mq_ai_date->format('Y.m.d H:i') }}@if($scrap->mq_ai_model) · {{ $scrap->mq_ai_model }}@endif
+                    @endif
+                </p>
+            </div>
+            @endif
+
+            <!-- 새로 알게된 용어 (예전 형식) -->
             @if($scrap->mq_new_terms)
             <div class="mb-8">
                 <div class="flex items-center gap-3 mb-4">

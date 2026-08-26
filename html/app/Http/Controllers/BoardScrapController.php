@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\BoardScrap;
+use App\Services\NewsAiAnalyzer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -62,7 +63,9 @@ class BoardScrapController extends Controller
             $query->where(function($q) use ($searchTerm) {
                 $q->where('mq_title', 'like', '%'.$searchTerm.'%')
                   ->orWhere('mq_reason', 'like', '%'.$searchTerm.'%')
-                  ->orWhere('mq_new_terms', 'like', '%'.$searchTerm.'%');
+                  ->orWhere('mq_new_terms', 'like', '%'.$searchTerm.'%')
+                  ->orWhere('mq_ai_interpretation', 'like', '%'.$searchTerm.'%')
+                  ->orWhere('mq_news_term', 'like', '%'.$searchTerm.'%');
             });
         }
 
@@ -110,24 +113,134 @@ class BoardScrapController extends Controller
     }
 
     /**
+     * [AI분석] 뉴스 링크를 분석해 4개 파트를 생성한다.
+     *
+     * 사람이 입력하는 항목(제목 / 링크 / 선택한 이유)은 건드리지 않고,
+     * 해석 / 경제 용어 / 향후 전망 / 내 상황 질문만 생성해 폼으로 돌려준다.
+     * 저장은 하지 않는다. 사용자가 결과를 다듬은 뒤 폼 제출 시점에 저장된다.
+     *
+     * @param Request $request
+     * @param NewsAiAnalyzer $analyzer
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function aiAnalyze(Request $request, NewsAiAnalyzer $analyzer)
+    {
+        $validator = validator($request->all(), [
+            'mq_url' => 'required|url|max:2000',
+        ], [
+            'mq_url.required' => '먼저 뉴스 링크를 입력해주세요.',
+            'mq_url.url' => '올바른 URL 형식이 아닙니다.',
+            'mq_url.max' => '뉴스 링크가 너무 깁니다.',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()->first('mq_url'),
+            ], 422);
+        }
+
+        $result = $analyzer->analyze(
+            $request->input('mq_url'),
+            $this->buildUserContext(Auth::user(), $request->input('mq_reason'))
+        );
+
+        if (!$result['success']) {
+            return response()->json([
+                'success' => false,
+                'message' => $result['message'],
+            ], 422);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $result['data'],
+            'meta' => $result['meta'],
+        ]);
+    }
+
+    /**
+     * 파트7(내 경제상황에 맞는 질문) 개인화에 쓰는 맥락을 만든다.
+     *
+     * 현재 근거는 두 가지뿐이다.
+     *  - reason   : 사용자가 폼에 쓴 "이 뉴스를 선택한 이유" (CKEditor HTML -> 평문)
+     *  - ageGroup : 회원 생일로 계산한 연령대
+     *
+     * 앞으로 회원가입/마이페이지에서 소득 구간, 관심 분야, 재무 목표 같은 항목을
+     * 추가로 받게 되면 이 메서드에 키를 더하고 NewsAiAnalyzer 의 [파트 4] 지침에
+     * 해당 항목을 반영하면 된다. 프롬프트는 <user_context> 에 있는 값만 사용하도록
+     * 지시되어 있으므로, 키가 없을 때 잘못된 추측이 섞이지 않는다.
+     *
+     * @param \App\Models\Member|null $user
+     * @param string|null $reason
+     * @return array
+     */
+    private function buildUserContext($user, $reason)
+    {
+        return [
+            'reason' => $this->htmlToPlainText($reason),
+            'ageGroup' => $this->resolveAgeGroup($user),
+        ];
+    }
+
+    /**
+     * 회원 생일로 연령대 문자열을 만든다. 생일이 없으면 null.
+     *
+     * @param \App\Models\Member|null $user
+     * @return string|null
+     */
+    private function resolveAgeGroup($user)
+    {
+        if (!$user || empty($user->mq_birthday)) {
+            return null;
+        }
+
+        try {
+            $age = Carbon::parse($user->mq_birthday)->age;
+        } catch (\Exception $e) {
+            return null;
+        }
+
+        if ($age < 10 || $age > 120) {
+            return null;
+        }
+
+        if ($age >= 60) {
+            return '60대 이상';
+        }
+
+        return (intdiv($age, 10) * 10) . '대';
+    }
+
+    /**
+     * CKEditor 로 작성된 HTML 을 프롬프트에 넣을 평문으로 바꾼다.
+     *
+     * @param string|null $html
+     * @return string
+     */
+    private function htmlToPlainText($html)
+    {
+        if (empty($html)) {
+            return '';
+        }
+
+        $text = preg_replace('/<br\s*\/?>/i', "\n", $html);
+        $text = preg_replace('#</(p|div|li|h[1-6]|blockquote)>#i', "\n", $text);
+        $text = html_entity_decode(strip_tags($text), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $text = preg_replace('/[ \t]+/u', ' ', $text);
+        $text = preg_replace('/\s*\n\s*/u', "\n", $text);
+        $text = preg_replace('/\n{2,}/u', "\n", $text);
+
+        return trim($text);
+    }
+
+    /**
      * 저장
      */
     public function store(Request $request)
     {
         // 유효성 검사
-        $request->validate([
-            'mq_title' => 'required|string|max:500',
-            'mq_url' => 'required|url|max:2000',
-            'mq_reason' => 'required|string',
-            'mq_new_terms' => 'nullable|string|max:5000',
-            'mq_is_public' => 'nullable|boolean'
-        ], [
-            'mq_title.required' => '뉴스 제목을 입력해주세요.',
-            'mq_title.max' => '뉴스 제목은 500자 이내로 입력해주세요.',
-            'mq_url.required' => '뉴스 링크를 입력해주세요.',
-            'mq_url.url' => '올바른 URL 형식이 아닙니다.',
-            'mq_reason.required' => '뉴스를 선택한 이유를 입력해주세요.',
-        ]);
+        $request->validate($this->validationRules(), $this->validationMessages());
 
         DB::beginTransaction();
 
@@ -143,7 +256,7 @@ class BoardScrapController extends Controller
             $scrap->mq_title = $request->mq_title;
             $scrap->mq_url = $request->mq_url;
             $scrap->mq_reason = $request->mq_reason;
-            $scrap->mq_new_terms = $request->mq_new_terms;
+            $this->applyAiFields($scrap, $request);
             $scrap->mq_thumbnail_url = $thumbnailUrl; // 자동 추출된 썸네일
             $scrap->mq_is_public = $isPublic ? 1 : 0;
             $scrap->mq_public_date = $isPublic ? Carbon::now() : null;
@@ -231,19 +344,7 @@ class BoardScrapController extends Controller
                         ->firstOrFail();
 
         // 유효성 검사
-        $request->validate([
-            'mq_title' => 'required|string|max:500',
-            'mq_url' => 'required|url|max:2000',
-            'mq_reason' => 'required|string',
-            'mq_new_terms' => 'nullable|string|max:5000',
-            'mq_is_public' => 'nullable|boolean'
-        ], [
-            'mq_title.required' => '뉴스 제목을 입력해주세요.',
-            'mq_title.max' => '뉴스 제목은 500자 이내로 입력해주세요.',
-            'mq_url.required' => '뉴스 링크를 입력해주세요.',
-            'mq_url.url' => '올바른 URL 형식이 아닙니다.',
-            'mq_reason.required' => '뉴스를 선택한 이유를 입력해주세요.',
-        ]);
+        $request->validate($this->validationRules(), $this->validationMessages());
 
         DB::beginTransaction();
 
@@ -260,7 +361,14 @@ class BoardScrapController extends Controller
             $scrap->mq_title = $request->mq_title;
             $scrap->mq_url = $request->mq_url;
             $scrap->mq_reason = $request->mq_reason;
-            $scrap->mq_new_terms = $request->mq_new_terms;
+            $this->applyAiFields($scrap, $request);
+
+            // 예전 형식 메모는 해당 입력칸이 화면에 있었을 때만 갱신한다 (없는 글의 값을 비우지 않도록)
+            if ($request->has('mq_new_terms')) {
+                $newTerms = trim((string) $request->input('mq_new_terms'));
+                $scrap->mq_new_terms = $newTerms !== '' ? $newTerms : null;
+            }
+
             $scrap->mq_is_public = $isPublic ? 1 : 0;
             $scrap->mq_update_date = Carbon::now();
 
@@ -283,6 +391,210 @@ class BoardScrapController extends Controller
                 ->withInput()
                 ->with('error', '뉴스 스크랩 수정 중 오류가 발생했습니다: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * 등록 / 수정 공통 유효성 규칙
+     *
+     * AI 파트는 모두 선택 항목이다. [AI분석] 을 돌리지 않고 사람이 직접 써도 되고,
+     * 비워둔 채 저장해도 된다.
+     *
+     * @return array
+     */
+    private function validationRules()
+    {
+        return [
+            'mq_title' => 'required|string|max:500',
+            'mq_url' => 'required|url|max:2000',
+            'mq_reason' => 'required|string',
+            // 예전 형식의 자유 입력 용어 메모. 값이 남아있는 글의 수정 화면에서만 전송된다.
+            'mq_new_terms' => 'nullable|string|max:5000',
+            'mq_ai_interpretation' => 'nullable|string|max:5000',
+            'mq_ai_outlook_short' => 'nullable|string|max:5000',
+            'mq_ai_outlook_long' => 'nullable|string|max:5000',
+            'mq_ai_questions' => 'nullable|array|max:2',
+            'mq_ai_questions.*' => 'nullable|string|max:500',
+            'terms' => 'nullable|array|max:' . BoardScrap::MAX_TERMS,
+            'terms.*.term' => 'nullable|string|max:100',
+            'terms.*.definition' => 'nullable|string|max:500',
+            'terms.*.context' => 'nullable|string|max:300',
+            'mq_ai_model' => 'nullable|string|max:60',
+            'mq_ai_source' => 'nullable|string|max:20',
+            'mq_is_public' => 'nullable|boolean'
+        ];
+    }
+
+    /**
+     * 등록 / 수정 공통 검증 메시지
+     *
+     * @return array
+     */
+    private function validationMessages()
+    {
+        return [
+            'mq_title.required' => '뉴스 제목을 입력해주세요.',
+            'mq_title.max' => '뉴스 제목은 500자 이내로 입력해주세요.',
+            'mq_url.required' => '뉴스 링크를 입력해주세요.',
+            'mq_url.url' => '올바른 URL 형식이 아닙니다.',
+            'mq_reason.required' => '뉴스를 선택한 이유를 입력해주세요.',
+            'terms.max' => '경제 용어는 최대 ' . BoardScrap::MAX_TERMS . '개까지 저장할 수 있습니다.',
+        ];
+    }
+
+    /**
+     * AI 파트 4개를 모델에 채운다. (등록 / 수정 공통)
+     *
+     * 사용자가 폼에서 수정한 값을 그대로 저장한다. AI 원본을 별도 보관하지 않는 이유는
+     * "AI 초안을 사용자가 다듬어 완성한 것" 이 이 게시물의 최종본이기 때문이다.
+     *
+     * @param BoardScrap $scrap
+     * @param Request $request
+     * @return void
+     */
+    private function applyAiFields(BoardScrap $scrap, Request $request)
+    {
+        // 해석은 사용자가 문단을 나눠 쓸 수 있으므로 줄바꿈을 살린다 (상세 화면도 whitespace-pre-line)
+        $interpretation = $this->cleanMultilineText($request->input('mq_ai_interpretation'));
+        $outlookShort = $this->cleanMultilineText($request->input('mq_ai_outlook_short'));
+        $outlookLong = $this->cleanMultilineText($request->input('mq_ai_outlook_long'));
+        $termsJson = $this->buildTermsJson($request->input('terms'));
+        $questionsJson = $this->buildQuestionsJson($request->input('mq_ai_questions'));
+
+        $scrap->mq_ai_interpretation = $interpretation !== '' ? $interpretation : null;
+        $scrap->mq_ai_outlook_short = $outlookShort !== '' ? $outlookShort : null;
+        $scrap->mq_ai_outlook_long = $outlookLong !== '' ? $outlookLong : null;
+        $scrap->mq_news_term = $termsJson;
+        $scrap->mq_ai_questions = $questionsJson;
+
+        $hasAiContent = $interpretation !== '' || $outlookShort !== '' || $outlookLong !== ''
+            || $termsJson !== null || $questionsJson !== null;
+
+        // 어떤 모델이 언제 만든 초안인지 남겨 둔다. 사용자가 손으로만 채운 경우엔 비운다.
+        if ($hasAiContent) {
+            $model = $this->cleanPlainText($request->input('mq_ai_model'));
+            $source = $this->cleanPlainText($request->input('mq_ai_source'));
+
+            $scrap->mq_ai_model = $model !== '' ? mb_substr($model, 0, 60, 'UTF-8') : null;
+            $scrap->mq_ai_source = in_array($source, ['crawl', 'url_context'], true) ? $source : null;
+            $scrap->mq_ai_date = Carbon::now();
+        } else {
+            $scrap->mq_ai_model = null;
+            $scrap->mq_ai_source = null;
+            $scrap->mq_ai_date = null;
+        }
+    }
+
+    /**
+     * 파트5 용어 리스트를 JSON 으로 만든다. 사용자가 체크한 상태도 함께 저장한다.
+     *
+     * @param mixed $rows
+     * @return string|null
+     */
+    private function buildTermsJson($rows)
+    {
+        if (!is_array($rows)) {
+            return null;
+        }
+
+        $terms = [];
+
+        foreach ($rows as $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+
+            $term = $this->cleanPlainText(isset($row['term']) ? $row['term'] : '');
+            if ($term === '') {
+                continue; // 용어명이 비면 사용자가 지운 행으로 본다
+            }
+
+            $terms[] = [
+                'term' => mb_substr($term, 0, 100, 'UTF-8'),
+                'definition' => mb_substr($this->cleanPlainText(isset($row['definition']) ? $row['definition'] : ''), 0, 500, 'UTF-8'),
+                'context' => mb_substr($this->cleanPlainText(isset($row['context']) ? $row['context'] : ''), 0, 300, 'UTF-8'),
+                'checked' => !empty($row['checked']),
+            ];
+
+            if (count($terms) >= BoardScrap::MAX_TERMS) {
+                break;
+            }
+        }
+
+        return empty($terms) ? null : json_encode($terms, JSON_UNESCAPED_UNICODE);
+    }
+
+    /**
+     * 파트7 질문 2개를 JSON 배열로 만든다.
+     *
+     * @param mixed $questions
+     * @return string|null
+     */
+    private function buildQuestionsJson($questions)
+    {
+        if (!is_array($questions)) {
+            return null;
+        }
+
+        $result = [];
+
+        foreach ($questions as $question) {
+            if (!is_string($question)) {
+                continue;
+            }
+
+            $clean = $this->cleanPlainText($question);
+            if ($clean !== '') {
+                $result[] = mb_substr($clean, 0, 500, 'UTF-8');
+            }
+
+            if (count($result) >= 2) {
+                break;
+            }
+        }
+
+        return empty($result) ? null : json_encode($result, JSON_UNESCAPED_UNICODE);
+    }
+
+    /**
+     * 한 줄 텍스트 정리. AI 파트는 평문으로만 저장하므로 태그를 제거한다.
+     *
+     * @param mixed $value
+     * @return string
+     */
+    private function cleanPlainText($value)
+    {
+        if (!is_string($value)) {
+            return '';
+        }
+
+        $value = strip_tags($value);
+        $value = preg_replace('/\s+/u', ' ', $value);
+
+        return trim($value);
+    }
+
+    /**
+     * 여러 줄 텍스트 정리. 전망 항목은 줄바꿈이 항목 구분자이므로 줄바꿈을 살린다.
+     *
+     * @param mixed $value
+     * @return string
+     */
+    private function cleanMultilineText($value)
+    {
+        if (!is_string($value)) {
+            return '';
+        }
+
+        $lines = [];
+
+        foreach (preg_split('/\r\n|\r|\n/', strip_tags($value)) as $line) {
+            $line = trim(preg_replace('/[ \t]+/u', ' ', $line));
+            if ($line !== '') {
+                $lines[] = $line;
+            }
+        }
+
+        return implode("\n", $lines);
     }
 
     /**

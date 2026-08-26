@@ -16,12 +16,23 @@ class BoardScrap extends Model
      */
     const BOARD_NAME = 'board_scrap';
 
+    /** 파트5 경제 용어 최대 개수 (AI 응답 / 사용자 편집 공통 상한) */
+    const MAX_TERMS = 10;
+
     protected $fillable = [
         'mq_user_id',
         'mq_title',
         'mq_url',
         'mq_reason',
         'mq_new_terms',
+        'mq_ai_interpretation',
+        'mq_news_term',
+        'mq_ai_outlook_short',
+        'mq_ai_outlook_long',
+        'mq_ai_questions',
+        'mq_ai_model',
+        'mq_ai_source',
+        'mq_ai_date',
         'mq_thumbnail_url',
         'mq_is_public',
         'mq_public_date',
@@ -36,7 +47,8 @@ class BoardScrap extends Model
     protected $dates = [
         'mq_reg_date',
         'mq_update_date',
-        'mq_public_date'
+        'mq_public_date',
+        'mq_ai_date'
     ];
 
     // 날짜를 항상 Carbon 인스턴스로 변환
@@ -53,6 +65,135 @@ class BoardScrap extends Model
     public function getMqPublicDateAttribute($value)
     {
         return $value ? Carbon::parse($value) : null;
+    }
+
+    public function getMqAiDateAttribute($value)
+    {
+        return $value ? Carbon::parse($value) : null;
+    }
+
+    /**
+     * 파트5 경제 용어 리스트
+     *
+     * mq_news_term 은 [{term, definition, context, checked}] 형태의 JSON 이다.
+     * 예전 글에는 값이 없으므로 항상 배열로 정규화해서 돌려준다.
+     *
+     * @return array
+     */
+    public function getAiTerms()
+    {
+        if (empty($this->mq_news_term)) {
+            return [];
+        }
+
+        $decoded = json_decode($this->mq_news_term, true);
+
+        if (!is_array($decoded)) {
+            return [];
+        }
+
+        $terms = [];
+
+        foreach ($decoded as $row) {
+            if (!is_array($row) || empty($row['term'])) {
+                continue;
+            }
+
+            $terms[] = [
+                'term'       => (string) $row['term'],
+                'definition' => isset($row['definition']) ? (string) $row['definition'] : '',
+                'context'    => isset($row['context']) ? (string) $row['context'] : '',
+                'checked'    => !empty($row['checked']),
+            ];
+        }
+
+        return $terms;
+    }
+
+    /**
+     * 사용자가 "알게 된 용어" 로 체크한 항목만
+     *
+     * @return array
+     */
+    public function getCheckedTerms()
+    {
+        $checked = [];
+
+        foreach ($this->getAiTerms() as $term) {
+            if ($term['checked']) {
+                $checked[] = $term;
+            }
+        }
+
+        return $checked;
+    }
+
+    /**
+     * 파트7 질문 리스트
+     *
+     * @return array
+     */
+    public function getAiQuestions()
+    {
+        if (empty($this->mq_ai_questions)) {
+            return [];
+        }
+
+        $decoded = json_decode($this->mq_ai_questions, true);
+
+        if (!is_array($decoded)) {
+            return [];
+        }
+
+        $questions = [];
+
+        foreach ($decoded as $question) {
+            if (is_string($question) && trim($question) !== '') {
+                $questions[] = trim($question);
+            }
+        }
+
+        return $questions;
+    }
+
+    /**
+     * 파트6 전망을 줄 단위 배열로 반환
+     *
+     * @param string $term 'short' | 'long'
+     * @return array
+     */
+    public function getOutlookLines($term = 'short')
+    {
+        $raw = $term === 'long' ? $this->mq_ai_outlook_long : $this->mq_ai_outlook_short;
+
+        if (empty($raw)) {
+            return [];
+        }
+
+        $lines = [];
+
+        foreach (preg_split('/\r\n|\r|\n/', $raw) as $line) {
+            $line = trim($line);
+            if ($line !== '') {
+                $lines[] = $line;
+            }
+        }
+
+        return $lines;
+    }
+
+    /**
+     * AI 분석 결과가 하나라도 있는지 (상세 화면 섹션 노출 판단용)
+     *
+     * @return bool
+     */
+    public function hasAiAnalysis()
+    {
+        return !empty($this->mq_ai_interpretation)
+            || !empty($this->mq_news_term)
+            || !empty($this->mq_ai_outlook_short)
+            || !empty($this->mq_ai_outlook_long)
+            || !empty($this->mq_ai_questions);
     }
 
     /**
