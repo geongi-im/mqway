@@ -23,6 +23,23 @@
                 <form action="{{ route('board-scrap.store') }}" method="POST" class="space-y-8" id="scrapForm">
                     @csrf
 
+                    <!-- 공개 설정 (제목 상단에 간단히 표기) -->
+                    <div class="flex justify-start">
+                        <!-- 체크박스는 해제 시 값을 보내지 않으므로 hidden 으로 기본값 0(나만보기)을 명시한다 -->
+                        <input type="hidden" name="mq_is_public" value="0">
+                        <label for="mq_is_public" class="inline-flex items-center gap-2 cursor-pointer" title="켜면 뉴스 스크랩 게시판에 공개됩니다">
+                            <input type="checkbox"
+                                   name="mq_is_public"
+                                   id="mq_is_public"
+                                   value="1"
+                                   {{ old('mq_is_public') ? 'checked' : '' }}
+                                   class="peer sr-only">
+                            <span class="relative w-9 h-5 rounded-full bg-gray-300 transition-colors peer-checked:bg-[#4ECDC4] after:absolute after:top-0.5 after:left-0.5 after:w-4 after:h-4 after:rounded-full after:bg-white after:shadow after:transition-transform peer-checked:after:translate-x-4"></span>
+                            <span class="text-xs font-semibold text-gray-400 peer-checked:hidden">비공개 · 나만 보기</span>
+                            <span class="hidden text-xs font-semibold text-[#2AA9A0] peer-checked:inline">공개 · 게시판에 노출</span>
+                        </label>
+                    </div>
+
                     <!-- 뉴스 제목 -->
                     <div class="space-y-2">
                         <label for="mq_title" class="text-sm font-semibold text-[#2D3047] block">
@@ -44,6 +61,26 @@
                             </p>
                         @enderror
                     </div>
+
+                    <!-- 뉴스를 선택한 이유 (CKEditor) -->
+                    <div class="space-y-2">
+                        <label for="editor" class="text-sm font-semibold text-[#2D3047] block">
+                            뉴스를 선택한 이유 <span class="text-red-500">*</span>
+                        </label>
+                        <p class="text-xs text-gray-400 mb-3">길게 쓰지 않아도 됩니다. 이 뉴스를 고른 이유를 한두 줄로 남겨주세요</p>
+                        <textarea name="mq_reason" id="editor">{{ old('mq_reason') }}</textarea>
+                        @error('mq_reason')
+                            <p class="text-sm text-red-500 flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                {{ $message }}
+                            </p>
+                        @enderror
+                    </div>
+
+                    <!-- 구분선 -->
+                    <div class="border-t border-gray-100"></div>
 
                     <!-- 뉴스 링크 -->
                     <div class="space-y-2">
@@ -67,7 +104,7 @@
                             </div>
                             <button type="button"
                                     id="aiAnalyzeBtn"
-                                    class="inline-flex items-center justify-center gap-2 shrink-0 h-12 px-6 rounded-xl bg-gradient-to-r from-violet-500 to-indigo-500 text-white font-bold hover:shadow-lg hover:shadow-indigo-500/30 hover:-translate-y-0.5 transition-all">
+                                    class="js-ai-analyze inline-flex items-center justify-center gap-2 shrink-0 h-12 px-6 rounded-xl bg-gradient-to-r from-violet-500 to-indigo-500 text-white font-bold hover:shadow-lg hover:shadow-indigo-500/30 hover:-translate-y-0.5 transition-all">
                                 <svg class="ai-btn-spinner hidden w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
@@ -86,14 +123,13 @@
                                 {{ $message }}
                             </p>
                         @enderror
-                        <p id="aiAnalyzeStatus" class="text-xs mt-2 hidden"></p>
                         <p class="text-xs text-gray-400 flex items-start gap-1.5">
                             <svg class="w-3.5 h-3.5 mt-0.5 shrink-0 text-[#4ECDC4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
                             <span>
                                 링크를 넣고 <strong class="text-indigo-500">[AI분석]</strong> 을 누르면 해석 · 경제 용어 · 향후 전망 · 내 상황 질문이 자동으로 채워집니다.
-                                아래 <strong>뉴스를 선택한 이유</strong>를 먼저 써두면 질문이 내 상황에 더 맞게 만들어집니다. 썸네일 이미지는 자동으로 가져옵니다.
+                                위 <strong>뉴스를 선택한 이유</strong>를 먼저 써두면 질문이 내 상황에 더 맞게 만들어집니다. 썸네일 이미지는 자동으로 가져옵니다.
                             </span>
                         </p>
                     </div>
@@ -101,46 +137,7 @@
                     <!-- 구분선 -->
                     <div class="border-t border-gray-100"></div>
 
-                    <!-- 뉴스를 선택한 이유 (CKEditor) -->
-                    <div class="space-y-2">
-                        <label for="editor" class="text-sm font-semibold text-[#2D3047] block">
-                            뉴스를 선택한 이유 <span class="text-red-500">*</span>
-                        </label>
-                        <p class="text-xs text-gray-400 mb-3">이 뉴스를 스크랩하는 이유와 느낀 점을 작성해주세요</p>
-                        <textarea name="mq_reason" id="editor">{{ old('mq_reason') }}</textarea>
-                        @error('mq_reason')
-                            <p class="text-sm text-red-500 flex items-center gap-1">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                {{ $message }}
-                            </p>
-                        @enderror
-                    </div>
-
                     @include('board_scrap._ai_form')
-
-                    <!-- 구분선 -->
-                    <div class="border-t border-gray-100"></div>
-
-                    <!-- 공개 설정 -->
-                    <div class="space-y-2">
-                        <label class="text-sm font-semibold text-[#2D3047] block">공개 설정</label>
-                        <!-- 체크박스는 해제 시 값을 보내지 않으므로 hidden 으로 기본값 0(나만보기)을 명시한다 -->
-                        <input type="hidden" name="mq_is_public" value="0">
-                        <label for="mq_is_public" class="flex items-start gap-3 p-4 rounded-xl border border-gray-200 bg-gray-50 cursor-pointer hover:border-[#4ECDC4] transition-all">
-                            <input type="checkbox"
-                                   name="mq_is_public"
-                                   id="mq_is_public"
-                                   value="1"
-                                   {{ old('mq_is_public') ? 'checked' : '' }}
-                                   class="mt-0.5 w-5 h-5 rounded border-gray-300 text-[#4ECDC4] focus:ring-[#4ECDC4]">
-                            <span class="text-sm">
-                                <span class="font-bold text-[#2D3047] block mb-1">뉴스 스크랩 게시판에 공개</span>
-                                <span class="text-gray-500">체크하지 않으면 나만 볼 수 있습니다. 저장 후 상세 페이지에서 언제든 바꿀 수 있습니다.</span>
-                            </span>
-                        </label>
-                    </div>
 
                     <!-- 구분선 -->
                     <div class="border-t border-gray-100"></div>
@@ -280,8 +277,9 @@
 
 <style>
 .ck-editor__editable {
-    min-height: 300px;
-    max-height: 500px;
+    /* 부담 없이 짧게 쓰도록 기존 높이의 절반으로 줄였다 */
+    min-height: 150px;
+    max-height: 250px;
     border-radius: 0 0 0.75rem 0.75rem !important;
     border-color: #e5e7eb !important;
     background-color: #f9fafb !important;

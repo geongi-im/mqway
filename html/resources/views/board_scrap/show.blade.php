@@ -119,6 +119,7 @@
                 $outlookShort = $scrap->getOutlookLines('short');
                 $outlookLong = $scrap->getOutlookLines('long');
                 $aiQuestions = $scrap->getAiQuestions();
+                $aiAnswers = $scrap->getAiAnswers(count($aiQuestions));
             @endphp
             <div class="mb-8 space-y-8">
 
@@ -152,7 +153,7 @@
                         <span class="text-xs text-gray-400">{{ count($aiTerms) }}개</span>
                         @if(count($checkedTerms))
                         <span class="inline-flex items-center gap-1 py-1 px-2.5 rounded-full bg-[#4ECDC4]/15 text-[#2AA9A0] text-xs font-bold">
-                            새로 알게 된 용어 {{ count($checkedTerms) }}개
+                            저장한 용어 {{ count($checkedTerms) }}개
                         </span>
                         @endif
                     </div>
@@ -161,7 +162,7 @@
                         <div class="rounded-xl border p-5 {{ $term['checked'] ? 'border-[#4ECDC4]/50 bg-[#4ECDC4]/5' : 'border-gray-100 bg-gray-50' }}">
                             <div class="flex items-start gap-3">
                                 @if($term['checked'])
-                                <span class="shrink-0 w-5 h-5 mt-0.5 rounded-full bg-[#4ECDC4] flex items-center justify-center" title="새로 알게 된 용어">
+                                <span class="shrink-0 w-5 h-5 mt-0.5 rounded-full bg-[#4ECDC4] flex items-center justify-center" title="저장한 용어">
                                     <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
                                     </svg>
@@ -174,9 +175,6 @@
                                 <div class="min-w-0">
                                     <p class="font-bold text-[#2D3047] mb-1">{{ $term['term'] }}</p>
                                     <p class="text-gray-700 leading-relaxed">{{ $term['definition'] }}</p>
-                                    @if($term['context'])
-                                    <p class="text-xs text-gray-500 mt-2">이 기사에서: {{ $term['context'] }}</p>
-                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -246,11 +244,20 @@
                     </div>
                     <div class="space-y-3">
                         @foreach($aiQuestions as $index => $question)
-                        <div class="rounded-xl border border-gray-200 bg-white p-5 flex items-start gap-4">
-                            <span class="shrink-0 w-7 h-7 rounded-full bg-[#2D3047] text-white text-xs font-bold flex items-center justify-center">
-                                {{ $index + 1 }}
-                            </span>
-                            <p class="text-gray-800 font-medium leading-relaxed">{{ $question }}</p>
+                        <div class="rounded-xl border border-gray-200 bg-white p-5">
+                            <div class="flex items-start gap-4">
+                                <span class="shrink-0 w-7 h-7 rounded-full bg-[#2D3047] text-white text-xs font-bold flex items-center justify-center">
+                                    {{ $index + 1 }}
+                                </span>
+                                <p class="text-gray-800 font-medium leading-relaxed">{{ $question }}</p>
+                            </div>
+                            {{-- 답변은 선택 항목이라 쓴 경우에만 보여준다 --}}
+                            @if(!empty($aiAnswers[$index]))
+                            <div class="mt-3 ml-11 border-l-2 border-[#4ECDC4] pl-4">
+                                <p class="text-xs font-bold text-[#2AA9A0] mb-1">내 답변</p>
+                                <p class="text-gray-700 whitespace-pre-line leading-relaxed">{{ $aiAnswers[$index] }}</p>
+                            </div>
+                            @endif
                         </div>
                         @endforeach
                     </div>

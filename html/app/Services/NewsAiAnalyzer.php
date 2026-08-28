@@ -82,7 +82,6 @@ class NewsAiAnalyzer
             'success' => true,
             'message' => null,
             'data'    => [
-                'articleTitle'   => $article['title'],
                 'interpretation' => $parsed['interpretation'],
                 'terms'          => $parsed['terms'],
                 'outlook'        => $parsed['outlook'],
@@ -253,6 +252,11 @@ PROMPT;
 [파트 2] terms — 기사 본문에 등장한 경제 용어 정의 (최대 {$maxTerms}개)
 선정 기준:
  - 기사 본문에 실제로 등장한 표현만 고릅니다. 기사에 없는 용어를 끌어오지 않습니다.
+ - 용어는 반드시 띄어쓰기 없는 한 단어(1어절)로 고릅니다. 두 어절 이상 이어진 구(句)는 용어로 쓰지 않습니다.
+   좋은 예) 기준금리, 공정거래위원회, 소비자물가지수, 관세, 공매도, 리쇼어링
+   나쁜 예) 기준금리 인하, 대규모 유통업법 위반, 미국 관세 정책, 주택담보대출 한도
+ - 기사에서 띄어 쓴 표현이라도 한 단어로 굳어져 통용되면 붙여 씁니다. (예: "가계 부채" -> "가계부채")
+   붙여 쓸 수 없는 표현이라면 그 안에서 설명이 필요한 핵심 한 단어만 남깁니다. (예: "미국 관세 정책" -> "관세")
  - 이 기사를 이해하는 데 꼭 필요한 것부터 중요도 순으로 배열합니다.
  - "경제", "정부", "회사", "가격" 처럼 설명이 필요 없는 일상어는 제외합니다.
  - 같은 개념의 다른 표기(예: 기준금리 / 정책금리)는 하나로 합칩니다.
@@ -261,12 +265,13 @@ PROMPT;
    기사에 있는 것을 빠뜨리지도, 기사에 없는 것으로 채우지도 마십시오. 상한은 {$maxTerms}개입니다.
  - 기관명, 법령명, 절차명, 제도명은 특히 빠뜨리기 쉽습니다. 본문을 처음부터 끝까지 훑어 빠진 것이 없는지 확인하십시오.
 항목별 작성 규칙:
- - term: 기사에 쓰인 표기 그대로. 영문 약어나 원어가 이해를 도우면 괄호로 덧붙입니다.
+ - term: 띄어쓰기 없는 한 단어로 씁니다. 영문 약어나 원어가 이해를 도우면 괄호로 덧붙입니다.
          예) "기준금리(Base Rate)", "CPI(소비자물가지수)"
+         괄호 병기를 뺀 본체에 공백이 하나라도 있으면 실패입니다.
  - definition: 1~2문장, 50~120자. 그 말을 처음 듣는 사람에게 설명하듯 씁니다.
          용어를 정의 안에서 되풀이하지 않습니다. (나쁜 예: "기준금리는 기준이 되는 금리입니다")
          가능하면 "무엇을 재거나 정하는 것인지 + 오르내리면 무슨 뜻인지" 를 함께 담습니다.
- - context: 이 기사에서 그 용어가 어떤 역할로 등장했는지 한 문장(40~80자). 기사 내용에 근거해서 씁니다.
+         용어 자체의 뜻만 씁니다. 이 기사에서 어떤 맥락으로 쓰였는지는 넣지 않습니다.
 
 [파트 3] outlook — 향후 전망
 outlook.shortTerm: 앞으로 3~6개월 사이에 나타날 수 있는 흐름. 2~4개 항목.
@@ -326,10 +331,9 @@ PROMPT;
                         'properties' => [
                             'term'       => ['type' => 'STRING'],
                             'definition' => ['type' => 'STRING'],
-                            'context'    => ['type' => 'STRING'],
                         ],
-                        'required'         => ['term', 'definition', 'context'],
-                        'propertyOrdering' => ['term', 'definition', 'context'],
+                        'required'         => ['term', 'definition'],
+                        'propertyOrdering' => ['term', 'definition'],
                     ],
                 ],
                 'outlook' => [
@@ -503,8 +507,7 @@ PROMPT;
             $result[] = [
                 'term'       => mb_substr($name, 0, 100, 'UTF-8'),
                 'definition' => mb_substr($definition, 0, 500, 'UTF-8'),
-                'context'    => mb_substr($this->cleanText(isset($term['context']) ? $term['context'] : ''), 0, 300, 'UTF-8'),
-                'checked'    => false, // 사용자가 체크하기 전 기본값
+                'checked'    => false, // 사용자가 "저장" 을 누르기 전 기본값
             ];
 
             if (count($result) >= self::MAX_TERMS) {

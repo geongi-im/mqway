@@ -30,6 +30,7 @@ class BoardScrap extends Model
         'mq_ai_outlook_short',
         'mq_ai_outlook_long',
         'mq_ai_questions',
+        'mq_ai_answers',
         'mq_ai_model',
         'mq_ai_source',
         'mq_ai_date',
@@ -75,8 +76,9 @@ class BoardScrap extends Model
     /**
      * 파트5 경제 용어 리스트
      *
-     * mq_news_term 은 [{term, definition, context, checked}] 형태의 JSON 이다.
+     * mq_news_term 은 [{term, definition, checked}] 형태의 JSON 이다.
      * 예전 글에는 값이 없으므로 항상 배열로 정규화해서 돌려준다.
+     * 예전 글이 남긴 context(이 기사에서의 쓰임) 키는 더 이상 쓰지 않으므로 읽을 때 버린다.
      *
      * @return array
      */
@@ -102,7 +104,6 @@ class BoardScrap extends Model
             $terms[] = [
                 'term'       => (string) $row['term'],
                 'definition' => isset($row['definition']) ? (string) $row['definition'] : '',
-                'context'    => isset($row['context']) ? (string) $row['context'] : '',
                 'checked'    => !empty($row['checked']),
             ];
         }
@@ -111,7 +112,7 @@ class BoardScrap extends Model
     }
 
     /**
-     * 사용자가 "알게 된 용어" 로 체크한 항목만
+     * 사용자가 "저장" 으로 표시한 용어만 (몰랐던 용어 즐겨찾기)
      *
      * @return array
      */
@@ -154,6 +155,37 @@ class BoardScrap extends Model
         }
 
         return $questions;
+    }
+
+    /**
+     * 파트7 질문에 사용자가 쓴 답변
+     *
+     * 질문과 같은 순서의 배열이며, 답을 쓰지 않은 칸은 빈 문자열로 채워 돌려준다.
+     * 답변은 선택 항목이라 질문 수보다 짧게 저장돼 있을 수 있다.
+     *
+     * @param int|null $size 맞출 칸 수 (기본: 질문 개수)
+     * @return array
+     */
+    public function getAiAnswers($size = null)
+    {
+        $size = $size === null ? count($this->getAiQuestions()) : (int) $size;
+        $answers = [];
+
+        if (!empty($this->mq_ai_answers)) {
+            $decoded = json_decode($this->mq_ai_answers, true);
+
+            if (is_array($decoded)) {
+                foreach ($decoded as $answer) {
+                    $answers[] = is_string($answer) ? trim($answer) : '';
+                }
+            }
+        }
+
+        if ($size <= 0) {
+            return $answers;
+        }
+
+        return array_pad(array_slice($answers, 0, $size), $size, '');
     }
 
     /**

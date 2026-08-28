@@ -414,10 +414,13 @@ class BoardScrapController extends Controller
             'mq_ai_outlook_long' => 'nullable|string|max:5000',
             'mq_ai_questions' => 'nullable|array|max:2',
             'mq_ai_questions.*' => 'nullable|string|max:500',
+            // 질문은 화면에서 읽기 전용 라벨로만 보이고 hidden 으로 되돌아온다.
+            // 질문에 대한 사용자 답변. 선택 항목이라 비어 있어도 통과한다.
+            'mq_ai_answers' => 'nullable|array|max:2',
+            'mq_ai_answers.*' => 'nullable|string|max:1000',
             'terms' => 'nullable|array|max:' . BoardScrap::MAX_TERMS,
             'terms.*.term' => 'nullable|string|max:100',
             'terms.*.definition' => 'nullable|string|max:500',
-            'terms.*.context' => 'nullable|string|max:300',
             'mq_ai_model' => 'nullable|string|max:60',
             'mq_ai_source' => 'nullable|string|max:20',
             'mq_is_public' => 'nullable|boolean'
@@ -458,13 +461,17 @@ class BoardScrapController extends Controller
         $outlookShort = $this->cleanMultilineText($request->input('mq_ai_outlook_short'));
         $outlookLong = $this->cleanMultilineText($request->input('mq_ai_outlook_long'));
         $termsJson = $this->buildTermsJson($request->input('terms'));
-        $questionsJson = $this->buildQuestionsJson($request->input('mq_ai_questions'));
+        list($questionsJson, $answersJson) = $this->buildQuestionAnswerJson(
+            $request->input('mq_ai_questions'),
+            $request->input('mq_ai_answers')
+        );
 
         $scrap->mq_ai_interpretation = $interpretation !== '' ? $interpretation : null;
         $scrap->mq_ai_outlook_short = $outlookShort !== '' ? $outlookShort : null;
         $scrap->mq_ai_outlook_long = $outlookLong !== '' ? $outlookLong : null;
         $scrap->mq_news_term = $termsJson;
         $scrap->mq_ai_questions = $questionsJson;
+        $scrap->mq_ai_answers = $answersJson;
 
         $hasAiContent = $interpretation !== '' || $outlookShort !== '' || $outlookLong !== ''
             || $termsJson !== null || $questionsJson !== null;
@@ -485,7 +492,7 @@ class BoardScrapController extends Controller
     }
 
     /**
-     * 파트5 용어 리스트를 JSON 으로 만든다. 사용자가 체크한 상태도 함께 저장한다.
+     * 파트5 용어 리스트를 JSON 으로 만든다. 사용자가 "저장" 으로 표시한 상태도 함께 담는다.
      *
      * @param mixed $rows
      * @return string|null
@@ -511,8 +518,7 @@ class BoardScrapController extends Controller
             $terms[] = [
                 'term' => mb_substr($term, 0, 100, 'UTF-8'),
                 'definition' => mb_substr($this->cleanPlainText(isset($row['definition']) ? $row['definition'] : ''), 0, 500, 'UTF-8'),
-                'context' => mb_substr($this->cleanPlainText(isset($row['context']) ? $row['context'] : ''), 0, 300, 'UTF-8'),
-                'checked' => !empty($row['checked']),
+                'checked' => !empty($row['checked']), // 사용자가 "저장" 으로 표시한 용어
             ];
 
             if (count($terms) >= BoardScrap::MAX_TERMS) {
@@ -524,35 +530,58 @@ class BoardScrapController extends Controller
     }
 
     /**
-     * 파트7 질문 2개를 JSON 배열로 만든다.
+     * 파트7 질문 2개와 그에 대한 답변을 JSON 배열 두 개로 만든다.
+     *
+     * 질문은 AI 가 만들고 화면에서는 읽기 전용 라벨로만 보여주며, 답변은 사용자가 직접 쓴다.
+     * 빈 질문은 통째로 버리기 때문에 질문과 답변의 인덱스가 어긋나지 않도록 한 번에 짝지어 처리한다.
+     * 답변은 선택 항목이라 모두 비어 있으면 null 을 돌려준다.
      *
      * @param mixed $questions
-     * @return string|null
+     * @param mixed $answers
+     * @return array [질문 JSON|null, 답변 JSON|null]
      */
-    private function buildQuestionsJson($questions)
+    private function buildQuestionAnswerJson($questions, $answers)
     {
         if (!is_array($questions)) {
-            return null;
+            return [null, null];
         }
 
-        $result = [];
+        $questions = array_values($questions);
+        $answers = is_array($answers) ? array_values($answers) : [];
 
-        foreach ($questions as $question) {
+        $keptQuestions = [];
+        $keptAnswers = [];
+
+        foreach ($questions as $index => $question) {
             if (!is_string($question)) {
                 continue;
             }
 
             $clean = $this->cleanPlainText($question);
-            if ($clean !== '') {
-                $result[] = mb_substr($clean, 0, 500, 'UTF-8');
+            if ($clean === '') {
+                continue; // 질문이 없으면 그 자리의 답변도 의미가 없다
             }
 
-            if (count($result) >= 2) {
+            $answer = isset($answers[$index]) && is_string($answers[$index]) ? $answers[$index] : '';
+
+            $keptQuestions[] = mb_substr($clean, 0, 500, 'UTF-8');
+            $keptAnswers[] = mb_substr($this->cleanMultilineText($answer), 0, 1000, 'UTF-8');
+
+            if (count($keptQuestions) >= 2) {
                 break;
             }
         }
 
-        return empty($result) ? null : json_encode($result, JSON_UNESCAPED_UNICODE);
+        if (empty($keptQuestions)) {
+            return [null, null];
+        }
+
+        $hasAnswer = trim(implode('', $keptAnswers)) !== '';
+
+        return [
+            json_encode($keptQuestions, JSON_UNESCAPED_UNICODE),
+            $hasAnswer ? json_encode($keptAnswers, JSON_UNESCAPED_UNICODE) : null,
+        ];
     }
 
     /**
