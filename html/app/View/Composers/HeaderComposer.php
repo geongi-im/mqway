@@ -34,7 +34,8 @@ class HeaderComposer
             [
                 'label' => '학습 도구',
                 'url' => route('tools.economy-term-game'),
-                'active' => $request->is('tools*'),
+                // 캐시플로우는 /tools 밖(/cashflow)에 있어 부모 활성 조건에 따로 넣는다.
+                'active' => $request->is('tools*') || $request->is('cashflow*'),
                 'target' => 'tools',
                 'children' => [
                     ['label' => '경제 용어 카드 맞추기', 'url' => route('tools.economy-term-game'), 'active' => $request->routeIs('tools.economy-term-game'), 'onclick' => ''],
@@ -42,6 +43,7 @@ class HeaderComposer
                     ['label' => '오늘의 뉴스 퀴즈', 'url' => route('tools.today-news-quiz'), 'active' => $request->routeIs('tools.today-news-quiz'), 'onclick' => ''],
                     ['label' => '노후 자금 계산기', 'url' => route('tools.retirement-calculator'), 'active' => $request->routeIs('tools.retirement-calculator'), 'onclick' => ''],
                     ['label' => 'Need or Want?', 'url' => route('tools.need-want-game'), 'active' => $request->routeIs('tools.need-want-game'), 'onclick' => ''],
+                    ['label' => '캐시플로우', 'url' => route('cashflow.intro'), 'active' => $request->routeIs('cashflow.*'), 'onclick' => ''],
                 ],
             ],
             [

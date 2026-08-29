@@ -282,7 +282,7 @@ Gemini API를 세 곳에서 사용합니다. API 키는 `GEMINI_API_KEY` 하나�
 | 기능 | 모델 | 위치 |
 |------|------|------|
 | 뉴스 스크랩 AI 분석 | `GEMINI_API_MODEL` (기본 `gemini-3.7-flash`) | `app/Services/NewsAiAnalyzer.php` |
-| 캐시플로우 챗봇 | `gemini-2.0-flash-lite` (하드코딩) | `app/Http/Controllers/GeminiBotController.php` |
+| 캐시플로우 챗봇 | `GEMINI_API_MODEL` (기본 `gemini-3.7-flash`) | `app/Services/CashflowChatBot.php` |
 | MQ 맵핑 이미지 생성 | `gemini-3.1-flash-image-preview` (하드코딩) | `app/Http/Controllers/MyPageController.php` |
 
 키는 반드시 `config('services.gemini.api_key')`로 읽습니다. 설정 파일 밖에서
@@ -320,6 +320,50 @@ AI 결과는 초안이며 저장 전에 네 파트 모두 수정할 수 있습�
 
 호출당 응답 시간은 모델과 경로에 따라 4~20초입니다. 외부 LLM 호출이므로
 `/board-scrap/ai-analyze` 라우트에 회원당 분당 10회 제한(`throttle:10,1`)을 걸어 뒀습니다.
+
+### 캐시플로우 챗봇
+
+`/cashflow/intro`에서 게임 규칙을 물어보는 챗봇입니다. 텍스트와 **카드 사진**을
+함께 받아 스트리밍으로 답합니다. 로그인이 필요하고 `/api/cashflow/chat` 라우트에
+분당 20회 제한(`throttle:20,1`)이 걸려 있습니다.
+
+| 역할 | 파일 |
+|------|------|
+| 모델 호출 · 프롬프트 조립 · SSE 파싱 | `app/Services/CashflowChatBot.php` |
+| 참고 자료 로더 | `app/Services/CashflowKnowledgeBase.php` |
+| 대화 이력 (세션) | `app/Services/CashflowChatHistory.php` |
+| 검증 + SSE 중계 | `app/Http/Controllers/CashflowChatController.php` |
+| 모달 마크업 | `resources/views/cashflow/_chatbot.blade.php` |
+| 화면 로직 | `public/js/cashflow/chatbot.js` |
+
+**프롬프트와 참고 자료는 코드 밖에 있습니다.** 배포 없이 파일만 고치면 됩니다.
+
+- `resources/prompts/cashflow/system.md` — 시스템 지시문. HTML 주석은 자동으로
+  제거되므로 편집 메모를 남겨도 됩니다. 파일이 없거나 비면
+  `CashflowChatBot::fallbackSystemPrompt()`로 떨어집니다.
+- `resources/knowledge/cashflow/*.md` — 답변 근거 자료. 파일명 오름차순으로 읽어
+  `<document name="...">`로 감싼 `<reference>` 블록을 시스템 지시문 뒤에 붙입니다.
+  `README.md`와 `_`로 시작하는 파일은 제외하고, 총합 상한은 6만 자입니다
+  (`CashflowKnowledgeBase::MAX_CHARS`). 자세한 규칙은 그 폴더의 `README.md` 참고.
+
+**스트리밍은 `alt=sse`로 받습니다.** 이 파라미터가 없으면 Gemini가 JSON 배열을
+쪼개서 흘려보내 청크가 객체 중간을 가를 때 파싱이 깨집니다. 브라우저에는 Gemini
+원본이 아니라 자체 봉투(`{"type":"delta"|"done"|"error"}`)만 내보내므로, 모델이나
+API 버전이 바뀌어도 화면 코드는 손대지 않아도 됩니다.
+
+**대화 이력은 세션에만** 담고 DB에는 남기지 않습니다. Gemini 규격(`user` / `model`)
+그대로 저장해 변환 단계를 없앴고, 최대 8턴까지 유지합니다. 이미지는 이력에 담지
+않고 표식만 남깁니다(base64 한 장이 세션 파일을 감당하지 못합니다).
+
+**이미지**는 프런트가 canvas로 최대 1280px JPEG로 정규화해 보내고, 서버가
+`data:` URI의 mime을 화이트리스트(JPEG/PNG/WEBP/HEIC)와 대조한 뒤
+`getimagesizefromstring()`으로 실제 바이트까지 확인합니다. 상한은 4MB입니다.
+
+게임 상태(`mq_cashflow_games` / `assets` / `liabilities`) 연동은 자리만 열어 뒀습니다.
+`CashflowChatController::buildContext()`가 배열을 돌려주고
+`CashflowChatBot::buildContextBlock()`이 `<user_context>`로 만들므로, 두 메서드만
+채우면 됩니다. 값을 넣을 때는 프롬프트에도 그 수치를 어떻게 쓸지 한 줄 추가해야
+모델이 무시하지 않습니다.
 
 ## 개발 환경
 

@@ -14,7 +14,7 @@ use App\Http\Controllers\DataInsertController;
 use App\Http\Controllers\RealityCheckController;
 use App\Http\Controllers\RoadmapController;
 use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\GeminiBotController;
+use App\Http\Controllers\CashflowChatController;
 use App\Http\Controllers\MqtestController;
 use App\Http\Controllers\Api\ServerCheckController;
 use App\Http\Controllers\CashflowController;
@@ -321,10 +321,6 @@ Route::get('/service', function () {
     return view('service');
 })->name('service');
 
-// 챗봇 API 라우트
-Route::post('/api/chatbot', [GeminiBotController::class, 'sendMessage'])->name('chatbot.send');
-Route::post('/api/chatbot/reset', [GeminiBotController::class, 'resetConversation'])->name('chatbot.reset');
-
 // 경제 상식 테스트
 Route::get('/api/quiz', [MqtestController::class, 'getQuizData'])->name('quiz.get');
 
@@ -368,4 +364,11 @@ Route::prefix('api/cashflow')->middleware('auth')->group(function () {
     Route::post('/load', [CashflowApiController::class, 'loadGameState']);
     Route::post('/games', [CashflowApiController::class, 'getUserGames']);
     Route::delete('/game', [CashflowApiController::class, 'deleteGame']);
+
+    // 캐시플로우 챗봇. 모델 호출 비용이 걸린 엔드포인트라 분당 호출을 제한한다.
+    Route::post('/chat', [CashflowChatController::class, 'send'])
+        ->middleware('throttle:20,1')
+        ->name('cashflow.chat.send');
+    Route::post('/chat/reset', [CashflowChatController::class, 'reset'])
+        ->name('cashflow.chat.reset');
 });
