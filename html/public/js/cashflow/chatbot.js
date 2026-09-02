@@ -7,6 +7,9 @@
  *   data: {"type":"error","message":"..."}
  * 따라서 이 파일에는 모델 응답 구조를 파고드는 코드가 없다.
  *
+ * 대화는 서버(회원별 테이블)에 남는다. 화면은 모달을 처음 열 때 저장된 대화를 받아 그리고,
+ * 그 뒤로는 주고받은 말풍선만 덧붙인다. 브라우저에 따로 보관하는 것은 없다.
+ *
  * blade 인라인이 아니라 파일로 둔 이유는 캐시가 먹고, 소개 페이지 마크업과 섞이지 않게 하기 위해서다.
  */
 (function () {
@@ -19,9 +22,16 @@
     }
 
     var SEND_URL = root.getAttribute('data-send-url');
+    var HISTORY_URL = root.getAttribute('data-history-url');
     var RESET_URL = root.getAttribute('data-reset-url');
     var MAX_MESSAGE = parseInt(root.getAttribute('data-max-message'), 10) || 2000;
     var GREETING = root.getAttribute('data-greeting') || '';
+
+    /**
+     * 이미지만 보낸 턴을 서버가 이력에 남길 때 쓰는 표식(CashflowChatHistory::IMAGE_PLACEHOLDER).
+     * 복원할 때 이 문자열은 본문 대신 첨부 표시로 바꿔 그린다.
+     */
+    var IMAGE_PLACEHOLDER = '(이미지 첨부)';
 
     /** 첨부 이미지 정규화 기준. 카드 글씨가 읽힐 정도면 충분하다. */
     var IMAGE_MAX_EDGE = 1280;
@@ -126,15 +136,38 @@
         +   '</svg>'
         + '</div>';
 
-    function appendUserMessage(text, imageSrc) {
+    /**
+     * 사용자 말풍선.
+     *
+     * @param {string} text
+     * @param {Object} [options]
+     * @param {string} [options.imageSrc] 방금 보낸 턴의 data URI. 복원된 턴에는 없다.
+     * @param {boolean} [options.hasImage] 이미지를 첨부했던 턴인지
+     * @param {string} [options.time] 표시할 시각. 없으면 지금 시각
+     */
+    function appendUserMessage(text, options) {
+        options = options || {};
+
+        var imageSrc = options.imageSrc || null;
+        var hasImage = options.hasImage || !!imageSrc;
+        var time = options.time || nowLabel();
         var body = '';
 
         if (imageSrc) {
             body += '<img src="' + escapeHtml(imageSrc) + '" alt="첨부한 이미지" class="max-h-48 rounded-lg mb-2 block">';
+        } else if (hasImage) {
+            // 이미지 자체는 서버에 담지 않는다(base64 한 장이 수 MB). 복원할 때는 첨부했다는
+            // 사실만 표시한다.
+            body += '<span class="inline-block text-[11px] bg-white/15 rounded-md px-2 py-1 mb-2">🖼 이미지 첨부</span>';
         }
 
-        if (text) {
+        if (text && text !== IMAGE_PLACEHOLDER) {
             body += '<p class="whitespace-pre-wrap break-words">' + escapeHtml(text) + '</p>';
+        }
+
+        // 표식만 저장된 턴에서 첨부 여부까지 없으면 말풍선이 비어 버린다. 원문을 그대로 쓴다.
+        if (body === '' && text) {
+            body = '<p class="whitespace-pre-wrap break-words">' + escapeHtml(text) + '</p>';
         }
 
         var wrapper = document.createElement('div');
@@ -142,7 +175,7 @@
         wrapper.innerHTML = ''
             + '<div class="bg-[#2D3047] text-white p-3 rounded-2xl rounded-br-sm shadow-sm max-w-[85%] text-sm leading-relaxed">'
             +   body
-            +   '<span class="text-[11px] text-white/60 mt-1 block">' + nowLabel() + '</span>'
+            +   '<span class="text-[11px] text-white/60 mt-1 block">' + escapeHtml(time) + '</span>'
             + '</div>';
 
         messagesBox.appendChild(wrapper);
@@ -151,8 +184,11 @@
 
     /**
      * 봇 말풍선을 만들고, 내용을 갱신할 수 있는 핸들을 돌려준다.
+     *
+     * @param {string} initialText
+     * @param {string} [timeLabel] 복원된 답변의 시각. 없으면 지금 시각
      */
-    function appendBotMessage(initialText) {
+    function appendBotMessage(initialText, timeLabel) {
         var wrapper = document.createElement('div');
         wrapper.className = 'flex mb-4';
         wrapper.innerHTML = ''
@@ -160,7 +196,7 @@
             + '<div class="bg-white p-3 rounded-2xl rounded-bl-sm shadow-sm max-w-[85%] min-w-0">'
             +   '<div class="chatbot-markdown text-sm text-gray-800 leading-relaxed break-words"></div>'
             +   '<div class="flex items-center gap-2 mt-1">'
-            +     '<span class="text-[11px] text-gray-400">' + nowLabel() + '</span>'
+            +     '<span class="text-[11px] text-gray-400">' + escapeHtml(timeLabel || nowLabel()) + '</span>'
             +     '<button type="button" class="chatbot-copy hidden text-[11px] text-gray-400 hover:text-[#2D3047] transition-colors" title="답변 복사">복사</button>'
             +   '</div>'
             + '</div>';
@@ -407,7 +443,7 @@
             body.image = pendingImage;
         }
 
-        appendUserMessage(text, pendingImage);
+        appendUserMessage(text, { imageSrc: pendingImage });
 
         input.value = '';
         autoGrow();
@@ -518,6 +554,71 @@
         }
     }
 
+    /**
+     * 저장된 대화를 말풍선으로 되돌린다.
+     *
+     * 첨부 이미지는 서버에 없으므로 사용자 턴은 첨부 표시만 되살아난다.
+     */
+    function renderTranscript(messages) {
+        messages.forEach(function (item) {
+            if (!item || !item.text) {
+                return;
+            }
+
+            if (item.role === 'user') {
+                appendUserMessage(item.text, { hasImage: !!item.has_image, time: item.time });
+                return;
+            }
+
+            appendBotMessage(item.text, item.time).finish();
+        });
+
+        scrollToBottom(true);
+    }
+
+    /**
+     * 서버에 남은 활성 대화를 불러와 화면을 맞춘다.
+     *
+     * 대화가 없으면 인사말로 시작한다. 불러오지 못했을 때도 대화 자체를 막지는 않는다.
+     * 새 질문은 그대로 보낼 수 있고, 서버는 이전 맥락을 계속 기억하고 있다.
+     */
+    function loadHistory() {
+        return fetch(HISTORY_URL, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'same-origin'
+        }).then(function (response) {
+            if (!response.ok) {
+                throw new Error('history request failed');
+            }
+
+            return response.json();
+        }).then(function (data) {
+            var messages = (data && data.messages) || [];
+
+            messagesBox.innerHTML = '';
+
+            if (messages.length === 0) {
+                showGreeting();
+                return;
+            }
+
+            renderTranscript(messages);
+        }).catch(function () {
+            messagesBox.innerHTML = '';
+            showGreeting();
+            setStatus('이전 대화를 불러오지 못했습니다. 이어서 물어보셔도 됩니다.');
+        });
+    }
+
+    /**
+     * 서버에 저장된 대화를 지운다.
+     *
+     * @return {Promise<boolean>} 지워졌는지
+     */
     function resetConversation() {
         return fetch(RESET_URL, {
             method: 'POST',
@@ -527,8 +628,10 @@
                 'X-Requested-With': 'XMLHttpRequest'
             },
             credentials: 'same-origin'
+        }).then(function (response) {
+            return response.ok;
         }).catch(function () {
-            // 초기화 실패는 치명적이지 않다. 다음 턴에 이전 맥락이 조금 남을 뿐이다.
+            return false;
         });
     }
 
@@ -541,8 +644,14 @@
         clearImage();
         setStatus('');
 
-        resetConversation().then(function () {
+        resetConversation().then(function (cleared) {
             showGreeting();
+
+            // 대화가 서버에 남아 있으므로 초기화 실패를 조용히 넘기면 안 된다. 화면만 비워진
+            // 상태로 질문하면 모델은 지워졌다고 생각한 이전 맥락을 계속 물고 답한다.
+            if (!cleared) {
+                setStatus('이전 대화를 지우지 못했습니다. 잠시 후 다시 시도해주세요.', 'error');
+            }
         });
     }
 
@@ -557,12 +666,13 @@
         // 푸터의 TOP/상담 플로팅 버튼을 가린다 (_chatbot.blade.php 의 CSS)
         document.body.classList.add('chatbot-open');
 
-        // 페이지를 새로 연 뒤 첫 열기라면 서버 이력과 화면을 맞춘다.
-        // 화면은 비어 있는데 서버만 이전 대화를 기억하는 상태를 없앤다.
+        // 페이지를 새로 연 뒤 첫 열기라면 저장된 대화를 끌어와 화면과 맞춘다.
+        // 예전에는 여기서 서버 이력을 지웠고(resetConversation), 그래서 새로고침 한 번에
+        // 대화가 사라졌다.
         if (!started) {
             started = true;
             messagesBox.innerHTML = '';
-            resetConversation().then(showGreeting);
+            loadHistory();
         }
 
         // 숨겨져 있는 동안에는 scrollHeight 가 0 이라 높이를 잴 수 없다.

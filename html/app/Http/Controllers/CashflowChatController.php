@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\CashflowChatBot;
 use App\Services\CashflowChatHistory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
@@ -22,12 +23,34 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  * 이렇게 두면 프런트가 Gemini 응답 구조를 몰라도 되고, 모델이나 API 버전이 바뀌어도
  * 화면 코드를 건드릴 일이 없다. 예전 구현은 Gemini 의 원본 JSON 을 그대로 내보내서
  * 브라우저가 candidates[0].content.parts[0].text 를 직접 파고들었다.
+ *
+ * 대화는 세션이 아니라 회원별 테이블에 남는다. 그래서 브라우저를 닫았다 켜도 열려 있던
+ * 대화를 그대로 이어갈 수 있고, 화면은 모달을 처음 열 때 history() 로 그 내용을 받아 그린다.
  */
 class CashflowChatController extends Controller
 {
     public function __construct()
     {
         $this->middleware('auth');
+    }
+
+    /**
+     * 활성 대화를 화면에 되돌려주기 위한 이력 조회.
+     *
+     * 모달을 처음 열 때 한 번 호출한다. 예전에는 이 자리에서 reset 을 불러 서버 이력을
+     * 비웠다. 화면(빈 상태)과 서버(이전 대화 기억) 가 어긋나는 걸 막기 위한 처리였지만,
+     * 그 탓에 새로고침 한 번에 대화가 사라졌다. 지금은 반대로 서버에 남은 대화를 화면으로
+     * 끌어와 양쪽을 맞춘다.
+     *
+     * @param  CashflowChatHistory $history
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function history(CashflowChatHistory $history)
+    {
+        return response()->json([
+            'success'  => true,
+            'messages' => $history->transcript(Auth::id()),
+        ]);
     }
 
     /**
@@ -65,18 +88,22 @@ class CashflowChatController extends Controller
         }
 
         // 스트림 콜백은 미들웨어가 끝난 뒤에 실행된다. 세션 의존값은 여기서 미리 읽어둔다.
-        $previous = $history->all();
-        $context  = $this->buildContext($request);
+        // 회원 식별자도 그중 하나다. 콜백 안에서 Auth 를 다시 부르지 않고 값으로 넘긴다.
+        $memberIdx = Auth::id();
+        $previous  = $history->all($memberIdx);
+        $context   = $this->buildContext($request);
 
-        return $this->stream(function () use ($bot, $history, $message, $image, $previous, $context) {
+        return $this->stream(function () use ($bot, $history, $message, $image, $previous, $context, $memberIdx) {
             $result = $bot->stream($message, $image, $previous, $context, function ($chunk) {
                 $this->emit(['type' => 'delta', 'text' => $chunk]);
             });
 
             if ($result['success']) {
                 $history->appendTurn(
+                    $memberIdx,
                     $message !== '' ? $message : CashflowChatHistory::IMAGE_PLACEHOLDER,
-                    $result['text']
+                    $result['text'],
+                    $image !== null
                 );
 
                 $this->emit(['type' => 'done']);
@@ -93,14 +120,14 @@ class CashflowChatController extends Controller
     }
 
     /**
-     * 대화를 비운다.
+     * 대화를 비운다. 저장된 발화를 지우므로 다음 접속에도 새 대화로 시작한다.
      *
      * @param  CashflowChatHistory $history
      * @return \Illuminate\Http\JsonResponse
      */
     public function reset(CashflowChatHistory $history)
     {
-        $history->reset();
+        $history->reset(Auth::id());
 
         return response()->json(['success' => true]);
     }

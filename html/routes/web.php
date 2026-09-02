@@ -369,6 +369,9 @@ Route::prefix('api/cashflow')->middleware('auth')->group(function () {
     Route::post('/chat', [CashflowChatController::class, 'send'])
         ->middleware('throttle:20,1')
         ->name('cashflow.chat.send');
+    // 저장된 활성 대화를 화면에 되돌린다. 모달을 처음 열 때 한 번 호출한다.
+    Route::get('/chat/history', [CashflowChatController::class, 'history'])
+        ->name('cashflow.chat.history');
     Route::post('/chat/reset', [CashflowChatController::class, 'reset'])
         ->name('cashflow.chat.reset');
 });

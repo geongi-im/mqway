@@ -74,6 +74,7 @@
      aria-modal="true"
      aria-labelledby="chatbotTitle"
      data-send-url="{{ route('cashflow.chat.send') }}"
+     data-history-url="{{ route('cashflow.chat.history') }}"
      data-reset-url="{{ route('cashflow.chat.reset') }}"
      data-max-message="{{ \App\Services\CashflowChatBot::MAX_MESSAGE_CHARS }}"
      data-greeting="안녕하세요! 캐시플로우 게임 도우미입니다. 🎲&#10;규칙이 헷갈리거나 카드 사진을 보여주시면 어떻게 진행하면 되는지 알려드릴게요.">
