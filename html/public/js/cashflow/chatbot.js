@@ -79,6 +79,55 @@
     }
 
     /**
+     * 강조를 닫지 못하는 ** 를 살려내기 위해 끼워 넣는 폭 없는 공백(U+200B).
+     *
+     * 구두점도 공백도 아닌 글자로 취급되므로 flanking 판정만 바꾸고 화면에는 보이지 않는다.
+     * 한글은 어차피 글자 단위로 줄이 바뀌니 줄바꿈에도 영향이 없다.
+     */
+    var ZERO_WIDTH_SPACE = '​';
+
+    /**
+     * 1번 그룹: 코드 펜스와 인라인 코드. 먼저 삼켜서 코드 안의 ** 는 건드리지 않는다.
+     * 2~3번 그룹: 앞이 구두점이고 뒤가 글자인 ** (닫히지 못하는 강조 구분자).
+     *
+     * \p{P} 는 ES2018 이라 구형 브라우저에서 리터럴로 쓰면 파일 전체가 파싱 실패한다.
+     * new RegExp 로 감싸서 실패하면 보정을 건너뛰게 한다.
+     */
+    var STRONG_CLOSE_PATTERN = null;
+
+    try {
+        STRONG_CLOSE_PATTERN = new RegExp(
+            '(```[\\s\\S]*?```|~~~[\\s\\S]*?~~~|`[^`\\n]*`)'
+            + '|((?![*_])[\\p{P}\\p{S}])(\\*{2,})(?=[^\\s\\p{P}\\p{S}])',
+            'gu'
+        );
+    } catch (error) {
+        STRONG_CLOSE_PATTERN = null;
+    }
+
+    /**
+     * CommonMark 의 flanking 규칙 때문에 깨지는 강조를 보정한다.
+     *
+     * 닫는 ** 는 right-flanking 이어야 강조를 닫는데, 앞이 구두점이고 뒤가 글자면
+     * 그 조건을 못 채운다. 한국어에서는 이 조합이 흔하다.
+     *   **직업 카드(재무제표)**입니다  ->  ** 가 그대로 노출
+     *   **"안녕"**이라고              ->  ** 가 그대로 노출
+     * ** 앞에 폭 없는 공백을 끼워 넣으면 앞 글자가 구두점이 아니게 되어 정상적으로 닫힌다.
+     *
+     * 보정이 필요 없는 자리(예: `(**정말**)` 의 여는 ** )에도 끼어들 수 있지만
+     * 여는 판정은 뒤 글자만 보므로 결과는 달라지지 않는다.
+     */
+    function normalizeStrongDelimiters(text) {
+        if (!STRONG_CLOSE_PATTERN) {
+            return text;
+        }
+
+        return String(text).replace(STRONG_CLOSE_PATTERN, function (match, code, before, stars) {
+            return code ? code : before + ZERO_WIDTH_SPACE + stars;
+        });
+    }
+
+    /**
      * 마크다운을 안전한 HTML 로 바꾼다.
      *
      * marked 와 DOMPurify 는 CDN 에서 온다. 광고 차단기나 사내망에 막혀 로드되지 않았을 때
@@ -91,7 +140,7 @@
         }
 
         try {
-            return window.DOMPurify.sanitize(window.marked.parse(text));
+            return window.DOMPurify.sanitize(window.marked.parse(normalizeStrongDelimiters(text)));
         } catch (error) {
             return escapeHtml(text).replace(/\n/g, '<br>');
         }
