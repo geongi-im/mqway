@@ -263,15 +263,6 @@
                     </div>
                 </div>
                 @endif
-
-                <!-- AI 분석 안내 -->
-                <p class="text-xs text-gray-400 leading-relaxed border-t border-gray-100 pt-4">
-                    위 네 항목은 AI가 뉴스 원문을 읽고 만든 초안을 작성자가 다듬은 내용입니다.
-                    사실과 다를 수 있으니 중요한 판단은 원문과 공식 자료로 확인해주세요. 투자 권유가 아닙니다.
-                    @if($scrap->mq_ai_date)
-                    <br>AI 분석 {{ $scrap->mq_ai_date->format('Y.m.d H:i') }}@if($scrap->mq_ai_model) · {{ $scrap->mq_ai_model }}@endif
-                    @endif
-                </p>
             </div>
             @endif
 
@@ -291,6 +282,13 @@
                 </div>
             </div>
             @endif
+
+            <!-- 출처 및 안내 -->
+            <p class="mb-8 text-xs text-gray-400 leading-relaxed border-t border-gray-100 pt-4">
+                이 글은 <a href="{{ $scrap->mq_url }}" target="_blank" rel="noopener noreferrer" class="break-all hover:text-gray-600 hover:underline">{{ $scrap->getSourceDomain() ?? $scrap->mq_url }}</a>
+                기사를 @if($scrap->hasAiAnalysis())AI와 함께 @endif요약·해석한 학습 기록으로, 사실과 다를 수 있으며 투자 권유가 아닙니다.
+                기사와 이미지의 저작권은 해당 언론사에 있으며, 게시 중단 요청은 <a href="http://pf.kakao.com/_xlEbJn/" target="_blank" rel="noopener noreferrer" class="hover:text-gray-600 hover:underline">문의하기</a>로 보내주세요.
+            </p>
 
             <!-- 좋아요 (공개된 스크랩만) -->
             @if($scrap->isPublic())
