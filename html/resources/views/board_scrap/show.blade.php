@@ -71,7 +71,7 @@
 <!-- ===== Content Section ===== -->
 <div class="container mx-auto px-4 -mt-20 relative z-20 pb-20">
     <div class="bg-white rounded-2xl shadow-xl overflow-hidden max-w-4xl mx-auto animate-slideUp" style="animation-delay: 0.3s;">
-        <div class="p-8 md:p-10">
+        <div class="p-5 sm:p-8 md:p-10">
 
             <!-- 원문 링크 -->
             <div class="mb-8 text-center">
@@ -106,7 +106,7 @@
                     </div>
                     <h2 class="text-xl font-bold text-[#2D3047]">뉴스를 선택한 이유</h2>
                 </div>
-                <div class="prose max-w-none bg-gray-50 rounded-xl p-6 border border-gray-100">
+                <div class="prose max-w-none bg-gray-50 rounded-xl p-4 sm:p-6 border border-gray-100">
                     {!! $scrap->mq_reason !!}
                 </div>
             </div>
@@ -134,7 +134,7 @@
                         </div>
                         <h2 class="text-xl font-bold text-[#2D3047]">뉴스에 대한 짧은 해석</h2>
                     </div>
-                    <div class="bg-violet-50/60 border border-violet-100 rounded-xl p-6">
+                    <div class="bg-violet-50/60 border border-violet-100 rounded-xl p-4 sm:p-6">
                         <p class="text-gray-800 whitespace-pre-line leading-relaxed">{{ $scrap->mq_ai_interpretation }}</p>
                     </div>
                 </div>
@@ -159,24 +159,22 @@
                     </div>
                     <div class="space-y-3">
                         @foreach($aiTerms as $term)
-                        <div class="rounded-xl border p-5 {{ $term['checked'] ? 'border-[#4ECDC4]/50 bg-[#4ECDC4]/5' : 'border-gray-100 bg-gray-50' }}">
-                            <div class="flex items-start gap-3">
+                        <div class="rounded-xl border p-4 sm:p-5 {{ $term['checked'] ? 'border-[#4ECDC4]/50 bg-[#4ECDC4]/5' : 'border-gray-100 bg-gray-50' }}">
+                            <div class="flex items-center gap-2 mb-1.5">
                                 @if($term['checked'])
-                                <span class="shrink-0 w-5 h-5 mt-0.5 rounded-full bg-[#4ECDC4] flex items-center justify-center" title="저장한 용어">
+                                <span class="shrink-0 w-5 h-5 rounded-full bg-[#4ECDC4] flex items-center justify-center" title="저장한 용어">
                                     <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
                                     </svg>
                                 </span>
                                 @else
-                                <span class="shrink-0 w-5 h-5 mt-0.5 flex items-center justify-center">
+                                <span class="shrink-0 w-5 h-5 flex items-center justify-center">
                                     <span class="w-1.5 h-1.5 rounded-full bg-gray-300"></span>
                                 </span>
                                 @endif
-                                <div class="min-w-0">
-                                    <p class="font-bold text-[#2D3047] mb-1">{{ $term['term'] }}</p>
-                                    <p class="text-gray-700 leading-relaxed">{{ $term['definition'] }}</p>
-                                </div>
+                                <p class="min-w-0 font-bold text-[#2D3047]">{{ $term['term'] }}</p>
                             </div>
+                            <p class="text-gray-700 leading-relaxed">{{ $term['definition'] }}</p>
                         </div>
                         @endforeach
                     </div>
@@ -196,11 +194,8 @@
                     </div>
                     <div class="grid gap-4 md:grid-cols-2">
                         @if(count($outlookShort))
-                        <div class="rounded-xl border border-amber-100 bg-amber-50/50 p-5">
-                            <p class="text-sm font-bold text-amber-700 mb-3 flex items-center gap-1.5">
-                                <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-                                단기 (3~6개월)
-                            </p>
+                        <div class="rounded-xl border border-amber-100 bg-amber-50/50 p-4 sm:p-5">
+                            <p class="text-sm font-bold text-amber-700 mb-3">단기 (3~6개월)</p>
                             <ul class="space-y-2.5">
                                 @foreach($outlookShort as $line)
                                 <li class="flex items-start gap-2 text-gray-800 leading-relaxed">
@@ -212,11 +207,8 @@
                         </div>
                         @endif
                         @if(count($outlookLong))
-                        <div class="rounded-xl border border-indigo-100 bg-indigo-50/50 p-5">
-                            <p class="text-sm font-bold text-indigo-700 mb-3 flex items-center gap-1.5">
-                                <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
-                                중장기 (1~3년)
-                            </p>
+                        <div class="rounded-xl border border-indigo-100 bg-indigo-50/50 p-4 sm:p-5">
+                            <p class="text-sm font-bold text-indigo-700 mb-3">중장기 (1~3년)</p>
                             <ul class="space-y-2.5">
                                 @foreach($outlookLong as $line)
                                 <li class="flex items-start gap-2 text-gray-800 leading-relaxed">
@@ -244,16 +236,16 @@
                     </div>
                     <div class="space-y-3">
                         @foreach($aiQuestions as $index => $question)
-                        <div class="rounded-xl border border-gray-200 bg-white p-5">
-                            <div class="flex items-start gap-4">
-                                <span class="shrink-0 w-7 h-7 rounded-full bg-[#2D3047] text-white text-xs font-bold flex items-center justify-center">
+                        <div class="rounded-xl border border-gray-200 bg-white p-4 sm:p-5">
+                            <div class="flex items-start gap-3 sm:gap-4">
+                                <span class="shrink-0 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#2D3047] text-white text-xs font-bold flex items-center justify-center">
                                     {{ $index + 1 }}
                                 </span>
-                                <p class="text-gray-800 font-medium leading-relaxed">{{ $question }}</p>
+                                <p class="min-w-0 text-gray-800 font-medium leading-relaxed">{{ $question }}</p>
                             </div>
                             {{-- 답변은 선택 항목이라 쓴 경우에만 보여준다 --}}
                             @if(!empty($aiAnswers[$index]))
-                            <div class="mt-3 ml-11 border-l-2 border-[#4ECDC4] pl-4">
+                            <div class="mt-3 ml-0 sm:ml-11 border-l-2 border-[#4ECDC4] pl-3 sm:pl-4">
                                 <p class="text-xs font-bold text-[#2AA9A0] mb-1">내 답변</p>
                                 <p class="text-gray-700 whitespace-pre-line leading-relaxed">{{ $aiAnswers[$index] }}</p>
                             </div>
@@ -277,7 +269,7 @@
                     </div>
                     <h2 class="text-xl font-bold text-[#2D3047]">새로 알게된 용어</h2>
                 </div>
-                <div class="bg-amber-50/50 border border-amber-100 rounded-xl p-6">
+                <div class="bg-amber-50/50 border border-amber-100 rounded-xl p-4 sm:p-6">
                     <p class="text-gray-800 whitespace-pre-wrap leading-relaxed">{{ $scrap->mq_new_terms }}</p>
                 </div>
             </div>
@@ -286,7 +278,7 @@
             <!-- 출처 및 안내 -->
             <p class="mb-8 text-xs text-gray-400 leading-relaxed border-t border-gray-100 pt-4">
                 이 글은 <a href="{{ $scrap->mq_url }}" target="_blank" rel="noopener noreferrer" class="break-all hover:text-gray-600 hover:underline">{{ $scrap->getSourceDomain() ?? $scrap->mq_url }}</a>
-                기사를 @if($scrap->hasAiAnalysis())AI와 함께 @endif요약·해석한 학습 기록으로, 사실과 다를 수 있으며 투자 권유가 아닙니다.
+                기사를 @if($scrap->hasAiAnalysis())AI와 함께 @endif요약/해석한 학습 기록으로, 사실과 다를 수 있으며 투자 권유가 아닙니다.
                 기사와 이미지의 저작권은 해당 언론사에 있으며, 게시 중단 요청은 <a href="http://pf.kakao.com/_xlEbJn/" target="_blank" rel="noopener noreferrer" class="hover:text-gray-600 hover:underline">문의하기</a>로 보내주세요.
             </p>
 
