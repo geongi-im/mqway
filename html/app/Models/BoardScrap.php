@@ -434,4 +434,26 @@ class BoardScrap extends Model
     {
         return $this->user->mq_user_name ?? '알 수 없음';
     }
+
+    /**
+     * 원문 링크의 도메인
+     *
+     * 출처 표기에 쓴다. www. 는 떼고 보여준다.
+     *
+     * @return string|null
+     */
+    public function getSourceDomain()
+    {
+        if (empty($this->mq_url)) {
+            return null;
+        }
+
+        $host = parse_url($this->mq_url, PHP_URL_HOST);
+
+        if (empty($host)) {
+            return null;
+        }
+
+        return preg_replace('/^www\./i', '', $host);
+    }
 }
