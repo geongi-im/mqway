@@ -37,7 +37,7 @@ class ExpService
     public function grant($userId, $actionCode, $refKey)
     {
         try {
-            if (!$userId || !$this->isStarted()) {
+            if (!$userId) {
                 return 0;
             }
 
@@ -96,7 +96,7 @@ class ExpService
     public function recordVisit($userId)
     {
         try {
-            if (!$userId || !$this->isStarted()) {
+            if (!$userId) {
                 return;
             }
 
@@ -372,22 +372,6 @@ class ExpService
             ->count();
 
         return $count >= $limit;
-    }
-
-    /**
-     * 집계 시작일이 지났는지 (소급 지급 방지)
-     *
-     * @return bool
-     */
-    private function isStarted()
-    {
-        $startDate = config('exp.start_date');
-
-        if (!$startDate) {
-            return true;
-        }
-
-        return Carbon::now()->startOfDay()->gte(Carbon::parse($startDate)->startOfDay());
     }
 
     /**
