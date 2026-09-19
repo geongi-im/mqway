@@ -239,8 +239,11 @@ class BoardScrapController extends Controller
      */
     public function store(Request $request)
     {
-        // 유효성 검사
-        $request->validate($this->validationRules(), $this->validationMessages());
+        // 유효성 검사 (같은 회원이 이미 올린 기사인지 포함)
+        $request->validate(
+            $this->validationRules(Auth::user()->mq_user_id),
+            $this->validationMessages()
+        );
 
         DB::beginTransaction();
 
@@ -255,6 +258,7 @@ class BoardScrapController extends Controller
             $scrap->mq_user_id = Auth::user()->mq_user_id;
             $scrap->mq_title = $request->mq_title;
             $scrap->mq_url = $request->mq_url;
+            $scrap->mq_url_hash = BoardScrap::urlHash($request->mq_url);
             $scrap->mq_reason = $request->mq_reason;
             $this->applyAiFields($scrap, $request);
             $scrap->mq_thumbnail_url = $thumbnailUrl; // 자동 추출된 썸네일
@@ -343,8 +347,11 @@ class BoardScrapController extends Controller
                         ->where('mq_status', 1)
                         ->firstOrFail();
 
-        // 유효성 검사
-        $request->validate($this->validationRules(), $this->validationMessages());
+        // 유효성 검사 (자기 자신은 중복 대상에서 제외)
+        $request->validate(
+            $this->validationRules(Auth::user()->mq_user_id, $scrap->idx),
+            $this->validationMessages()
+        );
 
         DB::beginTransaction();
 
@@ -360,6 +367,7 @@ class BoardScrapController extends Controller
 
             $scrap->mq_title = $request->mq_title;
             $scrap->mq_url = $request->mq_url;
+            $scrap->mq_url_hash = BoardScrap::urlHash($request->mq_url);
             $scrap->mq_reason = $request->mq_reason;
             $this->applyAiFields($scrap, $request);
 
@@ -399,13 +407,20 @@ class BoardScrapController extends Controller
      * AI 파트는 모두 선택 항목이다. [AI분석] 을 돌리지 않고 사람이 직접 써도 되고,
      * 비워둔 채 저장해도 된다.
      *
+     * @param string|null $userId 중복 검사 대상 회원 (null 이면 중복 검사를 건너뛴다)
+     * @param int|null $ignoreIdx 중복 대상에서 제외할 글 (수정 시 자기 자신)
      * @return array
      */
-    private function validationRules()
+    private function validationRules($userId = null, $ignoreIdx = null)
     {
         return [
             'mq_title' => 'required|string|max:500',
-            'mq_url' => 'required|url|max:2000',
+            'mq_url' => [
+                'required',
+                'url',
+                'max:2000',
+                $this->duplicateUrlRule($userId, $ignoreIdx),
+            ],
             'mq_reason' => 'required|string',
             // 예전 형식의 자유 입력 용어 메모. 값이 남아있는 글의 수정 화면에서만 전송된다.
             'mq_new_terms' => 'nullable|string|max:5000',
@@ -425,6 +440,29 @@ class BoardScrapController extends Controller
             'mq_ai_source' => 'nullable|string|max:20',
             'mq_is_public' => 'nullable|boolean'
         ];
+    }
+
+    /**
+     * 같은 회원이 같은 기사를 또 올리지 못하게 막는 검증 규칙
+     *
+     * 정규화한 URL 해시로 비교하므로 http/https, www/m, 추적 파라미터가 달라도 잡힌다.
+     * 삭제한 글은 중복으로 보지 않는다 (BoardScrap::findDuplicate 참고).
+     *
+     * @param string|null $userId
+     * @param int|null $ignoreIdx
+     * @return \Closure
+     */
+    private function duplicateUrlRule($userId, $ignoreIdx = null)
+    {
+        return function ($attribute, $value, $fail) use ($userId, $ignoreIdx) {
+            if (!$userId || !$value) {
+                return;
+            }
+
+            if (BoardScrap::findDuplicate($userId, $value, $ignoreIdx)) {
+                $fail('이미 스크랩한 뉴스입니다. 같은 기사는 한 번만 등록할 수 있습니다.');
+            }
+        };
     }
 
     /**
@@ -1035,6 +1073,8 @@ class BoardScrapController extends Controller
 
         $url = $request->input('url');
         $userId = Auth::user()->mq_user_id;
+        // 수정 화면에서 자기 자신을 중복으로 잡지 않도록 제외한다
+        $ignoreIdx = $request->input('idx');
 
         // URL 유효성 검사
         if (!$url || !filter_var($url, FILTER_VALIDATE_URL)) {
@@ -1045,16 +1085,16 @@ class BoardScrapController extends Controller
             ], 400);
         }
 
-        // 중복 체크: 현재 사용자가 해당 URL을 이미 스크랩했는지 확인
-        $exists = BoardScrap::where('mq_user_id', $userId)
-                          ->where('mq_url', $url)
-                          ->where('mq_status', 1)
-                          ->exists();
+        // 중복 체크: 정규화한 URL 해시로 비교한다 (www/m, http/https, 추적 파라미터 무시)
+        $duplicate = BoardScrap::findDuplicate($userId, $url, $ignoreIdx ? (int) $ignoreIdx : null);
 
         return response()->json([
             'success' => true,
-            'exists' => $exists,
-            'message' => $exists ? '이미 스크랩된 뉴스입니다.' : '스크랩 가능합니다.'
+            'exists' => (bool) $duplicate,
+            'idx' => $duplicate ? $duplicate->idx : null,
+            'title' => $duplicate ? $duplicate->mq_title : null,
+            'url' => $duplicate ? route('board-scrap.show', $duplicate->idx) : null,
+            'message' => $duplicate ? '이미 스크랩한 뉴스입니다.' : '스크랩 가능합니다.'
         ]);
     }
 }

@@ -19,10 +19,23 @@ class BoardScrap extends Model
     /** 파트5 경제 용어 최대 개수 (AI 응답 / 사용자 편집 공통 상한) */
     const MAX_TERMS = 10;
 
+    /**
+     * URL 정규화 시 버리는 추적용 쿼리 파라미터
+     *
+     * utm_ 으로 시작하는 것은 목록과 별개로 접두사 검사로 걸러낸다.
+     * 기사 식별에 쓰이는 파라미터(네이버의 oid/aid, 일부 언론사의 idxno 등)는
+     * 지우면 서로 다른 기사가 같은 글로 뭉쳐지므로 절대 목록에 넣지 않는다.
+     */
+    const URL_DROP_PARAMS = [
+        'fbclid', 'gclid', 'dclid', 'msclkid', 'igshid', 'yclid', 'ttclid',
+        'mc_cid', 'mc_eid', 'spm', 'cmpid', 'ncid', '_ga', '_gl',
+    ];
+
     protected $fillable = [
         'mq_user_id',
         'mq_title',
         'mq_url',
+        'mq_url_hash',
         'mq_reason',
         'mq_new_terms',
         'mq_ai_interpretation',
@@ -226,6 +239,112 @@ class BoardScrap extends Model
             || !empty($this->mq_ai_outlook_short)
             || !empty($this->mq_ai_outlook_long)
             || !empty($this->mq_ai_questions);
+    }
+
+    /**
+     * 같은 기사로 볼 수 있게 URL 을 정규화한다.
+     *
+     * 같은 기사라도 아래 차이 때문에 문자열이 달라져서 중복 검사가 새어 나간다.
+     * - http / https
+     * - www. / m. / mobile. 서브도메인
+     * - 끝의 슬래시, 중복 슬래시
+     * - utm_* 같은 추적 파라미터, 파라미터 순서
+     * - #앵커
+     *
+     * 파싱이 안 되는 문자열은 소문자로 다듬어 그대로 돌려준다. 정규화에 실패했다고
+     * 중복 검사를 포기하는 것보다 원문끼리라도 비교하는 편이 낫다.
+     *
+     * @param string|null $url
+     * @return string
+     */
+    public static function normalizeUrl($url)
+    {
+        $url = trim((string) $url);
+
+        if ($url === '') {
+            return '';
+        }
+
+        $parts = parse_url($url);
+
+        if ($parts === false || empty($parts['host'])) {
+            return rtrim(strtolower($url), '/');
+        }
+
+        // http 와 https 는 같은 기사로 본다
+        $scheme = 'https';
+
+        $host = strtolower($parts['host']);
+        $host = preg_replace('/^(www|m|mobile)\./', '', $host);
+
+        $path = isset($parts['path']) ? $parts['path'] : '/';
+        $path = preg_replace('#/+#', '/', $path);
+        $path = $path === '/' ? '/' : rtrim($path, '/');
+
+        if ($path === '') {
+            $path = '/';
+        }
+
+        $query = '';
+
+        if (!empty($parts['query'])) {
+            parse_str($parts['query'], $params);
+
+            foreach (array_keys($params) as $key) {
+                $lower = strtolower((string) $key);
+
+                if (strpos($lower, 'utm_') === 0 || in_array($lower, self::URL_DROP_PARAMS, true)) {
+                    unset($params[$key]);
+                }
+            }
+
+            ksort($params);
+            $query = http_build_query($params);
+        }
+
+        return $scheme . '://' . $host . $path . ($query !== '' ? '?' . $query : '');
+    }
+
+    /**
+     * 중복 검사용 URL 해시
+     *
+     * mq_url 이 TEXT 라 인덱스를 못 걸기 때문에 정규화 결과의 sha256 을 따로 저장한다.
+     *
+     * @param string|null $url
+     * @return string|null 빈 URL 이면 null
+     */
+    public static function urlHash($url)
+    {
+        $normalized = self::normalizeUrl($url);
+
+        return $normalized === '' ? null : hash('sha256', $normalized);
+    }
+
+    /**
+     * 같은 회원이 이미 올린 기사인지 확인한다.
+     *
+     * 삭제(mq_status=0)한 글은 중복으로 보지 않는다. 지운 기사는 다시 올릴 수 있어야 한다.
+     *
+     * @param string $userId
+     * @param string $url
+     * @param int|null $ignoreIdx 수정 화면에서 자기 자신을 제외할 때
+     * @return \App\Models\BoardScrap|null
+     */
+    public static function findDuplicate($userId, $url, $ignoreIdx = null)
+    {
+        $hash = self::urlHash($url);
+
+        if ($hash === null) {
+            return null;
+        }
+
+        return self::active()
+            ->ownedBy($userId)
+            ->where('mq_url_hash', $hash)
+            ->when($ignoreIdx, function ($query) use ($ignoreIdx) {
+                return $query->where('idx', '!=', $ignoreIdx);
+            })
+            ->first();
     }
 
     /**

@@ -58,6 +58,10 @@ return [
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
+            // 세션 타임존을 앱(Asia/Seoul)과 강제로 맞춘다.
+            // DB 서버/컨테이너의 시스템 타임존에 기대지 않기 위해 커넥션마다 명시한다.
+            // DATE() 로 날짜를 자르는 집계와 NOW() 가 PHP 시각과 어긋나는 것을 막는 목적.
+            'timezone' => env('DB_TIMEZONE', '+09:00'),
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
