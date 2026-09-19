@@ -80,7 +80,7 @@
                 <!-- 글쓰기 -->
                 @auth
                 <a href="{{ route('board-scrap.create') }}"
-                   class="group flex-shrink-0 inline-flex items-center justify-center gap-2 h-12 px-5 bg-point1 text-white font-bold rounded-xl shadow-lg shadow-point1/25 hover:bg-[#E63E3E] hover:shadow-xl hover:shadow-point1/35 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300"
+                   class="group flex-shrink-0 inline-flex items-center justify-center gap-2 h-10 px-4 bg-point1 text-white font-bold rounded-xl shadow-lg shadow-point1/25 hover:bg-[#E63E3E] hover:shadow-xl hover:shadow-point1/35 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300"
                    title="글쓰기">
                     <svg class="w-5 h-5 transition-transform duration-300 group-hover:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
