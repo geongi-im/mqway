@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\BoardScrap;
+use App\Services\ExpService;
 use App\Services\NewsAiAnalyzer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,14 +16,18 @@ class BoardScrapController extends Controller
 {
     protected $uploadPath = 'uploads/board_scrap';
 
+    /** @var ExpService */
+    protected $exp;
+
     /**
      * 생성자 - 목록/상세는 비회원도 열람 가능, 나머지는 회원 전용
      *
      * checkDuplicate 는 AJAX 로 호출되므로 미들웨어를 걸지 않고
      * 컨트롤러 안에서 JSON 401(requireLogin)을 직접 응답한다.
      */
-    public function __construct()
+    public function __construct(ExpService $exp)
     {
+        $this->exp = $exp;
         $this->middleware('auth')->except(['index', 'show', 'checkDuplicate']);
     }
 
@@ -101,6 +106,8 @@ class BoardScrapController extends Controller
             'sort' => $sort,
             'visibility' => $request->visibility,
             'myCounts' => $myCounts,
+            // 등급 카드는 내 스크랩 탭에서만 보여준다
+            'expSummary' => $mine ? $this->exp->summary($userId) : null,
         ]);
     }
 
@@ -271,6 +278,10 @@ class BoardScrapController extends Controller
 
             DB::commit();
 
+            // 경험치는 저장이 확정된 뒤에 준다. 지급 로직 문제로 글 저장이
+            // 통째로 실패하는 일이 없도록 트랜잭션 밖에서 부른다.
+            $this->grantScrapExp($scrap);
+
             return redirect()
                 ->route('board-scrap.show', $scrap->idx)
                 ->with('success', $isPublic
@@ -282,6 +293,30 @@ class BoardScrapController extends Controller
             return back()
                 ->withInput()
                 ->with('error', '뉴스 스크랩 등록 중 오류가 발생했습니다: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * 스크랩 한 건에 걸린 경험치를 지급한다. (등록 / 수정 공통)
+     *
+     * 세 항목 모두 ref_key 가 글 idx 라 글당 한 번씩만 들어간다. 그래서 수정할 때마다
+     * 불러도 안전하고, 나중에 AI 분석을 붙이거나 공개로 돌린 경우를 뒤늦게 챙길 수 있다.
+     *
+     * @param BoardScrap $scrap
+     * @return void
+     */
+    private function grantScrapExp(BoardScrap $scrap)
+    {
+        $userId = $scrap->mq_user_id;
+
+        $this->exp->grant($userId, 'scrap.create', $scrap->idx);
+
+        if ($scrap->hasAiAnalysis()) {
+            $this->exp->grant($userId, 'scrap.ai', $scrap->idx);
+        }
+
+        if ($scrap->isPublic()) {
+            $this->exp->grant($userId, 'scrap.public', $scrap->idx);
         }
     }
 
@@ -388,6 +423,10 @@ class BoardScrapController extends Controller
             $scrap->save();
 
             DB::commit();
+
+            // 나중에 AI 분석을 붙이거나 공개로 바꾼 경우에도 한 번은 받을 수 있게 한다.
+            // 같은 글에 두 번 지급되지 않는 것은 원장의 유니크 키가 보장한다.
+            $this->grantScrapExp($scrap);
 
             return redirect()
                 ->route('board-scrap.show', $scrap->idx)
@@ -727,6 +766,10 @@ class BoardScrapController extends Controller
 
             $scrap->save();
 
+            if ($nextIsPublic) {
+                $this->exp->grant($scrap->mq_user_id, 'scrap.public', $scrap->idx);
+            }
+
             return response()->json([
                 'success' => true,
                 'isPublic' => $nextIsPublic,
@@ -799,6 +842,12 @@ class BoardScrapController extends Controller
             ]);
 
             $scrap->increment('mq_like_cnt');
+
+            // 좋아요를 누른 사람이 아니라 글쓴이가 받는다.
+            // 같은 사람이 취소하고 다시 눌러도 ref_key 가 같아 한 번만 지급된다.
+            if ($scrap->mq_user_id !== $userId) {
+                $this->exp->grant($scrap->mq_user_id, 'scrap.liked', $idx . ':' . $userId);
+            }
 
             return response()->json([
                 'success' => true,

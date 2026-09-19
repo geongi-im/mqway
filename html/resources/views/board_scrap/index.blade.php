@@ -2,7 +2,7 @@
 
 @section('content')
 <!-- ===== Hero Section ===== -->
-<section class="relative pt-32 pb-24 overflow-hidden bg-[#3D4148]">
+<section class="relative pt-24 pb-14 overflow-hidden bg-[#3D4148]">
     <div class="absolute inset-0">
         <div class="absolute inset-0 bg-gradient-to-br from-[#3D4148] via-[#2D3047] to-[#1A1C29] opacity-95"></div>
         <div class="absolute top-0 right-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
@@ -25,12 +25,13 @@
         <span class="inline-block py-1 px-3 rounded-full bg-white/10 border border-white/20 text-white text-sm font-medium mb-4 backdrop-blur-md">
             📰 News Scrap
         </span>
-        <h1 class="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight tracking-tight">
+        <h1 class="text-3xl md:text-4xl font-bold text-white mb-3 leading-tight tracking-tight">
             {{ $mine ? '내 뉴스 스크랩' : '뉴스 스크랩' }}
         </h1>
-        <p class="text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed font-light">
+        {{-- 내 스크랩 탭은 아래 등급 카드가 자리를 쓰므로 설명 문구를 줄인다 --}}
+        <p class="text-base md:text-lg text-gray-300 max-w-2xl mx-auto leading-relaxed font-light">
             @if($mine)
-                내가 스크랩한 뉴스를 관리하고 공개 여부를 설정하세요.
+                기록이 쌓일수록 등급이 올라갑니다.
             @else
                 다른 회원들이 공유한 뉴스와 그 뉴스를 고른 이유를 살펴보세요.
             @endif
@@ -39,8 +40,8 @@
 </section>
 
 <!-- ===== Search Section ===== -->
-<div class="container mx-auto px-4 -mt-10 relative z-20 mb-10 animate-slideUp" style="animation-delay: 0.2s;">
-    <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 max-w-4xl mx-auto">
+<div class="container mx-auto px-4 -mt-8 relative z-20 mb-6 animate-slideUp" style="animation-delay: 0.2s;">
+    <div class="bg-white rounded-2xl shadow-xl p-3 md:p-4 max-w-3xl mx-auto">
         <form action="{{ route('board-scrap.index') }}" method="GET">
             @if($mine)
                 <input type="hidden" name="mine" value="1">
@@ -58,7 +59,7 @@
                     <input type="text"
                            name="search"
                            value="{{ request('search') }}"
-                           class="w-full h-12 pl-4 pr-12 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:ring-2 focus:ring-[#9F5AFF] focus:border-transparent transition-all placeholder-gray-400"
+                           class="w-full h-10 pl-4 pr-12 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:ring-2 focus:ring-[#9F5AFF] focus:border-transparent transition-all placeholder-gray-400"
                            placeholder="제목, 내용, 용어로 검색해보세요">
                     <button type="submit" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-[#9F5AFF] transition-colors" title="검색">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -87,6 +88,10 @@
         </form>
     </div>
 </div>
+
+@if($mine && $expSummary)
+@include('board_scrap._grade_card', ['expSummary' => $expSummary])
+@endif
 
 <!-- ===== Tabs ===== -->
 <div class="container mx-auto px-4 mb-6 max-w-7xl animate-slideUp" style="animation-delay: 0.25s;">

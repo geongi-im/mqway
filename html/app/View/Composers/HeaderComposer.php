@@ -2,10 +2,20 @@
 
 namespace App\View\Composers;
 
+use App\Services\ExpService;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class HeaderComposer
 {
+    /** @var ExpService */
+    private $exp;
+
+    public function __construct(ExpService $exp)
+    {
+        $this->exp = $exp;
+    }
+
     /**
      * 헤더 뷰에 메뉴 데이터를 바인딩합니다.
      */
@@ -73,5 +83,9 @@ class HeaderComposer
         ];
 
         $view->with('headerMenus', $headerMenus);
+
+        // 프로필 드롭다운에 보여줄 등급. 비로그인이면 null.
+        // 예전에는 여기에 mq_member.mq_level(권한 값)이 그대로 노출돼 있었다.
+        $view->with('headerExp', Auth::check() ? $this->exp->summary(Auth::user()->mq_user_id) : null);
     }
 }

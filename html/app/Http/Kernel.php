@@ -35,6 +35,8 @@ class Kernel extends HttpKernel
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            // 오늘 첫 접속 기록 (등급 경험치 / 연속 접속일)
+            \App\Http\Middleware\RecordDailyVisit::class,
         ],
 
         'api' => [
