@@ -94,7 +94,7 @@
 </div>
 
 @if($mine && $expSummary)
-@include('board_scrap._grade_card', ['expSummary' => $expSummary])
+@include('board_scrap._streak_card', ['expSummary' => $expSummary])
 @endif
 
 <!-- ===== Tabs ===== -->

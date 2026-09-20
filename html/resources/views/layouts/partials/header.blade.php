@@ -143,7 +143,7 @@
     .profile-dropdown-mobile {
         right: 0;
         left: auto;
-        min-width: 200px;
+        min-width: 240px;
     }
     
     /* 모바일에서 사용자명 숨김 */
@@ -243,15 +243,38 @@
                     </button>
                     
                     <!-- 드롭다운 메뉴 -->
-                    <div id="profileDropdownMenu" class="profile-dropdown-menu absolute top-full right-0 mt-2 w-48 profile-dropdown-mobile bg-white shadow-lg rounded-lg opacity-0 invisible transform translate-y-2 transition-all duration-200 z-50 border border-gray-200">
+                    <div id="profileDropdownMenu" class="profile-dropdown-menu absolute top-full right-0 mt-2 w-64 profile-dropdown-mobile bg-white shadow-lg rounded-lg opacity-0 invisible transform translate-y-2 transition-all duration-200 z-50 border border-gray-200">
                         <div class="py-2">
                             <div class="px-4 py-2 border-b border-gray-100">
                                 <p class="text-sm font-medium text-gray-900">{{ auth()->user()->mq_user_name ?? auth()->user()->name }}</p>
                                 <p class="text-xs text-gray-500">{{ auth()->user()->mq_user_email ?? auth()->user()->email }}</p>
                                 @if(!empty($headerExp))
-                                <div class="mt-2 flex items-center gap-1.5">
-                                    @include('components.grade_badge', ['grade' => $headerExp['grade']])
-                                    <span class="text-xs text-gray-400 font-medium">{{ number_format($headerExp['total']) }} EXP</span>
+                                <div class="mt-2">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <span class="flex items-center gap-1.5 min-w-0">
+                                            @include('components.grade_badge', ['grade' => $headerExp['grade']])
+                                            <span class="text-xs text-gray-400 font-medium whitespace-nowrap">{{ number_format($headerExp['total']) }} EXP</span>
+                                        </span>
+                                        <button type="button" id="expGuideOpen"
+                                                class="inline-flex shrink-0 items-center gap-1 px-1.5 py-0.5 rounded-full text-[11px] font-semibold text-gray-400 hover:text-[#9F5AFF] hover:bg-purple-50 transition-colors whitespace-nowrap"
+                                                title="경험치를 받는 방법과 등급표 보기">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            안내
+                                        </button>
+                                    </div>
+                                    <div class="mt-2 h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                                        <div class="h-full rounded-full"
+                                             style="width: {{ $headerExp['percent'] }}%; background-color: {{ $headerExp['grade']['color'] }};"></div>
+                                    </div>
+                                    <p class="text-[11px] text-gray-400 mt-1">
+                                        @if($headerExp['next'])
+                                            {{ $headerExp['next']['name'] }} 까지 {{ number_format($headerExp['remain']) }} EXP
+                                        @else
+                                            최고 등급입니다
+                                        @endif
+                                    </p>
                                 </div>
                                 @endif
                             </div>
@@ -285,6 +308,11 @@
         </div>
     </div>
 </nav>
+
+{{-- 프로필 드롭다운의 '안내' 버튼으로 여는 경험치/등급 설명 --}}
+@if(!empty($headerExp))
+@include('components.exp_guide_modal', ['expSummary' => $headerExp])
+@endif
 
 @push('scripts')
 <script>
@@ -414,6 +442,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 profileDropdownMenu.classList.remove('opacity-100', 'visible', 'translate-y-0');
                 profileDropdownButton.querySelector('svg:last-child').classList.remove('rotate-180');
             }
+        }
+
+        // 등급 안내 모달을 열 때는 드롭다운을 닫아 화면이 겹치지 않게 한다
+        const expGuideOpenButton = document.getElementById('expGuideOpen');
+        if (expGuideOpenButton) {
+            expGuideOpenButton.addEventListener('click', closeProfileDropdown);
         }
 
         // 프로필 버튼 클릭 시 드롭다운 토글
