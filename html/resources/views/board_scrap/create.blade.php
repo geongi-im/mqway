@@ -23,20 +23,21 @@
                 <form action="{{ route('board-scrap.store') }}" method="POST" class="space-y-8" id="scrapForm">
                     @csrf
 
-                    <!-- 공개 설정 (제목 상단에 간단히 표기) -->
+                    <!-- 비밀글 설정 (체크하지 않으면 공개) -->
                     <div class="flex justify-start">
-                        <!-- 체크박스는 해제 시 값을 보내지 않으므로 hidden 으로 기본값 0(나만보기)을 명시한다 -->
-                        <input type="hidden" name="mq_is_public" value="0">
-                        <label for="mq_is_public" class="inline-flex items-center gap-2 cursor-pointer" title="켜면 뉴스 스크랩 게시판에 공개됩니다">
+                        <!-- 체크박스는 해제 시 값을 보내지 않으므로 hidden 으로 기본값 0(공개)을 명시한다 -->
+                        <input type="hidden" name="mq_is_secret" value="0">
+                        <label for="mq_is_secret" class="inline-flex items-center gap-2 cursor-pointer" title="켜면 게시판에 올리지 않고 나만 볼 수 있습니다">
                             <input type="checkbox"
-                                   name="mq_is_public"
-                                   id="mq_is_public"
+                                   name="mq_is_secret"
+                                   id="mq_is_secret"
                                    value="1"
-                                   {{ old('mq_is_public') ? 'checked' : '' }}
+                                   {{ old('mq_is_secret') ? 'checked' : '' }}
                                    class="peer sr-only">
-                            <span class="relative w-9 h-5 rounded-full bg-gray-300 transition-colors peer-checked:bg-[#4ECDC4] after:absolute after:top-0.5 after:left-0.5 after:w-4 after:h-4 after:rounded-full after:bg-white after:shadow after:transition-transform peer-checked:after:translate-x-4"></span>
-                            <span class="text-xs font-semibold text-gray-400 peer-checked:hidden">비공개 · 나만 보기</span>
-                            <span class="hidden text-xs font-semibold text-[#2AA9A0] peer-checked:inline">공개 · 게시판에 노출</span>
+                            <span class="relative w-4 h-4 flex-shrink-0 rounded border border-gray-300 bg-white transition-colors peer-checked:bg-[#2D3047] peer-checked:border-[#2D3047] after:absolute after:left-1 after:top-0.5 after:w-1.5 after:h-2.5 after:border-r-2 after:border-b-2 after:border-white after:rotate-45 after:opacity-0 peer-checked:after:opacity-100"></span>
+                            <span class="text-xs font-semibold text-gray-600">비밀글로 저장</span>
+                            <span class="text-xs text-gray-400 peer-checked:hidden">체크하지 않으면 게시판에 공개됩니다</span>
+                            <span class="hidden text-xs font-semibold text-[#2D3047] peer-checked:inline">나만 볼 수 있습니다</span>
                         </label>
                     </div>
 

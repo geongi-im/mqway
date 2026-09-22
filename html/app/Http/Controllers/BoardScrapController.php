@@ -34,32 +34,25 @@ class BoardScrapController extends Controller
     /**
      * 뉴스 스크랩 목록
      *
-     * 기본: 공개된 스크랩 전체 (비회원 열람 가능)
-     * ?mine=1: 본인이 작성한 스크랩 전체 (공개 + 나만보기, 회원 전용)
+     * 공개글과 내 비밀글을 한 목록에서 함께 보여준다. 비회원에게는 공개글만 나간다.
+     *
+     * ?mine=1  내가 쓴 글만 (회원 전용)
      */
     public function index(Request $request)
     {
         $userId = Auth::check() ? Auth::user()->mq_user_id : null;
         $mine = $request->boolean('mine');
 
-        // 내 스크랩 보기는 로그인 필요
+        // 내 글 보기는 로그인 필요
         if ($mine && !$userId) {
             return redirect()->guest(route('login'));
         }
 
-        $query = BoardScrap::with('user')->active();
+        // 공개글 + 내 비밀글이 기본 모집단이다
+        $query = BoardScrap::with('user')->active()->visibleTo($userId);
 
         if ($mine) {
             $query->ownedBy($userId);
-
-            // 공개 여부 필터 (내 스크랩에서만 의미 있음)
-            if ($request->visibility === 'public') {
-                $query->where('mq_is_public', 1);
-            } elseif ($request->visibility === 'private') {
-                $query->where('mq_is_public', 0);
-            }
-        } else {
-            $query->publicOnly();
         }
 
         // 검색 처리
@@ -84,30 +77,23 @@ class BoardScrapController extends Controller
                 $query->orderBy('mq_like_cnt', 'desc');
                 break;
             default:
-                // 공개 목록은 공개로 전환한 시점 기준 (오래된 글을 오늘 공개해도 상단에 노출)
-                $query->orderBy($mine ? 'mq_reg_date' : 'mq_public_date', 'desc');
+                // 목록이 하나라 정렬 축도 작성일 하나다
+                $query->orderBy('mq_reg_date', 'desc');
         }
         $query->orderBy('idx', 'desc'); // 동일 시각 글의 페이지네이션 순서 고정
 
         $scraps = $query->paginate(12);
 
-        // 내 스크랩 탭의 공개/나만보기 개수
-        $myCounts = null;
-        if ($mine) {
-            $myCounts = [
-                'public' => BoardScrap::active()->ownedBy($userId)->where('mq_is_public', 1)->count(),
-                'private' => BoardScrap::active()->ownedBy($userId)->where('mq_is_public', 0)->count(),
-            ];
-        }
+        // 필터 버튼에 붙는 내 글 개수
+        $myCount = $userId ? BoardScrap::active()->ownedBy($userId)->count() : null;
 
         return view('board_scrap.index', [
             'scraps' => $scraps,
             'mine' => $mine,
             'sort' => $sort,
-            'visibility' => $request->visibility,
-            'myCounts' => $myCounts,
-            // 등급 카드는 내 스크랩 탭에서만 보여준다
-            'expSummary' => $mine ? $this->exp->summary($userId) : null,
+            'myCount' => $myCount,
+            // 연속 접속 띠는 로그인한 회원에게 항상 보여준다 (비회원은 null)
+            'expSummary' => $this->exp->summary($userId),
         ]);
     }
 
@@ -258,8 +244,8 @@ class BoardScrapController extends Controller
             // URL에서 자동으로 썸네일 추출
             $thumbnailUrl = $this->extractThumbnailFromUrl($request->mq_url);
 
-            // 체크하지 않으면 나만보기 (기본값)
-            $isPublic = $request->boolean('mq_is_public');
+            // 기본은 공개. 비밀글을 체크한 글만 작성자에게만 보인다.
+            $isPublic = !$request->boolean('mq_is_secret');
 
             $scrap = new BoardScrap();
             $scrap->mq_user_id = Auth::user()->mq_user_id;
@@ -270,7 +256,6 @@ class BoardScrapController extends Controller
             $this->applyAiFields($scrap, $request);
             $scrap->mq_thumbnail_url = $thumbnailUrl; // 자동 추출된 썸네일
             $scrap->mq_is_public = $isPublic ? 1 : 0;
-            $scrap->mq_public_date = $isPublic ? Carbon::now() : null;
             $scrap->mq_status = 1;
             $scrap->mq_reg_date = Carbon::now();
 
@@ -285,8 +270,8 @@ class BoardScrapController extends Controller
             return redirect()
                 ->route('board-scrap.show', $scrap->idx)
                 ->with('success', $isPublic
-                    ? '뉴스 스크랩이 등록되어 공개 게시판에 공유되었습니다.'
-                    : '뉴스 스크랩이 등록되었습니다. (나만보기)');
+                    ? '뉴스 스크랩이 등록되어 게시판에 올라갔습니다.'
+                    : '뉴스 스크랩이 비밀글로 등록되었습니다.');
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -321,7 +306,7 @@ class BoardScrapController extends Controller
     }
 
     /**
-     * 상세보기 (공개글은 누구나, 나만보기는 작성자 본인만)
+     * 상세보기 (공개글은 누구나, 비밀글은 작성자 본인만)
      */
     public function show($idx)
     {
@@ -397,8 +382,7 @@ class BoardScrapController extends Controller
                 $scrap->mq_thumbnail_url = $thumbnailUrl;
             }
 
-            $wasPublic = $scrap->isPublic();
-            $isPublic = $request->boolean('mq_is_public');
+            $isPublic = !$request->boolean('mq_is_secret');
 
             $scrap->mq_title = $request->mq_title;
             $scrap->mq_url = $request->mq_url;
@@ -414,11 +398,6 @@ class BoardScrapController extends Controller
 
             $scrap->mq_is_public = $isPublic ? 1 : 0;
             $scrap->mq_update_date = Carbon::now();
-
-            // 나만보기 -> 공개로 전환한 시점을 기록 (공개 목록 정렬 기준)
-            if ($isPublic && !$wasPublic) {
-                $scrap->mq_public_date = Carbon::now();
-            }
 
             $scrap->save();
 
@@ -477,7 +456,7 @@ class BoardScrapController extends Controller
             'terms.*.definition' => 'nullable|string|max:500',
             'mq_ai_model' => 'nullable|string|max:60',
             'mq_ai_source' => 'nullable|string|max:20',
-            'mq_is_public' => 'nullable|boolean'
+            'mq_is_secret' => 'nullable|boolean'
         ];
     }
 
@@ -735,7 +714,7 @@ class BoardScrapController extends Controller
     }
 
     /**
-     * 공개 / 나만보기 전환 (작성자 본인만)
+     * 공개 / 비밀글 전환 (작성자 본인만)
      *
      * @param int $idx
      * @return \Illuminate\Http\JsonResponse
@@ -759,11 +738,6 @@ class BoardScrapController extends Controller
 
             $scrap->mq_is_public = $nextIsPublic ? 1 : 0;
 
-            // 공개로 전환하는 시점을 기록 (공개 목록 정렬 기준)
-            if ($nextIsPublic) {
-                $scrap->mq_public_date = Carbon::now();
-            }
-
             $scrap->save();
 
             if ($nextIsPublic) {
@@ -774,8 +748,8 @@ class BoardScrapController extends Controller
                 'success' => true,
                 'isPublic' => $nextIsPublic,
                 'message' => $nextIsPublic
-                    ? '공개 게시판에 공유되었습니다.'
-                    : '나만보기로 변경되었습니다.'
+                    ? '게시판에 공개되었습니다.'
+                    : '비밀글로 변경되었습니다.'
             ]);
 
         } catch (\Exception $e) {

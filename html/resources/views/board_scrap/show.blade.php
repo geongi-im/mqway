@@ -30,7 +30,7 @@
                 </span>
                 @else
                 <span id="visibilityBadge" class="inline-flex items-center gap-1 py-1 px-3 rounded-full bg-white/10 border border-white/20 text-gray-300 text-xs font-bold backdrop-blur-md">
-                    나만보기
+                    비밀글
                 </span>
                 @endif
             @endif
@@ -243,10 +243,14 @@
                                 </span>
                                 <p class="min-w-0 text-gray-800 font-medium leading-relaxed">{{ $question }}</p>
                             </div>
-                            {{-- 답변은 선택 항목이라 쓴 경우에만 보여준다 --}}
-                            @if(!empty($aiAnswers[$index]))
+                            {{-- 답변은 선택 항목이라 쓴 경우에만 보여준다.
+                                 내 경제 상황이 담기는 칸이라 공개글이어도 작성자에게만 노출한다. --}}
+                            @if($isOwner && !empty($aiAnswers[$index]))
                             <div class="mt-3 ml-0 sm:ml-11 border-l-2 border-[#4ECDC4] pl-3 sm:pl-4">
-                                <p class="text-xs font-bold text-[#2AA9A0] mb-1">내 답변</p>
+                                <p class="text-xs font-bold text-[#2AA9A0] mb-1">
+                                    내 답변
+                                    <span class="ml-1 font-semibold text-gray-400">나만 보임</span>
+                                </p>
                                 <p class="text-gray-700 whitespace-pre-line leading-relaxed">{{ $aiAnswers[$index] }}</p>
                             </div>
                             @endif
@@ -304,15 +308,15 @@
                     <p class="text-sm font-bold text-[#2D3047] mb-1">공개 설정</p>
                     <p id="visibilityText" class="text-xs text-gray-500">
                         {{ $scrap->isPublic()
-                            ? '이 스크랩은 뉴스 스크랩 게시판에 공개되어 있습니다.'
-                            : '나만 볼 수 있는 상태입니다. 공개하면 게시판 목록에 올라갑니다.' }}
+                            ? '이 스크랩은 게시판에 공개되어 있습니다.'
+                            : '비밀글이라 나만 볼 수 있습니다. 공개하면 게시판 목록에 올라갑니다.' }}
                     </p>
                 </div>
                 <button type="button"
                         id="visibilityButton"
                         data-public="{{ $scrap->isPublic() ? '1' : '0' }}"
                         class="inline-flex items-center justify-center h-11 px-5 rounded-xl transition-all text-sm font-bold flex-shrink-0 {{ $scrap->isPublic() ? 'border border-gray-200 bg-white text-gray-600 hover:border-gray-300' : 'bg-gradient-to-r from-[#4ECDC4] to-[#2AA9A0] text-white hover:shadow-lg hover:-translate-y-0.5' }}">
-                    {{ $scrap->isPublic() ? '나만보기로 변경' : '공개 게시판에 공유' }}
+                    {{ $scrap->isPublic() ? '비밀글로 변경' : '게시판에 공개' }}
                 </button>
             </div>
             @endif
@@ -320,7 +324,7 @@
             <!-- 버튼 영역 -->
             <div class="flex justify-between items-center pt-6 border-t border-gray-100">
                 <!-- 좌측 버튼 -->
-                <a href="{{ route('board-scrap.index', $isOwner && !$scrap->isPublic() ? ['mine' => 1] : []) }}"
+                <a href="{{ route('board-scrap.index') }}"
                    class="inline-flex items-center justify-center h-11 px-5 border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all text-gray-600 text-sm font-medium">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
@@ -414,15 +418,15 @@ if (likeButton) {
     });
 }
 
-// 공개 / 나만보기 전환
+// 공개 / 비밀글 전환
 const visibilityButton = document.getElementById('visibilityButton');
 if (visibilityButton) {
     visibilityButton.addEventListener('click', async () => {
         const isPublic = visibilityButton.dataset.public === '1';
 
         const message = isPublic
-            ? '나만보기로 변경하시겠습니까?\n공개 게시판 목록에서 사라집니다.'
-            : '이 스크랩을 공개 게시판에 공유하시겠습니까?\n다른 회원과 비회원도 볼 수 있게 됩니다.';
+            ? '비밀글로 변경하시겠습니까?\n게시판 목록에서 나에게만 보이게 됩니다.'
+            : '이 스크랩을 게시판에 공개하시겠습니까?\n다른 회원과 비회원도 볼 수 있게 됩니다.';
 
         if (!confirm(message)) {
             return;

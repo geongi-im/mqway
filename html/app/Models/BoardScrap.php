@@ -49,7 +49,6 @@ class BoardScrap extends Model
         'mq_ai_date',
         'mq_thumbnail_url',
         'mq_is_public',
-        'mq_public_date',
         'mq_view_cnt',
         'mq_like_cnt',
         'mq_status',
@@ -61,7 +60,6 @@ class BoardScrap extends Model
     protected $dates = [
         'mq_reg_date',
         'mq_update_date',
-        'mq_public_date',
         'mq_ai_date'
     ];
 
@@ -72,11 +70,6 @@ class BoardScrap extends Model
     }
 
     public function getMqUpdateDateAttribute($value)
-    {
-        return $value ? Carbon::parse($value) : null;
-    }
-
-    public function getMqPublicDateAttribute($value)
     {
         return $value ? Carbon::parse($value) : null;
     }
