@@ -223,8 +223,10 @@
                 </div>
                 @endif
 
-                <!-- 내 경제상황에 맞는 질문 -->
-                @if(count($aiQuestions))
+                {{-- 내 경제상황에 맞는 질문
+                     질문/답변 모두 개인 경제 상황이 담기는 칸이라
+                     공개글이어도 항목 자체를 작성자에게만 보여준다. --}}
+                @if($isOwner && count($aiQuestions))
                 <div>
                     <div class="flex items-center gap-3 mb-4">
                         <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#2D3047] to-[#1A1C29] flex items-center justify-center">
@@ -233,6 +235,12 @@
                             </svg>
                         </div>
                         <h2 class="text-xl font-bold text-[#2D3047]">내 경제상황에 맞는 질문</h2>
+                        <span class="inline-flex items-center gap-1 py-0.5 px-2 rounded-full bg-[#4ECDC4]/10 text-[#2AA9A0] text-xs font-bold">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                            </svg>
+                            나만 보임
+                        </span>
                     </div>
                     <div class="space-y-3">
                         @foreach($aiQuestions as $index => $question)
@@ -243,14 +251,10 @@
                                 </span>
                                 <p class="min-w-0 text-gray-800 font-medium leading-relaxed">{{ $question }}</p>
                             </div>
-                            {{-- 답변은 선택 항목이라 쓴 경우에만 보여준다.
-                                 내 경제 상황이 담기는 칸이라 공개글이어도 작성자에게만 노출한다. --}}
-                            @if($isOwner && !empty($aiAnswers[$index]))
+                            {{-- 답변은 선택 항목이라 쓴 경우에만 보여준다. --}}
+                            @if(!empty($aiAnswers[$index]))
                             <div class="mt-3 ml-0 sm:ml-11 border-l-2 border-[#4ECDC4] pl-3 sm:pl-4">
-                                <p class="text-xs font-bold text-[#2AA9A0] mb-1">
-                                    내 답변
-                                    <span class="ml-1 font-semibold text-gray-400">나만 보임</span>
-                                </p>
+                                <p class="text-xs font-bold text-[#2AA9A0] mb-1">내 답변</p>
                                 <p class="text-gray-700 whitespace-pre-line leading-relaxed">{{ $aiAnswers[$index] }}</p>
                             </div>
                             @endif

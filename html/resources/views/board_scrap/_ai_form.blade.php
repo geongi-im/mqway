@@ -286,9 +286,19 @@
             <label class="text-sm font-semibold text-[#2D3047] block">
                 내 경제상황에 맞는 질문
                 <span class="text-xs font-normal text-gray-400 ml-1">답변은 선택</span>
+                <span class="inline-flex items-center gap-1 ml-1 py-0.5 px-2 rounded-full bg-[#4ECDC4]/10 text-[#2AA9A0] text-xs font-bold align-middle">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                    나만 보임
+                </span>
             </label>
             <p class="text-xs text-gray-400 mb-3">
                 정답이 있는 질문이 아닙니다. 스스로 답해보면서 이 뉴스를 내 상황으로 옮겨보세요
+            </p>
+            {{-- 개인 경제 상황이 담기는 칸이라 상세보기에서 작성자에게만 보여준다(show.blade.php) --}}
+            <p class="text-xs text-[#2AA9A0] bg-[#4ECDC4]/10 border border-[#4ECDC4]/30 rounded-lg px-3 py-2 mb-3 leading-relaxed">
+                이 항목은 전체 공개로 저장해도 질문과 답변 모두 다른 사람에게 보이지 않습니다. 나만 볼 수 있으니 편하게 적어보세요
             </p>
             <div class="space-y-3">
                 @foreach($questions as $index => $question)
