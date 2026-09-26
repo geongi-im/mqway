@@ -603,7 +603,10 @@
         }
 
         if (!hasReasonText()) {
-            setStatus('먼저 뉴스를 선택한 이유를 입력해주세요. 내 상황에 맞는 질문을 만드는 데 쓰입니다.', 'error');
+            // 결과 영역 가운데 버튼으로 누르면 상태 문구가 화면 밖에 있을 수 있어 알림창으로도 알린다
+            var reasonMessage = '먼저 뉴스를 선택한 이유를 입력해주세요. 내 상황에 맞는 질문을 만드는 데 쓰입니다.';
+            setStatus(reasonMessage, 'error');
+            alert(reasonMessage);
             focusReason();
             return;
         }
