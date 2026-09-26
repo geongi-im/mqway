@@ -133,9 +133,20 @@ class BoardScrapController extends Controller
             ], 422);
         }
 
+        // 질문 개인화의 핵심 근거라 분석 전에 반드시 받는다.
+        // CKEditor 는 빈 칸이어도 <p>&nbsp;</p> 를 보내므로 평문으로 바꾼 뒤에 비었는지 본다.
+        $reason = $this->htmlToPlainText($request->input('mq_reason'));
+
+        if ($reason === '') {
+            return response()->json([
+                'success' => false,
+                'message' => '먼저 뉴스를 선택한 이유를 입력해주세요.',
+            ], 422);
+        }
+
         $result = $analyzer->analyze(
             $request->input('mq_url'),
-            $this->buildUserContext(Auth::user(), $request->input('mq_reason'))
+            $this->buildUserContext(Auth::user(), $reason)
         );
 
         if (!$result['success']) {
@@ -156,7 +167,7 @@ class BoardScrapController extends Controller
      * 파트7(내 경제상황에 맞는 질문) 개인화에 쓰는 맥락을 만든다.
      *
      * 현재 근거는 두 가지뿐이다.
-     *  - reason   : 사용자가 폼에 쓴 "이 뉴스를 선택한 이유" (CKEditor HTML -> 평문)
+     *  - reason   : 사용자가 폼에 쓴 "이 뉴스를 선택한 이유" 평문 (aiAnalyze 에서 필수로 받는다)
      *  - ageGroup : 회원 생일로 계산한 연령대
      *
      * 앞으로 회원가입/마이페이지에서 소득 구간, 관심 분야, 재무 목표 같은 항목을
@@ -165,13 +176,13 @@ class BoardScrapController extends Controller
      * 지시되어 있으므로, 키가 없을 때 잘못된 추측이 섞이지 않는다.
      *
      * @param \App\Models\Member|null $user
-     * @param string|null $reason
+     * @param string $reason htmlToPlainText 를 거친 평문
      * @return array
      */
     private function buildUserContext($user, $reason)
     {
         return [
-            'reason' => $this->htmlToPlainText($reason),
+            'reason' => $reason,
             'ageGroup' => $this->resolveAgeGroup($user),
         ];
     }
@@ -220,7 +231,8 @@ class BoardScrapController extends Controller
         $text = preg_replace('/<br\s*\/?>/i', "\n", $html);
         $text = preg_replace('#</(p|div|li|h[1-6]|blockquote)>#i', "\n", $text);
         $text = html_entity_decode(strip_tags($text), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $text = preg_replace('/[ \t]+/u', ' ', $text);
+        // &nbsp; 는 디코드하면 U+00A0 이 되어 trim 에 걸리지 않으므로 일반 공백으로 바꾼다
+        $text = preg_replace('/[ \t\x{00A0}]+/u', ' ', $text);
         $text = preg_replace('/\s*\n\s*/u', "\n", $text);
         $text = preg_replace('/\n{2,}/u', "\n", $text);
 
@@ -439,7 +451,16 @@ class BoardScrapController extends Controller
                 'max:2000',
                 $this->duplicateUrlRule($userId, $ignoreIdx),
             ],
-            'mq_reason' => 'required|string',
+            'mq_reason' => [
+                'required',
+                'string',
+                // CKEditor 는 빈 칸이어도 <p>&nbsp;</p> 를 보내므로 [AI분석] 과 같은 기준으로 평문을 본다
+                function ($attribute, $value, $fail) {
+                    if ($this->htmlToPlainText($value) === '') {
+                        $fail('뉴스를 선택한 이유를 입력해주세요.');
+                    }
+                },
+            ],
             // 예전 형식의 자유 입력 용어 메모. 값이 남아있는 글의 수정 화면에서만 전송된다.
             'mq_new_terms' => 'nullable|string|max:5000',
             'mq_ai_interpretation' => 'nullable|string|max:5000',

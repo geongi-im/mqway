@@ -477,6 +477,29 @@
         return textarea ? textarea.value : '';
     }
 
+    /** 선택한 이유에 실제 글자가 있는지. CKEditor 는 빈 칸이어도 <p>&nbsp;</p> 를 돌려준다. */
+    function hasReasonText() {
+        var box = document.createElement('div');
+        box.innerHTML = getReasonText();
+        // JS 의 trim 은 &nbsp; 가 풀린 U+00A0 도 공백으로 보고 지운다
+        return (box.textContent || '').trim() !== '';
+    }
+
+    function focusReason() {
+        try {
+            if (typeof editorInstance !== 'undefined' && editorInstance) {
+                editorInstance.editing.view.focus();
+                return;
+            }
+        } catch (error) {
+            // CKEditor 미초기화 - 아래에서 textarea 로 폴백
+        }
+        var textarea = document.getElementById('editor');
+        if (textarea) {
+            textarea.focus();
+        }
+    }
+
     /** 스켈레톤을 걷어내고 실제 입력 폼을 보여준다 */
     function revealResult() {
         if (skeleton) {
@@ -576,6 +599,12 @@
             if (urlInput) {
                 urlInput.focus();
             }
+            return;
+        }
+
+        if (!hasReasonText()) {
+            setStatus('먼저 뉴스를 선택한 이유를 입력해주세요. 내 상황에 맞는 질문을 만드는 데 쓰입니다.', 'error');
+            focusReason();
             return;
         }
 

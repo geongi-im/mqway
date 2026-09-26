@@ -131,7 +131,7 @@
                             </svg>
                             <span>
                                 링크를 넣고 <strong class="text-indigo-500">[AI분석]</strong> 을 누르면 해석 · 경제 용어 · 향후 전망 · 내 상황 질문이 자동으로 채워집니다.
-                                위 <strong>뉴스를 선택한 이유</strong>를 먼저 써두면 질문이 내 상황에 더 맞게 만들어집니다. 썸네일 이미지는 자동으로 가져옵니다.
+                                위 <strong>뉴스를 선택한 이유</strong>를 먼저 써야 분석할 수 있으며, 질문은 이 내용을 바탕으로 만들어집니다. 썸네일 이미지는 자동으로 가져옵니다.
                             </span>
                         </p>
                     </div>
@@ -270,8 +270,10 @@
             return true;
         }
 
-        const content = editorInstance.getData();
-        if (!content || content.trim() === '') {
+        // 빈 칸이어도 <p>&nbsp;</p> 가 오므로 태그를 걷어낸 글자로 판단한다
+        const box = document.createElement('div');
+        box.innerHTML = editorInstance.getData();
+        if ((box.textContent || '').trim() === '') {
             e.preventDefault();
             alert('뉴스를 선택한 이유를 입력해주세요.');
             editorInstance.focus();

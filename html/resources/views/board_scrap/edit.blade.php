@@ -276,8 +276,10 @@
             return true;
         }
 
-        const content = editorInstance.getData();
-        if (!content || content.trim() === '') {
+        // 빈 칸이어도 <p>&nbsp;</p> 가 오므로 태그를 걷어낸 글자로 판단한다
+        const box = document.createElement('div');
+        box.innerHTML = editorInstance.getData();
+        if ((box.textContent || '').trim() === '') {
             e.preventDefault();
             alert('뉴스를 선택한 이유를 입력해주세요.');
             editorInstance.focus();
