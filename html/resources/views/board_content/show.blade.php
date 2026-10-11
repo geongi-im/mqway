@@ -98,7 +98,7 @@
 
                 <!-- 본문 내용 -->
                 <div class="prose prose-lg max-w-none prose-headings:text-[#2D3047] prose-p:text-gray-600 prose-a:text-[#4ECDC4] prose-strong:text-[#2D3047] prose-img:rounded-xl prose-img:shadow-lg">
-                    {!! $post->mq_content !!}
+                    {!! renderBoardContent($post->mq_content) !!}
                 </div>
 
                 <!-- Bottom Like CTA -->

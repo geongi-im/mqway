@@ -100,7 +100,7 @@
                 <!-- 본문 텍스트 (있는 경우) -->
                 @if(strip_tags($post->mq_content) != '')
                 <div class="prose prose-lg max-w-none prose-headings:text-[#2D3047] prose-p:text-gray-600 prose-a:text-[#9F5AFF] prose-strong:text-[#2D3047] pt-8 border-t border-gray-100">
-                    {!! $post->mq_content !!}
+                    {!! renderBoardContent($post->mq_content) !!}
                 </div>
                 @endif
 

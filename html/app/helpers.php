@@ -48,4 +48,22 @@ if (!function_exists('extractFirstImageSrc')) {
         }
         return null;
     }
-} 
+}
+
+if (!function_exists('renderBoardContent')) {
+    /**
+     * 게시글 본문을 화면 출력용 HTML 로 변환
+     * API 로 등록된 일반 텍스트 본문은 이스케이프 후 줄바꿈을 <br> 로 바꾸고,
+     * 에디터로 작성된 HTML 본문은 그대로 반환한다.
+     *
+     * @param string|null $content 본문
+     * @return string 출력용 HTML
+     */
+    function renderBoardContent($content) {
+        $content = (string) $content;
+        if ($content === strip_tags($content)) {
+            return nl2br(e($content));
+        }
+        return $content;
+    }
+}

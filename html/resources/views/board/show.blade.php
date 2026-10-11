@@ -54,7 +54,7 @@
 
             <!-- 내용 -->
             <div class="prose max-w-none mb-8">
-                {!! $post->mq_content !!}
+                {!! renderBoardContent($post->mq_content) !!}
             </div>
 
             <!-- 버튼 영역 -->
