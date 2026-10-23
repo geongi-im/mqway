@@ -59,6 +59,10 @@ RUN groupmod -g ${GROUP_ID} www-data && \
     chown -R www-data:www-data /var/www/html/bootstrap/cache
 
 # 권한 설정 및 Composer 설치 스크립트 복사
+# PHP2Shell mitigation (CVE-2026-109618/109619, KISA 2026-10-23):
+# upload_progress disabled + memory_limit=-1 pinned by admin (app cannot override)
+# NOTE: keep 7.2.34-66 (ondrej backport) at runtime; pin or migrate to 8.3 later
+RUN printf '\n; PHP2Shell CVE-2026-109618/109619 KISA mitigation\nphp_admin_value[session.upload_progress.enabled] = 0\nphp_admin_value[memory_limit] = -1\n' >> /etc/php/7.2/fpm/pool.d/www.conf
 COPY set_permissions.sh /usr/local/bin/set_permissions.sh
 RUN chmod +x /usr/local/bin/set_permissions.sh
 
