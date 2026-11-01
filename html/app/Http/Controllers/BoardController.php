@@ -269,8 +269,9 @@ class BoardController extends AbstractBoardController
     {
         $board = Board::findOrFail($idx);
         
-        // 작성자 체크
-        if ($board->mq_user_id !== Auth::user()->mq_user_id) {
+        // 작성자 또는 관리자(mq_level 10 이상)만 삭제 가능
+        $user = Auth::user();
+        if ($user->mq_level < 10 && $board->mq_user_id !== $user->mq_user_id) {
             return redirect()->route('board.show', $idx)->with('error', '삭제 권한이 없습니다.');
         }
 

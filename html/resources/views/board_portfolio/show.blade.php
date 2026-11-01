@@ -661,11 +661,13 @@
                 
                 <!-- 우측 버튼 그룹 -->
                 <div class="flex items-center gap-2">
-                    @if(auth()->check() && auth()->user()->mq_user_id === $post->mq_user_id)
-                        <a href="{{ route('board-portfolio.edit', $post->idx) }}" 
-                           class="inline-flex items-center justify-center h-11 px-5 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all text-gray-600 text-sm font-medium">
-                            수정
-                        </a>
+                    @if(auth()->check() && (auth()->user()->mq_level >= 10 || auth()->user()->mq_user_id === $post->mq_user_id))
+                        @if(auth()->user()->mq_user_id === $post->mq_user_id)
+                            <a href="{{ route('board-portfolio.edit', $post->idx) }}" 
+                               class="inline-flex items-center justify-center h-11 px-5 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all text-gray-600 text-sm font-medium">
+                                수정
+                            </a>
+                        @endif
                         <form action="{{ route('board-portfolio.destroy', $post->idx) }}"
                               method="POST"
                               onsubmit="return confirmDelete()">

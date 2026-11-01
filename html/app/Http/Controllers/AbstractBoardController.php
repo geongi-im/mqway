@@ -595,12 +595,13 @@ abstract class AbstractBoardController extends Controller
     }
     
     /**
-     * 권한 - 게시글 삭제 가능 여부
+     * 권한 - 게시글 삭제 가능 여부 (관리자 또는 작성자)
+     * 관리자(mq_level 10 이상)는 다른 사람의 게시글도 삭제할 수 있다.
      */
     protected function canDelete($post)
     {
-        // 기본 구현은 작성자만 삭제 가능
-        return $post->mq_user_id === Auth::user()->mq_user_id;
+        $user = Auth::user();
+        return $user->mq_level >= 10 || $post->mq_user_id === $user->mq_user_id;
     }
     
     /**

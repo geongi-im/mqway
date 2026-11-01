@@ -347,9 +347,13 @@ class BoardScrapController extends Controller
                 ->exists();
         }
 
+        // 삭제 버튼은 작성자 본인과 관리자(mq_level 10 이상)에게 보인다.
+        $canDelete = $isOwner || (Auth::check() && Auth::user()->mq_level >= 10);
+
         return view('board_scrap.show', [
             'scrap' => $scrap,
             'isOwner' => $isOwner,
+            'canDelete' => $canDelete,
             'isLiked' => $isLiked
         ]);
     }
@@ -704,14 +708,23 @@ class BoardScrapController extends Controller
     }
 
     /**
-     * 삭제
+     * 삭제 (작성자 본인 또는 관리자)
      */
     public function destroy($idx)
     {
-        $scrap = BoardScrap::where('idx', $idx)
-                        ->where('mq_user_id', Auth::user()->mq_user_id)
-                        ->where('mq_status', 1)
-                        ->firstOrFail();
+        $user = Auth::user();
+        $isAdmin = $user->mq_level >= 10;
+
+        $query = BoardScrap::where('idx', $idx)
+                        ->where('mq_status', 1);
+
+        // 관리자(mq_level 10 이상)는 다른 사람의 스크랩도 삭제할 수 있다.
+        if (!$isAdmin) {
+            $query->where('mq_user_id', $user->mq_user_id);
+        }
+
+        $scrap = $query->firstOrFail();
+        $isOwner = $scrap->isOwner($user->mq_user_id);
 
         DB::beginTransaction();
 
@@ -723,8 +736,9 @@ class BoardScrapController extends Controller
 
             DB::commit();
 
+            // 관리자가 남의 글을 지운 경우는 내 글 목록이 아니라 전체 목록으로 보낸다.
             return redirect()
-                ->route('board-scrap.index', ['mine' => 1])
+                ->route('board-scrap.index', $isOwner ? ['mine' => 1] : [])
                 ->with('success', '뉴스 스크랩이 삭제되었습니다.');
 
         } catch (\Exception $e) {

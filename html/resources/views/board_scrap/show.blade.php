@@ -336,9 +336,10 @@
                     목록
                 </a>
 
-                <!-- 우측 버튼 그룹 (작성자 본인만) -->
-                @if($isOwner)
+                <!-- 우측 버튼 그룹 (수정은 작성자 본인만, 삭제는 작성자 본인과 관리자) -->
+                @if($canDelete)
                 <div class="flex items-center gap-2">
+                    @if($isOwner)
                     <a href="{{ route('board-scrap.edit', $scrap->idx) }}"
                        class="inline-flex items-center justify-center h-11 px-5 border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all text-gray-600 text-sm font-medium">
                         <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -346,6 +347,7 @@
                         </svg>
                         수정
                     </a>
+                    @endif
                     <form action="{{ route('board-scrap.destroy', $scrap->idx) }}"
                           method="POST"
                           onsubmit="return confirmDelete()"

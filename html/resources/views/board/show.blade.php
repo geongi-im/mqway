@@ -67,11 +67,13 @@
                 
                 <!-- 우측 버튼 그룹 -->
                 <div class="flex items-center gap-2">
-                    @if(auth()->check() && auth()->user()->mq_user_id === $post->mq_user_id)
-                        <a href="{{ route('board.edit', $post->idx) }}" 
-                           class="inline-flex items-center justify-center h-10 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all text-gray-700 text-sm">
-                            수정
-                        </a>
+                    @if(auth()->check() && (auth()->user()->mq_level >= 10 || auth()->user()->mq_user_id === $post->mq_user_id))
+                        @if(auth()->user()->mq_user_id === $post->mq_user_id)
+                            <a href="{{ route('board.edit', $post->idx) }}" 
+                               class="inline-flex items-center justify-center h-10 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all text-gray-700 text-sm">
+                                수정
+                            </a>
+                        @endif
                         <form action="{{ route('board.destroy', $post->idx) }}"
                               method="POST"
                               onsubmit="return confirmDelete()">

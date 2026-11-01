@@ -125,11 +125,13 @@
                     </a>
                     
                     <div class="flex items-center gap-3">
-                        @if(auth()->check() && auth()->user()->mq_user_id === $post->mq_user_id)
-                            <a href="{{ route('board-content.edit', $post->idx) }}" 
-                               class="inline-flex items-center px-5 py-3 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all font-medium">
-                                수정
-                            </a>
+                        @if(auth()->check() && (auth()->user()->mq_level >= 10 || auth()->user()->mq_user_id === $post->mq_user_id))
+                            @if(auth()->user()->mq_user_id === $post->mq_user_id)
+                                <a href="{{ route('board-content.edit', $post->idx) }}" 
+                                   class="inline-flex items-center px-5 py-3 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all font-medium">
+                                    수정
+                                </a>
+                            @endif
                             <form action="{{ route('board-content.destroy', $post->idx) }}"
                                   method="POST"
                                   onsubmit="return confirmDelete()">
