@@ -101,6 +101,29 @@
                     {!! renderBoardContent($post->mq_content) !!}
                 </div>
 
+                <!-- 첨부파일 -->
+                @php($attachments = $post->getAttachments())
+                @if(count($attachments) > 0)
+                    <div class="mt-10 pt-8 border-t border-gray-100">
+                        <h3 class="text-sm font-semibold text-[#2D3047] mb-3">첨부파일 <span class="text-gray-400 font-normal">{{ count($attachments) }}</span></h3>
+                        <ul class="space-y-2">
+                            @foreach($attachments as $attachment)
+                                <li>
+                                    <a href="{{ route('board-insights.download-file', [$post->idx, $attachment['file']]) }}"
+                                       class="flex items-center justify-between gap-3 h-12 px-4 border border-gray-200 rounded-xl bg-gray-50 hover:bg-white hover:border-[#9F5AFF] transition-all group">
+                                        <div class="flex items-center gap-3 min-w-0">
+                                            <span class="shrink-0 w-12 text-center text-[10px] font-bold uppercase rounded bg-[#9F5AFF]/10 text-[#7B2CBF] py-1">{{ $attachment['ext'] }}</span>
+                                            <span class="text-sm text-gray-700 truncate group-hover:text-[#2D3047]">{{ $attachment['name'] }}</span>
+                                            <span class="shrink-0 text-xs text-gray-400">{{ formatFileSize($attachment['size'], 1) }}</span>
+                                        </div>
+                                        <svg class="shrink-0 w-5 h-5 text-gray-400 group-hover:text-[#9F5AFF] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                    </a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 <!-- Bottom Like CTA -->
                 <div class="flex flex-col items-center justify-center py-12 mt-12 mb-8 border-y border-gray-100 bg-gray-50/50 rounded-2xl">
                     <p class="text-[#2D3047] font-bold text-lg mb-6">이 콘텐츠가 도움이 되셨나요?</p>

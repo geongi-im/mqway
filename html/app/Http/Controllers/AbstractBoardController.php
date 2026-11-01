@@ -154,6 +154,9 @@ abstract class AbstractBoardController extends Controller
                 $board->mq_thumbnail_original = $thumbnailOriginalNames;
             }
 
+            // 게시판별 추가 첨부파일 처리
+            $this->saveExtraFiles($request, $board);
+
             $board->mq_reg_date = now();
             $board->save();
             
@@ -293,6 +296,9 @@ abstract class AbstractBoardController extends Controller
                 $board->mq_original_image = $originalNames;
             }
 
+            // 게시판별 추가 첨부파일 처리
+            $this->saveExtraFiles($request, $board);
+
             $board->mq_update_date = now();
             $board->save();
             
@@ -341,6 +347,9 @@ abstract class AbstractBoardController extends Controller
                         Storage::disk('public')->delete($this->uploadPath . '/' . $thumbnail);
                     }
                 }
+
+                // 게시판별 추가 첨부파일 삭제
+                $this->deleteExtraFiles($board);
             }
 
             // 삭제 처리 (소프트 or 하드)
@@ -656,6 +665,22 @@ abstract class AbstractBoardController extends Controller
         ]);
     }
     
+    /**
+     * 게시판별 추가 첨부파일 저장 (기본값: 없음)
+     * store/update 에서 save() 직전에 호출된다.
+     */
+    protected function saveExtraFiles(Request $request, $board)
+    {
+    }
+
+    /**
+     * 게시판별 추가 첨부파일 삭제 (기본값: 없음)
+     * 하드 삭제 시 destroy 에서 호출된다.
+     */
+    protected function deleteExtraFiles($board)
+    {
+    }
+
     /**
      * 페이지당 게시글 수
      */

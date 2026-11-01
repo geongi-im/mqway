@@ -158,6 +158,9 @@
                         </div>
                     </div>
 
+                    <!-- 첨부파일 (PDF/PPT 등) -->
+                    @include('board_insights.partials.attach_files', ['post' => $post])
+
                     <!-- 버튼 영역 -->
                     <div class="flex items-center justify-between pt-8 border-t border-gray-100 mt-8">
                         <button type="button" 

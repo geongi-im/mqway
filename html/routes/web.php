@@ -193,6 +193,12 @@ Route::prefix('board-insights')->middleware('auth')->group(function () {
     Route::post('/{idx}/like', [BoardInsightsController::class, 'like'])->name('board-insights.like');
     Route::post('/delete-image/{idx}/{filename}', [BoardInsightsController::class, 'deleteImage'])->name('board-insights.delete-image');
     Route::delete('/{idx}/thumbnail', [BoardInsightsController::class, 'deleteThumbnail'])->name('board-insights.delete-thumbnail');
+    Route::get('/{idx}/files/{filename}', [BoardInsightsController::class, 'downloadFile'])
+        ->where(['idx' => '[0-9]+', 'filename' => '[A-Za-z0-9]{32}\.[a-z]+'])
+        ->name('board-insights.download-file');
+    Route::delete('/{idx}/files/{filename}', [BoardInsightsController::class, 'deleteFile'])
+        ->where(['idx' => '[0-9]+', 'filename' => '[A-Za-z0-9]{32}\.[a-z]+'])
+        ->name('board-insights.delete-file');
     Route::get('/{idx}', [BoardInsightsController::class, 'show'])->name('board-insights.show');
 });
 
