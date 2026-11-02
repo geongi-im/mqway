@@ -190,7 +190,7 @@
 
                             <!-- 작성자 -->
                             <div class="col-span-1 text-center text-xs text-gray-400 font-medium truncate">
-                                {{ $post->user->mq_user_id ?? $post->mq_user_id ?? '익명' }}
+                                {{ ($post->user->mq_user_name ?? '') ?: ($post->user->mq_user_id ?? $post->mq_user_id ?? '익명') }}
                             </div>
 
                             <!-- 등록일 -->
@@ -238,7 +238,7 @@
                                         @endif
                                     </h3>
                                     <div class="flex items-center gap-3 text-[11px] text-gray-400">
-                                        <span>{{ $post->user->mq_user_id ?? $post->mq_user_id ?? '익명' }}</span>
+                                        <span>{{ ($post->user->mq_user_name ?? '') ?: ($post->user->mq_user_id ?? $post->mq_user_id ?? '익명') }}</span>
                                         <span class="text-gray-200">·</span>
                                         <span>{{ $post->mq_reg_date ? $post->mq_reg_date->format('Y.m.d') : '' }}</span>
                                         <span class="text-gray-200">·</span>

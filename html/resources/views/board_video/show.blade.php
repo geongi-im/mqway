@@ -37,12 +37,19 @@
             <div class="flex items-center justify-between border-t border-white/10 pt-6 animate-slideUp" style="animation-delay: 0.2s;">
                 <div class="flex items-center gap-4">
                     <div class="flex items-center gap-3">
+                        @php
+                            $authorId = $post->mq_user_id ?? ($post->user->mq_user_id ?? '');
+                            $authorName = $post->user->mq_user_name ?? '';
+                            $authorDisplay = $authorName ?: ($authorId ?: '익명');
+                        @endphp
                         <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#FF4D4D] to-[#FF8585] flex items-center justify-center text-white font-bold shadow-lg">
-                            {{ mb_substr($post->user->mq_user_id ?? 'A', 0, 1) }}
+                            {{ mb_substr($authorDisplay, 0, 1) }}
                         </div>
                         <div>
-                            <p class="text-white font-medium">{{ $post->user->mq_user_id ?? 'Anonymous' }}</p>
-                            <p class="text-xs text-gray-400">Creator</p>
+                            <p class="text-white font-medium">{{ $authorDisplay }}</p>
+                            @if($authorName && $authorId)
+                            <p class="text-xs text-gray-400">{{ $authorId }}</p>
+                            @endif
                         </div>
                     </div>
                 </div>
