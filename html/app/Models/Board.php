@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
+use App\User;
 
 class Board extends Model
 {
@@ -46,4 +47,12 @@ class Board extends Model
         'mq_image' => 'array',
         'mq_original_image' => 'array'
     ];
+
+    /**
+     * 사용자와의 관계 정의
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'mq_user_id', 'mq_user_id');
+    }
 } 

@@ -701,6 +701,20 @@ Square format optimized for thumbnail icon (512x512px).";
                     $item->boardUrl = $boardUrl;
                 }
             }
+
+            // 작성자 이름 조회 (이름이 없으면 아이디로 표시)
+            $authorIds = $likedItems->pluck('post.mq_user_id')->filter()->unique()->values();
+            $authorNames = $authorIds->isEmpty()
+                ? collect()
+                : DB::table('mq_member')
+                    ->whereIn('mq_user_id', $authorIds)
+                    ->pluck('mq_user_name', 'mq_user_id');
+
+            foreach ($likedItems as $item) {
+                if ($item->post) {
+                    $item->authorName = ($authorNames[$item->post->mq_user_id] ?? '') ?: $item->post->mq_user_id;
+                }
+            }
         }
 
         // 카테고리별 색상 매핑

@@ -27,7 +27,7 @@
                     <svg class="w-4 h-4 mr-1.5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
-                    <span>{{ $post->mq_user_id }}</span>
+                    <span>{{ ($post->user->mq_user_name ?? '') ?: ($post->mq_user_id ?? '익명') }}</span>
                 </div>
                 <div class="flex items-center">
                     <svg class="w-4 h-4 mr-1.5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
