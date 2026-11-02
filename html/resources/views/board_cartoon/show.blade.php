@@ -40,11 +40,16 @@
                         @php
                             $authorId = $post->mq_user_id ?? ($post->user->mq_user_id ?? '');
                             $authorName = $post->user->mq_user_name ?? '';
+                            $authorImage = $post->user->mq_profile_image ?? '';
                             $authorDisplay = $authorName ?: ($authorId ?: '익명');
                         @endphp
+                        @if($authorImage)
+                        <img src="{{ asset('storage/uploads/profile/' . $authorImage) }}" alt="{{ $authorDisplay }}" class="w-10 h-10 rounded-full object-cover shadow-lg flex-shrink-0">
+                        @else
                         <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#9F5AFF] to-[#C77DFF] flex items-center justify-center text-white font-bold shadow-lg">
                             {{ mb_substr($authorDisplay, 0, 1) }}
                         </div>
+                        @endif
                         <div>
                             <p class="text-white font-medium">{{ $authorDisplay }}</p>
                             @if($authorName && $authorId)
