@@ -33,6 +33,7 @@ use App\Http\Controllers\RetirementCalculatorController;
 use App\Http\Controllers\NeedWantGameController;
 use App\Http\Controllers\Api\CashflowApiController;
 use App\Http\Controllers\BoardScrapController;
+use App\Http\Controllers\PushTokenController;
 
 /*
 |--------------------------------------------------------------------------
@@ -101,6 +102,12 @@ Route::prefix('board-news')->group(function () {
     Route::get('/', [NewsController::class, 'index'])->name('board-news.index');
     Route::get('/top-news/{date}', [NewsController::class, 'getTopNewsByDate'])->name('board-news.top-news');
 });
+
+// 앱 푸시 알림 받기/끄기 (헤더의 알림 버튼에서 호출. 켜기는 회원만 가능해 컨트롤러가 401 JSON 으로 막는다)
+// 호출 횟수 제한은 컨트롤러가 세션 기준으로 한다. (throttle 미들웨어는 IP 기준인데,
+// Cloudflare 뒤라 IP 가 Cloudflare 서버 주소로 잡혀 여러 사용자가 한 카운터를 나눠 쓰게 된다)
+Route::post('/push/token', [PushTokenController::class, 'store'])->name('push.token.store');
+Route::delete('/push/token', [PushTokenController::class, 'destroy'])->name('push.token.destroy');
 
 // 게시판 (비회원 접근 가능)
 Route::get('/board', [BoardController::class, 'index'])->name('board.index');

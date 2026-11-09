@@ -16,6 +16,13 @@
 
     <title>{{ config('app.name', 'MQWAY') }}</title>
 
+    {{-- 홈 화면에 추가(PWA). iOS 는 홈 화면에 추가한 웹 앱에서만 푸시 알림을 받을 수 있다. --}}
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+    <meta name="theme-color" content="#3D4148">
+    <link rel="apple-touch-icon" href="{{ asset('images/pwa/icon-180.png') }}">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="MQWAY">
+
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-V01TWJNXEC"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
@@ -210,6 +217,9 @@
     @include('layouts.partials.footer')
 
     @stack('scripts')
+
+    {{-- 앱 푸시 알림 받기 (헤더의 종 버튼) --}}
+    @include('components.push_subscribe')
 
     <!-- 알림 메시지 자동 숨김 스크립트 -->
     <script>

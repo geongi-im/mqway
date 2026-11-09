@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use App\Http\Controllers\Api\BoardApiController;
 use App\Http\Controllers\Api\NewsApiController;
+use App\Http\Controllers\Api\PushApiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -45,3 +46,7 @@ Route::prefix('news')->group(function () {
     // 오늘의 뉴스 1면 API (외부 프로그램용)
     Route::post('/top', [NewsApiController::class, 'storeTopNews']);
 });
+
+// 앱 푸시 발송 API (외부 프로그램용, X-Push-Key 공유 키 필요)
+// 실수로 반복 호출해도 알림이 쏟아지지 않도록 컨트롤러가 전체 발송 횟수를 따로 제한한다.
+Route::post('/push/send', [PushApiController::class, 'send'])->middleware('push.key');

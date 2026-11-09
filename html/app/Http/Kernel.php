@@ -63,6 +63,8 @@ class Kernel extends HttpKernel
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+        // 앱 푸시 발송 API 공유 키 확인 (X-Push-Key)
+        'push.key' => \App\Http\Middleware\VerifyPushApiKey::class,
     ];
 
     /**
