@@ -16,6 +16,12 @@ class BoardScrapController extends Controller
 {
     protected $uploadPath = 'uploads/board_scrap';
 
+    /** AI 질문 개인화에 넘길 과거 스크랩 최대 건수 */
+    const AI_HISTORY_LIMIT = 5;
+
+    /** 과거 스크랩의 선택 이유 / 답변을 프롬프트에 실을 때 항목별 최대 글자 수 */
+    const AI_HISTORY_TEXT_MAX = 300;
+
     /** @var ExpService */
     protected $exp;
 
@@ -146,7 +152,7 @@ class BoardScrapController extends Controller
 
         $result = $analyzer->analyze(
             $request->input('mq_url'),
-            $this->buildUserContext(Auth::user(), $reason)
+            $this->buildUserContext(Auth::user(), $reason, $request->input('mq_url'))
         );
 
         if (!$result['success']) {
@@ -166,9 +172,10 @@ class BoardScrapController extends Controller
     /**
      * 파트7(내 경제상황에 맞는 질문) 개인화에 쓰는 맥락을 만든다.
      *
-     * 현재 근거는 두 가지뿐이다.
+     * 현재 근거는 세 가지다.
      *  - reason   : 사용자가 폼에 쓴 "이 뉴스를 선택한 이유" 평문 (aiAnalyze 에서 필수로 받는다)
      *  - ageGroup : 회원 생일로 계산한 연령대
+     *  - history  : 본인이 최근에 쓴 스크랩의 선택 이유 / AI 질문 / 직접 쓴 답변
      *
      * 앞으로 회원가입/마이페이지에서 소득 구간, 관심 분야, 재무 목표 같은 항목을
      * 추가로 받게 되면 이 메서드에 키를 더하고 NewsAiAnalyzer 의 [파트 4] 지침에
@@ -177,14 +184,110 @@ class BoardScrapController extends Controller
      *
      * @param \App\Models\Member|null $user
      * @param string $reason htmlToPlainText 를 거친 평문
+     * @param string $url 지금 분석하는 뉴스 링크 (이력에서 같은 기사를 빼는 데 쓴다)
      * @return array
      */
-    private function buildUserContext($user, $reason)
+    private function buildUserContext($user, $reason, $url)
     {
         return [
             'reason' => $reason,
             'ageGroup' => $this->resolveAgeGroup($user),
+            'history' => $this->recentScrapHistory($user, $url),
         ];
+    }
+
+    /**
+     * 질문 개인화에 쓸 본인의 과거 스크랩 이력.
+     *
+     * 사용자가 예전에 직접 밝힌 상황(선택 이유, 질문에 쓴 답변)을 이어 쓰고,
+     * 최근에 받은 질문과 겹치지 않게 하려는 용도다.
+     *
+     * - 삭제한 글은 빼고, 비공개 글은 본인 것이므로 포함한다.
+     * - 지금 분석하는 기사와 같은 URL 의 글은 뺀다. 수정 화면에서 다시 분석할 때
+     *   자기 자신의 이전 결과가 섞이지 않게 하기 위해서다.
+     * - 선택 이유도 질문도 없는 글은 근거가 없으므로 건너뛴다.
+     *
+     * @param \App\Models\Member|null $user
+     * @param string $url
+     * @return array [{date, title, reason, qa: [{question, answer}]}] 최신 글부터
+     */
+    private function recentScrapHistory($user, $url)
+    {
+        if (!$user) {
+            return [];
+        }
+
+        $currentHash = BoardScrap::urlHash($url);
+
+        $scraps = BoardScrap::active()
+            ->ownedBy($user->mq_user_id)
+            ->when($currentHash, function ($query) use ($currentHash) {
+                // 예전 글은 mq_url_hash 가 비어 있을 수 있어 NULL 은 남긴다
+                return $query->where(function ($q) use ($currentHash) {
+                    $q->whereNull('mq_url_hash')->orWhere('mq_url_hash', '!=', $currentHash);
+                });
+            })
+            ->orderBy('mq_reg_date', 'desc')
+            ->orderBy('idx', 'desc')
+            // 아래에서 걸러지는 글(같은 기사, 빈 글)이 있어도 건수가 모자라지 않게 넉넉히 읽는다
+            ->limit(self::AI_HISTORY_LIMIT * 3)
+            ->get(['idx', 'mq_title', 'mq_url', 'mq_reason', 'mq_ai_questions', 'mq_ai_answers', 'mq_reg_date']);
+
+        $history = [];
+
+        foreach ($scraps as $scrap) {
+            if (count($history) >= self::AI_HISTORY_LIMIT) {
+                break;
+            }
+
+            // 해시가 없는 예전 글은 URL 을 직접 비교해 같은 기사를 뺀다
+            if ($currentHash !== null && BoardScrap::urlHash($scrap->mq_url) === $currentHash) {
+                continue;
+            }
+
+            $reason = $this->clipText($this->htmlToPlainText($scrap->mq_reason));
+
+            $questions = $scrap->getAiQuestions();
+            $answers = $scrap->getAiAnswers(count($questions));
+            $qa = [];
+
+            foreach ($questions as $i => $question) {
+                $qa[] = [
+                    'question' => $question,
+                    'answer' => $this->clipText($answers[$i]),
+                ];
+            }
+
+            if ($reason === '' && empty($qa)) {
+                continue;
+            }
+
+            $history[] = [
+                'date' => $scrap->mq_reg_date ? $scrap->mq_reg_date->format('Y-m-d') : null,
+                'title' => mb_substr(trim((string) $scrap->mq_title), 0, 200, 'UTF-8'),
+                'reason' => $reason,
+                'qa' => $qa,
+            ];
+        }
+
+        return $history;
+    }
+
+    /**
+     * 프롬프트에 실을 사용자 글을 길이 제한에 맞춰 자른다.
+     *
+     * @param string $text
+     * @return string
+     */
+    private function clipText($text)
+    {
+        $text = trim((string) $text);
+
+        if (mb_strlen($text, 'UTF-8') <= self::AI_HISTORY_TEXT_MAX) {
+            return $text;
+        }
+
+        return mb_substr($text, 0, self::AI_HISTORY_TEXT_MAX, 'UTF-8') . '...';
     }
 
     /**

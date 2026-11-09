@@ -44,6 +44,7 @@ class NewsAiAnalyzer
      * @param array  $context 개인화 맥락
      *                        - reason    : 사용자가 쓴 "이 뉴스를 선택한 이유" 평문
      *                        - ageGroup  : "30대" 같은 연령대 문자열 (없으면 null)
+     *                        - history   : 본인의 최근 스크랩 [{date, title, reason, qa: [{question, answer}]}]
      * @return array {success: bool, message: string|null, data: array|null, meta: array}
      */
     public function analyze($url, array $context = [])
@@ -208,6 +209,8 @@ PROMPT;
             $articleBlock .= "\n<body>\n{$article['body']}\n</body>";
         }
 
+        $history = $this->historyBlock(isset($context['history']) ? $context['history'] : []);
+
         $tasks = $this->taskPrompt();
 
         return <<<PROMPT
@@ -220,10 +223,70 @@ PROMPT;
 <selected_reason>
 {$reason}
 </selected_reason>
+<history>
+{$history}
+</history>
 </user_context>
 
 {$tasks}
 PROMPT;
+    }
+
+    /**
+     * 과거 스크랩 이력을 프롬프트용 텍스트로 만든다.
+     *
+     * 사용자가 쓴 글이 태그 구조를 깨지 않도록 꺾쇠는 괄호로 바꿔 싣는다.
+     *
+     * @param mixed $history
+     * @return string 이력이 없으면 "(없음)"
+     */
+    protected function historyBlock($history)
+    {
+        if (!is_array($history) || empty($history)) {
+            return '(없음)';
+        }
+
+        $clean = function ($text) {
+            return str_replace(['<', '>'], ['(', ')'], trim((string) $text));
+        };
+
+        $blocks = [];
+
+        foreach ($history as $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+
+            $date = !empty($item['date']) ? $clean($item['date']) : '';
+            $lines = ['<scrap' . ($date !== '' ? ' date="' . $date . '"' : '') . '>'];
+
+            if (!empty($item['title'])) {
+                $lines[] = '<title>' . $clean($item['title']) . '</title>';
+            }
+
+            $reason = isset($item['reason']) ? $clean($item['reason']) : '';
+            $lines[] = '<reason>' . ($reason === '' ? '(없음)' : $reason) . '</reason>';
+
+            $qaList = isset($item['qa']) && is_array($item['qa']) ? $item['qa'] : [];
+
+            foreach ($qaList as $qa) {
+                if (!is_array($qa) || empty($qa['question'])) {
+                    continue;
+                }
+
+                $answer = isset($qa['answer']) ? $clean($qa['answer']) : '';
+
+                $lines[] = '<qa>';
+                $lines[] = '<question>' . $clean($qa['question']) . '</question>';
+                $lines[] = '<answer>' . ($answer === '' ? '(답하지 않음)' : $answer) . '</answer>';
+                $lines[] = '</qa>';
+            }
+
+            $lines[] = '</scrap>';
+            $blocks[] = implode("\n", $lines);
+        }
+
+        return empty($blocks) ? '(없음)' : implode("\n", $blocks);
     }
 
     /**
@@ -240,8 +303,8 @@ PROMPT;
         return <<<PROMPT
 <tasks>
 아래 네 개 파트를 각각의 규칙에 따라 작성하십시오.
-파트 1~3 은 기사만 근거로 씁니다. selected_reason 에 드러난 관심사에 맞춰 해석 / 용어 / 전망을 치우치게 쓰지 않습니다.
-selected_reason 은 파트 4 에서만 씁니다.
+파트 1~3 은 기사만 근거로 씁니다. selected_reason 이나 history 에 드러난 관심사에 맞춰 해석 / 용어 / 전망을 치우치게 쓰지 않습니다.
+selected_reason 과 history 는 파트 4 에서만 씁니다.
 
 [파트 1] interpretation — 뉴스에 대한 짧은 해석
 목적: 기사를 읽지 않은 사람이 이 문단만 읽고도 "무슨 일이고 왜 중요한지" 알 수 있게 합니다.
@@ -302,6 +365,32 @@ selected_reason 은 작성자가 이 뉴스를 고른 이유를 직접 쓴 글�
    "그 돈으로 대출을 갚는다" 처럼 한 단계 건너 이어 붙여야 연결되는 경우도 무관한 것입니다.
    예) 명절 선물 중고거래 기사 + "마이너스통장 금리가 궁금해서" -> 기사에 대출 금리가 나오지 않으므로 무관합니다.
        질문에 마이너스통장이나 대출을 넣지 않고 중고거래를 소재로 씁니다.
+ 1-1단계: history 에서 (나) 를 보충합니다.
+   history 는 작성자가 예전에 스크랩한 다른 기사들의 선택 이유(reason)와, 그때 받은 질문(question)에 직접 쓴 답변(answer)입니다.
+   - reason 과 answer 에서 작성자가 스스로 밝힌 상황(직업, 대출, 주거 형태, 투자 여부, 가족, 목표, 지출 습관 등)을 찾습니다.
+     question 은 AI 가 만든 문장이므로 상황의 근거로 쓰지 않습니다. answer 가 "(답하지 않음)" 이면 그 질문에서는 아무것도 알 수 없습니다.
+   - 찾은 상황에도 1단계의 판단 기준을 똑같이 적용합니다. 이번 기사 본문에 그 주제가 직접 등장할 때만 (나) 에 더합니다.
+     예) 예전 답변 "전세 만기가 내년 봄이라 걱정입니다" + 이번 기사가 전세대출 규제 -> (나) 에 더합니다.
+     예) 예전 답변 "전세 만기가 내년 봄이라 걱정입니다" + 이번 기사가 반도체 수출 -> 무관하므로 쓰지 않습니다.
+   - selected_reason 과 history 가 어긋나면 selected_reason 을 따릅니다. history 는 시간이 지나 바뀌었을 수 있는 과거 정보입니다.
+   - history 가 "(없음)" 이면 이 단계를 건너뜁니다.
+ 1-2단계: questionPlan 을 채웁니다. questions 를 쓰기 전에 반드시 먼저 채웁니다.
+   - questionPlan.knownFacts: 1단계와 1-1단계에서 이 기사와 관련 있다고 판단한 작성자의 상황을 한 항목에 하나씩 적습니다.
+     작성자가 직접 쓴 글에 있는 사실만 적고, 수치나 날짜가 있으면 그대로 옮깁니다. 없으면 빈 배열입니다.
+     예) ["마이너스통장 한도 3천만 원, 금리 6퍼센트", "연말에 이직 예정"]
+   - questionPlan.coveredTargets: history 의 question 들이 이미 다룬 "확인 대상" 을 짧은 명사구로 적습니다. 없으면 빈 배열입니다.
+     예) "지금 쓰고 계신 대출의 금리 조건을 확인해 보시겠습니까?" -> "대출 금리 조건"
+     예) "카드 명세서에서 배달앱 결제액을 확인해 보시겠습니까?" -> "카드 명세서의 배달앱 결제액"
+ 1-3단계: questionPlan 을 질문에 이렇게 반영합니다.
+   - knownFacts 는 이미 아는 사실입니다. 그 사실 자체를 다시 확인하라고 묻지 마십시오. 그 사실을 전제로 깔고 한 걸음 더 나아간 것을 묻습니다.
+     나쁜 예: (knownFacts 에 "마이너스통장 금리 6퍼센트") "마이너스통장 금리가 몇 퍼센트인지 확인해 보시겠습니까?"
+     좋은 예: (같은 상황) "기준금리가 내려가는 흐름이라면 6퍼센트인 마이너스통장 금리를 낮춰 달라고 요청할 수 있는지 은행 앱에서 찾아보시겠습니까?"
+   - history 에서 온 사실은 지금은 바뀌었을 수 있으므로 단정하지 말고 "~라면", "~를 앞두고 있다면" 처럼 가볍게 전제합니다.
+     나쁜 예: "마이너스통장을 쓰고 계시니", "마이너스통장을 이용 중인 상황에서"
+     좋은 예: "마이너스통장을 계속 쓰고 있다면", "연말 이직을 앞두고 있다면"
+   - coveredTargets 에 있는 대상을 다시 확인 대상으로 삼지 마십시오. 표현이 달라도 확인하는 대상이 같으면 같은 질문입니다.
+     예) coveredTargets 에 "대출 금리 조건" 이 있으면 "예상 금리를 은행에 문의", "금리 조건을 앱에서 확인" 은 모두 같은 대상이라 실패입니다.
+         대신 한도, 상환 방식, 갈아탈 수 있는 상품 조건, 월 이자 부담액 변화처럼 아직 다루지 않은 대상을 고릅니다.
  2단계: 찾은 내용에 따라 씁니다.
    - (나) 가 있으면 두 질문 모두 그 상황을 직접 겨냥합니다.
      예) "마이너스통장을 쓰고 있어서 골랐다" -> 그 대출의 금리 조건과 상환 계획을 묻습니다.
@@ -312,9 +401,16 @@ selected_reason 은 작성자가 이 뉴스를 고른 이유를 직접 쓴 글�
    - age_group 이 "(알 수 없음)" 이면 연령을 특정하지 않는 표현으로 씁니다.
  - selected_reason 이 "(없음)" 인 예외 상황에서는 기사의 핵심 이슈와 age_group 만으로 씁니다.
  - 작성자가 밝히지 않은 개인 정보(연봉, 자산, 결혼 여부 등)를 있다고 가정하지 마십시오.
-   selected_reason 에 나온 사실은 쓰되, 거기서 더 나아가 추측하지 않습니다.
- - selected_reason 의 문장을 그대로 옮기거나 "~라고 하셨는데" 처럼 인용하지 않습니다. 내용만 녹여 씁니다.
- - selected_reason 에 담긴 선택 이유나 생각을 평가하지 않습니다.
+   selected_reason 과 history 에 나온 사실은 쓰되, 거기서 더 나아가 추측하지 않습니다.
+ - knownFacts 에 없는 금융 상품이나 상황(대출, 전세, 보유 주식, 보험 등)을 작성자가 이미 갖고 있다고 전제하지 마십시오.
+   기사가 그 상품을 다루더라도 마찬가지입니다. 이때는 "~를 이용 중이거나 계획하고 있다면" 처럼 조건으로 열어 두거나,
+   누구나 확인할 수 있는 대상(월 주거비, 고정지출, 저축액 등)으로 묻습니다.
+   나쁜 예: (knownFacts 가 비어 있음, 반도체 기사) "보유하신 주식 중 반도체 종목의 비중을 확인해 보시겠습니까?"
+   좋은 예: (같은 상황) "주식에 투자하고 있거나 시작할 생각이 있다면, 한 업종에 돈이 얼마나 몰려 있는지 따져 보시겠습니까?"
+ - 이 지침의 예시 문장은 형식을 보여 주기 위한 것입니다. 예시 문장을 그대로 쓰거나 단어와 숫자만 바꿔 쓰지 마십시오.
+   질문은 이 기사의 구체적인 내용(수치, 제도, 일정)에서 출발해 새로 씁니다.
+ - selected_reason 과 history 의 문장을 그대로 옮기거나 "~라고 하셨는데", "지난번 스크랩에서" 처럼 인용하지 않습니다. 내용만 녹여 씁니다.
+ - selected_reason 과 history 에 담긴 선택 이유, 생각, 답변을 평가하지 않습니다.
 두 질문의 역할을 나눕니다.
  - 첫 번째 질문: 이 뉴스와 관련해 "지금 당장 확인해볼 수 있는 것" 을 묻습니다.
    통장, 계약서, 요금제, 청구서처럼 손에 잡히는 대상으로 이어지게 합니다.
@@ -329,6 +425,10 @@ selected_reason 은 작성자가 이 뉴스를 고른 이유를 직접 쓴 글�
  - 예/아니오로 답이 끝나지 않는 열린 질문으로 씁니다. 숫자나 구체적인 행동을 떠올리게 만듭니다.
  - 기사의 핵심 이슈를 질문 안에 반드시 반영합니다. 아무 뉴스에나 붙일 수 있는 일반론은 실패입니다.
  - 정답을 암시하거나 훈계하지 않습니다. 판단은 독자가 합니다.
+questions 를 확정하기 전에 두 질문 각각을 아래 기준으로 점검하고, 하나라도 걸리면 고쳐 씁니다.
+ - knownFacts 에 이미 있는 사실을 다시 확인하라고 묻고 있지 않은가?
+ - coveredTargets 에 있는 대상을 표현만 바꿔 다시 묻고 있지 않은가?
+ - knownFacts 에 없는 상품이나 상황을 작성자가 갖고 있다고 전제하고 있지 않은가?
 </tasks>
 PROMPT;
     }
@@ -367,14 +467,26 @@ PROMPT;
                     'required'         => ['shortTerm', 'longTerm'],
                     'propertyOrdering' => ['shortTerm', 'longTerm'],
                 ],
+                // 파트 4 를 쓰기 전에 근거를 먼저 정리하게 하는 작업 메모.
+                // questions 앞에 두어야 모델이 이것을 먼저 생성하고 질문에 반영한다.
+                // 화면에는 쓰지 않으므로 parseResult 에서 버린다.
+                'questionPlan' => [
+                    'type'       => 'OBJECT',
+                    'properties' => [
+                        'knownFacts'     => ['type' => 'ARRAY', 'items' => ['type' => 'STRING']],
+                        'coveredTargets' => ['type' => 'ARRAY', 'items' => ['type' => 'STRING']],
+                    ],
+                    'required'         => ['knownFacts', 'coveredTargets'],
+                    'propertyOrdering' => ['knownFacts', 'coveredTargets'],
+                ],
                 'questions' => [
                     'type'     => 'ARRAY',
                     'maxItems' => 2,
                     'items'    => ['type' => 'STRING'],
                 ],
             ],
-            'required'         => ['articleReadable', 'interpretation', 'terms', 'outlook', 'questions'],
-            'propertyOrdering' => ['articleReadable', 'interpretation', 'terms', 'outlook', 'questions'],
+            'required'         => ['articleReadable', 'interpretation', 'terms', 'outlook', 'questionPlan', 'questions'],
+            'propertyOrdering' => ['articleReadable', 'interpretation', 'terms', 'outlook', 'questionPlan', 'questions'],
         ];
     }
 
