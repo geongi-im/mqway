@@ -287,10 +287,11 @@
                             {{--
                                 앱 푸시 알림 받기/끄기. 알림은 로그인 회원만 받을 수 있어서 프로필 메뉴 안에 둔다.
                                 웹 푸시를 쓸 수 있는 환경에서만 public/js/push.js 가 hidden 을 떼어 보이게 하고,
-                                켜짐/꺼짐에 따라 data-push-icon-on / data-push-icon-off 중 하나만 보인다.
+                                켜짐/꺼짐에 따라 data-push-icon-on / data-push-icon-off 중 하나만 보이고,
+                                설정하는 동안에는 둘 다 숨기고 data-push-busy (스피너) 를 보인다.
                             --}}
                             <button type="button" data-push-toggle aria-pressed="false" title="새 소식 알림 받기"
-                                    class="hidden w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                    class="hidden w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors disabled:cursor-wait">
                                 <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
                                 </svg>
@@ -302,6 +303,13 @@
                                 {{-- 알림 받는 중 --}}
                                 <span data-push-icon-on class="hidden relative inline-block w-9 h-5 rounded-full bg-point1">
                                     <span class="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-white shadow"></span>
+                                </span>
+                                {{-- 설정하는 중 --}}
+                                <span data-push-busy class="hidden inline-flex items-center justify-center w-9 h-5">
+                                    <svg class="w-4 h-4 animate-spin text-gray-400" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                    </svg>
                                 </span>
                             </button>
                             <div class="border-t border-gray-100"></div>

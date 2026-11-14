@@ -28,6 +28,10 @@ const STORAGE_KEY = 'mq_push_sync';
 const SW_SCOPE = '/firebase-cloud-messaging-push-scope';
 
 let messaging = null;
+// 알림을 켜고 끄는 중인지. 그동안 버튼을 막고 스피너를 보여 여러 번 누르지 않게 한다.
+let busy = false;
+// 서비스 워커 등록 결과. 미리 등록해 두고 켤 때 그대로 쓴다.
+let swReady = null;
 
 function readSync() {
     try {
@@ -72,18 +76,32 @@ function buttons() {
 function render() {
     const on = isOn();
     let title = '새 소식 알림 받기';
-    if (on) {
+    if (busy) {
+        title = '알림 설정 중';
+    } else if (on) {
         title = '알림 받는 중 (누르면 끄기)';
     } else if (!config.memberIdx) {
         title = '새 소식 알림 받기 (로그인 필요)';
     }
     buttons().forEach(function (btn) {
         btn.classList.remove('hidden');
+        btn.disabled = busy;
+        btn.setAttribute('aria-busy', busy ? 'true' : 'false');
         btn.setAttribute('aria-pressed', on ? 'true' : 'false');
         btn.title = title;
-        btn.querySelector('[data-push-icon-on]').classList.toggle('hidden', !on);
-        btn.querySelector('[data-push-icon-off]').classList.toggle('hidden', on);
+        btn.querySelector('[data-push-icon-on]').classList.toggle('hidden', busy || !on);
+        btn.querySelector('[data-push-icon-off]').classList.toggle('hidden', busy || on);
+        const spinner = btn.querySelector('[data-push-busy]');
+        if (spinner) {
+            spinner.classList.toggle('hidden', !busy);
+        }
     });
+}
+
+// 화면을 바로 바꾸는 동기 함수다. 권한 요청 앞에서 불러도 iOS 의 클릭 제약에 걸리지 않는다.
+function setBusy(value) {
+    busy = value;
+    render();
 }
 
 function toast(message, type) {
@@ -121,25 +139,41 @@ async function request(method, token) {
     return data;
 }
 
-async function serviceWorker() {
+async function registerServiceWorker() {
     const params = new URLSearchParams(config.firebase).toString();
     const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js?' + params, { scope: SW_SCOPE });
     // 처음 설치할 때는 활성화될 때까지 기다려야 getToken 이 구독을 만들 수 있다.
     if (!registration.active) {
-        await new Promise(function (resolve) {
+        await new Promise(function (resolve, reject) {
             const worker = registration.installing || registration.waiting;
+            const check = function () {
+                if (worker.state === 'activated') {
+                    resolve();
+                } else if (worker.state === 'redundant') {
+                    // 설치 실패(SDK 를 못 받는 등). 기다리기만 하면 스피너가 멈추지 않는다.
+                    reject(new Error('알림을 준비하지 못했습니다. 잠시 후 다시 시도해주세요.'));
+                }
+            };
             if (!worker) {
                 resolve();
                 return;
             }
-            worker.addEventListener('statechange', function () {
-                if (worker.state === 'activated') {
-                    resolve();
-                }
-            });
+            worker.addEventListener('statechange', check);
+            check();
         });
     }
     return registration;
+}
+
+// 서비스 워커 등록은 한 번만 하고 결과를 함께 쓴다. 실패하면 다음 호출에서 다시 시도한다.
+function serviceWorker() {
+    if (!swReady) {
+        swReady = registerServiceWorker().catch(function (e) {
+            swReady = null;
+            throw e;
+        });
+    }
+    return swReady;
 }
 
 async function currentToken() {
@@ -148,6 +182,7 @@ async function currentToken() {
 }
 
 async function subscribe() {
+    setBusy(true);
     // iOS 는 사용자 클릭 안에서 바로 권한을 물어야 한다. 이 호출 앞에 await 를 두지 않는다.
     const permission = await Notification.requestPermission();
     if (permission !== 'granted') {
@@ -181,6 +216,7 @@ async function unsubscribe() {
     if (!confirm('새 소식 알림을 끌까요?')) {
         return;
     }
+    setBusy(true);
     await release();
     toast('알림을 껐습니다.', 'info');
 }
@@ -259,20 +295,28 @@ async function init() {
 
     render();
 
+    // 알림을 켤 수 있는 회원이면 서비스 워커를 미리 등록해 둔다.
+    // 처음 설치는 Firebase SDK 를 받고 활성화될 때까지 기다려야 해서, 버튼을 누른 뒤에 하면 그만큼 늦어진다.
+    // 등록만 하는 것이라 알림 권한을 묻거나 구독을 만들지는 않는다.
+    if (config.memberIdx && config.marketingAgree && !isRegistered()) {
+        serviceWorker().catch(function (e) {
+            console.warn('[push] 서비스 워커 미리 등록 실패', e);
+        });
+    }
+
     buttons().forEach(function (btn) {
         btn.addEventListener('click', async function () {
-            if (btn.dataset.busy) {
+            // 켜고 끄는 데 몇 초씩 걸려서, 그동안 누른 것은 무시한다. (화면은 setBusy 가 막는다)
+            if (busy) {
                 return;
             }
-            btn.dataset.busy = '1';
             try {
                 await onClick();
             } catch (e) {
                 console.error('[push]', e);
                 toast(e.message || '알림 설정에 실패했습니다.', 'error');
             } finally {
-                delete btn.dataset.busy;
-                render();
+                setBusy(false);
             }
         });
     });
