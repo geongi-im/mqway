@@ -1,22 +1,22 @@
 /*
- * 앱 푸시 알림 받기/끄기 (헤더의 종 버튼)
+ * 앱 푸시 알림 받기/끄기 (헤더 프로필 메뉴의 앱 알림 버튼)
  *
  * 설정은 레이아웃이 window.MQ_PUSH 로 넘긴다. (resources/views/components/push_subscribe.blade.php)
  *
  * 알림은 로그인한 회원 중 마케팅 정보 수신에 동의한 회원만 받는다.
- *   - 비로그인: 종 버튼을 누르면 로그인 화면으로 안내
+ *   - 비로그인: 버튼이 프로필 메뉴 안에 있어 보이지 않는다. (누르면 로그인 화면으로 안내하는 처리는 남겨 둠)
  *   - 미동의 회원: 마이페이지의 마케팅 정보 수신 동의로 안내
  *   - 동의 회원: 아래 흐름으로 알림을 켠다
  *
  * 흐름
- *   1. 종 버튼을 누르면 알림 권한을 묻는다. iOS 는 버튼 클릭 안에서 바로 물어야 하므로
+ *   1. 앱 알림 버튼을 누르면 알림 권한을 묻는다. iOS 는 버튼 클릭 안에서 바로 물어야 하므로
  *      다른 비동기 작업보다 권한 요청을 먼저 한다.
  *   2. 서비스 워커를 등록하고 FCM 토큰을 받아 서버(/push/token)에 보낸다.
  *      서버는 토큰을 회원과 함께 저장하고, 발송할 때 이 명단에서 대상을 고른다.
  *   3. 켜 둔 기기는 하루 한 번 토큰을 다시 보내 서버 명단을 갱신한다.
  *      토큰은 브라우저가 바꿀 수 있어서 그때도 새 토큰이 서버로 간다.
  *   4. 같은 브라우저에서 다른 회원이 로그인하면 이전 회원의 알림을 끈다.
- *      새 회원은 직접 종 버튼을 눌러야 받는다.
+ *      새 회원은 직접 앱 알림 버튼을 눌러야 받는다.
  */
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js';
 import { getMessaging, getToken, deleteToken, onMessage, isSupported } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-messaging.js';

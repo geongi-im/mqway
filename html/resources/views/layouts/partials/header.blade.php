@@ -173,16 +173,12 @@
 <!-- 헤더 -->
 <nav class="bg-point p-4 font-noto">
     <div class="container mx-auto flex justify-between items-center lg:justify-between">
-        <!-- 모바일 햄버거 메뉴 + 알림 버튼 (좌측에 고정, PC에서는 숨김) -->
-        {{-- 모바일은 로고가 화면 중앙에 고정이라 우측에 종까지 두면 로고와 겹쳐서 이쪽으로 옮겼다. --}}
-        <div class="flex items-center gap-2 lg:hidden">
-            <button id="menuButton" class="mobile-menu-button text-cdark hover:text-cgray lg:hidden">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
-            </button>
-            @include('components.push_toggle')
-        </div>
+        <!-- 모바일 햄버거 메뉴 (좌측에 고정) -->
+        <button id="menuButton" class="mobile-menu-button text-cdark hover:text-cgray lg:hidden">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+        </button>
 
         <!-- 로고 (모바일에서 중앙, PC에서 좌측) -->
         <a href="{{ url('/') }}" class="mobile-logo-center lg:mobile-logo-center-reset flex items-center">
@@ -222,11 +218,6 @@
         
         <!-- 로그인/로그아웃 영역 (우측) -->
         <div class="flex items-center gap-4">
-            {{-- 앱 푸시 알림 받기/끄기 (PC용. 모바일은 햄버거 옆에 따로 있다) --}}
-            <div class="hidden lg:flex">
-                @include('components.push_toggle')
-            </div>
-
             @if(auth()->check())
                 <!-- 프로필 이미지 드롭다운 -->
                 <div class="relative profile-dropdown">
@@ -293,6 +284,26 @@
                                 </svg>
                                 마이페이지
                             </a>
+                            {{--
+                                앱 푸시 알림 받기/끄기. 알림은 로그인 회원만 받을 수 있어서 프로필 메뉴 안에 둔다.
+                                웹 푸시를 쓸 수 있는 환경에서만 public/js/push.js 가 hidden 을 떼어 보이게 하고,
+                                켜짐/꺼짐에 따라 data-push-icon-on / data-push-icon-off 중 하나만 보인다.
+                            --}}
+                            <button type="button" data-push-toggle aria-pressed="false" title="새 소식 알림 받기"
+                                    class="hidden w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                                </svg>
+                                <span class="flex-1 text-left">앱 알림</span>
+                                {{-- 알림 꺼짐 --}}
+                                <span data-push-icon-off class="relative inline-block w-9 h-5 rounded-full bg-gray-300">
+                                    <span class="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow"></span>
+                                </span>
+                                {{-- 알림 받는 중 --}}
+                                <span data-push-icon-on class="hidden relative inline-block w-9 h-5 rounded-full bg-point1">
+                                    <span class="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-white shadow"></span>
+                                </span>
+                            </button>
                             <div class="border-t border-gray-100"></div>
                             <a href="{{ url('/logout') }}" 
                                class="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
