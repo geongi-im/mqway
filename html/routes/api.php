@@ -50,3 +50,7 @@ Route::prefix('news')->group(function () {
 // 앱 푸시 발송 API (외부 프로그램용, X-Push-Key 공유 키 필요)
 // 실수로 반복 호출해도 알림이 쏟아지지 않도록 컨트롤러가 전체 발송 횟수를 따로 제한한다.
 Route::post('/push/send', [PushApiController::class, 'send'])->middleware('push.key');
+
+// 앱 푸시 회원 지정 발송 API (외부 프로그램용, 같은 공유 키). 받을 회원을 user_ids 로 지정한다.
+// 전체 발송과 주소를 나눈 이유: user_ids 를 빠뜨린 요청이 전체 발송으로 바뀌는 사고를 막는다.
+Route::post('/push/send-users', [PushApiController::class, 'sendToUsers'])->middleware('push.key');

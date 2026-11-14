@@ -22,6 +22,7 @@ class PushLog extends Model
         'mq_dedupe_key',
         'mq_source',
         'mq_target',
+        'mq_target_users',
         'mq_title',
         'mq_body',
         'mq_link',

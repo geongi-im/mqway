@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Member;
 use App\Models\PushLog;
 use App\Models\PushToken;
 use Carbon\Carbon;
@@ -19,8 +20,11 @@ use Illuminate\Support\Facades\Log;
  * - 발송할 때는 그중 '활성 회원 + 마케팅 정보 수신 동의' 인 회원의 기기에만 보낸다.
  *   동의 여부는 발송 시점의 mq_member 값을 보므로, 마이페이지에서 동의를 철회하면 바로 빠진다.
  *
- * 발송 흐름 (외부 프로그램이 /api/push/send 호출)
- * 1. prepareBroadcast(): 입력을 정리하고 발송 이력을 만든 뒤 대상 수를 센다.
+ * - 회원을 지정해서 보낼 때(/api/push/send-users)도 같은 규칙을 거친다. 지정한 회원 중 이 조건을
+ *   만족하는 회원의 기기에만 간다.
+ *
+ * 발송 흐름 (외부 프로그램이 /api/push/send 또는 /api/push/send-users 호출)
+ * 1. prepareBroadcast() / prepareForUsers(): 입력을 정리하고 발송 이력을 만든 뒤 대상 수를 센다.
  * 2. 호출한 쪽에 먼저 응답한다.
  * 3. deliver(): 대상 기기마다 FCM 요청을 보내고 결과를 이력에 남긴다. (큐가 없어서 응답 뒤에 같은 프로세스에서 보낸다)
  */
@@ -30,6 +34,12 @@ class PushService
 
     /** mq_push_logs.mq_target 값: 마케팅 수신 동의 회원 전체 */
     const TARGET_MARKETING_MEMBERS = 'marketing_members';
+
+    /** mq_push_logs.mq_target 값: 지정한 회원 (아이디 목록은 mq_target_users) */
+    const TARGET_USERS = 'users';
+
+    /** 회원 지정 발송 한 번에 받는 아이디 수 */
+    const USER_IDS_MAX = 500;
 
     const TITLE_MAX = 100;
     const BODY_MAX = 500;
@@ -114,15 +124,16 @@ class PushService
     /**
      * 지금 보내면 받는 기기 수.
      *
+     * @param  array|null $memberIdxs 지정하면 이 회원들의 기기만 센다
      * @return int
      */
-    public function countTargets()
+    public function countTargets(array $memberIdxs = null)
     {
-        return $this->targetQuery()->count();
+        return $this->targetQuery($memberIdxs)->count();
     }
 
     /**
-     * 발송을 준비한다. 이력을 만들고 대상 수를 센다. 실제 발송은 deliver() 가 한다.
+     * 전체 발송을 준비한다. 이력을 만들고 대상 수를 센다. 실제 발송은 deliver() 가 한다.
      *
      * @param  string      $title
      * @param  string|null $body
@@ -137,13 +148,81 @@ class PushService
             return ['result' => 'not_configured', 'log' => null, 'target_count' => 0];
         }
 
+        return $this->prepare(self::TARGET_MARKETING_MEMBERS, null, $this->countTargets(), $title, $body, $link, $source, $dedupeKey);
+    }
+
+    /**
+     * 지정한 회원에게 보낼 발송을 준비한다. 실제 발송은 deliver() 가 한다.
+     *
+     * 아이디가 없는 회원, 탈퇴/정지 회원, 마케팅 수신 미동의 회원, 알림을 켠 기기가 없는 회원은
+     * 받지 못하고 skipped_user_ids 로 돌려준다.
+     *
+     * @param  array       $userIds   mq_member.mq_user_id 목록 (중복 제거된 값)
+     * @param  string      $title
+     * @param  string|null $body
+     * @param  string|null $link      정규화된 절대 주소 (normalizeLink() 결과)
+     * @param  string      $source    self::SOURCE_*
+     * @param  string|null $dedupeKey 같은 키로 이미 보냈으면 다시 보내지 않는다
+     * @return array {result, log, target_count, skipped_user_ids: string[]}
+     */
+    public function prepareForUsers(array $userIds, $title, $body, $link, $source, $dedupeKey = null)
+    {
+        if (!$this->fcm->isConfigured()) {
+            return ['result' => 'not_configured', 'log' => null, 'target_count' => 0, 'skipped_user_ids' => []];
+        }
+
+        $userIds = array_values($userIds);
+        $memberIdxs = $this->memberIdxsByUserIds($userIds);
+
+        // 받을 기기가 하나라도 있는 회원. 아이디 비교는 DB 정렬 규칙(대소문자 무시)에 맞춰 소문자로 한다.
+        $reachable = [];
+        if ($memberIdxs) {
+            $rows = $this->targetQuery(array_values($memberIdxs))
+                ->distinct()
+                ->pluck('mq_member.mq_user_id');
+            foreach ($rows as $userId) {
+                $reachable[mb_strtolower($userId, 'UTF-8')] = true;
+            }
+        }
+
+        $skipped = [];
+        foreach ($userIds as $userId) {
+            if (!isset($reachable[mb_strtolower($userId, 'UTF-8')])) {
+                $skipped[] = $userId;
+            }
+        }
+
+        $targetCount = $memberIdxs ? $this->countTargets(array_values($memberIdxs)) : 0;
+
+        $prepared = $this->prepare(self::TARGET_USERS, $userIds, $targetCount, $title, $body, $link, $source, $dedupeKey);
+        $prepared['skipped_user_ids'] = $skipped;
+
+        return $prepared;
+    }
+
+    /**
+     * 발송 이력을 만들고 결과를 정한다. (prepareBroadcast / prepareForUsers 공통)
+     *
+     * @param  string      $target      self::TARGET_*
+     * @param  array|null  $targetUsers 회원 지정 발송일 때 아이디 목록
+     * @param  int         $targetCount
+     * @param  string      $title
+     * @param  string|null $body
+     * @param  string|null $link
+     * @param  string      $source
+     * @param  string|null $dedupeKey
+     * @return array {result, log, target_count}
+     */
+    protected function prepare($target, $targetUsers, $targetCount, $title, $body, $link, $source, $dedupeKey)
+    {
         $title = mb_substr($title, 0, self::TITLE_MAX, 'UTF-8');
         $body = $body !== null ? mb_substr($body, 0, self::BODY_MAX, 'UTF-8') : null;
-        $targetCount = $this->countTargets();
 
         $log = $this->openLog($dedupeKey, [
             'mq_source'       => $source,
-            'mq_target'       => self::TARGET_MARKETING_MEMBERS,
+            'mq_target'       => $target,
+            // 재발송 때 openLog() 가 쿼리 빌더로 갱신하므로 모델 cast 대신 직접 JSON 으로 저장한다.
+            'mq_target_users' => $targetUsers !== null ? json_encode(array_values($targetUsers), JSON_UNESCAPED_UNICODE) : null,
             'mq_title'        => $title,
             'mq_body'         => $body,
             'mq_link'         => $link,
@@ -161,6 +240,21 @@ class PushService
         }
 
         return ['result' => 'accepted', 'log' => $log, 'target_count' => $targetCount];
+    }
+
+    /**
+     * 아이디 목록을 회원 고유번호 목록으로 바꾼다. 없는 아이디는 빠진다.
+     *
+     * @param  array $userIds
+     * @return array mq_user_id => idx
+     */
+    protected function memberIdxsByUserIds(array $userIds)
+    {
+        if (!$userIds) {
+            return [];
+        }
+
+        return Member::whereIn('mq_user_id', $userIds)->pluck('idx', 'mq_user_id')->all();
     }
 
     /**
@@ -185,8 +279,19 @@ class PushService
         $body = $log->mq_body;
         $link = $log->mq_link;
 
+        // 회원 지정 발송이면 보내는 시점에 다시 회원을 찾는다. (그 사이 동의를 철회했으면 빠진다)
+        $memberIdxs = null;
+        if ($log->mq_target === self::TARGET_USERS) {
+            $userIds = json_decode((string) $log->mq_target_users, true);
+            $memberIdxs = array_values($this->memberIdxsByUserIds(is_array($userIds) ? $userIds : []));
+        }
+
         try {
-            $this->targetQuery()
+            if ($memberIdxs === []) {
+                throw new \RuntimeException('지정한 회원을 찾을 수 없습니다.');
+            }
+
+            $this->targetQuery($memberIdxs)
                 ->select('mq_push_tokens.idx', 'mq_push_tokens.mq_token', 'mq_push_tokens.mq_token_hash')
                 ->chunkById(self::CHUNK_SIZE, function ($tokens) use ($title, $body, $link, &$success, &$failure, &$firstError) {
                     $messages = [];
@@ -256,15 +361,22 @@ class PushService
     /**
      * 알림을 받을 기기: 켜져 있는 토큰 중 활성 회원이면서 마케팅 정보 수신에 동의한 회원의 것.
      *
+     * @param  array|null $memberIdxs 지정하면 이 회원들의 기기로 좁힌다
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    protected function targetQuery()
+    protected function targetQuery(array $memberIdxs = null)
     {
-        return PushToken::query()
+        $query = PushToken::query()
             ->join('mq_member', 'mq_member.idx', '=', 'mq_push_tokens.member_idx')
             ->where('mq_push_tokens.mq_status', PushToken::STATUS_ACTIVE)
             ->where('mq_member.mq_status', 1)
             ->where('mq_member.mq_marketing_agree', 1);
+
+        if ($memberIdxs !== null) {
+            $query->whereIn('mq_push_tokens.member_idx', $memberIdxs);
+        }
+
+        return $query;
     }
 
     /**
