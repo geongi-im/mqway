@@ -17,6 +17,14 @@
  *      토큰은 브라우저가 바꿀 수 있어서 그때도 새 토큰이 서버로 간다.
  *   4. 같은 브라우저에서 다른 회원이 로그인하면 이전 회원의 알림을 끈다.
  *      새 회원은 직접 앱 알림 버튼을 눌러야 받는다.
+ *
+ * 홈 화면 추가 (안내 모달은 push_subscribe.blade.php 의 #pushGuideModal)
+ *   - 사이트가 홈 화면 추가를 대신 할 수는 없다. 브라우저마다 할 수 있는 만큼만 돕는다.
+ *   - 안드로이드: 알림을 켠 직후 홈 화면 추가 버튼을 보여주고, 누르면 브라우저의 설치 창을 띄운다.
+ *     브라우저가 설치 창을 줄 수 없으면(이미 설치됨, 지원 안 함) 알림만 켠다.
+ *   - 아이폰 브라우저 탭: 웹 푸시가 안 되므로 버튼을 보여 두고, 누르면 홈 화면 추가 방법을 안내한다.
+ *     홈 화면 아이콘으로 열면 웹 푸시가 되어 위 흐름으로 알림을 켠다.
+ *   - iOS 16.4 미만: 웹 푸시 자체가 안 되므로 업데이트를 안내한다.
  */
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js';
 import { getMessaging, getToken, deleteToken, onMessage, isSupported } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-messaging.js';
@@ -32,6 +40,141 @@ let messaging = null;
 let busy = false;
 // 서비스 워커 등록 결과. 미리 등록해 두고 켤 때 그대로 쓴다.
 let swReady = null;
+// 웹 푸시를 못 써서 버튼을 누르면 안내만 하는 환경 ('ios-install' | 'ios-old'). 웹 푸시가 되면 null.
+let guideMode = null;
+// 브라우저가 넘겨 준 홈 화면 추가 이벤트. 이걸로 원할 때 설치 창을 띄운다. (안드로이드 크롬, 삼성 인터넷 등)
+// 기본 설치 배너는 그대로 두려고 preventDefault 는 하지 않는다.
+let installPrompt = null;
+
+window.addEventListener('beforeinstallprompt', function (e) {
+    installPrompt = e;
+});
+window.addEventListener('appinstalled', function () {
+    installPrompt = null;
+});
+
+// 홈 화면 아이콘으로 열었는지
+function isStandalone() {
+    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+
+// 아이폰/아이패드면 {major, minor} (버전을 못 읽으면 0), 아니면 null
+function iosVersion() {
+    const ua = navigator.userAgent;
+    // 아이패드는 데스크톱 사이트 모드에서 맥처럼 보여서 터치 여부로 가린다.
+    const iPadDesktop = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+    if (!/iPhone|iPad|iPod/.test(ua) && !iPadDesktop) {
+        return null;
+    }
+    // 아이폰 UA 의 'OS 16_3' 을 먼저 보고, 없으면 사파리의 'Version/16.3' 을 본다.
+    const m = ua.match(/ OS (\d+)_(\d+)/) || ua.match(/Version\/(\d+)\.(\d+)/);
+    return m ? { major: parseInt(m[1], 10), minor: parseInt(m[2], 10) } : { major: 0, minor: 0 };
+}
+
+// 카카오톡/네이버 같은 앱 안의 브라우저인지. 이 안에서는 홈 화면에 추가할 수 없다.
+function isInAppBrowser() {
+    return /KAKAOTALK|NAVER\(inapp|Instagram|FBAN|FBAV|Line\/|DaumApps/i.test(navigator.userAgent);
+}
+
+// 웹 푸시를 못 쓰는 환경에서 버튼을 눌렀을 때 보여 줄 안내. 안내할 것이 없으면 null (버튼을 숨긴다).
+function detectGuideMode() {
+    const ios = iosVersion();
+    if (!ios) {
+        return null;
+    }
+    const known = ios.major > 0;
+    const old = known && (ios.major < 16 || (ios.major === 16 && ios.minor < 4));
+    // 홈 화면 아이콘으로 열었는데도 안 되면 버전 문제로 본다.
+    return old || isStandalone() ? 'ios-old' : 'ios-install';
+}
+
+function guideModal() {
+    return document.getElementById('pushGuideModal');
+}
+
+function openGuide(mode) {
+    const modal = guideModal();
+    if (!modal) {
+        return;
+    }
+    let title = '';
+    modal.querySelectorAll('[data-push-guide-panel]').forEach(function (panel) {
+        const match = panel.getAttribute('data-push-guide-panel') === mode;
+        panel.classList.toggle('hidden', !match);
+        if (match) {
+            title = panel.getAttribute('data-title');
+        }
+    });
+    modal.querySelector('[data-push-guide-title]').textContent = title;
+
+    if (mode === 'ios-install') {
+        modal.querySelector('[data-push-guide-inapp]').classList.toggle('hidden', !isInAppBrowser());
+    }
+    if (mode === 'ios-old') {
+        const ios = iosVersion();
+        const wrap = modal.querySelector('[data-push-ios-version-wrap]');
+        if (ios && ios.major > 0) {
+            modal.querySelector('[data-push-ios-version]').textContent = 'iOS ' + ios.major + '.' + ios.minor;
+            wrap.classList.remove('hidden');
+        } else {
+            wrap.classList.add('hidden');
+        }
+    }
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function closeGuide() {
+    const modal = guideModal();
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+}
+
+function bindGuide() {
+    const modal = guideModal();
+    if (!modal) {
+        return;
+    }
+    modal.querySelectorAll('[data-push-guide-close]').forEach(function (btn) {
+        btn.addEventListener('click', closeGuide);
+    });
+    // 바깥 어두운 곳을 누르거나 Esc 를 누르면 닫는다.
+    modal.addEventListener('click', function (e) {
+        if (e.target === modal) {
+            closeGuide();
+        }
+    });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            closeGuide();
+        }
+    });
+
+    const installBtn = modal.querySelector('[data-push-install]');
+    if (installBtn) {
+        installBtn.addEventListener('click', async function () {
+            const prompt = installPrompt;
+            closeGuide();
+            if (!prompt) {
+                return;
+            }
+            // 설치 창은 한 이벤트로 한 번만 띄울 수 있다.
+            installPrompt = null;
+            try {
+                await prompt.prompt();
+                const choice = await prompt.userChoice;
+                if (choice && choice.outcome === 'accepted') {
+                    toast('홈 화면에 MQWAY 를 추가했어요.', 'success');
+                }
+            } catch (e) {
+                console.warn('[push] 홈 화면 추가 창을 띄우지 못함', e);
+            }
+        });
+    }
+}
 
 function readSync() {
     try {
@@ -60,6 +203,9 @@ function today() {
 
 // 이 브라우저가 지금 로그인한 회원 명의로 알림을 켜 두었는지
 function isRegistered() {
+    if (!('Notification' in window)) {
+        return false;
+    }
     const sync = readSync();
     return Notification.permission === 'granted' && !!sync && sync.member === config.memberIdx;
 }
@@ -181,6 +327,7 @@ async function currentToken() {
     return getToken(messaging, { vapidKey: config.vapidKey, serviceWorkerRegistration: registration });
 }
 
+// 알림을 켜고 서버가 준 안내 문구를 돌려준다. 권한을 못 받으면 null.
 async function subscribe() {
     setBusy(true);
     // iOS 는 사용자 클릭 안에서 바로 권한을 물어야 한다. 이 호출 앞에 await 를 두지 않는다.
@@ -189,13 +336,13 @@ async function subscribe() {
         toast(permission === 'denied'
             ? '알림이 차단되어 있습니다. 브라우저 설정에서 이 사이트의 알림을 허용해 주세요.'
             : '알림 권한을 허용해야 받을 수 있어요.', 'warning');
-        return;
+        return null;
     }
 
     const token = await currentToken();
     const data = await request('POST', token);
     writeSync({ token: token, date: today(), member: config.memberIdx });
-    toast(data.message, 'success');
+    return data.message;
 }
 
 // 서버 명단에서 이 기기를 빼고 브라우저 토큰도 지운다.
@@ -261,15 +408,67 @@ async function onClick() {
         }
         return;
     }
-    await subscribe();
+    // 아이폰 브라우저 탭/구버전은 여기서 알림을 켤 수 없어 안내만 한다.
+    if (guideMode) {
+        openGuide(guideMode);
+        return;
+    }
+    const message = await subscribe();
+    if (message === null) {
+        return;
+    }
+    // 브라우저가 설치 창을 줄 수 있으면 이어서 홈 화면 추가를 권한다. (모달 제목이 '알림을 켰어요')
+    if (installPrompt && !isStandalone()) {
+        openGuide('android-install');
+    } else {
+        toast(message, 'success');
+    }
+}
+
+function bindButtons() {
+    buttons().forEach(function (btn) {
+        btn.addEventListener('click', async function () {
+            // 켜고 끄는 데 몇 초씩 걸려서, 그동안 누른 것은 무시한다. (화면은 setBusy 가 막는다)
+            if (busy) {
+                return;
+            }
+            try {
+                await onClick();
+            } catch (e) {
+                console.error('[push]', e);
+                toast(e.message || '알림 설정에 실패했습니다.', 'error');
+            } finally {
+                setBusy(false);
+            }
+        });
+    });
+}
+
+async function pushSupported() {
+    if (!('serviceWorker' in navigator) || !('Notification' in window)) {
+        return false;
+    }
+    try {
+        return await isSupported();
+    } catch (e) {
+        return false;
+    }
 }
 
 async function init() {
-    if (!config || !('serviceWorker' in navigator) || !('Notification' in window)) {
+    if (!config) {
         return;
     }
-    // iOS 사파리 탭처럼 웹 푸시를 못 쓰는 환경에서는 버튼을 숨긴 채로 둔다.
-    if (!(await isSupported())) {
+    bindGuide();
+
+    // 아이폰 브라우저 탭처럼 웹 푸시를 못 쓰는 환경이면 안내할 것이 있을 때만 버튼을 보인다.
+    // 그 밖의 환경(앱 안 브라우저 등)은 버튼을 숨긴 채로 둔다.
+    if (!(await pushSupported())) {
+        guideMode = detectGuideMode();
+        if (guideMode) {
+            render();
+            bindButtons();
+        }
         return;
     }
 
@@ -304,22 +503,7 @@ async function init() {
         });
     }
 
-    buttons().forEach(function (btn) {
-        btn.addEventListener('click', async function () {
-            // 켜고 끄는 데 몇 초씩 걸려서, 그동안 누른 것은 무시한다. (화면은 setBusy 가 막는다)
-            if (busy) {
-                return;
-            }
-            try {
-                await onClick();
-            } catch (e) {
-                console.error('[push]', e);
-                toast(e.message || '알림 설정에 실패했습니다.', 'error');
-            } finally {
-                setBusy(false);
-            }
-        });
-    });
+    bindButtons();
 
     refresh().catch(function (e) {
         console.warn('[push] 토큰 갱신 실패', e);

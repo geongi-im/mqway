@@ -286,7 +286,7 @@
                             </a>
                             {{--
                                 앱 푸시 알림 받기/끄기. 알림은 로그인 회원만 받을 수 있어서 프로필 메뉴 안에 둔다.
-                                웹 푸시를 쓸 수 있는 환경에서만 public/js/push.js 가 hidden 을 떼어 보이게 하고,
+                                웹 푸시를 쓸 수 있는 환경과 홈 화면 추가를 안내할 아이폰에서만 public/js/push.js 가 hidden 을 떼어 보이게 하고,
                                 켜짐/꺼짐에 따라 data-push-icon-on / data-push-icon-off 중 하나만 보이고,
                                 설정하는 동안에는 둘 다 숨기고 data-push-busy (스피너) 를 보인다.
                             --}}
