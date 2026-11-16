@@ -38,6 +38,7 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\MemberController as AdminMemberController;
 use App\Http\Controllers\Admin\BoardController as AdminBoardController;
 use App\Http\Controllers\Admin\PushRuleController as AdminPushRuleController;
+use App\Http\Controllers\Admin\PushSendController as AdminPushSendController;
 
 /*
 |--------------------------------------------------------------------------
@@ -407,6 +408,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('/push', [AdminPushRuleController::class, 'index'])->name('push.index');
     Route::get('/push/logs', [AdminPushRuleController::class, 'logs'])->name('push.logs');
     Route::get('/push/audience', [AdminPushRuleController::class, 'audience'])->name('push.audience');
+    Route::get('/push/send', [AdminPushSendController::class, 'create'])->name('push.send.create');
+    Route::post('/push/send', [AdminPushSendController::class, 'send'])->name('push.send');
+    Route::get('/push/recipients', [AdminPushSendController::class, 'recipients'])->name('push.recipients');
     Route::post('/push/rules', [AdminPushRuleController::class, 'store'])->name('push.rules.store');
     Route::put('/push/rules/{idx}', [AdminPushRuleController::class, 'update'])->name('push.rules.update')->where('idx', '[0-9]+');
     Route::put('/push/rules/{idx}/status', [AdminPushRuleController::class, 'updateStatus'])->name('push.rules.status')->where('idx', '[0-9]+');

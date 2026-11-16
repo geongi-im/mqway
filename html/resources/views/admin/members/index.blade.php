@@ -154,6 +154,8 @@
                 row('마케팅 수신', m.marketing ? '동의' + (m.marketing_date ? ' (' + esc(m.marketing_date.substr(0, 10)) + ')' : '') : '미동의') +
                 row('알림 켠 기기', m.devices ? esc(m.devices) + '대' : '없음') +
             '</dl>' +
+            '<a href="' + esc(m.push_url) + '" class="mt-4 flex items-center justify-center gap-1.5 w-full border border-gray-200 rounded-lg py-2 text-[13px] text-ink hover:bg-gray-50">' +
+                '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>이 회원에게 알림 보내기</a>' +
             '<form method="POST" action="' + esc(m.update_url) + '" class="mt-6 space-y-3">' +
                 '<input type="hidden" name="_token" value="' + esc(CSRF) + '"><input type="hidden" name="_method" value="PUT">' +
                 '<div><div class="text-[12px] text-gray-500 mb-1">계정 상태</div><select name="mq_status" class="sel w-full"' + lock + '>' + options(STATUS, m.status) + '</select>' +

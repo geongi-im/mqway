@@ -100,6 +100,7 @@ class MemberController extends Controller
             'level'        => (int) $m->mq_level,
             'is_me'        => (int) $m->idx === (int) Auth::id(),
             'update_url'   => route('admin.members.update', $m->idx),
+            'push_url'     => route('admin.push.send.create', ['users' => $m->mq_user_id]),
         ]);
     }
 

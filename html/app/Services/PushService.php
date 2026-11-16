@@ -35,6 +35,9 @@ class PushService
     /** 관리자 페이지의 자동 발송 규칙 (php artisan push:run-rules) */
     const SOURCE_RULE = 'rule';
 
+    /** 관리자 페이지의 회원 지정 발송 (지금 바로 보내기) */
+    const SOURCE_MANUAL = 'manual';
+
     /** mq_push_logs.mq_target 값: 마케팅 수신 동의 회원 전체 */
     const TARGET_MARKETING_MEMBERS = 'marketing_members';
 
