@@ -198,8 +198,8 @@
                 <div>
                     <div class="flex items-center gap-2 mb-3"><span class="w-6 h-6 rounded-full bg-point text-white text-[12px] font-bold flex items-center justify-center">3</span><span class="font-bold">무엇을</span></div>
                     <div class="space-y-3">
-                        <div><div class="text-[12px] text-gray-500 mb-1">제목</div><input name="mq_title" id="rTitle" maxlength="100" required class="inp"></div>
-                        <div><div class="text-[12px] text-gray-500 mb-1">본문 <span class="text-gray-400">({{ $placeholder }} 을 넣으면 받는 회원 이름으로 바뀝니다)</span></div><textarea name="mq_body" id="rBody" maxlength="500" class="inp h-20"></textarea></div>
+                        <div><div class="text-[12px] text-gray-500 mb-1">제목 <span class="text-gray-400">(제목과 본문에 {{ $placeholder }} 을 넣으면 받는 회원 이름으로 바뀝니다)</span></div><input name="mq_title" id="rTitle" maxlength="100" required class="inp"></div>
+                        <div><div class="text-[12px] text-gray-500 mb-1">본문</div><textarea name="mq_body" id="rBody" maxlength="500" class="inp h-20"></textarea></div>
                         <div><div class="text-[12px] text-gray-500 mb-1">누르면 열 주소 <span class="text-gray-400">(사이트 안의 경로, 비우면 첫 화면)</span></div><input name="mq_link" id="rLink" maxlength="500" class="inp" placeholder="/board-scrap/create"></div>
                     </div>
                 </div>

@@ -48,7 +48,7 @@ class PushService
     const TARGET_RULE = 'rule';
 
     /** 제목/본문에 넣으면 받는 회원 이름으로 바뀌는 자리표시자 */
-    const NAME_PLACEHOLDER = '{이름}';
+    const NAME_PLACEHOLDER = '{{이름}}';
 
     /** 이름이 비어 있는 회원에게 대신 쓰는 말 */
     const NAME_FALLBACK = '회원';
@@ -379,7 +379,7 @@ class PushService
     }
 
     /**
-     * 제목/본문의 {이름} 을 받는 회원 이름으로 바꾼다.
+     * 제목/본문의 {{이름}} 을 받는 회원 이름으로 바꾼다.
      *
      * @param  string      $text
      * @param  string|null $name
