@@ -5,12 +5,6 @@
 @section('content')
 @include('admin.push.tabs', ['active' => 'send'])
 
-@unless($canSendNow)
-    <div class="mb-4 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-[13px] px-4 py-3">
-        지금은 보낼 수 없는 시간입니다. 알림은 {{ $sendWindow }} 사이에만 보낼 수 있습니다.
-    </div>
-@endunless
-
 <form id="sendForm" method="POST" action="{{ route('admin.push.send') }}" class="bg-white rounded-xl border border-gray-200">
     @csrf
     <input type="hidden" name="send_key" value="{{ $sendKey }}">
@@ -55,7 +49,7 @@
                 <div class="font-bold text-ink break-all" id="pvTitle"></div>
                 <div class="text-gray-600 mt-0.5 leading-snug break-all whitespace-pre-line" id="pvBody"></div>
             </div>
-            <button type="submit" id="sSubmit" class="w-full mt-6 bg-point1 hover:bg-[#ff3333] disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold rounded-lg py-2.5 text-[13px]" @unless($canSendNow) disabled @endunless>지금 보내기</button>
+            <button type="submit" id="sSubmit" class="w-full mt-6 bg-point1 hover:bg-[#ff3333] disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold rounded-lg py-2.5 text-[13px]">지금 보내기</button>
         </div>
     </div>
 </form>
@@ -68,7 +62,6 @@
     var SEARCH_URL = @json(route('admin.push.recipients'));
     var PLACEHOLDER = @json($placeholder);
     var MAX = @json($maxUsers);
-    var CAN_SEND = @json($canSendNow);
     var $ = function (id) { return document.getElementById(id); };
 
     var picked = [];   // [{user_id, name, email, devices, reachable, reason}]
@@ -97,7 +90,7 @@
         $('sCount').textContent = picked.length;
         $('sReach').textContent = reach.length;
         $('sDevices').textContent = reach.reduce(function (n, m) { return n + m.devices; }, 0);
-        $('sSubmit').disabled = !CAN_SEND || reach.length === 0;
+        $('sSubmit').disabled = reach.length === 0;
     }
     function preview() {
         $('pvTitle').textContent = ($('sTitle').value || '제목').split(PLACEHOLDER).join('김민지');

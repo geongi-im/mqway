@@ -21,6 +21,9 @@ class PushRuleController extends Controller
 {
     const LOGS_PER_PAGE = 30;
 
+    /** 규칙 편집 화면에 보여줄 예상 대상자 수 */
+    const AUDIENCE_PREVIEW_LIMIT = 100;
+
     /** @var PushRuleService */
     protected $rules;
 
@@ -56,7 +59,7 @@ class PushRuleController extends Controller
     }
 
     /**
-     * 편집 화면에서 대상 조건을 바꿀 때 지금 기준 대상 수를 센다.
+     * 편집 화면에서 대상 조건을 바꿀 때 지금 기준 대상 수와 예상 대상자 목록(앞쪽 일부)을 돌려준다.
      */
     public function audience(Request $request)
     {
@@ -65,9 +68,9 @@ class PushRuleController extends Controller
             'days'   => 'nullable|integer|min:1|max:365',
         ]);
 
-        return response()->json([
-            'count' => $this->rules->countAudience($data['target'], $data['days'] ?? null),
-        ]);
+        return response()->json(
+            $this->rules->previewAudience($data['target'], $data['days'] ?? null, self::AUDIENCE_PREVIEW_LIMIT)
+        );
     }
 
     public function store(Request $request)

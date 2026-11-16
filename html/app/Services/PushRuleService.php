@@ -38,6 +38,35 @@ class PushRuleService
     }
 
     /**
+     * 지금 조건에 맞는 회원 수와 앞쪽 일부 회원. (관리자 화면의 예상 대상자 목록, 최근 가입 순)
+     *
+     * @param  string   $target PushRule::TARGET_*
+     * @param  int|null $days
+     * @param  int      $limit  목록에 담을 최대 회원 수
+     * @return array ['count' => int, 'members' => [{user_id, name, email}]]
+     */
+    public function previewAudience($target, $days, $limit)
+    {
+        $query = $this->audienceQuery($target, $days, Carbon::now());
+        $count = (clone $query)->count();
+
+        $members = $query
+            ->orderByDesc('m.idx')
+            ->limit($limit)
+            ->get(['m.mq_user_id', 'm.mq_user_name', 'm.mq_user_email'])
+            ->map(function ($m) {
+                return [
+                    'user_id' => $m->mq_user_id,
+                    'name'    => $m->mq_user_name,
+                    'email'   => $m->mq_user_email,
+                ];
+            })
+            ->all();
+
+        return ['count' => $count, 'members' => $members];
+    }
+
+    /**
      * 조건에 맞는 회원 아이디 목록.
      *
      * @param  PushRule $rule

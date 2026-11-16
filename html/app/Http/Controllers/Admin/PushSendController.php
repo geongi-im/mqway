@@ -3,9 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\PushRule;
 use App\Services\PushService;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -17,17 +15,13 @@ use Illuminate\Support\Str;
  *
  * 관리자가 고른 회원에게 지금 바로 알림을 보낸다. 받는 사람 규칙은 다른 발송과 같다.
  * (활성 회원 + 마케팅 정보 수신 동의 + 알림을 켠 기기) 고른 회원 중 이 규칙에 걸리는 회원은 받지 못한다.
+ *
+ * 자동 발송 규칙과 달리 발송 시간 제한이 없다. 관리자가 직접 고른 회원에게 보내는 것이라 언제든 보낼 수 있게 했다.
  */
 class PushSendController extends Controller
 {
     /** 회원 검색 결과 수 */
     const SEARCH_LIMIT = 20;
-
-    /**
-     * 직접 발송도 야간(21:00-08:00)에는 막는다. 자동 발송 규칙과 같은 기준이다.
-     * (정보통신망법: 야간 광고성 정보는 별도 동의가 필요하다)
-     */
-    const SEND_END = '21:00';
 
     /** @var PushService */
     protected $push;
@@ -56,8 +50,6 @@ class PushSendController extends Controller
             'sendKey'     => Str::random(32),
             'placeholder' => PushService::NAME_PLACEHOLDER,
             'maxUsers'    => PushService::USER_IDS_MAX,
-            'canSendNow'  => $this->canSendNow(),
-            'sendWindow'  => PushRule::SEND_TIME_MIN . '-' . self::SEND_END,
         ]);
     }
 
@@ -105,10 +97,6 @@ class PushSendController extends Controller
             'mq_link'  => '누르면 열 주소',
         ]);
 
-        if (!$this->canSendNow()) {
-            return back()->withInput()->with('admin_error', PushRule::SEND_TIME_MIN . '-' . self::SEND_END . ' 사이에만 보낼 수 있습니다.');
-        }
-
         $userIds = array_values(array_unique(array_map('trim', $data['user_ids'])));
 
         // 받을 수 있는 회원이 없으면 이력을 만들지 않고 돌려보낸다. (고쳐서 다시 보낼 수 있게)
@@ -155,13 +143,6 @@ class PushSendController extends Controller
         }
 
         return redirect()->route('admin.push.logs')->with('admin_message', $message);
-    }
-
-    protected function canSendNow()
-    {
-        $now = Carbon::now()->format('H:i');
-
-        return $now >= PushRule::SEND_TIME_MIN && $now < self::SEND_END;
     }
 
     /**

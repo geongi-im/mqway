@@ -208,6 +208,9 @@
             <div class="p-6 bg-surface lg:rounded-br-2xl">
                 <div class="text-[12px] text-gray-500">지금 기준 대상</div>
                 <div class="font-outfit text-4xl font-extrabold mt-1"><span id="rAud">-</span><span class="text-base font-bold ml-1">명</span></div>
+                <div class="text-[12px] text-gray-500 mt-6 mb-2">예상 대상자 <span class="text-gray-400">(최근 가입 순)</span></div>
+                <div id="rAudList" class="bg-white rounded-lg border border-gray-100 max-h-56 overflow-y-auto text-[12px] divide-y divide-gray-50"></div>
+                <div id="rAudMore" class="text-[11px] text-gray-400 mt-1"></div>
                 <div class="text-[12px] text-gray-500 mt-6 mb-2">미리보기</div>
                 <div class="bg-white rounded-2xl p-3 shadow-sm text-[12px]">
                     <div class="flex items-center gap-1.5 text-[11px] text-gray-400 mb-1"><span class="w-4 h-4 rounded bg-point text-white text-[8px] font-bold flex items-center justify-center">MQ</span>MQWAY<span class="ml-auto">지금</span></div>
@@ -262,19 +265,47 @@
         $('pvBody').textContent = ($('rBody').value || '본문').split(PLACEHOLDER).join('김민지');
     }
 
-    var audTimer = null;
+    function esc(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+    }
+    function renderAudience(count, members, message) {
+        $('rAud').textContent = count === null ? '-' : Number(count).toLocaleString('ko-KR');
+        if (message) {
+            $('rAudList').innerHTML = '<div class="px-3 py-3 text-gray-400">' + esc(message) + '</div>';
+            $('rAudMore').textContent = '';
+            return;
+        }
+        $('rAudList').innerHTML = members.length ? members.map(function (m) {
+            return '<div class="px-3 py-1.5 flex items-center gap-1.5" title="' + esc(m.email || '') + '">' +
+                '<span class="font-semibold text-ink truncate">' + esc(m.name || '-') + '</span>' +
+                '<span class="text-gray-400 truncate">' + esc(m.user_id) + '</span></div>';
+        }).join('') : '<div class="px-3 py-3 text-gray-400">지금 조건에 맞는 회원이 없습니다.</div>';
+        $('rAudMore').textContent = count > members.length
+            ? '앞쪽 ' + members.length + '명만 보입니다. 외 ' + (count - members.length).toLocaleString('ko-KR') + '명'
+            : '';
+    }
+
+    var audTimer = null, audSeq = 0;
     function syncAudience() {
         var target = selectedTarget();
         var d = target ? daysInput(target) : null;
         $('rDays').value = d ? d.value : '';
         clearTimeout(audTimer);
-        if (!target) { $('rAud').textContent = '-'; return; }
+        var seq = ++audSeq;
+        if (!target) { renderAudience(null, [], '대상을 고르면 여기에 보입니다.'); return; }
+        $('rAudList').innerHTML = '<div class="px-3 py-3 text-gray-400">불러오는 중...</div>';
         audTimer = setTimeout(function () {
             var url = AUDIENCE_URL + '?target=' + encodeURIComponent(target) + (d ? '&days=' + encodeURIComponent(d.value) : '');
             fetch(url, { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
                 .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-                .then(function (j) { $('rAud').textContent = Number(j.count).toLocaleString('ko-KR'); })
-                .catch(function () { $('rAud').textContent = '-'; });
+                .then(function (j) {
+                    // 조건을 빠르게 바꾸면 늦게 온 예전 응답이 덮어쓰지 않게 한다.
+                    if (seq !== audSeq) return;
+                    renderAudience(j.count, j.members || []);
+                })
+                .catch(function () { if (seq === audSeq) renderAudience(null, [], '대상을 불러오지 못했습니다.'); });
         }, 250);
     }
     function setToggle(on) {
