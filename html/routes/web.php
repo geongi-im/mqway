@@ -34,6 +34,10 @@ use App\Http\Controllers\NeedWantGameController;
 use App\Http\Controllers\Api\CashflowApiController;
 use App\Http\Controllers\BoardScrapController;
 use App\Http\Controllers\PushTokenController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\MemberController as AdminMemberController;
+use App\Http\Controllers\Admin\BoardController as AdminBoardController;
+use App\Http\Controllers\Admin\PushRuleController as AdminPushRuleController;
 
 /*
 |--------------------------------------------------------------------------
@@ -387,4 +391,24 @@ Route::prefix('api/cashflow')->middleware('auth')->group(function () {
         ->name('cashflow.chat.history');
     Route::post('/chat/reset', [CashflowChatController::class, 'reset'])
         ->name('cashflow.chat.reset');
+});
+
+// 관리자 페이지 (최고관리자 mq_level 10 만)
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
+    Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/members', [AdminMemberController::class, 'index'])->name('members.index');
+    Route::get('/members/{idx}', [AdminMemberController::class, 'show'])->name('members.show')->where('idx', '[0-9]+');
+    Route::put('/members/{idx}', [AdminMemberController::class, 'update'])->name('members.update')->where('idx', '[0-9]+');
+
+    Route::get('/boards', [AdminBoardController::class, 'index'])->name('boards.index');
+    Route::put('/boards/{board}/{idx}/status', [AdminBoardController::class, 'updateStatus'])->name('boards.status')->where('idx', '[0-9]+');
+
+    Route::get('/push', [AdminPushRuleController::class, 'index'])->name('push.index');
+    Route::get('/push/logs', [AdminPushRuleController::class, 'logs'])->name('push.logs');
+    Route::get('/push/audience', [AdminPushRuleController::class, 'audience'])->name('push.audience');
+    Route::post('/push/rules', [AdminPushRuleController::class, 'store'])->name('push.rules.store');
+    Route::put('/push/rules/{idx}', [AdminPushRuleController::class, 'update'])->name('push.rules.update')->where('idx', '[0-9]+');
+    Route::put('/push/rules/{idx}/status', [AdminPushRuleController::class, 'updateStatus'])->name('push.rules.status')->where('idx', '[0-9]+');
+    Route::delete('/push/rules/{idx}', [AdminPushRuleController::class, 'destroy'])->name('push.rules.destroy')->where('idx', '[0-9]+');
 });

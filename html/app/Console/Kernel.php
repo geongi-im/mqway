@@ -24,8 +24,11 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')
-        //          ->hourly();
+        // 앱 푸시 자동 발송 규칙 (관리자 페이지 > 앱 푸시관리)
+        // 발송이 1분을 넘겨도 다음 실행과 겹치지 않게 한다. 잠금은 15분 뒤 풀린다.
+        $schedule->command('push:run-rules')
+            ->everyMinute()
+            ->withoutOverlapping(15);
     }
 
     /**

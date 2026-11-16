@@ -65,6 +65,8 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         // 앱 푸시 발송 API 공유 키 확인 (X-Push-Key)
         'push.key' => \App\Http\Middleware\VerifyPushApiKey::class,
+        // 관리자 페이지 (/admin) 최고관리자 확인
+        'admin' => \App\Http\Middleware\EnsureSuperAdmin::class,
     ];
 
     /**

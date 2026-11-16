@@ -32,11 +32,23 @@ class PushService
 {
     const SOURCE_API = 'api';
 
+    /** 관리자 페이지의 자동 발송 규칙 (php artisan push:run-rules) */
+    const SOURCE_RULE = 'rule';
+
     /** mq_push_logs.mq_target 값: 마케팅 수신 동의 회원 전체 */
     const TARGET_MARKETING_MEMBERS = 'marketing_members';
 
     /** mq_push_logs.mq_target 값: 지정한 회원 (아이디 목록은 mq_target_users) */
     const TARGET_USERS = 'users';
+
+    /** mq_push_logs.mq_target 값: 자동 발송 규칙이 고른 회원 (아이디 목록은 mq_target_users, 규칙은 mq_rule_idx) */
+    const TARGET_RULE = 'rule';
+
+    /** 제목/본문에 넣으면 받는 회원 이름으로 바뀌는 자리표시자 */
+    const NAME_PLACEHOLDER = '{이름}';
+
+    /** 이름이 비어 있는 회원에게 대신 쓰는 말 */
+    const NAME_FALLBACK = '회원';
 
     /** 회원 지정 발송 한 번에 받는 아이디 수 */
     const USER_IDS_MAX = 500;
@@ -201,7 +213,35 @@ class PushService
     }
 
     /**
-     * 발송 이력을 만들고 결과를 정한다. (prepareBroadcast / prepareForUsers 공통)
+     * 자동 발송 규칙이 고른 회원에게 보낼 발송을 준비한다. 실제 발송은 deliver() 가 한다.
+     *
+     * 회원 지정 발송과 같은 길을 타지만, 이력에 어느 규칙인지 남기고 회원 수 제한(USER_IDS_MAX)이 없다.
+     *
+     * @param  int         $ruleIdx   mq_push_rules.idx
+     * @param  array       $userIds   PushRuleService 가 고른 mq_member.mq_user_id 목록
+     * @param  string      $title
+     * @param  string|null $body
+     * @param  string|null $link      정규화된 절대 주소 (normalizeLink() 결과)
+     * @param  string      $dedupeKey 규칙과 회차로 만든 키. 같은 회차가 두 번 나가지 않게 한다.
+     * @return array {result: accepted|no_target|duplicate|not_configured, log: PushLog|null, target_count: int}
+     */
+    public function prepareForRule($ruleIdx, array $userIds, $title, $body, $link, $dedupeKey)
+    {
+        if (!$this->fcm->isConfigured()) {
+            return ['result' => 'not_configured', 'log' => null, 'target_count' => 0];
+        }
+
+        $userIds = array_values($userIds);
+        $memberIdxs = $this->memberIdxsByUserIds($userIds);
+        $targetCount = $memberIdxs ? $this->countTargets(array_values($memberIdxs)) : 0;
+
+        return $this->prepare(self::TARGET_RULE, $userIds, $targetCount, $title, $body, $link, self::SOURCE_RULE, $dedupeKey, [
+            'mq_rule_idx' => $ruleIdx,
+        ]);
+    }
+
+    /**
+     * 발송 이력을 만들고 결과를 정한다. (prepareBroadcast / prepareForUsers / prepareForRule 공통)
      *
      * @param  string      $target      self::TARGET_*
      * @param  array|null  $targetUsers 회원 지정 발송일 때 아이디 목록
@@ -211,14 +251,15 @@ class PushService
      * @param  string|null $link
      * @param  string      $source
      * @param  string|null $dedupeKey
+     * @param  array       $extra       이력에 함께 남길 값 (mq_rule_idx 등)
      * @return array {result, log, target_count}
      */
-    protected function prepare($target, $targetUsers, $targetCount, $title, $body, $link, $source, $dedupeKey)
+    protected function prepare($target, $targetUsers, $targetCount, $title, $body, $link, $source, $dedupeKey, array $extra = [])
     {
         $title = mb_substr($title, 0, self::TITLE_MAX, 'UTF-8');
         $body = $body !== null ? mb_substr($body, 0, self::BODY_MAX, 'UTF-8') : null;
 
-        $log = $this->openLog($dedupeKey, [
+        $log = $this->openLog($dedupeKey, $extra + [
             'mq_source'       => $source,
             'mq_target'       => $target,
             // 재발송 때 openLog() 가 쿼리 빌더로 갱신하므로 모델 cast 대신 직접 JSON 으로 저장한다.
@@ -279,9 +320,9 @@ class PushService
         $body = $log->mq_body;
         $link = $log->mq_link;
 
-        // 회원 지정 발송이면 보내는 시점에 다시 회원을 찾는다. (그 사이 동의를 철회했으면 빠진다)
+        // 회원 지정 / 규칙 발송이면 보내는 시점에 다시 회원을 찾는다. (그 사이 동의를 철회했으면 빠진다)
         $memberIdxs = null;
-        if ($log->mq_target === self::TARGET_USERS) {
+        if (in_array($log->mq_target, [self::TARGET_USERS, self::TARGET_RULE], true)) {
             $userIds = json_decode((string) $log->mq_target_users, true);
             $memberIdxs = array_values($this->memberIdxsByUserIds(is_array($userIds) ? $userIds : []));
         }
@@ -292,11 +333,16 @@ class PushService
             }
 
             $this->targetQuery($memberIdxs)
-                ->select('mq_push_tokens.idx', 'mq_push_tokens.mq_token', 'mq_push_tokens.mq_token_hash')
+                ->select('mq_push_tokens.idx', 'mq_push_tokens.mq_token', 'mq_push_tokens.mq_token_hash', 'mq_member.mq_user_name')
                 ->chunkById(self::CHUNK_SIZE, function ($tokens) use ($title, $body, $link, &$success, &$failure, &$firstError) {
                     $messages = [];
                     foreach ($tokens as $token) {
-                        $messages[$token->mq_token_hash] = $this->buildMessage($token->mq_token, $title, $body, $link);
+                        $messages[$token->mq_token_hash] = $this->buildMessage(
+                            $token->mq_token,
+                            $this->fillName($title, $token->mq_user_name),
+                            $body !== null ? $this->fillName($body, $token->mq_user_name) : null,
+                            $link
+                        );
                     }
 
                     $invalid = [];
@@ -327,6 +373,24 @@ class PushService
             'mq_error'         => $firstError !== null ? mb_substr($firstError, 0, 1000, 'UTF-8') : null,
             'mq_send_date'     => Carbon::now(),
         ]);
+    }
+
+    /**
+     * 제목/본문의 {이름} 을 받는 회원 이름으로 바꾼다.
+     *
+     * @param  string      $text
+     * @param  string|null $name
+     * @return string
+     */
+    public function fillName($text, $name)
+    {
+        if (strpos($text, self::NAME_PLACEHOLDER) === false) {
+            return $text;
+        }
+
+        $name = trim((string) $name);
+
+        return str_replace(self::NAME_PLACEHOLDER, $name !== '' ? $name : self::NAME_FALLBACK, $text);
     }
 
     /**

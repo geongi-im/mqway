@@ -21,6 +21,7 @@ class PushLog extends Model
     protected $fillable = [
         'mq_dedupe_key',
         'mq_source',
+        'mq_rule_idx',
         'mq_target',
         'mq_target_users',
         'mq_title',
@@ -42,4 +43,12 @@ class PushLog extends Model
         'mq_reg_date'      => 'datetime',
         'mq_send_date'     => 'datetime',
     ];
+
+    /**
+     * 자동 발송 규칙이 보낸 이력이면 그 규칙. (규칙을 지웠으면 null)
+     */
+    public function rule()
+    {
+        return $this->belongsTo(PushRule::class, 'mq_rule_idx', 'idx');
+    }
 }

@@ -284,6 +284,15 @@
                                 </svg>
                                 마이페이지
                             </a>
+                            @if((int) auth()->user()->mq_level >= 10)
+                                {{-- 최고관리자에게만 보인다. 실제 접근 제한은 /admin 라우트의 admin 미들웨어가 한다. --}}
+                                <a href="{{ route('admin.dashboard') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3l8 3v6c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10V6l8-3z"></path>
+                                    </svg>
+                                    관리자 페이지
+                                </a>
+                            @endif
                             {{--
                                 앱 푸시 알림 받기/끄기. 알림은 로그인 회원만 받을 수 있어서 프로필 메뉴 안에 둔다.
                                 웹 푸시를 쓸 수 있는 환경과 홈 화면 추가를 안내할 아이폰에서만 public/js/push.js 가 hidden 을 떼어 보이게 하고,

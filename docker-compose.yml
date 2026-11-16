@@ -45,6 +45,38 @@ services:
       php-fpm7.2 -F
       "
 
+  # Laravel 스케줄러 (app/Console/Kernel.php). 지금은 앱 푸시 자동 발송 규칙(push:run-rules)만 돈다.
+  # 컨테이너에 cron 이 없어서 1분마다 schedule:run 을 부르는 루프로 대신한다.
+  # www-data 로 돌려야 storage/logs 에 만든 로그 파일을 php-fpm 도 쓸 수 있다.
+  # composer install / migrate 는 php 서비스가 하므로 여기서는 하지 않는다. (끝나기 전의 실행은 실패하고 1분 뒤 다시 돈다)
+  scheduler:
+    container_name: scheduler_${COMPOSE_PROJECT_NAME}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - USER_ID=${USER_ID:-1000}
+        - GROUP_ID=${GROUP_ID:-1000}
+    volumes:
+      - ./html:/var/www/html
+    working_dir: /var/www/html
+    user: www-data
+    environment:
+      - DB_HOST=${MYSQL_HOSTNAME}
+      - DB_DATABASE=${MYSQL_DATABASE}
+      - DB_USERNAME=${MYSQL_USER}
+      - DB_PASSWORD=${MYSQL_PASSWORD}
+    depends_on:
+      - php
+    restart: unless-stopped
+    command: >
+      sh -c "
+      while true; do
+      php artisan schedule:run --no-interaction;
+      sleep 60;
+      done
+      "
+
   mysql:
     container_name: mysql_${COMPOSE_PROJECT_NAME}
     image: mysql:5.7
