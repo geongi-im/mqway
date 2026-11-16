@@ -177,7 +177,11 @@
 </div>
 
 @push('scripts')
-<script src="https://cdn.ckeditor.com/ckeditor5/40.0.0/classic/ckeditor.js"></script>
+{{-- CKEditor 5 는 v42 부터 미리 묶은 classic 빌드가 없어져 플러그인을 직접 고르는 방식으로 바뀌었다.
+     cdn.ckeditor.com 은 GPL 키를 받지 않으므로 npm 배포본을 jsDelivr 에서 받는다. --}}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ckeditor5@49.1.0/dist/browser/ckeditor5.css">
+<script src="https://cdn.jsdelivr.net/npm/ckeditor5@49.1.0/dist/browser/ckeditor5.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/ckeditor5@49.1.0/dist/translations/ko.umd.js"></script>
 <script>
     class UploadAdapter {
         constructor(loader) {
@@ -231,21 +235,42 @@
         };
     }
 
+    // 플러그인은 예전 classic 빌드(40.0.0)에 들어 있던 것과 같게 맞췄다.
+    // 툴바도 그때 실제로 보이던 버튼만 둔다 (밑줄/취소선/정렬/글자색은 빌드에 없어서 표시되지 않았다)
+    const {
+        ClassicEditor, Essentials, Autoformat, BlockQuote, Bold, Heading,
+        Image, ImageCaption, ImageStyle, ImageToolbar, ImageUpload, PictureEditing,
+        Indent, Italic, Link, List, MediaEmbed, Paragraph, PasteFromOffice,
+        Table, TableToolbar, TextTransformation
+    } = CKEDITOR;
+
     ClassicEditor
         .create(document.querySelector('#editor'), {
+            licenseKey: 'GPL',
+            plugins: [
+                Essentials, Autoformat, BlockQuote, Bold, Heading,
+                Image, ImageCaption, ImageStyle, ImageToolbar, ImageUpload, PictureEditing,
+                Indent, Italic, Link, List, MediaEmbed, Paragraph, PasteFromOffice,
+                Table, TableToolbar, TextTransformation
+            ],
             extraPlugins: [MyCustomUploadAdapterPlugin],
             toolbar: {
                 items: [
                     'undo', 'redo',
                     '|', 'heading',
-                    '|', 'bold', 'italic', 'strikethrough', 'underline',
+                    '|', 'bold', 'italic',
                     '|', 'bulletedList', 'numberedList',
-                    '|', 'alignment',
-                    '|', 'link', 'uploadImage', 'blockQuote', 'insertTable', 'mediaEmbed',
-                    '|', 'fontColor', 'fontBackgroundColor'
+                    '|', 'link', 'uploadImage', 'blockQuote', 'insertTable', 'mediaEmbed'
                 ]
             },
-            language: 'ko'
+            image: {
+                toolbar: ['imageStyle:inline', 'imageStyle:block', 'imageStyle:side', '|', 'toggleImageCaption', 'imageTextAlternative']
+            },
+            table: {
+                contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells']
+            },
+            language: 'ko',
+            translations: [window.CKEDITOR_TRANSLATIONS]
         })
         .then(editor => {
             console.log('Editor was initialized');
